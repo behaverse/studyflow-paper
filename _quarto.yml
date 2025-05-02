@@ -14,11 +14,14 @@ format:
     notebook-links: false
     notebook-view: false
     keep-ipynb: false
+    fig-align: center
     fig-cap-location: bottom
 
   # pdf: default
   arxiv-pdf:
     output-file: studyflow_modeler_arxiv.pdf
+    fig-align: center
+    fig-cap-location: bottom
 
 execute:
   freeze: true
