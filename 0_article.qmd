@@ -1,0 +1,44 @@
+---
+title: "Studyflow: A tool to define and run scientific workflows"
+authors:
+  - name: Author 1
+    affiliation: University of Luxembourg
+    roles: develop, draft, review
+    corresponding: true
+  - name: Author 2
+    affiliation: University of Luxembourg
+    roles: supervise, review
+    corresponding: true
+keywords:
+  - scientific workflows
+  - BPMN
+  - reproducibility
+  - MLOps
+abstract: |
+  Reproducibility and clarity of experimental workflows in scientific manuscripts are often compromised by informal or incomplete documentation. Existing practices typically rely on free-text descriptions, basic box-and-arrow diagrams, and custom scripts, which can be ambiguous and difficult to replicate.
+  To address these challenges, we introduce Studyflow, a formal diagramming framework based on BPMN (Business Process Model and Notation) for specifying end-to-end scientific workflows. Studyflow encodes scientific workflows as a self-contained, machine-readable diagram--including study design, data collection, preprocessing, analysis, and deployment. Studyflow diagrams (stored in standard XML) can be version-controlled and used to automated execution, enabling reproducibility and validation. By explicit model of all procedural details of scientific studies, Studyflow aligns with FAIR principles (Findable, Accessible, Interoperable, Reusable) and promotes transparent, reusable research processes.
+  We also provide an open-source Studyflow Modeler tool for editing, simulation, and visualization of workflows. The Studyflow specifications and tools are open-source at https://github.com/behaverse/studyflow-modeler.
+key-points:
+date: last-modified
+bibliography: references.bib
+citation:
+  container-title: Earth and Space Science
+number-sections: true
+---
+
+## Key Points {.unnumbered}
+
+- Despite many standards and tools for defining scientific studies, many research manuscripts describe the methods using either convoluted textual descriptions (and basic box-and-arrow diagrams) or custom softwares that are difficult to comprehend and reproduce. This is due to the complexity of the scientific studies, which often involve many steps and require a deep understanding of the domain.
+
+- The lack of formalism in the description of scientific studies makes it difficult to share and reproduce the results, and to communicate the methods and protocols used in the study.
+
+- Here, we present studyflow, a formal diagram for describing scientific workflows. Studyflow is based on the BPMN standard, and allows to define many steps of a scientific modeling process, including the study protocols, experimental design, data collection, data processing, analysis, and deployment. Studyflow diagrams are designed to be easy to share and understand, even for domain experts and non-experts. They are stand-alone and machine-readable, allowing for automatic execution of studies, enabling reproducible research workflows and precise communication of the protocols and methods without the need for custom software that depends on external packages. Because of the underlying storage format, studyflow diagrams can be version controlled to track changes and to improve reproducibility.
+
+- We demonstrate the use of studyflow for different scientific use cases. Finally, as a proof of concept, a modeler software is developed for editing, simulating, and visualizing these diagrams in a user-friendly way. All the specifications and tools are open-source and available at https://{{meta .github_repo}}.
+
+{{< include 1_introduction.qmd >}}
+{{< include 2_related_works.qmd >}}
+{{< include 3_overview.qmd >}}
+{{< include 4_use_cases.qmd >}}
+{{< include 5_conclusion.qmd >}}
+{{< include 6_backmatter.qmd >}}

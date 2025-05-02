@@ -2,9 +2,9 @@
 order: 2
 ---
 
-# Related Works
+## Related Works
 
-## BPMN
+### BPMN
 
 BPMN is a standard language for business process modeling, widely used in healthcare, finance, and logistics to model workflows. BPMN provides 1) a graphical representation of workflows, allowing stakeholders to understand and communicate complex processed easily, and 2) a formal XML-based semantics that enables the execution of BPMN models in various environments.
 

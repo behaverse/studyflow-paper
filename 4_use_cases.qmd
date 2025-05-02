@@ -2,10 +2,10 @@
 order: 4
 ---
 
-# Example Use Case
+## Example Use Cases
 
 
-## CONSORT
+### CONSORT
 
 CONSORT is a checklist and flow diagram for reporting randomized controlled trials (RCTs). It is designed to improve the quality of reporting in RCTs and to help readers understand the design of RCTs. Studyflow can be used to create a CONSORT flow in a more concise and readable way than traditional box-and-arrow along with text descriptions. Additonally, since the studyflow diagrams are machine-readable, they can also be used to simulate the RCTs (see supplementary materials for a simulation video).
 
@@ -14,8 +14,8 @@ Figure X shows an example of CONSORT flow diagram created in studyflow language.
 ![Example CONSORT](figures/consort.svg)
 
 
-## Use Case: Data Analysis and Visualization
+### Use Case: Data Analysis and Visualization
 
-## MLOps
+### MLOps
 
-## Multi-agent collaborative experiments
+### Multi-agent collaborative experiments

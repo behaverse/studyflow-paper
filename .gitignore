@@ -5,3 +5,7 @@ _manuscript/
 .pixi/
 .venv/
 *.egg-info
+
+0_article_files/
+/arxiv.sty
+/orcidlink.sty

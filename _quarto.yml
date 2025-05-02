@@ -1,18 +1,26 @@
 project:
   type: manuscript
+  output-dir: _manuscript
 
 manuscript:
-  article: 0-article.qmd
-  meca-bundle: true
+  article: 0_article.qmd
+  meca-bundle: false
+  code-links: false
 format:
   html:
+    toc: true
     comments:
       hypothesis: false
-  jats: default
-  pdf: default
+    notebook-links: false
+    notebook-view: false
+    keep-ipynb: false
+    fig-cap-location: bottom
 
-# execute:
-#   freeze: true
+  # pdf: default
+  arxiv-pdf:
+    output-file: studyflow_modeler_arxiv.pdf
 
+execute:
+  freeze: true
 
 
