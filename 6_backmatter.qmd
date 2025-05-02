@@ -10,4 +10,3 @@ order: 7
 
 ## Acknowledgments {.unnumbered}
 
-Removed for anonymity.

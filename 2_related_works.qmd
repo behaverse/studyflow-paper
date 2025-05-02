@@ -23,4 +23,4 @@ Pipeline tools
 - Pydpiper
 - BIDS tools
     - Nipype
-    - https://www.sciencedirect.com/science/article/pii/S2772528622000346
+    - BIDS Manager-Pipeline: A framework for multi-subject analysis in electrophysiology [link](https://www.sciencedirect.com/science/article/pii/S2772528622000346)

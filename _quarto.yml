@@ -17,11 +17,9 @@ format:
     fig-align: center
     fig-cap-location: bottom
 
-  # pdf: default
-  arxiv-pdf:
-    output-file: studyflow_modeler_arxiv.pdf
-    fig-align: center
-    fig-cap-location: bottom
+  pdf:
+    output-file: studyflow_modeler.pdf
+    fontsize: 10pt
 
 execute:
   freeze: true
