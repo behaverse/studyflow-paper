@@ -1,5 +1,5 @@
 ---
-title: "Studyflow: Technical Paper"
+title: "Studyflow: A tool to define and run scientific workflows"
 authors:
   - name: Author 1
     affiliation: University of Luxembourg

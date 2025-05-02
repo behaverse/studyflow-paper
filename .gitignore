@@ -1,2 +1,7 @@
 /.quarto/
 _manuscript/
+
+# pixi environments
+.pixi/
+.venv/
+*.egg-info

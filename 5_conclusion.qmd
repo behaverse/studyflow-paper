@@ -14,7 +14,7 @@ order: 5
 
 - we also implemented a prototype of a runtime engine to execute studyflow diagrams.
 
-# Future Works
+## Future Works
 
 We will extend elements to support more complex processes, such as data normalization, data augmentation, multi-modal data processing, and data fusion.
 

@@ -2,8 +2,8 @@ project:
   type: manuscript
 
 manuscript:
-  article: index.qmd
-  meca-bundle: false
+  article: 0-article.qmd
+  meca-bundle: true
 format:
   html:
     comments:

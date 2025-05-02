@@ -1,10 +1,10 @@
 ---
-title: "Studyflow Modeler: A tool to define and run scientific workflows"
 order: 1
 ---
 
+# Introduction
 
-# problem statement
+## problem statement
 
 > problems with current scientific workflows:
 > - either informal (textual description of methods in manuscripts) or 
@@ -20,7 +20,7 @@ Exact description of scientific experiments is crucial for reproducibility and r
 Interpreting those texts and diagrams also require specialized knowledge that is not always available to all researchers, making them inaccessible to non-experts and hindering the reproducibility and replicability of the experiments.
 
 
-# solution
+## solution
 
 Here we address two problems: (1) a formal way to describe scientific studies that can be interpreted and executed by both humans and machines, and (2) a proof-of-concept interface to model and run their experiments without the need for specialized knowledge.
 
@@ -30,7 +30,7 @@ Studyflow is based on BPMN (Business Process Model and Notation), a standard for
 
 
 
-# process-driven, functional instead of data-driven
+## process-driven, functional instead of data-driven
 
 Recent decade in software engineering has seen a shift from data-driven to process-driven software development. This shift is driven by the need for more flexible and adaptable software systems that can respond reactively to changing environments.
 
