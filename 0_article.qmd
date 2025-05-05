@@ -1,5 +1,5 @@
 ---
-title: "Studyflow: A tool to define and run scientific workflows"
+title: "Studyflow Modeler: Schema and Tools to Define and Run Scientific Workflows"
 authors:
   - name: Author 1
     affiliation: University of Luxembourg
