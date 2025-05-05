@@ -9,13 +9,14 @@ In addition to the elements specified in BPMN2.1, the studyflow language introdu
 
 ### Formulation
 
-A basic workflow is a (G, F, C, A) tuple, where G is a directed graph, F is a set of flow objects (e.g., nodes, decision branching), C is a set of connecting objects (e.g., edges, messages), and A is a set of artifacts (e.g., data, annotations). The nodes in the graph represent the different elements of the study, such as tasks, events, and processes. The edges in the graph represent the flow of control and data between these elements.
+A workflow is a (N, E, T, $\tau$, $\lambda$) tuple, where N is a finite set of elements (activities, gateways, events), $E\subseteq N\times N$ represents sequence flows (edges), T is a set of pre-defined node types (Activity, Event, Gateway), $\tau: N \rightarrow T$ is a typing function that assigned types (Activity, Event, Gateway) to the nodes, and $\lambda$ is a labeling function that assigns additional attributes to the nodes (e.g., event triggers, gateway logic, implementations). The elements are connected by directed edges, forming a directed acyclic graph (DAG) that represents the flow of the study.
 
+Studyflow extends this formulation by introducing additional type hierarchies and attributes to the elements, allowing for a more detailed representation of the workflow, tailored to the specific needs of scientific research.
 
 TODO: 
-- properties of the elements
+- attributes of the elements
 - input/outputs
-- gateways -> branches
+- branching and joining patterns
 - grouping mechanisms:
     - subprocesses (can be another graph G)
     - groups of flow objects (paths in the G)
