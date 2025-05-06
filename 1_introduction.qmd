@@ -36,8 +36,8 @@ To this end we propose Studyflow, a formal language to describe cognitive experi
 Studyflow is based on BPMN [Business Process Model and Notation; @white2004introduction], a standard for business process modeling that is widely used in industry. BPMN is a graphical language that allows to formally describe processes, making them easy to understand and execute. Studyflow extends BPMN with additional elements to describe cognitive experiments, such as elements for data collection, data transformation, and other MLOps steps.
 
 
-### process-driven, functional models instead of data-driven models
 
-Recent decade in software engineering has seen a shift from data-driven to process-driven software development. This shift is driven by the need for more flexible and adaptable software systems that can respond reactively to changing environments.
+# Sharing workflows along with the data
 
-Process-driven software development focuses on the workflows that govern software systems, rather than the data that those systems manipulate. This approach allows for more efficient and effective softwares, as well as better alignment with domain-specific goals.
+- data models and dataset are not sufficient to reproduce the experiments
+- 
