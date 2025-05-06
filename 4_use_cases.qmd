@@ -19,3 +19,5 @@ Figure X shows an example of CONSORT flow diagram created in studyflow language.
 ### MLOps
 
 ### Multi-agent collaborative experiments
+
+BPMN2 introduced coreography tasks that can be used to model multi-agent collaborative experiments. Studyflow extends this concept to allow for the modeling of human studies and multi-agent experiments in a more intuitive way. The following example shows how to model a multi-agent experiment using studyflow.

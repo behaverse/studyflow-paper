@@ -40,4 +40,20 @@ Studyflow is based on BPMN [Business Process Model and Notation; @white2004intro
 # Sharing workflows along with the data
 
 - data models and dataset are not sufficient to reproduce the experiments
-- 
+
+
+## Benefits of Using Studyflow for Scientific Research Workflows
+
+Studyflow extends BPMN with domain-specific elements for scientific research including cognitive tests, questionnaires, instructions, and specialized datasets that align with standards like BDM (Behaverse Data Model), BIDS, and Psych-DS.
+
+Using studyflow to model your scientific research workflows will:
+
+- Help all stakeholders understand complex research protocols using easily readable diagrams that follow BPMN 2.0 standards with domain-specific extensions
+- Provide a natural basis for collaboration between researchers, ethics committees, data scientists, software engineers, and other stakeholders through coherent visual representation
+- Reduce the effort and risk of experimental design through graphical decomposition of research workflows into well-defined activities, events, and gateways
+- Allow study protocols to be defined simply and unambiguously using a formal machine-readable format that supports version control
+- Simplify reproducibility of studies using specifications that can be automatically validated, shared, and executed
+- Provide a structured context for integrating data processing, analysis, and MLOps components into your research workflow
+- Support the FAIR principles by making experimental designs findable, accessible, interoperable, and reusable
+- Enable the development of a library of reusable research components across cognitive tests, questionnaires, instructions, and data processing pipelines
+
