@@ -4,20 +4,20 @@ order: 1
 
 ## Introduction
 
-### context problem statement
+### context; problem statement
 
-Current methods to describe scientific workflows are often informal (as in textual description of methods in manuscripts) or custom-built (as in complex codes), making them difficult to interpret, reproduce, or execute.
+As we more and more rely on AI-driven approaches to conduct scientific research, the need for reproducibility and replicability of scientific experiments has become increasingly essential for building trust in data-driven automated scientific research.
 
-Exact description of scientific experiments is crucial for reproducibility and replicability. Current situation in cognitive science is that experiments are usually described as texts in scientific papers; sometimes, basic flowchart diagrams accompany those methods sections for improved communications. However, these diagrams are minimal, informal, and due their implicit nature cannot be readily executed. Sometimes, and most often not, they are supplemented by ad-hoc, custom codes to run the experiments, modeling, and analysis. The result is that the methods sections of scientific papers are often difficult to interpret and reproduce by other researchers. The situation is even worse when the methods are described in a language that is not the native language of the reader or a programming language that is proprietary or outdated.
+The cognitive science industry is no exception to this trend. Yet, most efforts are focused on formalizing the data and the models, while formalizing the workflows that generate these data and models are often neglected. This is particularly problematic in cognitive science, where the complexity of the experiments and the diversity of the stakeholders make it difficult to communicate and share workflows effectively. A complete description of the cognitive experiments requires both a data model and a workflow model [@Sehgal2011]. The data model describes the structure and semantics of the data, while the workflow model describes the process of generating and making sense of the data.
 
-Interpreting those texts and diagrams also require specialized knowledge that is not always available to all researchers, making them inaccessible to non-experts and hindering the reproducibility and replicability of the experiments.
 
 ### Current solutions and limitations
 
-- current models of communication for scientific workflows are limiting:
+- current models of communication for scientific workflows are limiting not only general communication of science but reproducibility and replicability:
     - either they are informal as in (textual description of methods in manuscripts) without any specific pattern to reproduce
     - or in custom codes for which communication is limited and reproducibility requires a huge upfront effort.
     - too much focus on data ended up in domain-specific non-adaptable workflows that only work for specific datasets. Recent AI paradigm shift requires more flexible and adaptable workflows that can handle multi-modal data and changing environments.
+    - The situation is even worse when the methods are described in a language that is not the native language of the reader or a programming language that is proprietary or outdated. Interpreting those texts and supporting diagrams also require specialized knowledge that is not always available to all the stakeholders (from researchers to funding agencies), making them inaccessible to non-experts and hindering the reproducibility of the experiments.
 - the main solution to these limitations are:
     - box and arrow diagrams explains the workflow and the data in a more abstract way. These are limited because of the medium, or task-specific formats. There are efforts like UML in software engineering, or CONSORT in experimental sciences, but they are limited an inefficient to capture the complexity of modern data and softwares (e.g., MLOps). Given the fact that several stakeholders in scientific research each requires different kinds of communication, those diagramming are required to be separately tailored for each stakeholder; making it impossible to share via scientific communication outlets such as manuscripts. At the end they are just arbitrary post-hoc description of what happened during the scientific experiment, neither the texts nor the visual diagrams are executable for engineers to re-use.
     - Checklists, and pre-defined questions (e.g., pre-registration) address the need for structured text descriptions but they do not directly addresses the need for exploration requires by any scientific workflows which requires keeping track of changes. Keeping history of such is are difficult because of the inherent unstructure-ness of natural language descriptions, and the way they are stored: formatted texts in PDF, DOCX, etc on data silos that will never change. Overall tools for reproducibility in science do not promote version control.

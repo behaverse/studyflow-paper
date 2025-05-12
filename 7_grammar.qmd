@@ -1,9 +1,14 @@
 ---
-filters:
+filters: 
   - diagram
+diagram:
+  engine:
+    plantuml:
+      mime-type:
+        application/pdf: false
 ---
 
-## Appendix A: EBNF Grammar
+# Appendix A: EBNF Grammar
 The following grammar describes the structure of a studyflow diagram. It is based on the BPMN 2.1 specification (including choreography tasks) and has been adapted to fit the needs of our specific use case.
 
 ```{.plantuml code-fold="false"}
