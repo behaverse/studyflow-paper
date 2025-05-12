@@ -42,3 +42,5 @@ number-sections: true
 {{< include 4_use_cases.qmd >}}
 {{< include 5_conclusion.qmd >}}
 {{< include 6_backmatter.qmd >}}
+
+{{< include 7_grammar.qmd >}}

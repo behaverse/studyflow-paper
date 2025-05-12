@@ -7,6 +7,7 @@ _manuscript/
 *.egg-info
 
 0_article_files/
-/arxiv.sty
-/orcidlink.sty
+7_grammar_files/
+_freeze/
+
 .DS_Store
