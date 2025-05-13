@@ -9,7 +9,8 @@ diagram:
 ---
 
 # Appendix A: EBNF Grammar
-The following grammar describes the structure of a studyflow diagram. It is based on the BPMN 2.1 specification (including choreography tasks) and has been adapted to fit the needs of our specific use case.
+
+Studyflow extends the BPMN 2.1 specification (including the recent addition of the choreography tasks) and has been adapted to fit the needs of our specific use case. Generally, studyflow diagrams can be described as a domain-specific language to model processes along with data produced or needed by those processes. The following grammar describes the formal structure of a studyflow diagram:
 
 ```{.plantuml code-fold="false"}
 @startebnf
