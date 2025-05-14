@@ -14,6 +14,14 @@ Figure X shows an example of CONSORT flow diagram created in studyflow language.
 ![Example CONSORT](figures/consort.svg)
 
 
+### Use Case: Cognitive Tests
+
+One common way to describe cognitive tests and their trial structures is to visualize different stages of a trial as slides annotated them with timing parameters (see for example N-back task in figure below). However, this approach is not always reproducible, not machine-readable, and does not provide a formal and complete description of the experiment.
+
+![N-back task (current)](figures/nback_current.svg)
+
+![N-back task (studyflow)](figures/nback_studyflow.svg)
+
 ### Use Case: Data Analysis and Visualization
 
 ### MLOps
