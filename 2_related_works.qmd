@@ -6,7 +6,9 @@ order: 2
 
 - Workflow definition vs. workflow execution
 
-### BPMN
+### General
+
+#### BPMN
 
 BPMN is a standard language to define business processes, widely used in healthcare, finance, and logistics to model workflows. BPMN provides 1) a graphical representation of workflows, allowing various stakeholders to understand and communicate complex processes, and 2) a formal XML-based semantics that enables the execution of BPMN models in various environments.
 
@@ -15,6 +17,17 @@ However, despite its versatile nature, BPMN is designed for general use cases an
 Studyflow is an extension of BPMN that is specifically designed to model scientific experiments. It provides a formal language to describe the workflow of the experiments, including the design, collection, and modeling phases.
 
 
+Petri nets are a mathematical modeling language used to represent processes as bipartite graphs of places (states) and transitions (events).
+
+UML Activity Diagrams
+
+
+### Specific
+
+Nextflow
+SBGN (Systems Biology Graphical Notation)
+Common Workflow Language (CWL) is an open standard for describing how to run command line tools and connect them to create workflows.
+Apache Airflow helps with scheduling and monitoring complex DAGs, often in large data-processing contexts.
 POWL
 ProMoAI (Khourani2024)
 BPMN-ChatBot (Kopke2024)
@@ -24,8 +37,22 @@ Workflow and process models
 - general
     - make and taskfile
     - CI pipelines
+    - UML activity diagrams
 - Pydra
+- NeuroHub
+- NeuroManager
+- Cromwell https://cromwell.readthedocs.io/en/stable/
 - Pydpiper
+- neuropype
+- Porcupine
+- labvanced
+- NiPype is a Python-based engine that wraps popular neuroimaging softwares to build and execute pipelines as directed graphs of processing "nodes".
+Frontiers
+- With LONI Pipeline, researchers can create workflow protocols to run multiple computational tools, monitor their progress and quickly interpret results.
+GitHub
+. Its workflow engine enforces unique node names, cycle-free graphs, and supports hierarchical workflows for modular reuse 
+Frontiers
 - BIDS tools
     - Nipype
     - BIDS Manager-Pipeline: A framework for multi-subject analysis in electrophysiology [link](https://www.sciencedirect.com/science/article/pii/S2772528622000346)
+
