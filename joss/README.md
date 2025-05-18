@@ -43,15 +43,3 @@ References: Is the list of references complete, and is everything cited appropri
 
  250-1000 words
 
-
-# Comple
-
-```
-cd <ProjectDir>
-
-docker run --rm \
-    --volume $PWD/joss:/data \
-    --user $(id -u):$(id -g) \
-    --env JOURNAL=joss \
-    openjournals/inara
-```
