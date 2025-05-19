@@ -13,8 +13,10 @@ You need to install the following dependencies:
 If you don't have them installed, you can use pixi to install them:
 ```
 pixi shell
-quarto preview .
+quarto render . --to pdf
 ```
+
+The output will be saved as `_manuscript/studyflow-modeler-paper.pdf`.
 
 ## JOSS
 

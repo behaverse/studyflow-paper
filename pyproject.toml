@@ -15,7 +15,6 @@ platforms = ["osx-arm64"]
 [tool.pixi.dependencies]
 librsvg = ">=2.58.4,<3"
 quarto = ">=1.7.30,<2"
-plantuml = ">=1.2025.2,<2"
 jupyter = ">=1.1.1,<2"
 
 [pypi-dependencies]

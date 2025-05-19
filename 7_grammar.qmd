@@ -1,52 +1,47 @@
 ---
-filters: 
-  - diagram
-diagram:
-  engine:
-    plantuml:
-      mime-type:
-        application/pdf: false
-        image/svg+xml: false
-        image/png: true
+format:
+  html:
+    code-overflow: wrap
 ---
 
 # Appendix A: EBNF Grammar {.unnumbered}
 
 Studyflow extends the BPMN 2.1 specification (including the addition of the choreography tasks) and has been adapted to fit the needs of our specific use case. Generally, studyflow diagrams can be described as a domain-specific language to model processes along with data produced or needed by those processes. The following grammar describes the formal structure of a studyflow diagram:
 
-```{.plantuml code-fold="false"}
-@startebnf
+Note: use https://matthijsgroen.github.io/ebnf2railroad/try-yourself.html to visualize the EBNF grammar.
 
-Definitions      = { Process }-;
+```{.ebnf code-fold="false" code-line-numbers="true" }
+Definitions       = { Process } ;
 
-Process         = "process", Identifier, { Node | SequenceFlow }-;
+Process           = "process", Identifier, { Node | SequenceFlow } ;
 
-Node    = (StartEvent | Task | Gateway | EndEvent);
+Node              = StartEvent | Task  | Gateway | EndEvent;
 
-StartEvent      = "startEvent", Identifier;
-EndEvent        = "endEvent", Identifier;
+StartEvent        = "startEvent", Identifier ;
+EndEvent          = "endEvent", Identifier ;
 
-Task            = 'task', Identifier, TaskType, [Choreography];
+Task            = "task", Identifier, TaskType, [ Choreography ] ;
 
-TaskType        = "cognitive-test" | "questionnaire" | "instruction" | "rest" | "script" | "manual";
-Choreography = "choreography", ParticipantList, [InitiatingParticipant];
+TaskType          = "cognitive-test" | "questionnaire" | "instruction" | "rest" | "script" | "manual" ;
 
-Gateway         = 'gateway', Identifier, GatewayType;
-GatewayType     = 'random-assignment' | 'exclusive' | 'complex';
+Choreography      = "choreography", ParticipantList, [ InitiatingParticipant ] ;
 
+Gateway           = "gateway", Identifier, GatewayType ;
 
-SequenceFlow = "sequenceFlow", Identifier, NodeRef, ?→?, NodeRef;
+GatewayType       = "random-assignment" | "exclusive" | "complex";
 
+SequenceFlow      = "sequenceFlow", Identifier, NodeRef, "→", NodeRef ;
 
-MessageFlowList  = { "messageFlow", Identifier, ParticipantRef, ?→?, ParticipantRef };
+MessageFlowList   = { "messageFlow", Identifier, ParticipantRef, "→", ParticipantRef } ;
 
+ProcessRef            = Identifier ;
+NodeRef               = Identifier ;
+ParticipantRef        = ProcessRef ;
+InitiatingParticipant = ParticipantRef ;
+ParticipantList  = Identifier, { Identifier } ;
 
-ProcessRef = Identifier;
-NodeRef = Identifier;
-ParticipantRef = ProcessRef;
-InitiatingParticipant = ParticipantRef;
+Identifier       = Letter, { Letter | Digit | "_" } ;
+Letter           = "A", "Z" | "a", "z" | "_" ;
+Digit            = "0", "9" ;
 
-Identifier = ? [a-zA-Z_][a-zA-Z0-9_]* ?;
-
-@endebnf
 ```

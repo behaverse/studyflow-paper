@@ -5,6 +5,7 @@ project:
     - index.qmd
 
 format:
+  html: default
   pdf:
     fontsize: 10pt
     output-file: studyflow_modeler_paper.pdf
