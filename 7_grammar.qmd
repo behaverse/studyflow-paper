@@ -10,7 +10,7 @@ diagram:
         image/png: true
 ---
 
-# Appendix A: EBNF Grammar
+# Appendix A: EBNF Grammar {.unnumbered}
 
 Studyflow extends the BPMN 2.1 specification (including the addition of the choreography tasks) and has been adapted to fit the needs of our specific use case. Generally, studyflow diagrams can be described as a domain-specific language to model processes along with data produced or needed by those processes. The following grammar describes the formal structure of a studyflow diagram:
 

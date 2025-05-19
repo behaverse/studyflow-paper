@@ -1,27 +1,10 @@
 project:
-  type: manuscript
-  output-dir: _manuscript
+  type: default
+  output-dir: _manuscript/
+  render:
+    - index.qmd
 
-manuscript:
-  article: 0_article.qmd
-  meca-bundle: false
-  code-links: false
 format:
-  html:
-    toc: true
-    comments:
-      hypothesis: false
-    notebook-links: false
-    notebook-view: false
-    keep-ipynb: false
-    fig-align: center
-    fig-cap-location: bottom
-
   pdf:
-    output-file: studyflow_modeler.pdf
     fontsize: 10pt
-
-execute:
-  freeze: true
-  # cache: true
-
+    output-file: studyflow_modeler_paper.pdf

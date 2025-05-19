@@ -2,16 +2,16 @@
 order: 1
 ---
 
-## Introduction
+# Introduction
 
-### context; problem statement
+## context; problem statement
 
 As we more and more rely on AI-driven approaches to scientific research, the need for reproducibility and replicability of scientific experiments has become increasingly essential for building trust in automated workflows.
 
 The cognitive science industry is no exception to this trend. Yet, most efforts are focused on formalizing data and analysis, while formalizing the workflows that generate the data and fits the models are often neglected. This is particularly problematic in cognitive science, where the complexity of the experiments and the diversity of the stakeholders make it difficult to communicate and share workflows effectively. A complete description of experiments requires both a data model and a workflow model [@Sehgal2011]. The data model describes the structure and semantics of the data, while the workflow model describes the process of generating and making sense of the data.
 
 
-### Current approach and its limitations
+## Current approach and its limitations
 
 - current models of communication for scientific workflows are limiting not only general communication of science but reproducibility and replicability:
     - either they are informal as in (textual description of methods in manuscripts) without any specific pattern to reproduce
@@ -27,7 +27,7 @@ The cognitive science industry is no exception to this trend. Yet, most efforts 
 We can however leverage solutions to the domain-driven software engineering applied to the real-world scenarios that involve multiple stake-holder and require reproducibility and trust such as finance or healthcare and apply them to science.
 
 
-### Our contributions
+## Our contributions
 
 Here we address two problems: (1) a formal way to describe scientific studies that can be interpreted and executed by both humans (at different levels of expertise) and machines, and (2) a proof-of-concept interface to model and run their experiments without the need for specialized knowledge.
 
@@ -37,12 +37,9 @@ Studyflow is based on BPMN [Business Process Model and Notation; @white2004intro
 
 
 
-# Sharing workflows along with the data
+## Benefits of Using Studyflow for Scientific Research Workflows
 
 - data models and dataset are not sufficient to reproduce the experiments
-
-
-## Benefits of Using Studyflow for Scientific Research Workflows
 
 Studyflow extends BPMN with domain-specific elements for scientific research including cognitive tests, questionnaires, instructions, and specialized datasets that align with standards like BDM (Behaverse Data Model), BIDS, and Psych-DS.
 

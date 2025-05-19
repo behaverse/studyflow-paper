@@ -2,7 +2,7 @@
 order: 3
 ---
 
-## Overview
+# Overview
 
 Business Process Model and Notation (BPMN 2.0) is an OMG standard for process modeling, widely used in industry for its clear semantics and extensibility. In practice, BPMN supports domain‐specific extensions (e.g. in healthcare or finance) via an integrated extension mechanism. For example, research systems like ProjectFlow leverage BPMN so that investigators can "create custom workflows using Business Process Model and Notation" for study protocols. Similarly, Knight et al. (2024) used BPMN to visualize a neurology patient-care workflow and its data movements. These examples along with availability of BPMN in many off-the-shelf tools (e.g., diagrams.io, miro, bpmn.io, etc) show that BPMN is a good candidate to model scientific research workflows. Recent work even implements a BPMN-based scientific workflow engine, underscoring its applicability beyond business domains. Despite this, we found no open BPMN profile specifically for experimental researches; using BPMN to model study protocols (hypothesis, IRB, tasks, analysis, etc.) remains an open need.
 
@@ -14,7 +14,7 @@ Each extended task can carry **metadata** about the experiment (lambda). BPMN 2 
 
 Constraints and dependencies in Studyflows are modeled using BPMN events and gateway conditions. For instance, approval deadlines (IRB must respond within 30 days) can be added as a **timer event** on the IRB task. Concurrent activities (e.g. running two different cognitive tasks in parallel) are captured via parallel gateways. Random assignments and branching can be implemented using gateways (XOR) model experimental conditions or decision points (e.g. if a participant withdraws, take alternate path in CONSORT). Data-dependency constraints (Task B must wait for data from Task A) are implicit in the flows of data objects. In a formal sense, studyflow is still a directed graph of activities and flows, with added annotations: tasks have additional markers and attributes (e.g. …), and edges enforce ordering or grouping of activities. Conceptually, one can treat these constraints as a partially ordered timeline superimposed on the BPMN graph. In practice, modeling tools could enforce simple constraints by BPMN sequence flow conditions or event gateways, while more complex logic might be documented in gateways and activity annotations.
 
-### Formulation
+## Formulation
 
 A workflow is a (N, E, T, $\tau$, $\lambda$) tuple, where N is a finite set of elements (activities, gateways, events), $E\subseteq N\times N$ represents sequence flows (edges), T is a set of pre-defined node types (Activity, Event, Gateway), $\tau: N \rightarrow T$ is a typing function that assigned types (Activity, Event, Gateway) to the nodes, and $\lambda$ is a labeling function that assigns additional attributes to the nodes (e.g., event triggers, gateway logic, implementations). The elements are connected by directed edges, forming a directed acyclic graph (DAG) that represents the flow of the study.
 
@@ -22,45 +22,13 @@ Studyflow extends this formulation by introducing additional type hierarchies an
 
 TODO: - attributes of the elements - input/outputs - branching and joining patterns - grouping mechanisms: - subprocesses (can be another graph G) - groups of flow objects (paths in the G) - bpmn2:group -\> visual annotation
 
-### Studyflow elements
+## Studyflow elements
 
 The basic elements of the studyflow are tailored to the specific needs scientific research and include:
 
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| Element                           | Definition                                                                                                                                                                                                                                                                  | Notation                                                                  |
-+===================================+=============================================================================================================================================================================================================================================================================+===========================================================================+
-| Start Event                       | Defines the beginning of the workflow. It can be conditioned on human participants giving informed consent, supporting the ethical and legal requirements.                                                                                                                  | ![](figures/elements/start_event.svg){#fig-start-event alt="Start event"} |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| End Event                         | Defines the end of the workflow, typically after all the data has been collected. It can redirect to a different workflow or terminate the study.                                                                                                                           | ![](figures/elements/end_event.svg){alt="End event"}                      |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| Instruction                       | Define and deliver instructions to the participants. The scope of the instruction can be: within an activity, and independent instruction outside the scope of any activity.                                                                                                | ![](figures/elements/instruction.svg){alt="Instruction"}                  |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-|                                   | Surveys and questionnaires for gathering self-reported data.                                                                                                                                                                                                                | ![](figures/elements/questionnaire.svg){alt="Instruction"}                |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| Cognitive Test                    | Various cognitive assessment tasks within the study design, including [cognitive assessment tests](https://behaverse.org/projects/cognitive-tests.html).                                                                                                                    | ![](figures/elements/cognitive_test.svg){alt="Cognitive test"}            |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| Video Game                        | Interactive games as part of the experimental paradigm.                                                                                                                                                                                                                     | ![](figures/elements/video_game.svg){alt="Video game"}                    |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| Exprimental Design                |                                                                                                                                                                                                                                                                             |                                                                           |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| Dataset                           | Describe how data is stored and formatted. It supports various dataset formats, including BDM, BIDS, Psych-DS, and others. It can also be used to describe levels of the data in [Behaverse Data Model (BDM)](https://behaverse.org/data-model): events, trials, or models. | ![](figures/elements/dataset.svg){alt="Dataset"}                          |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| BDM Dataset (Events)              | Data records represent the raw data collected during an activity. In BDM, Events are stored in the events.csv file within the activity folder of a BDM dataset.                                                                                                             | ![](figures/elements/bdm_events.svg){alt="BDM Events"}                    |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| BDM Dataset (Trials)              | A dataset in which data records represent a single attempt at an activity accompanied by the participant's response and experimenter's interpretation of the response. Trials are stored in the trials.csv file within the activity folder of a BDM dataset.                | ![](figures/elements/bdm_trials.svg){alt="BDM Trials"}                    |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| BDM Dataset (Statistics & Models) | Statistics & Models: the most abstract level of data that represent the data analysis and interpretation of the data, like a checkpoint for a deep learning model that predicts performance.                                                                                | ![](figures/elements/bdm_models.svg){alt="BDM Models"}                    |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| BIDS Dataset                      |                                                                                                                                                                                                                                                                             | ![](figures/elements/bids.svg){alt="BIDS"}                                |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
-| Psych-DS Dataset                  |                                                                                                                                                                                                                                                                             | ![](figures/elements/psych_ds.svg){alt="Psych-DS"}                        |
-+-----------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
+{{< include partials/elements_table.qmd >}}
 
-: Studyflow elements. See [studyflow.yaml schema](https://behaverse.org/data-model/assets/schemas/studyflow.yaml) for a complete list of elements and their attributes.
-
-TODO
-
-Processes:
+### Processes
 
 -   StudyStep: a generic step in the study workflow.
 -   DesignExperiment
@@ -68,18 +36,18 @@ Processes:
 -   ValidateData
 -   TransformData
 
-#### Data Processing
+### Data Processing
 
 -   MapData
 -   ReduceData
 -   FilterData
 
-#### Tabular data transformation
+### Tabular data transformation
 
 -   TransformTable
 -   TransformTables
 
-#### MLOps
+### MLOps
 
 -   TrainModel
 -   FineTuneModel

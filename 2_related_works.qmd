@@ -2,13 +2,12 @@
 order: 2
 ---
 
-## Related Works
+# Related Works
 
+## General
 - Workflow definition vs. workflow execution
 
-### General
-
-#### BPMN
+## BPMN
 
 BPMN is a standard language to define business processes, widely used in healthcare, finance, and logistics to model workflows. BPMN provides 1) a graphical representation of workflows, allowing various stakeholders to understand and communicate complex processes, and 2) a formal XML-based semantics that enables the execution of BPMN models in various environments.
 
@@ -22,7 +21,7 @@ Petri nets are a mathematical modeling language used to represent processes as b
 UML Activity Diagrams
 
 
-### Specific
+## Domain-specific
 
 Nextflow
 SBGN (Systems Biology Graphical Notation)
