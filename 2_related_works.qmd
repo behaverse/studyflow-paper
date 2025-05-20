@@ -4,35 +4,31 @@ order: 2
 
 # Related Works
 
-## General
+Numerous approach in scientific workflow modeling exist, each with its own strengths and weaknesses. General-purpose standards like BPMN [@white2004introduction] offer graphical modeling and XML-based semantics, widely adopted in various industries but lacking domain-specific constructs specifically for scientific research. Other general formalisms include UML for data modeling and UML Activity Diagrams for basic processes. While BPMN is extendible, and has been adapted in works like XXXX [@REF], its generic semantics requires extension for specialized domains like experimental cognitive science. Simpler tools like make and taskfile, alongside CI pipelines, also represent general workflow automation but often lack the rich modeling capabilities required for complex scientific experiments.
+
+In scientific domains, several specialized workflow tools have been developed. For instance, Nextflow, Common Workflow Language (CWL), and Apache Airflow facilitate the execution of command-line tools and complex data-processing directed acyclic graphs (DAGs). Biology benefits from SBGN (Systems Biology Graphical Notation). Neuroscience, in particular, has seen tools like NiPype, Pydra, NeuroHub, NeuroManager, Cromwell, Pydpiper, neuropype, Porcupine, labvanced, the LONI Pipeline, and BIDS tools like BIDS Manager-Pipeline, each addressing specific aspects of neuroimaging or electrophysiology data analysis. More recent efforts like ProMoAI [@Khourani2024] and POWL also target specific research workflow needs. While these tools provide significant value in their respective domains, a gap remains for a comprehensive, formally defined language that integrates the entire scientific study lifecycle from experimental design and data collection (including cognitive tests and questionnaires) to data formatting and analysis while being accessible to different stakeholders with or without specialized knowledge.
+
+## Notes
+
 - Workflow definition vs. workflow execution
 
-## BPMN
+- BPMN is a standard language to define business processes, widely used in healthcare, finance, and logistics to model workflows. BPMN provides 1) a graphical representation of workflows, allowing various stakeholders to understand and communicate complex processes, and 2) a formal XML-based semantics that enables the execution of BPMN models in various environments.
 
-BPMN is a standard language to define business processes, widely used in healthcare, finance, and logistics to model workflows. BPMN provides 1) a graphical representation of workflows, allowing various stakeholders to understand and communicate complex processes, and 2) a formal XML-based semantics that enables the execution of BPMN models in various environments.
+- However, despite its versatile nature, BPMN is designed for general use cases and does not specifically capture domain-specific semantics like in cognitive science or machine learning. It is extendible though: its elements can be extended to model specific concepts in data-driven scientific experiments, such as experimental design, data collection, data cleaning and transformation, training models, versioning and deployment, and so on. 
 
-However, despite its versatile nature, BPMN is designed for general use cases and does not specifically capture domain-specific semantics like in cognitive science or machine learning. It is extendible though: its elements can be extended to model specific concepts in data-driven scientific experiments, such as experimental design, data collection, data cleaning and transformation, training models, versioning and deployment, and so on. 
-
-Studyflow is an extension of BPMN that is specifically designed to model scientific experiments. It provides a formal language to describe the workflow of the experiments, including the design, collection, and modeling phases.
+- Studyflow is an extension of BPMN that is specifically designed to model scientific experiments. It provides a formal language to describe the workflow of the experiments, including the design, collection, and modeling phases.
 
 
-Petri nets are a mathematical modeling language used to represent processes as bipartite graphs of places (states) and transitions (events).
+- Petri nets are a mathematical modeling language used to represent processes as bipartite graphs of places (states) and transitions (events).
 
-UML Activity Diagrams
+- UML Activity Diagrams
 
 
-## Domain-specific
-
-Nextflow
-SBGN (Systems Biology Graphical Notation)
-Common Workflow Language (CWL) is an open standard for describing how to run command line tools and connect them to create workflows.
-Apache Airflow helps with scheduling and monitoring complex DAGs, often in large data-processing contexts.
-POWL
-ProMoAI (Khourani2024)
-BPMN-ChatBot (Kopke2024)
-
-Workflow and process models
-
+- Domain specific: Nextflow, SBGN (Systems Biology Graphical Notation), Common Workflow Language (CWL) is an open standard for describing how to run command line tools and connect them to create workflows.
+- Apache Airflow helps with scheduling and monitoring complex DAGs, often in large data-processing contexts.
+- POWL
+- ProMoAI (Khourani2024)
+- BPMN-ChatBot (Kopke2024)
 - general
     - make and taskfile
     - CI pipelines
@@ -46,12 +42,8 @@ Workflow and process models
 - Porcupine
 - labvanced
 - NiPype is a Python-based engine that wraps popular neuroimaging softwares to build and execute pipelines as directed graphs of processing "nodes".
-Frontiers
 - With LONI Pipeline, researchers can create workflow protocols to run multiple computational tools, monitor their progress and quickly interpret results.
-GitHub
-. Its workflow engine enforces unique node names, cycle-free graphs, and supports hierarchical workflows for modular reuse 
-Frontiers
+- GitHub CI. Its workflow engine enforces unique node names, cycle-free graphs, and supports hierarchical workflows for modular reuse 
 - BIDS tools
     - Nipype
     - BIDS Manager-Pipeline: A framework for multi-subject analysis in electrophysiology [link](https://www.sciencedirect.com/science/article/pii/S2772528622000346)
-
