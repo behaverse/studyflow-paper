@@ -10,30 +10,32 @@ Studyflow extends the BPMN 2.1 specification (including the addition of the chor
 
 Note: use https://matthijsgroen.github.io/ebnf2railroad/try-yourself.html to visualize the EBNF grammar.
 
-```{.ebnf code-fold="false" code-line-numbers="true" }
+```{.ini code-fold="false" code-line-numbers="true" }
 Definitions       = { Process } ;
 
-Process           = "process", Identifier, { Node | SequenceFlow } ;
+Process           = "process", Identifier, {Attribute}, { Node | SequenceFlow } ;
 
 Node              = StartEvent | Task  | Gateway | EndEvent;
 
-StartEvent        = "startEvent", Identifier ;
-EndEvent          = "endEvent", Identifier ;
+StartEvent        = "startEvent", Identifier, {Attribute} ;
+EndEvent          = "endEvent", Identifier, {Attribute} ;
 
-Task            = "task", Identifier, TaskType, [ Choreography ] ;
-
+Task             = "task", Identifier, , {TaskAttribute}, [ Choreography ] ;
+TaskAttribute    = TaskType, { Attribute } ;
 TaskType          = "cognitive-test" | "questionnaire" | "instruction" | "rest" | "script" | "manual" ;
 
-Choreography      = "choreography", ParticipantList, [ InitiatingParticipant ] ;
+Choreography      = "choreography", { Attribute }, ParticipantList, [ InitiatingParticipant ] ;
 
-Gateway           = "gateway", Identifier, GatewayType ;
-
+Gateway           = "gateway", Identifier, { GatewayAttribute };
+GatewayAttribute = GatewayType, { Attribute } ;
 GatewayType       = "random-assignment" | "exclusive" | "complex";
 
-SequenceFlow      = "sequenceFlow", Identifier, NodeRef, "→", NodeRef ;
+SequenceFlow      = "sequenceFlow", Identifier, { Attribute }, NodeRef, "→", NodeRef ;
 
-MessageFlowList   = { "messageFlow", Identifier, ParticipantRef, "→", ParticipantRef } ;
+MessageFlowList   = { "messageFlow", Identifier, { Attribute }, ParticipantRef, "→", ParticipantRef } ;
 
+
+Attribute         = "attribute", Identifier, "=", Value ;
 ProcessRef            = Identifier ;
 NodeRef               = Identifier ;
 ParticipantRef        = ProcessRef ;
@@ -41,7 +43,7 @@ InitiatingParticipant = ParticipantRef ;
 ParticipantList  = Identifier, { Identifier } ;
 
 Identifier       = Letter, { Letter | Digit | "_" } ;
-Letter           = "A", "Z" | "a", "z" | "_" ;
-Digit            = "0", "9" ;
+Letter           = [A-Za-z] | "_" ;
+Digit            = [0-9];
 
 ```
