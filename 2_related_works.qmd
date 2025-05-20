@@ -4,13 +4,24 @@ order: 2
 
 # Related Works
 
-Numerous approach in scientific workflow modeling exist, each with its own strengths and weaknesses. General-purpose standards like BPMN [@white2004introduction] offer graphical modeling and XML-based semantics, widely adopted in various industries but lacking domain-specific constructs specifically for scientific research. Other general formalisms include UML for data modeling and UML Activity Diagrams for basic processes. While BPMN is extendible, and has been adapted in works like XXXX [@REF], its generic semantics requires extension for specialized domains like experimental cognitive science. Simpler tools like make and taskfile, alongside CI pipelines, also represent general workflow automation but often lack the rich modeling capabilities required for complex scientific experiments.
+Workflows ecosystem can be understood along two dimensions: 1) definition vs. execution, and 2) domain-generic vs. domain-specific (see Figure YXY). Prominent among general-purpose definition languages is Business Process Model and Notation (BPMN), a widely adopted standard for process modeling that offers both graphical representation and executable semantics in XML format. BPMN in particular has been noted for its readability (enabling communication across technical and non-technical stakeholders), but it lacks built-in support for scientific experiments. Despite this limitation for domain-specific workflows, BPMN provides an extension mechanism which can be used to extend the underlying meta-model. UML Activity Diagrams and Petri nets also reside in the general-purpose space, focusing on formal definitions of workflows rather than domain relevance. They can be cumbersome for complex workflows. 
 
-In scientific domains, several specialized workflow tools have been developed. For instance, Nextflow, Common Workflow Language (CWL), and Apache Airflow facilitate the execution of command-line tools and complex data-processing directed acyclic graphs (DAGs). Biology benefits from SBGN (Systems Biology Graphical Notation). Neuroscience, in particular, has seen tools like NiPype, Pydra, NeuroHub, NeuroManager, Cromwell, Pydpiper, neuropype, Porcupine, labvanced, the LONI Pipeline, and BIDS tools like BIDS Manager-Pipeline, each addressing specific aspects of neuroimaging or electrophysiology data analysis. More recent efforts like ProMoAI [@Khourani2024] and POWL also target specific research workflow needs. While these tools provide significant value in their respective domains, a gap remains for a comprehensive, formally defined language that integrates the entire scientific study lifecycle from experimental design and data collection (including cognitive tests and questionnaires) to data formatting and analysis while being accessible to different stakeholders with or without specialized knowledge.
+On the opposite end, execution-focused generic tools like LONI, Apache Airflow, and CI pipelines (e.g., Taskfile, Make, CI, Jenkins, GitHub Actions) provide powerful orchestration engines, yet they lack formal specifications and require specific knowledge to develop pipelines for experimental logics.
+
+The other end is domain-specific tools. Systems biology uses SBGN (Systems Biology Graphical Notation) as a visual guide. The protocols.io is a platform developing and sharing reproducible protocols, which describe the background, rationale, objectives, design, methodology, statistical considerations, and organization of a clinical research project. Within the cognitive sciences, neuroscience has a rich toolkit for domain-specific workflows. Tools such as NiPype (flexible Python-based engine for neuroimaging analyses), NeuroManager (automates neuroscience simulation workflows across diverse compute resources), Pydra (an emerging lightweight dataflow successor to NiPype), Cromwell/WDL (scalable, reproducible pipelines), and CWL (Common Workflow Language, an open standard for portable, command-line-driven pipelines) fill the gap for executable domain-specific scientific workflows. Other key tools include the LONI Pipeline, NeuroHub, Pydpiper, neuropype, Porcupine, labvanced, and BIDS-based tools like the BIDS Manager-Pipeline. These tools are useful for execution and reproducibility, but they often demand programming skills or significant upfront setup and often lack a visual or formal modeling layer interpretable by non-technical stakeholders.
+
+With the advent of large language models, BPMN, known for its clarity and its ability to connect design with execution, has recently been adapted for automated development. For example, ProMoAI [@Khourani2024] and BPMN-ChatBot [@Kopke2024] use large language models to create BPMN models from text. These tools allow for automated BPMN modeling but don't inherently understand domain-specific semantics directly.
+
+In contrast, Studyflow occupies a unique space: grounded in BPMN, it extends the language with constructs for cognitive experiments: data collection, transformation, experimental tasks. Moreover, studyflows align with community standards like BIDS, BDM, and Psych-DS. This allows studyflow to operate across both axes: it enables interpretable, formal workflow definitions tailored for scientific communication that can be executed directly, without requiring implicit knowledge.
+
+- TODO: limitations of DAG for scientific discovery (@Ghareeb2025).
+
 
 ## Notes
 
-- Workflow definition vs. workflow execution
+- Numerous approach in scientific workflow modeling exist, each with its own strengths and weaknesses. General-purpose standards like BPMN [@white2004introduction] offer graphical modeling and XML-based semantics, widely adopted in various industries but lacking domain-specific constructs specifically for scientific research. Other general formalisms include UML for data modeling and UML Activity Diagrams for basic processes. While BPMN is extendible, and has been adapted in works like XXXX [@REF], its generic semantics requires extension for specialized domains like experimental cognitive science. Simpler tools like make and taskfile, alongside CI pipelines, also represent general workflow automation but often lack the rich modeling capabilities required for complex scientific experiments.
+
+- In scientific domains, several specialized workflow tools have been developed. For instance, Nextflow, Common Workflow Language (CWL), and Apache Airflow facilitate the execution of command-line tools and complex data-processing directed acyclic graphs (DAGs). Biology benefits from SBGN (Systems Biology Graphical Notation). Neuroscience, in particular, has seen tools like NiPype, Pydra, NeuroHub, NeuroManager, Cromwell, Pydpiper, neuropype, Porcupine, labvanced, the LONI Pipeline, and BIDS tools like BIDS Manager-Pipeline, each addressing specific aspects of neuroimaging or electrophysiology data analysis. More recent efforts like ProMoAI [@Khourani2024] and POWL also target specific research workflow needs. While these tools provide significant value in their respective domains, a gap remains for a comprehensive, formally defined language that integrates the entire scientific study lifecycle from experimental design and data collection (including cognitive tests and questionnaires) to data formatting and analysis while being accessible to different stakeholders with or without specialized knowledge.
 
 - BPMN is a standard language to define business processes, widely used in healthcare, finance, and logistics to model workflows. BPMN provides 1) a graphical representation of workflows, allowing various stakeholders to understand and communicate complex processes, and 2) a formal XML-based semantics that enables the execution of BPMN models in various environments.
 
@@ -21,18 +32,11 @@ In scientific domains, several specialized workflow tools have been developed. F
 
 - Petri nets are a mathematical modeling language used to represent processes as bipartite graphs of places (states) and transitions (events).
 
-- UML Activity Diagrams
-
-
 - Domain specific: Nextflow, SBGN (Systems Biology Graphical Notation), Common Workflow Language (CWL) is an open standard for describing how to run command line tools and connect them to create workflows.
 - Apache Airflow helps with scheduling and monitoring complex DAGs, often in large data-processing contexts.
 - POWL
 - ProMoAI (Khourani2024)
 - BPMN-ChatBot (Kopke2024)
-- general
-    - make and taskfile
-    - CI pipelines
-    - UML activity diagrams
 - Pydra
 - NeuroHub
 - NeuroManager
