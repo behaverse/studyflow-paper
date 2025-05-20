@@ -9,3 +9,4 @@ format:
   pdf:
     fontsize: 10pt
     output-file: studyflow_modeler_paper.pdf
+    # pdf-engine: latexmk  # for inline SVG
