@@ -8,7 +8,7 @@ order: 1
 
 As we more and more rely on AI-driven approaches to scientific research, the need for reproducibility and replicability of scientific experiments has become increasingly essential for building trust in automated workflows.
 
-The cognitive science industry is no exception to this trend. Yet, most efforts are focused on formalizing data and analysis, while formalizing the workflows that generate the data and fits the models are often neglected. This is particularly problematic in cognitive science, where the complexity of the experiments and the diversity of the stakeholders make it difficult to communicate and share workflows effectively. A complete description of experiments requires both a data model and a workflow model [@Sehgal2011]. The data model describes the structure and semantics of the data, while the workflow model describes the process of generating and making sense of the data.
+The cognitive science industry is no exception to this trend. Yet, most efforts are focused on formalizing data and analysis, while formalizing the workflows that generate the data and fits the models are often neglected. This is particularly problematic in cognitive science, where the complexity of the experiments and the diversity of the stakeholders make it difficult to communicate and share workflows effectively. A complete description of experiments requires both a data model and a workflow model [@sehgal2011]. The data model describes the structure and semantics of the data, while the workflow model describes the process of generating and making sense of the data.
 
 
 ## Current approach and its limitations

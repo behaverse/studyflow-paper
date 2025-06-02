@@ -26,24 +26,36 @@ TODO: - attributes of the elements - input/outputs - branching and joining patte
 
 The basic elements of the studyflow are tailored to the specific needs scientific research and include:
 
+### Elements
+
+- Study: represents a complete research project, encompassing all phases from design to publication. A Study extends BPMN:Process and is a top-level container that contains a sequence of flow elements, including activities (tasks and subprocesses), events, and gateways.
+- Activity: represents work performed within a study. It is a generic term that represents both tasks and subprocesses.
+- Task: An atomic (indivisible) unit of work that cannot be broken down further.
+- SubProcess: A compound Activity that contains a set of other flow elements, allowing for hierarchical decomposition of complex processes. For example:
+
+    - DesignExperiment
+    - CollectData
+    - ValidateData
+    - TransformData
+    - ShareData
+
+### TODO
+
+- DataCatalog
+- DataStore and DataStoreReference
+- DataObject: available as long as the process instance is live. Possible to use multiple data objects in a process instance, to avoid long associations, e.g., "trial data [raw]", "trial data [processed]", etc. Supported annotations: input, output, multiple (e.g., a list).
+- DataAssociation: a link between data and other elements in the workflow, such as tasks or events. It's not part of the process flow.
+- Diagram Views: per audience (domain experts, technical experts)
+- styles: color coding signifies the importance or role of the elements, iconography represents the type of the element (e.g., a cogwheel for a task, a clock for a timer event), and labels provide additional context or instructions.
+
 {{< include partials/elements_table.qmd >}}
 
-### Processes
-
--   StudyStep: a generic step in the study workflow.
--   DesignExperiment
--   CollectData
--   ValidateData
--   TransformData
 
 ### Data Processing
 
 -   MapData
 -   ReduceData
 -   FilterData
-
-### Tabular data transformation
-
 -   TransformTable
 -   TransformTables
 
