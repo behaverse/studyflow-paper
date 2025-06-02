@@ -4,53 +4,48 @@ order: 1
 
 # Introduction
 
-## context; problem statement
+## Problem statement
 
-As we more and more rely on AI-driven approaches to scientific research, the need for reproducibility and replicability of scientific experiments has become increasingly essential for building trust in automated workflows.
+As we more and more rely on AI-driven approaches to scientific research, the need for reproducibility of scientific experiments has become increasingly essential for building trust in automated workflows.
 
-The cognitive science industry is no exception to this trend. Yet, most efforts are focused on formalizing data and analysis, while formalizing the workflows that generate the data and fits the models are often neglected. This is particularly problematic in cognitive science, where the complexity of the experiments and the diversity of the stakeholders make it difficult to communicate and share workflows effectively. A complete description of experiments requires both a data model and a workflow model [@sehgal2011]. The data model describes the structure and semantics of the data, while the workflow model describes the process of generating and making sense of the data.
+A complete description of experiments requires both a data model and a workflow model [@sehgal2011]. The cognitive science industry is no exception to this. Yet, most efforts are focused on standardized data and analysis of that data, while formalizing the processes that generate the data and follow with fitting models and communicating them are often neglected. The lack of process models is particularly problematic in cognitive science, where the complexity of the experiments and the diversity of the stakeholders make it difficult to communicate and share processes effectively. The data model describes the structure and semantics of the data, while the workflow model describes the process of generating and making sense of the data.
 
 
 ## Current approach and its limitations
 
-- current models of communication for scientific workflows are limiting not only general communication of science but reproducibility and replicability:
-    - either they are informal as in (textual description of methods in manuscripts) without any specific pattern to reproduce
-    - or in custom codes for which communication is limited and reproducibility requires a huge upfront effort.
-    - too much focus on data ended up in domain-specific non-adaptable workflows that only work for specific datasets. Recent AI paradigm shift requires more flexible and adaptable workflows that can handle multi-modal data and changing environments.
-    - The situation is even worse when the methods are described in a language that is not the native language of the reader or a programming language that is proprietary or outdated. Interpreting those texts and supporting diagrams also require specialized knowledge that is not always available to all the stakeholders (from researchers to funding agencies), making them inaccessible to non-experts and hindering the reproducibility of the experiments.
-- the main solution to these limitations are:
-    - box and arrow diagrams explains the workflow and the data in a more abstract way. These are limited because of the medium, or task-specific formats. There are efforts like UML in software engineering, or CONSORT in experimental sciences, but they are limited an inefficient to capture the complexity of modern data and softwares (e.g., MLOps). Given the fact that several stakeholders in scientific research each requires different kinds of communication, those diagramming are required to be separately tailored for each stakeholder; making it impossible to share via scientific communication outlets such as manuscripts. At the end they are just arbitrary post-hoc description of what happened during the scientific experiment, neither the texts nor the visual diagrams are executable for engineers to re-use.
-    - Checklists, and pre-defined questions (e.g., pre-registration) address the need for structured text descriptions but they do not directly addresses the need for exploration requires by any scientific workflows which requires keeping track of changes. Keeping history of such is are difficult because of the inherent unstructure-ness of natural language descriptions, and the way they are stored: formatted texts in PDF, DOCX, etc on data silos that will never change. Overall tools for reproducibility in science do not promote version control.
-    - Schemas, specific standards, domain ontologies, and custom packages for scientific workflows help to make decisions and designs machine-readable, but they do not capture the two different aspects of the modern science: domain-specific and technical. They are either tailored for domain experts (e.g., NiBabel), or technical experts (e.g., UML). The technical solutions are also often specific to specific use cases, e.g., MLOps or GitHub actions, and do not address the need for several levels of expertise that a scientific project requires, from funding agencies and public audiences, to software engineers and non-expert assistants who develop the tools, collect the data, and manage the process.
-    - Machine readable codes (source code, scripts, MLOps packages, CI codes, etc) make everything clear, but requires a lot effort to be readable and shareable which is a luxury for scientists whose main task is address research questions. They also often include terminologies and require environments which is not the task non-expert stakeholders like to communicate with: it is difficult to reproduce the same environment with respect to the computations needed or required third-party tools. Sharing those codes is also a limiting factor, as it requires IP management or open sourcing the project which is not always feasible for human-involved scientific projects.
+- current techniques to define and communicate scientific workflows are either informal as plain textual descriptions in manuscripts accompanied by basic figures, or are custom codes which require huge upfront effort (e.g., custom scripts, MLOps packages, CI codes). These formats for the workflows not easily shareable or executable, specifically given various stakeholders of experimental sciences (scientists, data collector, analyst, funding agencies, etc). The situation is even worse when the methods are described in a language that is not the native language of the reader or a programming language that is proprietary or outdated. Interpreting those texts and supporting diagrams also require specialized knowledge that is not always available to all the stakeholders, making them inaccessible to non-experts and hindering the reproducibility of the experiments.
 
-We can however leverage solutions to the domain-driven software engineering applied to the real-world scenarios that involve multiple stake-holder and require reproducibility and trust such as finance or healthcare and apply them to science.
+
+The current solutions to these limitations are:
+
+- **Box and arrow figures** explains the workflow and the data in a more abstract way. These are limited because of the medium, or task-specific formats. There are efforts like UML in software engineering, or CONSORT in experimental sciences, but they are limited an inefficient to capture the complexity of modern data and softwares (e.g., MLOps). Given the fact that several stakeholders in scientific research each requires different kinds of communication, those diagramming are required to be separately tailored for each stakeholder; making it impossible to share via common scientific communication outlets such as manuscripts. At the end they are just arbitrary description of what actually happened during the scientific experiment, neither the texts nor the visual diagrams are executable for engineers to re-use.
+- **Checklists**, and pre-defined forms (e.g., pre-registration) address the need for structured text descriptions but they do not directly addresses the need for exploration required by rigorous science (e.g., by keeping track of changes or promoting version control). Keeping history is difficult because of the inherent unstructured-ness of natural language descriptions, and the way they are stored: formatted texts in proprietary PDF, DOCX, and on data silos that will never change.
+- **Schemas, standards, ontologies, and custom packages** make decisions and designs machine-readable, but they do not capture the two different aspects of the modern science: domain-specific (as in asking the right question) and technical (as in using the right software architecture). They are either tailored for domain experts (e.g., NiBabel), or technical experts (e.g., UML). The technical solutions are also often specific to particular use cases, e.g., MLOps or GitHub actions, and do not address the need for several levels of expertise that a scientific project requires, from funding agencies and public audiences, to software engineers and non-expert assistants who develop the tools, collect the data, and manage the process. Recent efforts in cognitive science have mainly focused on data models, such as BIDS [@gorgolewski2016bids] and Psych-DS [@REF], which provide a structured way to describe the data collected during experiments. However, data models do not address the need for an end-to-end description of the workflows that generate, analyze, and report the data. Recent paradigm shifts in how data is managed (@REF) and how software is implemented (e.g., @REF) requires more flexible and adaptable workflows that can handle multi-modal data and changing environments. 
+- **Codes** (source code, scripts, MLOps packages, CI jobs, etc) make pipeline definitions clear, but requires a lot of effort to be readable and shareable which is a luxury for scientists whose main task is address research questions. They also often include terminologies and require environments which are not tailored for other non-expert stakeholders they like to communicate with. Sharing those codes is also a limiting factor, as it requires intellectual property management or open sourcing the project which is not always feasible for human-involved scientific projects.
+
+We can however leverage practices in the disciplines that require trust (e.g., finance or healthcare) and apply them to the experimental science.
 
 
 ## Our contributions
 
-Here we address two problems: (1) a formal way to describe scientific studies that can be interpreted and executed by both humans (at different levels of expertise) and machines, and (2) a proof-of-concept interface to model and run their experiments without the need for specialized knowledge.
+Our contribution is two-fold:
+- A formal way to describe scientific studies that can be interpreted and executed by both humans (at different levels of expertise) and machines.
+- A proof-of-concept interface to model and run the experiments without the need for specialized knowledge.
 
-To this end we propose Studyflow, a formal language to describe cognitive experiments, and Studyflow Modeler, a tool to model and run cognitive experiments using the Studyflow language.
+To this end we propose Studyflow, a formal language to describe cognitive experiments, and Studyflow Modeler, a tool to design and test cognitive experiments using the Studyflow language.
 
-Studyflow is based on BPMN [Business Process Model and Notation; @white2004introduction], a standard for business process modeling that is widely used in industry. BPMN is a graphical language that allows to formally describe processes, making them easy to understand and execute. Studyflow extends BPMN with additional elements to describe cognitive experiments, such as elements for data collection, data transformation, and other MLOps steps.
+Studyflow is based on BPMN [Business Process Model and Notation; @white2004introduction], a standard for process modeling that is widely used in industry. BPMN is a graphical language to formally describe workflows, making them easy to understand and execute. Studyflow extends BPMN with additional elements to describe scientific experiments, such as elements for data collection, data transformation, and other steps in a study.
 
+Studyflow Modeler is a web-based tool that demonstrates how to design and test cognitive experiments using the Studyflow language. It provides a graphical interface to create and edit Studyflow models, as well as a simulator to run the workflow before deployment and visualize the results. The tool is designed to be easy to use, even for domain experts with no technical experience.
 
 
 ## Benefits of Using Studyflow for Scientific Research Workflows
 
-- data models and dataset are not sufficient to reproduce the experiments
-
-Studyflow extends BPMN with domain-specific elements for scientific research including cognitive tests, questionnaires, instructions, and specialized datasets that align with standards like BDM (Behaverse Data Model), BIDS, and Psych-DS.
-
-Using studyflow to model your scientific research workflows will:
-
-- Help all stakeholders understand complex research protocols using easily readable diagrams that follow BPMN 2.0 standards with domain-specific extensions
-- Provide a natural basis for collaboration between researchers, ethics committees, data scientists, software engineers, and other stakeholders through coherent visual representation
-- Reduce the effort and risk of experimental design through graphical decomposition of research workflows into well-defined activities, events, and gateways
-- Allow study protocols to be defined simply and unambiguously using a formal machine-readable format that supports version control
-- Simplify reproducibility of studies using specifications that can be automatically validated, shared, and executed
-- Provide a structured context for integrating data processing, analysis, and MLOps components into your research workflow
-- Support the FAIR principles by making experimental designs findable, accessible, interoperable, and reusable
-- Enable the development of a library of reusable research components across cognitive tests, questionnaires, instructions, and data processing pipelines
-
+- Data models are not sufficient to reproduce the experiments. Studyflow extends BPMN with domain-specific elements for scientific data and activities including cognitive tests, questionnaires, instructions, and specialized datasets that align with standards like BDM (Behaverse Data Model), BIDS, and Psych-DS.
+- Help all stakeholders understand complex research protocols using easily readable diagrams.
+- Provide a natural basis for collaboration between researchers, ethics committees, data scientists, software engineers, and other stakeholders through a coherent visual representation.
+- Reduce the effort and risk of experimental design through graphical decomposition of research workflows into well-defined activities, events, and gateways, and simulation of the workflow before deployment.
+- Allow study protocols to be defined simply and unambiguously using a formal machine-readable format that supports version control.
+- Simplify reproducibility of studies using specifications that can be automatically validated, shared, and executed.
+- Support the FAIR principles by making processes such as experimental protocols findable, accessible, interoperable, and reusable.
+- Enable the development of a library of reusable research components across cognitive tests, questionnaires, instructions, and data processing pipelines.
