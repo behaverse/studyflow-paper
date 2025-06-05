@@ -50,6 +50,23 @@ The basic elements of the studyflow are tailored to the specific needs scientifi
 
 {{< include partials/elements_table.qmd >}}
 
+### Events
+
+Events represent specific triggers or moments that affect the flow of the study. They can be categorized into different types, such as:
+
+- StartEvent: marks the beginning of a study or sub-process.
+- EndEvent: marks the completion of a study or sub-process.
+- IntermediateEvent: represents an event that occurs during the process, such as a timer or message event (see below).
+- BoundaryEvent: attached to an activity to handle exceptions or interruptions, such as a cancellation or error event.
+
+More specific event types include:
+
+- ErrorEvent: represents an error that occurs during the process, such as a data validation error or a system failure.
+- TimerEvent: represents a time-based trigger. For example, a timer event can be used to set the duration of a stimulus in a cognitive test or to enforce timeout for trials.
+- MessageEvent: represents a communication event, such as receiving data from an external system or input from another participant.
+- SignalEvent: a signal that can be sent or received, such as a notification or alert. Unlike message events, there is no specific receiver for a signal event, and it can be broadcast to multiple recipients.
+- CompensationEvent: represents a compensation action that is triggered to undo the effects of a previous action, such as rolling back a transaction or compensating for an error.
+- ConditionalEvent: represents a condition that must be met for the process to continue, such as completion of a task or availability of data.
 
 ### Data Processing
 

@@ -7,11 +7,20 @@ order: 4
 
 ## Use Case: CONSORT
 
-CONSORT is a checklist and flow diagram for reporting randomized controlled trials (RCTs). It is designed to improve the quality of reporting in RCTs and to help readers understand the design of RCTs. Studyflow can be used to create a CONSORT flow in a more concise and readable way than traditional box-and-arrow along with text descriptions. Additionally, since the studyflow diagrams are machine-readable, they can also be used to simulate the RCTs (see supplementary materials for a simulation video).
+CONSORT is a checklist and flow diagram for reporting randomized controlled trials (RCTs). It is designed to improve the quality of reporting in RCTs and to help readers understand the design of experiments. Studyflow diagrams can be used to create a CONSORT flow in a more concise and readable format than traditional box-and-arrow figures. Additionally, since the studyflow diagrams are machine-readable, they can also be used to simulate the RCTs (see supplementary materials for a simulation video).
 
-Figure X shows an example of CONSORT flow diagram created in studyflow language. It reads from top to bottom, and the the default format for CONSORT is shown on the right path of diagram. On the left path, the diagram uses more advanced and concise elements to describe the the same flow using error handling events.
+@fig-consort compares traditional CONSORT diagram against the same CONSORT created in studyflow language. The studyflow diagram (Panel B) reads from top to bottom and uses similar text format as in the original CONSORT. On Panel C, the diagram uses more concise elements accompanied with iconography and events to describe the the same flow using BPMN error handling events. Boundary error events are used to describe the flow of participants through the trial, and the diagram is more compact and easier to read than the original CONSORT diagram. The studyflow diagram can also include additional metadata such as colors, checklists, and other elements to enhance readability and understanding. Since the metadata is machine-readable, the diagram can be used to generate reports or simulate the flow of participants through the experiment.
 
-![Example CONSORT](/assets/figures/consort.png)
+::: {#fig-consort layout-ncol=1}
+
+![Original CONSORT](/assets/figures/consort.png)
+
+![CONSORT in minimally applied studyflow format](/assets/figures/consort.png)
+
+![Revised CONSORT using studyflow elements](/assets/figures/consort.png)
+
+:::
+
 
 ## Use Case: Checklists
 
