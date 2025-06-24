@@ -7,9 +7,13 @@ _manuscript/
 *.egg-info
 
 0_article_files/
+4_use_cases_files/
+4_use_cases.html
 7_grammar_files/
+
 _freeze/
 
 .DS_Store
 *.drawio.bkp
 *.drawio.dtmp
+
