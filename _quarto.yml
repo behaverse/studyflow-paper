@@ -1,8 +1,11 @@
 project:
-  type: default
+  type: manuscript
   output-dir: _manuscript/
   render:
     - 0_frontmatter.qmd
+
+manuscript: 
+  article: 0_frontmatter.qmd
 
 format:
   html: default
