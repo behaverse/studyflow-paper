@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Behaverse Studyflow Modeler Paper in Quarto"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [ "quarto-cli>=1.7.31,<2", "jupyter>=1.1.1,<2"]
+dependencies = [
+    "quarto-cli>=1.7.31,<2",
+    "jupyter>=1.1.1,<2"]
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
@@ -13,6 +15,4 @@ platforms = ["osx-arm64"]
 [tool.pixi.tasks]
 
 [tool.pixi.dependencies]
-librsvg = ">=2.58.4,<3"
-
-[pypi-dependencies]
+# librsvg = ">=2.58.4,<3"
