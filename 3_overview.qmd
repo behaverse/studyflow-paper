@@ -39,6 +39,28 @@ The basic elements of the studyflow are tailored to the specific needs scientifi
     - TransformData
     - ShareData
 
+### Time-sensitive elements
+
+Experimental workflows often involve time-related activities and constraints. The visual representations of scientific workflows aso require elements along the time axis such as timelines, temporal dependencies, and deadlines.
+
+BPMN already provides some support for temporal modeling, such as timer events and triggers, which can be used to model the timing of tasks and events within a workflow. However, there is no direct or native way to represent duration of the activities, start and end times, or progress of the tasks in BPMN. This is a significant limitation when modeling scientific workflows where time is a key factor in the design and execution of the study, such as in showing trial timelines, standard flow figures (e.g., SPIRIT), or longitudinal studies .
+
+To address this, Studyflow extends BPMN elements with properties that allow modeling temporal aspects of the activities. These additional properties are not part of the BPMN standard but are essential for scientific workflows. They can be represented as attributes of the activities or as separate elements that are linked to the activities. These properties include:
+
+- Start time: The time when specific activity is to begin.
+- End time: The time when specific activity is to end.
+- Progress: The current status of an activity, indicating how much of the activity has been completed.
+- Resource allocation: The resources assigned to an activity, such as personnel, equipment, or budget. This is represented as lanes or pools in BPMN, which can be used to show the roles and responsibilities of different stakeholders in the workflow.
+
+
+Studyflow uses these additional properties to export the diagram to a Gantt view.
+
+
+### TODO: Checklists
+
+One common way to ensure that all necessary steps are completed in a scientific workflow is to use checklists. Checklists can be used to ensure that all required tasks are completed before moving on to the next step and reporting the scientific results. See for example, the SPIRIT checklist for clinical trial (and see the section on the use cases).
+
+
 ### TODO
 
 - DataCatalog
