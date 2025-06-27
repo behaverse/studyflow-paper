@@ -47,14 +47,21 @@ BPMN already provides some support for temporal modeling, such as timer events a
 
 To address this, Studyflow extends BPMN elements with properties that allow modeling temporal aspects of the activities. These additional properties are not part of the BPMN standard but are essential for scientific workflows. They can be represented as attributes of the activities or as separate elements that are linked to the activities. These properties include:
 
-- Start time: The time when specific activity is to begin.
-- End time: The time when specific activity is to end.
-- Progress: The current status of an activity, indicating how much of the activity has been completed.
-- Resource allocation: The resources assigned to an activity, such as personnel, equipment, or budget. This is represented as lanes or pools in BPMN, which can be used to show the roles and responsibilities of different stakeholders in the workflow.
+- Start/end time: The time when specific activity is to begin/end.
+    - Duration: The total time allocated for an activity, which can be calculated as the difference between the start and end times.
+- Progress: The current status of an activity, indicating how much of the activity has been completed. Progress can be represented as percentage (e.g., 50%) or as a label (e.g., "In Progress", "Completed", etc.).
+- Resource allocation: The resources assigned to an activity, such as personnel, equipment, or budget. This is represented as lanes or pools in BPMN.
 
 
-Studyflow uses these additional properties to export the diagram to a Gantt view.
+Studyflow uses these additional properties to export the diagram to a Gantt-like view.
 
+
+Notes:
+- under the hood, these temporal properties are converted into BPMN timer events and conditions, so the end result is a BPMN diagram that can be executed by a BPMN engine. The start_time and end_time are represented as timer events that trigger the respectively start and end of the activity. Progress is represented as a condition that checks the status of the activity, and resources are represented as lanes, pools, or data objects.
+- These properties can be used to generate Gantt charts, which are commonly used in project management to visualize the timeline of activities and their dependencies. Gantt charts can help researchers and stakeholders understand the overall scheduling of the study, e.g., trial timelines or longitudinal studies.
+- Milestones (as in Gantt) are represented as special case where start and end times of an activity are the same. They can be used to mark significant points in the study, such as the completion of a block of trials.
+- Hierarchical structure of tasks in Gantt can be represented by using subprocesses in BPMN. Each subprocess can have its own set of tasks and events, allowing for a detailed breakdown of the study.
+- To manage temporal dependencies, the default BPMN sequence flow can be used to represent the order of activities.
 
 ### TODO: Checklists
 
