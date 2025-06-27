@@ -5,15 +5,20 @@ Studyflow Modeler Paper
 
 ## Setup
 
-You need to install the following dependencies:
-- [Quarto](https://quarto.org/docs/get-started/installation/)
+You can use [uv](https://docs.astral.sh/uv/) to automatically set up the environment and generate the pdf file:
 
-If you don't have them installed, you can use uv:
 ```
 uv run quarto render . --to pdf
 ```
 
 The output will be saved as `_manuscript/studyflow_modeler_paper.pdf`.
+
+
+To preview the paper in HTML format, you can run:
+
+```
+uv run quarto preview .
+```
 
 ## JOSS
 
