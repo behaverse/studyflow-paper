@@ -39,9 +39,20 @@ The basic elements of the studyflow are tailored to the specific needs scientifi
     - TransformData
     - ShareData
 
+### Additional elements for guidelines
+
+In order to reproduce common diagrams and figures in Studyflow, we have reviewed standard guidelines about experimental sciences (see supplementary materials). We identified two artifacts that are commonly recommended in the guidelines to report experiments: timelines and checklists. 
+
+Timelines provide temporal ordering of activities and events (e.g., trial timelines, CONSORT, SPIRIT, etc.) which can be effectively modeled using timer events in BPMN, and visualized as Gantt charts.
+
+Checklists are a list of tasks to ensure that important steps are not overlooked and to properly report the protocols. Often times, checklists cover the whole study, but they can also be attributed to specific activities within a workflow. For example, some guidelines provide checklists for specific steps such as "recruitment", "data collection", or "analysis".
+
+Studyflow uses a standard BPMN pattern to define timelines (Figure X) and checklists (Figure Y). Moreover, Studyflow provides templates for checklists in standard guidelines available in the literature. To visualize the design patterns of timelines (as a Gantt chart) and checklists (as a list) according to the need of the audience, Studyflow automatically identifies those patterns in the BPMN XML codes, and provides additional views for specific artifacts. With this design, the workflow of the study remains compatible with BPMN tools while providing additional visualization profiles common in experimental sciences. The following sections describe these elements in more detail.
+
+
 ### Time-sensitive elements
 
-Experimental workflows often involve time-related activities and constraints. The visual representations of scientific workflows aso require elements along the time axis such as timelines, temporal dependencies, and deadlines.
+Experimental workflows often involve time-related activities and constraints. The visual representations of activities also require elements along the time axis such as timelines, temporal dependencies, and deadlines.
 
 BPMN already provides some support for temporal modeling, such as timer events and triggers, which can be used to model the timing of tasks and events within a workflow. However, there is no direct or native way to represent duration of the activities, start and end times, or progress of the tasks in BPMN. This is a significant limitation when modeling scientific workflows where time is a key factor in the design and execution of the study, such as in showing trial timelines, standard flow figures (e.g., SPIRIT), or longitudinal studies .
 
@@ -81,7 +92,6 @@ To make checklists and additional metadata accessible, all the data is stored in
 - DataStore and DataStoreReference
 - DataObject: available as long as the process instance is live. Possible to use multiple data objects in a process instance, to avoid long associations, e.g., "trial data [raw]", "trial data [processed]", etc. Supported annotations: input, output, multiple (e.g., a list).
 - DataAssociation: a link between data and other elements in the workflow, such as tasks or events. It's not part of the process flow.
-- Diagram Views: per audience (domain experts, technical experts)
 - styles: color coding signifies the importance or role of the elements, iconography represents the type of the element (e.g., a cogwheel for a task, a clock for a timer event), and labels provide additional context or instructions.
 
 {{< include partials/elements_table.qmd >}}
