@@ -4,6 +4,8 @@ order: 1
 
 # Introduction
 
+Trusting science at large requires rigor and reproducibility; and reproducibility (hence clear communication) has became one of the cornerstones of scientific experiments. To this end, many scientific projects rely on detailed description of experimental design and protocols in manuscripts, visual diagrams, standard guidelines to report results, and more-or-less standard tools and softwares to provide enough detailed description to reproduce the observed results of experiments.
+
 ## Problem statement
 
 As we more and more rely on AI-driven approaches to scientific research, the need for reproducibility of scientific experiments has become increasingly essential for building trust in automated workflows.
