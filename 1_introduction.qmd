@@ -41,9 +41,11 @@ Studyflow is based on BPMN [Business Process Model and Notation; @white2004intro
 Studyflow Modeler is a web-based tool that demonstrates how to design and test cognitive experiments using the Studyflow language. It provides a graphical interface to create and edit Studyflow models, as well as a simulator to run the workflow before deployment and visualize the results. The tool is designed to be easy to use, even for domain experts with no technical experience.
 
 
-## Benefits of Using Studyflow for Scientific Research Workflows
+## Benefits
 
-- Data models are not sufficient to reproduce the experiments. Studyflow extends BPMN with domain-specific elements for scientific data and activities including cognitive tests, questionnaires, instructions, and specialized datasets that align with standards like BDM (Behaverse Data Model), BIDS, and Psych-DS.
+Benefits of using studyflow for scientific research workflows include:
+
+- Data models are not sufficient to reproduce the experiments. Full reproducibility requires a process model alongside the data model. Studyflow extends BPMN with domain-specific elements for scientific data and activities including cognitive tests, questionnaires, instructions, and specialized datasets that align with standards like BDM (Behaverse Data Model), BIDS, and Psych-DS.
 - Help all stakeholders understand complex research protocols using easily readable diagrams.
 - Provide a natural basis for collaboration between researchers, ethics committees, data scientists, software engineers, and other stakeholders through a coherent visual representation.
 - Reduce the effort and risk of experimental design through graphical decomposition of research workflows into well-defined activities, events, and gateways, and simulation of the workflow before deployment.

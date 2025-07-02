@@ -1,0 +1,6 @@
+
+### Reporting Guidelines
+
+In order to reproduce common diagrams and figures in Studyflow, we have reviewed standard guidelines about experimental sciences. We identified two artifacts that are commonly recommended in the guidelines to report experiments: timelines and checklists. 
+
+- Standard BPMN patterns can be used to define timelines (Figure X) and checklists (Figure Y). Moreover, Studyflow provides templates for checklists in standard guidelines available in the literature. To visualize the design patterns of timelines (as a Gantt chart) and checklists (as a list) according to the need of the audience, Studyflow automatically identifies those patterns in the BPMN XML codes, and provides additional views for specific artifacts. With this design, the workflow of the study remains compatible with BPMN tools while providing additional visualization profiles common in experimental sciences. The following sections describe these elements in more detail.

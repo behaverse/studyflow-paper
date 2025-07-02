@@ -1,0 +1,3 @@
+### Styles and Iconography
+
+- styles: color coding signifies the importance or role of the elements, iconography represents the type of the element (e.g., a cogwheel for a task, a clock for a timer event), and labels provide additional context or instructions.

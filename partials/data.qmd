@@ -1,0 +1,14 @@
+### Data
+
+- DataCatalog
+- DataStore and DataStoreReference
+- DataObject: available as long as the process instance is live. Possible to use multiple data objects in a process instance, to avoid long associations, e.g., "trial data [raw]", "trial data [processed]", etc. Supported annotations: input, output, multiple (e.g., a list).
+- DataAssociation: a link between data and other elements in the workflow, such as tasks or events. It's not part of the process flow.
+
+### Data Processing
+
+-   MapData
+-   ReduceData
+-   FilterData
+-   TransformTable
+-   TransformTables

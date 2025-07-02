@@ -1,0 +1,14 @@
+
+### Checklists
+
+- Checklists are a list of tasks to ensure that important steps are not overlooked and to properly report the protocols. Often times, checklists cover the whole study, but they can also be attributed to specific activities within a workflow. For example, some guidelines provide checklists for specific steps such as "recruitment", "data collection", or "analysis".
+
+- checklists are common tools to report scientific results in a consistent and transparent manner; it is important to ensure that all necessary steps are completed in a scientific workflow. These standards usually provide checklists that outline the key elements that should be included in the report, such as study design, data collection, analysis, and reporting of results. Checklists in established guidelines, and standards for reporting, includes CONSORT for clinical trials, PRISMA for systematic reviews, CARE for case reports, and SPIRIT for reporting the protocol of randomized trials (see Table X for more).
+
+- To facilitate the use of these checklists, Studyflow introduces a machine-readble **Checklist** element that can be attached to any activity or subprocess.
+
+- The Checklist element contains a set of items that must be completed before the activity can proceed. Each item in the checklist can be marked as complete or incomplete, and the overall status of the checklist can be used to determine whether the activity can continue. Figure X shows an example of a checklist attached to a "Data Collection" activity, which includes items such as "Obtain informed consent", "Collect demographic data", and "Administer cognitive tests". In this example, the checklist can be used to ensure that all necessary steps of a guideline are completed before the data collection can proceed.
+
+To make checklists compatible with existing BPMN tools, the Studyflow checklist elements are represented as attributes of the elements. This allows the checklist to be visually distinguished from other tasks in the workflow, while still being semantically compatible with standard BPMN tools. Moreover, studyflow modeler tool provides templates for common checklists in experimental science, such as CONSORT, PRISMA, CARE, and SPIRIT, which can be applied to the elements of a workflow diagram.
+
+To make checklists and additional metadata accessible, all the data is stored in a diagram in a machine-readable way, hence shared once the diagram is published. This allows for easy integration with other tools, such as version control, analysis pipelines, and reporting tools. The checklist can be exported in a standard format (e.g., JSON, Markdown todo list) that can be easily consumed by other tools for seamless integration into the research workflow.

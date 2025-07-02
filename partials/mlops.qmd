@@ -1,0 +1,11 @@
+### MLOps
+
+-   TrainModel
+-   FineTuneModel
+-   EvaluateModel
+-   BenchmarkModel
+-   VersionData
+-   VersionModel
+-   DeployModel
+-   PublishModel
+-   MonitorModel

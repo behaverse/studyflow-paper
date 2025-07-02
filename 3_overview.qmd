@@ -22,114 +22,35 @@ Studyflow extends this formulation by introducing additional type hierarchies an
 
 TODO: - attributes of the elements - input/outputs - branching and joining patterns - grouping mechanisms: - subprocesses (can be another graph G) - groups of flow objects (paths in the G) - bpmn2:group -\> visual annotation
 
-## Studyflow elements
+## Elements
 
 The basic elements of the studyflow are tailored to the specific needs scientific research and include:
 
-### Elements
-
 - Study: represents a complete research project, encompassing all phases from design to publication. A Study extends BPMN:Process and is a top-level container that contains a sequence of flow elements, including activities (tasks and subprocesses), events, and gateways.
 - Activity: represents work performed within a study. It is a generic term that represents both tasks and subprocesses.
-- Task: An atomic (indivisible) unit of work that cannot be broken down further.
-- SubProcess: A compound Activity that contains a set of other flow elements, allowing for hierarchical decomposition of complex processes. For example:
+    - Task: An atomic (indivisible) unit of work that cannot be broken down further.
+    - SubProcess: A compound Activity that contains a set of other flow elements, allowing for hierarchical decomposition of complex processes. For example: DesignExperiment, CollectData, ValidateData, TransformData, ShareData
 
-    - DesignExperiment
-    - CollectData
-    - ValidateData
-    - TransformData
-    - ShareData
+<!-- Elements table -->
+{{< include partials/elements.qmd >}}
 
-### Additional elements for guidelines
+<!-- guideline elements -->
+{{< include partials/guidelines.qmd >}}
 
-In order to reproduce common diagrams and figures in Studyflow, we have reviewed standard guidelines about experimental sciences (see supplementary materials). We identified two artifacts that are commonly recommended in the guidelines to report experiments: timelines and checklists. 
+<!-- Timelines -->
+{{< include partials/timelines.qmd >}}
 
-Timelines provide temporal ordering of activities and events (e.g., trial timelines, CONSORT, SPIRIT, etc.) which can be effectively modeled using timer events in BPMN, and visualized as Gantt charts.
+<!-- Checklists -->
+{{< include partials/checklists.qmd >}}
 
-Checklists are a list of tasks to ensure that important steps are not overlooked and to properly report the protocols. Often times, checklists cover the whole study, but they can also be attributed to specific activities within a workflow. For example, some guidelines provide checklists for specific steps such as "recruitment", "data collection", or "analysis".
+<!-- data elements -->
+{{< include partials/data.qmd >}}
 
-Studyflow uses a standard BPMN pattern to define timelines (Figure X) and checklists (Figure Y). Moreover, Studyflow provides templates for checklists in standard guidelines available in the literature. To visualize the design patterns of timelines (as a Gantt chart) and checklists (as a list) according to the need of the audience, Studyflow automatically identifies those patterns in the BPMN XML codes, and provides additional views for specific artifacts. With this design, the workflow of the study remains compatible with BPMN tools while providing additional visualization profiles common in experimental sciences. The following sections describe these elements in more detail.
+<!-- Element styles -->
+{{< include partials/styles.qmd >}}
 
+<!-- events -->
+{{< include partials/events.qmd >}}
 
-### Time-sensitive elements
-
-Experimental workflows often involve time-related activities and constraints. The visual representations of activities also require elements along the time axis such as timelines, temporal dependencies, and deadlines.
-
-BPMN already provides some support for temporal modeling, such as timer events and triggers, which can be used to model the timing of tasks and events within a workflow. However, there is no direct or native way to represent duration of the activities, start and end times, or progress of the tasks in BPMN. This is a significant limitation when modeling scientific workflows where time is a key factor in the design and execution of the study, such as in showing trial timelines, standard flow figures (e.g., SPIRIT), or longitudinal studies .
-
-To address this, Studyflow extends BPMN elements with properties that allow modeling temporal aspects of the activities. These additional properties are not part of the BPMN standard but are essential for scientific workflows. They can be represented as attributes of the activities or as separate elements that are linked to the activities. These properties include:
-
-- Start/end time: The time when specific activity is to begin/end.
-    - Duration: The total time allocated for an activity, which can be calculated as the difference between the start and end times.
-- Progress: The current status of an activity, indicating how much of the activity has been completed. Progress can be represented as percentage (e.g., 50%) or as a label (e.g., "In Progress", "Completed", etc.).
-- Resource allocation: The resources assigned to an activity, such as personnel, equipment, or budget. This is represented as lanes or pools in BPMN.
-
-
-Studyflow uses these additional properties to export the diagram to a Gantt-like view.
-
-
-Notes:
-- under the hood, these temporal properties are converted into BPMN timer events and conditions, so the end result is a BPMN diagram that can be executed by a BPMN engine. The start_time and end_time are represented as timer events that trigger the respectively start and end of the activity. Progress is represented as a condition that checks the status of the activity, and resources are represented as lanes, pools, or data objects.
-- These properties can be used to generate Gantt charts, which are commonly used in project management to visualize the timeline of activities and their dependencies. Gantt charts can help researchers and stakeholders understand the overall scheduling of the study, e.g., trial timelines or longitudinal studies.
-- Milestones (as in Gantt) are represented as special case where start and end times of an activity are the same. They can be used to mark significant points in the study, such as the completion of a block of trials.
-- Hierarchical structure of tasks in Gantt can be represented by using subprocesses in BPMN. Each subprocess can have its own set of tasks and events, allowing for a detailed breakdown of the study.
-- To manage temporal dependencies, the default BPMN sequence flow can be used to represent the order of activities.
-
-### Checklists
-
-In liu to report scientific results in a consistent and transparent manner, it is important to ensure that all necessary steps are completed in a scientific workflow. This includes following established guidelines and standards for reporting, such as CONSORT for clinical trials, PRISMA for systematic reviews, CARE for case reports, and SPIRIT for reporting the protocol of randomized trials (see Table X for more). These standards usually provide checklists that outline the key elements that should be included in the report, such as study design, data collection, analysis, and reporting of results.
-
-
-To facilitate the use of these checklists, Studyflow introduces a machine-readble **Checklist** element that can be attached to any activity or subprocess. The Checklist element contains a set of items that must be completed before the activity can proceed. Each item in the checklist can be marked as complete or incomplete, and the overall status of the checklist can be used to determine whether the activity can continue. Figure X shows an example of a checklist attached to a "Data Collection" activity, which includes items such as "Obtain informed consent", "Collect demographic data", and "Administer cognitive tests". In this example, the checklist can be used to ensure that all necessary steps of a guideline are completed before the data collection can proceed.
-
-To make checklists compatible with existing BPMN tools, the Studyflow checklist elements are represented as attributes of the elements. This allows the checklist to be visually distinguished from other tasks in the workflow, while still being semantically compatible with standard BPMN tools. Moreover, studyflow modeler tool provides templates for common checklists in experimental science, such as CONSORT, PRISMA, CARE, and SPIRIT, which can be applied to the elements of a workflow diagram.
-
-To make checklists and additional metadata accessible, all the data is stored in a diagram in a machine-readable way, hence shared once the diagram is published. This allows for easy integration with other tools, such as version control, analysis pipelines, and reporting tools. The checklist can be exported in a standard format (e.g., JSON, Markdown todo list) that can be easily consumed by other tools for seamless integration into the research workflow.
-
-
-### TODO
-
-- DataCatalog
-- DataStore and DataStoreReference
-- DataObject: available as long as the process instance is live. Possible to use multiple data objects in a process instance, to avoid long associations, e.g., "trial data [raw]", "trial data [processed]", etc. Supported annotations: input, output, multiple (e.g., a list).
-- DataAssociation: a link between data and other elements in the workflow, such as tasks or events. It's not part of the process flow.
-- styles: color coding signifies the importance or role of the elements, iconography represents the type of the element (e.g., a cogwheel for a task, a clock for a timer event), and labels provide additional context or instructions.
-
-{{< include partials/elements_table.qmd >}}
-
-### Events
-
-Events represent specific triggers or moments that affect the flow of the study. They can be categorized into different types, such as:
-
-- StartEvent: marks the beginning of a study or sub-process.
-- EndEvent: marks the completion of a study or sub-process.
-- IntermediateEvent: represents an event that occurs during the process, such as a timer or message event (see below).
-- BoundaryEvent: attached to an activity to handle exceptions or interruptions, such as a cancellation or error event.
-
-More specific event types include:
-
-- ErrorEvent: represents an error that occurs during the process, such as a data validation error or a system failure.
-- TimerEvent: represents a time-based trigger. For example, a timer event can be used to set the duration of a stimulus in a cognitive test or to enforce timeout for trials.
-- MessageEvent: represents a communication event, such as receiving data from an external system or input from another participant.
-- SignalEvent: a signal that can be sent or received, such as a notification or alert. Unlike message events, there is no specific receiver for a signal event, and it can be broadcast to multiple recipients.
-- CompensationEvent: represents a compensation action that is triggered to undo the effects of a previous action, such as rolling back a transaction or compensating for an error.
-- ConditionalEvent: represents a condition that must be met for the process to continue, such as completion of a task or availability of data.
-
-### Data Processing
-
--   MapData
--   ReduceData
--   FilterData
--   TransformTable
--   TransformTables
-
-### MLOps
-
--   TrainModel
--   FineTuneModel
--   EvaluateModel
--   BenchmarkModel
--   VersionData
--   VersionModel
--   DeployModel
--   PublishModel
--   MonitorModel
+<!-- MLOps -->
+{{< include partials/mlops.qmd >}}
