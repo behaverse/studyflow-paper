@@ -74,37 +74,43 @@ Event             ::= StartEvent | EndEvent
 StartEvent        ::= 'StartEvent' Identifier Attribute*
 EndEvent          ::= 'EndEvent' Identifier Attribute*
 
-Activity          ::= 'Activity' Identifier ActivityAttribute* Choreography?
-ActivityAttribute ::= ActivityType | Attribute | DataTransformation
-ActivityType      ::= '@type' ('CognitiveTest' | 'Questionnaire' | 'Instruction' | 'Rest' | 'VideoGame' | 'Script' | 'Manual' | 'DataTransformation')
+Activity          ::= 'Activity' Identifier ActivityAttributeList Choreography?
+ActivityAttributeList ::= ActivityType ActivityAttribute*
+ActivityType      ::= '@type' ('CognitiveTest' | 'Questionnaire' | 'Instruction' | 'Rest' | 'VideoGame' | 'Script' | 'Manual')
+ActivityAttribute ::= Attribute | DataOperation
 
-Choreography     ::= 'choreography' Attribute* ParticipantList InitiatingParticipant?
+Choreography     ::= 'Choreography' Attribute* ParticipantRef+ InitiatingParticipant? MessageFlowList
+ParticipantRef   ::= ProcessRef
+InitiatingParticipant ::= ParticipantRef
+MessageFlowList  ::= MessageFlow*
+MessageFlow      ::= 'MessageFlow' Identifier Attribute* ParticipantRef '→' ParticipantRef
 
+/* Gateway definitions */
 Gateway          ::= 'Gateway' Identifier GatewayAttribute*
 GatewayAttribute ::= GatewayType | Attribute
 GatewayType      ::= '@type' ('Random' | 'Exclusive' | 'Complex')
 SequenceFlow     ::= 'SequenceFlow' Identifier Attribute* NodeRef '→' NodeRef
-MessageFlowList  ::= ('messageFlow' Identifier Attribute* ParticipantRef '→' ParticipantRef)*
 
-Attribute             ::= Identifier Value
-ProcessRef            ::= Identifier
-NodeRef               ::= Identifier
-ParticipantRef        ::= ProcessRef
-InitiatingParticipant ::= ParticipantRef
-ParticipantList       ::= Identifier (Identifier)*
-Identifier ::= Letter (Letter | Digit | '_')*
-Value      ::= String | Number | Boolean | Identifier
-Number     ::= '-'? Digit+ ('.' Digit+)?
+/* Common definitions */
+Attribute  ::= Identifier Value
+ProcessRef ::= Identifier
+NodeRef    ::= Identifier
+
+/* Basic value types */
 Boolean    ::= 'true' | 'false'
-String     ::= '"' /* ... any character except " ... */ '"'
-Letter     ::= [A-Za-z]
-Digit      ::= [0-9]
+Value      ::= String | Number | Boolean | Identifier
+Number     ::= '-'? ( [0-9]+ ('.' [0-9]*)? | '.' [0-9]+ )
+String     ::= '"' [^"]* '"'
+Identifier ::= [A-Za-z] [A-Za-z0-9_]*
 
-/* WIP: data transformation subset  */
-DataTransformation       ::= (DataOp DataInput DataOutput)+
-DataOp               ::= '@op' ('Map' | 'Filter' | 'FlatMap' | 'Reduce' | 'GroupBy' | 'Aggregate')
-DataInput            ::= '@in' Identifier
-DataOutput           ::= '@out' Identifier
+/* data transformations */
+DataOperation ::= DataOpClause+
+DataOpClause  ::= DataOperator DataInput+ DataOutput+
+DataOperator  ::= '@op' ('Transform' | 'TransformTables'
+                        | 'Map' | 'Filter' | 'FlatMap'
+                        | 'Reduce' | 'Group')
+DataInput     ::= '@in' NodeRef
+DataOutput    ::= '@out' NodeRef
 ```
 
 # Example Use Cases
