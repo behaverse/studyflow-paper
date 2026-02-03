@@ -15,11 +15,11 @@ affiliations:
  - name: University of Luxembourg, Luxembourg
    index: 1
 date: 30 January 2026
-bibliography: paper.bib
+bibliography: references.bib
 ---
 
 # Summary
-Scientific workflows are often communicated through free-text descriptions in manuscripts, informal box-and-arrow figures, or code artifacts that are difficult to reconcile across stakeholders and to reproduce in later studies. We propose Studyflow language, a BPMN extension that provides formal, machine-readable diagrams for end-to-end scientific workflows. Studyflow diagrams can be used to describe different stages of scientific workdlows including experimental design, data collection, analysis, and reporting. The language adds domain-specific elements (e.g., activities, tests, group assignments) while retaining familiar notation of BPMN in XML format [@white2004introduction]. Studyflow diagrams complement standard data models with process models in a human-friendly, machine-readable, and executable way. It encapsulates what is needed for research in one unified diagram (including experiment design, protocol documentation, data formats, methodology communication, reproducibility, and reporting).
+Scientific workflows are often communicated through free-text descriptions in manuscripts, informal box-and-arrow figures, or code artifacts that are difficult to reconcile across stakeholders and to reproduce in later studies. We propose Studyflow language, a BPMN extension that provides formal, machine-readable diagrams for end-to-end scientific workflows. Studyflow diagrams can be used to describe different stages of scientific workflows including experimental design, data collection, analysis, and reporting. The language adds domain-specific elements (e.g., activities, tests, group assignments) while retaining familiar notation of BPMN in XML format [@white2004introduction]. Studyflow diagrams complement standard data models with process models in a human-friendly, machine-readable, and executable way. It encapsulates what is needed for research in one unified diagram (including experiment design, protocol documentation, data formats, methodology communication, reproducibility, and reporting).
 
 As a proof-of-concept, we also developed *Studyflow Modeler*, a web editor for creating, simulating, and deployment of studyflows. The specifications, example diagrams, and tools are open source at https://github.com/behaverse/studyflow-modeler under the MIT license. A versioned release will be archived at <DOI>.
 
