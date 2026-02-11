@@ -25,7 +25,7 @@ One common way to describe cognitive tests and their trial structures is to visu
 
 ![N-back trials (common)](/assets/figures/nback.png)
 
-![N-back trials using studyflow](/assets/figures/nback.studyflow.png)
+![N-back trials using studyflow](/assets/figures/nback2.studyflow.png)
 
 
 ## Use Case: Reporting
