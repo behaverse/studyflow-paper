@@ -54,15 +54,23 @@ Studyflow is designed around three principles: **interoperability**, **schema-fi
 
 **Separation of language and tooling.** The Studyflow specification is independent of any particular UI implementation. The accompanying **Studyflow Modeler** is a reference editor that operationalizes the schema through interactive validation and export. The modeler is implemented as a web application using TypeScript/React and `bpmn-js` for BPMN rendering/editing, extended with Studyflow-specific palettes, properties, and validators [@bpmnjs]. This separation allows other tooling (e.g., CLI validators, converters, or execution adapters) to be implemented against the same spec.
 
-# Functionality
 
-Studyflow extends BPMN with a profile that includes:
+
+# Software Design
+
+- [ ] UML
+
+## Functionality
+
+It extends BPMN with a profile that includes:
 
 - **Core BPMN elements**: events, activities, gateways, and data-related artifacts.
-- **Domain-specific activities** for scientific actions (e.g., experimental tasks, questionnaires, instructions, data collection phases).
+- **Domain-specific elements** for experiments in cognitive sciences (e.g., tests, video games, questionnaires, instructions, data elements and operators).
 - **Study-aware gateways** to encode participant assignment and branching (e.g., random assignment, inclusion/exclusion criteria).
-- **Data-aware annotations** declaring which steps consume or produce datasets, enabling traceability across the lifecycle.
-- **A schema-driven interchange format** using BPMN XML augmented with `studyflow:` extensions, enabling validation, version control, and integration with BPMN tooling.
+- **Data-aware annotations** declaring which steps consume or produce datasets for traceability across the lifecycle.
+- **A schema-driven interchange format** using BPMN XML augmented with `studyflow:` extensions, enabling validation, version control, and integration with BPMN tooling. Studyflow diagrams are serialized as BPMN 2.0 XML augmented with Studyflow-specific elements in a dedicated namespace, preserving compatibility with standard BPMN parsers while adding study semantics.
+
+The language specification is provided as a LinkML schema (see `assets/studyflow.linkml.yaml`), and example diagrams are included in the repository.
 
 # Example
 
@@ -72,12 +80,6 @@ Common established research patterns can be naturally represented using Studyflo
 ![Example Studyflow diagram showing randomization, exclusion pathways, and data annotations.](figures/figure1_consort_studyflow.png)
 
 Another example is cognitive task design, where trial structures, instructions, and data outputs are captured as explicit workflow steps, making experimental procedures easier to understand and replicate.
-
-# Implementation details
-Studyflow diagrams are serialized as BPMN 2.0 XML augmented with Studyflow-specific elements in a dedicated namespace, preserving compatibility with standard BPMN parsers while adding study semantics. The language specification is provided as a schema (see `assets/schemas/studyflow.yaml`), and representative diagrams are included in the repository to support validation and regression testing.
-
-- [ ] UML
-- [ ] GRAMMAR + MATHEMATICAL FORMALIZATION
 
 ## Modeler
 
