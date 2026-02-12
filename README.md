@@ -27,11 +27,7 @@ There is an alternative, and shorter, version of the paper that is formatted for
 To build the JOSS version, you need to install Docker and run the following command in the root of the project:
 
 ```
-docker run --rm \
-    --volume $PWD/joss:/data \
-    --user $(id -u):$(id -g) \
-    --env JOURNAL=joss \
-    openjournals/inara
+docker run --rm --volume $PWD/joss:/data --env JOURNAL=joss openjournals/inara
 ```
 
 Output will be saved as `joss/paper.pdf`.
