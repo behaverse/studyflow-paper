@@ -21,13 +21,17 @@ bibliography: joss_references.bib
 
 # Summary
 
-Scientific processes are often communicated through free-text descriptions in manuscripts, informal box-and-arrow figures, or code artifacts that are difficult to reconcile across stakeholders and to reproduce in later studies. We present **Studyflow**, a BPMN extension that provides formal, machine-readable diagrams for end-to-end scientific workflows in cognitive sciences. Studyflow adds study-oriented constructs to BPMN (e.g., cognitive tests, questionnaires, data operators, and group assignment logic) while remaining compatible with familiar BPMN notation and tooling. We also present **Studyflow Modeler**, an open-source editor that operationalizes the studyflow specification through interactive visual authoring, validation, simulation, execution, and export. By making study protocols explicit, Studyflow aims to enhance communication across the scientific lifecycle and across different stakeholders.
+Scientific processes are often obscured by free-text descriptions, informal figures, or code artifacts that are difficult to reconcile or reproduce in later studies. We present **Studyflow**, a BPMN extension providing formal, machine-readable diagrams for cognitive science workflows. Studyflow adds experiment-oriented constructs such as cognitive tests, data operators, and group assignment logic while maintaining compatibility with familiar BPMN notation.  By formalizing study protocols in a human-understandable format, Studyflow clarifies communication between different stakeholders across the scientific lifecycle.
+
+We also present **Studyflow Modeler**, an open source editor that operationalizes the specification through visual authoring, validation, and export.
+
+Studyflow contributes a process-modeling layer that complements common data standards by making study protocols explicit, reviewable, and machine-validated. The project provides (i) an open language specification and validation schema, (ii) representative example diagrams that encode common experimental patterns (e.g., randomization/exclusion flows and task procedures), and (iii) an open-source web-based modeler that lowers the barrier to producing shareable, version-controlled workflow diagrams. Together, these artifacts provide a concrete foundation for integrating protocol diagrams into documentation and review workflows (e.g., protocol review, preregistration supplements, and collaborative study design), and for connecting high-level study intent to downstream data products in a tool-interoperable format.
 
 # Statement of need
 
 Reproducibility in science requires more than sharing data and manuscripts; it also requires an explicit description of the process that generated those artifacts. Process models complement data models by documenting the sequence of activities, decision points, and transformations that underlie a scientific study [@sehgal2011].
 
-Existing workflow approaches tend to split across two needs: execution-focused tooling (e.g., orchestration frameworks and pipeline languages) that encodes study logic implicitly in code, and domain-generic process modeling (e.g., BPMN) that is readable and standardized but lacks scientific-study concepts such as participant assignment, inclusion/exclusion logic, and explicit links between workflow steps and research datasets. Domain-specific workflow engines improve executable reproducibility in particular communities, yet they often require programming expertise and do not provide a shared modeling layer interpretable by non-technical stakeholders (e.g., ethics boards, clinicians, and collaborators). Studyflow addresses this gap by extending BPMN with study-specific constructs—experimental task types, randomization and branching gateways, and data-aware annotations aligned with community standards (e.g., BIDS/BDM/Psych-DS [@bids; @bdm; @psychds])—so a single diagram can serve as both a human-readable protocol and a machine-readable specification for validation, versioning, and downstream tooling across the study lifecycle.
+Existing workflow approaches tend to split across two needs: execution-focused tooling (e.g., orchestration frameworks and pipeline languages) that encodes study logic implicitly in code, and domain-generic process modeling (e.g., BPMN) that is readable and standardized but lacks scientific-study concepts such as participant assignment, inclusion/exclusion logic, and explicit links between workflow steps and research datasets. Domain-specific workflow engines improve executable reproducibility in particular communities, yet they often require programming expertise and do not provide a shared modeling layer interpretable by non-technical stakeholders (e.g., ethics boards, clinicians, and collaborators). Studyflow addresses this gap by extending BPMN with study-specific constructs—experimental task types, branching gateways, and data-aware annotations aligned with community standards (e.g., BIDS/BDM/Psych-DS [@bids; @bdm; @psychds])—so a single diagram can serve as both a human-readable protocol and a machine-readable specification to validate, version, and integrate downstream tooling across the study lifecycle.
 
 ## State of the field
 
@@ -52,13 +56,12 @@ Studyflow is designed around three principles: **interoperability**, **schema-fi
 
 **Schema-first specification.** Studyflow’s language surface is specified as a machine-checkable schema (see `assets/schemas/studyflow.yaml`) that defines allowable element types, required attributes, and validation rules. Keeping the core specification text-based supports version control, review diffs, and long-term provenance tracking, and enables automated checks (e.g., diagram completeness constraints, branch labeling, and data input/output consistency).
 
-**Separation of language and tooling.** The Studyflow specification is independent of any particular UI implementation. The accompanying **Studyflow Modeler** is a reference editor that operationalizes the schema through interactive validation and export. The modeler is implemented as a web application using TypeScript/React and `bpmn-js` for BPMN rendering/editing, extended with Studyflow-specific palettes, properties, and validators [@bpmnjs]. This separation allows other tooling (e.g., CLI validators, converters, or execution adapters) to be implemented against the same spec.
+**Separation of language and tooling.** The Studyflow specification is independent of any particular UI implementation. The accompanying **Studyflow Modeler** is a reference editor that operationalizes the schema through interactive validation and export. The modeler is implemented as a web application using TypeScript/React and `bpmn-js` for BPMN rendering/editing, extended with Studyflow-specific palettes, properties, and validators [@bpmnjs]. This separation allows other tooling (e.g., CLI validators, converters, or execution adapters) to be implemented against the same spec. The modeler is available at https://behaverse.github.io/studyflow-modeler/.
 
+The specifications, example diagrams, and tools are open source at https://github.com/behaverse/studyflow-modeler under the MIT license. A versioned release will be archived at <DOI>. 
 
+Studyflow is formally specified to support unambiguous interpretation, validation, and interoperability, but the full grammar and schema are maintained in the project documentation. The complete schema and serialization rules are provided in the repository under `assets/` (and accompanying specification documentation), together with example diagrams and the modeler implementation.
 
-# Software Design
-
-- [ ] UML
 
 ## Functionality
 
@@ -80,20 +83,6 @@ Common established research patterns can be naturally represented using Studyflo
 ![Example Studyflow diagram showing randomization, exclusion pathways, and data annotations.](figures/figure1_consort_studyflow.png)
 
 Another example is cognitive task design, where trial structures, instructions, and data outputs are captured as explicit workflow steps, making experimental procedures easier to understand and replicate.
-
-## Modeler
-
-As a proof-of-concept, we also developed *Studyflow Modeler*, a schema-based visual editor for creating, simulating, and deployment of studyflows. The specifications, example diagrams, and tools are open source at https://github.com/behaverse/studyflow-modeler under the MIT license. A versioned release will be archived at <DOI>.
-
-Studyflow Modeler is a web-based editor for authoring Studyflow diagrams and exporting them for documentation and downstream use (e.g., simulation or integration with data collection and analysis tooling). The modeler is available at https://behaverse.github.io/studyflow-modeler/ and is implemented using TypeScript/React and `bpmn-js`, with Studyflow-specific UI components and validation rules.
-
-## Grammar and formalization
-
-Studyflow is formally specified to support unambiguous interpretation, validation, and interoperability, but the full grammar and schema are maintained in the project documentation. The complete schema and serialization rules are provided in the repository under `assets/` (and accompanying specification documentation), together with example diagrams and the modeler implementation.
-
-# Research impact statement
-
-Studyflow contributes a process-modeling layer that complements common data standards by making study protocols explicit, reviewable, and machine-validated. The project provides (i) an open language specification and validation schema, (ii) representative example diagrams that encode common experimental patterns (e.g., randomization/exclusion flows and task procedures), and (iii) an open-source web-based modeler that lowers the barrier to producing shareable, version-controlled workflow diagrams. Together, these artifacts provide a concrete foundation for integrating protocol diagrams into documentation and review workflows (e.g., protocol review, preregistration supplements, and collaborative study design), and for connecting high-level study intent to downstream data products in a tool-interoperable format.
 
 # AI usage disclosure
 
