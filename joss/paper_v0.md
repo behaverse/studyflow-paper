@@ -1,26 +1,5 @@
 ---
 title: 'Studyflow: Formal Diagrams to Define and Execute Scientific Workflows'
-tags:
-  - BPMN
-  - cognitive science
-  - workflow
-  - scientific computing
-authors:
-  - name: Morteza Ansarinia
-    orcid: https://orcid.org/0000-0001-8335-6704
-    affiliation: 1
-  - name: Pedro Cardoso-Leite
-    affiliation: 1
-affiliations:
- - name: University of Luxembourg, Luxembourg
-   index: 1
-date: 15 May 2025
-bibliography: paper.bib
-
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-# aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-# aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary
