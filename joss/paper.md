@@ -43,11 +43,7 @@ BPMN's graphical clarity, formal execution semantics, and proven extensibility (
 Recent LLM-assisted BPMN authoring tools can accelerate diagram creation from text (e.g., ProMoAI, BPMN-ChatBot) [@khourani2024; @kopke2024], but they do not resolve the absence of domain semantics and validation rules needed to represent scientific studies. Studyflow builds on BPMN's familiarity and ecosystem while adding a science-oriented profile and schema, so that a single diagram can serve as both a human-understandable protocol and a machine-readable specification across the study lifecycle.
 
 
-<!-- Existing workflow engines and data standards provide important building blocks, but they often emphasize one aspect of research (data, execution, or reporting) rather than a shared, human-readable protocol that can be communicated across scientists, engineers, ethics boards, and other stakeholders with diverse expertise and responsibilities. -->
 
-<!-- Just like ERD or UML for data or code, one widely used solution for process modeling is BPMN. BPMN (Business Process Model and Notation) is a general-purpose process modeling in industry and business domains. BPMN provides a well adopted process modeling standard [@white2004introduction], yet it lacks constructs tailored to the needs of experimental sciences. Studyflow extends BPMN and targets researchers who need a formal, shareable way to describe study protocols while keeping them compatible with established notations. -->
-
-# WIP: Software design
 
 # Software design
 
@@ -69,59 +65,39 @@ Workflow systems typically optimize for one of two audiences: developers who nee
 
 Most workflow tools separate process logic from data descriptions: the pipeline defines what runs, while a separate data standard (e.g., BIDS, Psych-DS) defines what is produced. This split forces researchers to maintain two representations that can drift apart. Studyflow's architecture allows data artifacts (datasets consumed, transformed, or produced by each step) to be annotated directly on the process diagram through data elements and operators. The trade-off is increased visual density. To manage this, the modeler supports collapsible views so that researchers can toggle between a process-only view and a full process-and-data view. This dual representation supports traceability from high-level protocol design to downstream data products and enables validation of both process logic and data dependencies within a single reviewable artifact.
 
-## Schema-driven UI for incremental evolution
+## Schema-driven tooling for incremental evolution
 
 The modeler's user interface is generated from the LinkML schema rather than hard-coded. When a new element type or attribute is added to the schema, the property panels, palette entries, and validation rules update accordingly without manual UI work. This design choice reduces the cost of evolving the notation—critical during early adoption when community feedback drives frequent schema changes. But it constrains the UI to patterns that can be generalized from schema metadata (forms, palettes, and context menus). Highly specialized interactions (e.g., drag gestures or icons) require specialized codes in the tools. In practice, the schema-driven approach has proven sufficient for the current element set while keeping the modeler lightweight (React + `bpmn-js`) and deployable as a static web application with no server dependency.
 
-<!-- 
-Studyflow is a formal and visual representation of research in cognitive sciences to support unambiguous interpretation. It is designed around the following principles:
-
-**Interoperability via BPMN extension.** Rather than introducing a new notation, Studyflow leverages BPMN's extension points to introduce additional elements and attributes through `studyflow:` namespace [@bpmn_spec]. This keeps diagrams compatible with BPMN editors/parsers while enabling domain-specific semantics (e.g., gateways, study activities, and data annotations). Studyflow's notation is specified as a machine-checkable schema (see `assets/schemas/studyflow.yaml`).
-
-**no requirement to know BPMN or any domain-specific notation**
-
-support for human-centered experiments in cognitive sciences (e.g., randomization, inclusion/exclusion criteria, data annotations) while maintaining familiarity with BPMN's core elements (events, activities, gateways). These basic building blocks, combined, will provide a way to describe activities in experimental research (e.g., cognitive tests, or flow of participants described by loops, filters, branching).
-
-
-**Incremental development** via schema-driven UI (separation of spec and tooling). The Studyflow specification is developed as a LinkML schema, which serves as the single source of truth for the language. The accompanying Studyflow Modeler is a reference implementation that uses the schema to render, edit, and export diagrams. This separation allows the specification to evolve independently of any particular UI, and enables other tools (e.g., CLI validators, converters, execution environments) to be implemented against the same spec. The schema is open at https://behaverse.org/schemas/studyflow
-
-**Addressing the diversity of cognitive sciences** Studyflow provides a core set of elements for general process modeling, while introducing domain-specific constructs (e.g., cognitive test activities, data operators) that can be used as needed. This allows researchers to represent a wide range of experimental designs without being constrained by a rigid set of elements, while still maintaining compatibility with other domains.
-
-**Diverse stakeholders**: cognitively support programmers and non-programmers alike, so that the same diagram can be used for communication across collaborators, ethics boards, and reviewers, as well as for downstream tooling and execution.
-
-**Separation of language and tooling.** The Studyflow specification is independent of any UI. The accompanying **Studyflow Modeler** is a reference editor that uses the studyflow schema through interactive visualization and export. The modeler uses React and `bpmn-js` for rendering, editing, and publishing. This separation of spec from interfaces allows other tooling (e.g., CLI validators, converters, or execution environments) to be implemented against the same spec. The modeler is available at https://behaverse.github.io/studyflow-modeler/ under the MIT license.
-
-The grammar and mathematical formalism can be found in the documentation website (https://behaverse.org/studyflow-modeler/docs/), and the schema is available at https://behaverse.org/schemas/studyflow.
-
-**Model process and data together.** Studyflow diagrams can encode both the sequence of steps and the details of the data artifacts they produce or consume. This dual representation supports traceability from high-level protocol design to downstream data products, and enables validation of both process logic and data dependencies. -->
-
 ## Functionality
 
-The Studyflow implements BPMN with the following features:
+Beyond core BPMN elements (events, activities, gateways, data artifacts), Studyflow adds:
 
-- **Core BPMN elements**: events, activities, gateways, and data-related artifacts, used without modification.
-- **Domain-specific activity types** for experimental cognitive science (e.g., cognitive tests, video games, questionnaires, instructions), introduced as BPMN task specializations via the `studyflow:` namespace.
-- **Study-aware gateways** encoding participant-level branching such as random assignment, stratified allocation, and inclusion/exclusion criteria—patterns that have no native BPMN equivalent.
-- **Data elements and operators** declaring which steps consume or produce datasets, aligned with community data standards (e.g., BIDS, Psych-DS). This allows researchers to represent both process and data in a single diagram.
-
-- **A schema-driven interchange format**: diagrams are serialized as standard BPMN 2.0 XML augmented with `studyflow:` extension elements, preserving compatibility with generic BPMN parsers while enabling domain-specific validation, version control, and tooling integration.
-
-The language specification is provided as a LinkML schema (see `assets/studyflow.linkml.yaml`), and example diagrams encoding common experimental patterns are included in the repository.
+- **Domain-specific activity types** for cognitive science experiments (e.g., cognitive tests, video games, questionnaires, instructions), introduced as BPMN task specializations.
+- **Study-aware gateways** encoding participant-level branching such as random assignment, stratified allocation, and inclusion/exclusion criteria.
+- **Data elements and operators** for annotating which steps consume or produce datasets, aligned with community data standards (e.g., BIDS, Psych-DS).
 
 # Research impact
 
 ## Contributions
 
-Studyflow contributes a process-modeling framework that complements common data standards by making study protocols explicit, reviewable, and machine-validated. The project provides (i) an open language specification, (ii) representative example diagrams that encode common experimental patterns, and (iii) Studyflow Modeler: an open-source web-based modeler that operationalize the specification and lowers the barrier to producing shareable, version controlled workflow diagrams. Together, these artifacts provide a concrete foundation for integrating protocol diagrams into scientific practices and connecting high-level research intent to downstream data products in an interoperable format.
+Studyflow contributes three open, independently usable artifacts to the scientific workflow ecosystem:
+
+1. **An open language specification** maintained as a versioned LinkML schema (`assets/studyflow.linkml.yaml`). The schema defines element types, attribute constraints, and validation rules for experimental workflow diagrams.
+
+2. **A set of representative example diagrams** that encode common experimental patterns (e.g., CONSORT-style randomized controlled trials, within-subject crossover designs, and multi-session cognitive testing protocols) as standard BPMN 2.0 XML with `studyflow:` extensions. These examples serve as reusable templates and as regression tests for the specification itself.
+
+3. **Studyflow Modeler**, an open-source, client-side web application (React + `bpmn-js` [@bpmnjs], MIT license) that operationalizes the specification through a schema-driven graphical editor. The modeler is continuously deployed at https://behaverse.github.io/studyflow-modeler/.
+
+All artifacts are publicly available under permissive licenses. Because diagrams are valid BPMN 2.0 XML, they can be opened in any compliant editor (e.g., Camunda Modeler, bpmn.io) and stored in version-control systems with meaningful diffs.
 
 ## Example
 
-Established research patterns can be naturally represented using Studyflow diagrams. For example, a CONSORT-style randomized controlled trial flow can be expressed with explicit randomization and exclusion pathways while preserving BPMN readability (Figure 1). Similarly, cognitive task designs can capture trial structure, instructions, branching logic, and data outputs as explicit workflow steps, supporting clearer protocol communication and replication.
+Established experimental patterns can be directly represented as Studyflow diagrams. Figure 1 shows a CONSORT-style randomized controlled trial encoded with explicit randomization gateways, inclusion/exclusion pathways, and data annotations—all within standard BPMN structure.
 
+![Example Studyflow diagram showing a CONSORT-style trial with randomization, exclusion pathways, and data annotations.](figures/figure1_consort_studyflow.png)
 
-![Example Studyflow diagram showing randomization, exclusion pathways, and data annotations.](figures/figure1_consort_studyflow.png)
-
-Another example is cognitive task design, where trial structures, instructions, and data outputs are captured as explicit workflow steps, making experimental procedures easier to understand and replicate.
+A second use case is cognitive task design, where trial sequences, instruction screens, branching logic, and data outputs are captured as typed workflow steps rather than buried in experiment scripts.
 
 # AI usage disclosure
 
