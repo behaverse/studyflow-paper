@@ -49,6 +49,31 @@ Recent LLM-assisted BPMN authoring tools can accelerate diagram creation from te
 
 # WIP: Software design
 
+# Software design
+
+Designing a process notation for experimental cognitive science requires balancing competing demands: formal precision for machine validation versus visual simplicity for non-technical stakeholders; domain specificity versus interoperability with existing tooling; and a stable language specification versus rapid iteration on features. The architecture of Studyflow reflects deliberate trade-offs among these tensions.
+
+## Extend BPMN rather than invent a new notation
+
+The central design decision was whether to create a standalone domain-specific language (DSL) or to extend an existing standard. A standalone DSL would offer maximum expressiveness for experimental constructs (e.g., trial sequences, task parametrization, variable naming) but would require building parsers, renderers, and an ecosystem from scratch, and would impose yet another notation on a community already fragmented across tools. Adopting BPMN as the host notation trades some syntactic features for three concrete benefits: (i) Studyflow diagrams remain valid BPMN and can be opened, diffed, and versioned with any BPMN-compliant tool; (ii) researchers already exposed to flowchart-like notations can read diagrams without learning a new visual grammar; and (iii) BPMN's formal extension mechanism (`extensionElements` and typed attributes) provides a constrained way to add domain semantics without breaking the base standard [@bpmn_spec]. Studyflow introduces its constructs through a `studyflow:` namespace, so that a generic BPMN parser gracefully ignores study-specific metadata while a Studyflow-aware tool can validate and render it.
+
+## Separate the language specification from tooling
+
+A recurring failure mode in scientific workflow projects is coupling the notation to a single application: when the tool is abandoned, the notation becomes unreadable. Studyflow counters this by maintaining the language as an independent, machine-readable LinkML schema that serves as the single source of truth for element definitions, attribute constraints, and validation rules. The accompanying **Studyflow Modeler** application is explicitly positioned as one reference implementation of this schema, not the canonical artifact. This separation has practical consequences: the schema can generate JSON Schema validators, documentation, and conversion utilities independently of the editor, and third-party tools (e.g., CLI linters or execution engines) can target the same specification without depending on the modeler's codebase. The trade-off is the added overhead but this cost is justified by the longevity and portability it affords a community standard.
+
+## Prioritize communication over execution
+
+Workflow systems typically optimize for one of two audiences: developers who need executable pipelines, or domain experts who need readable protocols. Studyflow deliberately prioritizes the latter. Diagrams are designed so that a single artifact can be reviewed by an ethics board, shared with collaborators, and attached to a publication without requiring any programming knowledge. This means Studyflow intentionally hides execution semantics (e.g., container orchestration, scheduling policies, retry logic) that would add complexity without serving the communication goal. Where execution is needed, the schema-driven interchange format allows downstream tools to consume Studyflow diagrams and map them onto executable pipelines, preserving a clean boundary between protocol description and runtime concerns.
+
+## Process and data in a joint diagram
+
+Most workflow tools separate process logic from data descriptions: the pipeline defines what runs, while a separate data standard (e.g., BIDS, Psych-DS) defines what is produced. This split forces researchers to maintain two representations that can drift apart. Studyflow's architecture allows data artifacts (datasets consumed, transformed, or produced by each step) to be annotated directly on the process diagram through data elements and operators. The trade-off is increased visual density. To manage this, the modeler supports collapsible views so that researchers can toggle between a process-only view and a full process-and-data view. This dual representation supports traceability from high-level protocol design to downstream data products and enables validation of both process logic and data dependencies within a single reviewable artifact.
+
+## Schema-driven UI for incremental evolution
+
+The modeler's user interface is generated from the LinkML schema rather than hard-coded. When a new element type or attribute is added to the schema, the property panels, palette entries, and validation rules update accordingly without manual UI work. This design choice reduces the cost of evolving the notation—critical during early adoption when community feedback drives frequent schema changes. But it constrains the UI to patterns that can be generalized from schema metadata (forms, palettes, and context menus). Highly specialized interactions (e.g., drag gestures or icons) require specialized codes in the tools. In practice, the schema-driven approach has proven sufficient for the current element set while keeping the modeler lightweight (React + `bpmn-js`) and deployable as a static web application with no server dependency.
+
+<!-- 
 Studyflow is a formal and visual representation of research in cognitive sciences to support unambiguous interpretation. It is designed around the following principles:
 
 **Interoperability via BPMN extension.** Rather than introducing a new notation, Studyflow leverages BPMN's extension points to introduce additional elements and attributes through `studyflow:` namespace [@bpmn_spec]. This keeps diagrams compatible with BPMN editors/parsers while enabling domain-specific semantics (e.g., gateways, study activities, and data annotations). Studyflow's notation is specified as a machine-checkable schema (see `assets/schemas/studyflow.yaml`).
@@ -68,19 +93,20 @@ support for human-centered experiments in cognitive sciences (e.g., randomizatio
 
 The grammar and mathematical formalism can be found in the documentation website (https://behaverse.org/studyflow-modeler/docs/), and the schema is available at https://behaverse.org/schemas/studyflow.
 
-**Model process and data together.** Studyflow diagrams can encode both the sequence of steps and the details of the data artifacts they produce or consume. This dual representation supports traceability from high-level protocol design to downstream data products, and enables validation of both process logic and data dependencies.
+**Model process and data together.** Studyflow diagrams can encode both the sequence of steps and the details of the data artifacts they produce or consume. This dual representation supports traceability from high-level protocol design to downstream data products, and enables validation of both process logic and data dependencies. -->
 
 ## Functionality
 
-It extends BPMN with a profile that includes:
+The Studyflow implements BPMN with the following features:
 
-- **Core BPMN elements**: events, activities, gateways, and data-related artifacts.
-- **Domain-specific elements** for experiments in cognitive sciences (e.g., tests, video games, questionnaires, instructions, data elements and operators).
-- **Study-aware gateways** to encode participant assignment and branching (e.g., random assignment, inclusion/exclusion criteria).
-- **Data-aware annotations** declaring which steps consume or produce datasets for traceability across the lifecycle.
-- **A schema-driven interchange format** using BPMN XML augmented with `studyflow:` extensions, enabling validation, version control, and integration with BPMN tooling. Studyflow diagrams are serialized as BPMN 2.0 XML augmented with Studyflow-specific elements in a dedicated namespace, preserving compatibility with standard BPMN parsers while adding study semantics.
+- **Core BPMN elements**: events, activities, gateways, and data-related artifacts, used without modification.
+- **Domain-specific activity types** for experimental cognitive science (e.g., cognitive tests, video games, questionnaires, instructions), introduced as BPMN task specializations via the `studyflow:` namespace.
+- **Study-aware gateways** encoding participant-level branching such as random assignment, stratified allocation, and inclusion/exclusion criteria—patterns that have no native BPMN equivalent.
+- **Data elements and operators** declaring which steps consume or produce datasets, aligned with community data standards (e.g., BIDS, Psych-DS). This allows researchers to represent both process and data in a single diagram.
 
-The language specification is provided as a LinkML schema (see `assets/studyflow.linkml.yaml`), and example diagrams are included in the repository.
+- **A schema-driven interchange format**: diagrams are serialized as standard BPMN 2.0 XML augmented with `studyflow:` extension elements, preserving compatibility with generic BPMN parsers while enabling domain-specific validation, version control, and tooling integration.
+
+The language specification is provided as a LinkML schema (see `assets/studyflow.linkml.yaml`), and example diagrams encoding common experimental patterns are included in the repository.
 
 # Research impact
 
