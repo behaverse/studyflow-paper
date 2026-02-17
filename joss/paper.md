@@ -68,10 +68,7 @@ support for human-centered experiments in cognitive sciences (e.g., randomizatio
 
 The grammar and mathematical formalism can be found in the documentation website (https://behaverse.org/studyflow-modeler/docs/), and the schema is available at https://behaverse.org/schemas/studyflow.
 
-## Contributions
-
-Studyflow contributes a process-modeling framework that complements common data standards by making study protocols explicit, reviewable, and machine-validated. The project provides (i) an open language specification, (ii) representative example diagrams that encode common experimental patterns, and (iii) Studyflow Modeler: an open-source web-based modeler that operationalize the specification and lowers the barrier to producing shareable, version controlled workflow diagrams. Together, these artifacts provide a concrete foundation for integrating protocol diagrams into scientific practices and connecting high-level research intent to downstream data products in an interoperable format.
-
+**Model process and data together.** Studyflow diagrams can encode both the sequence of steps and the details of the data artifacts they produce or consume. This dual representation supports traceability from high-level protocol design to downstream data products, and enables validation of both process logic and data dependencies.
 
 ## Functionality
 
@@ -85,9 +82,15 @@ It extends BPMN with a profile that includes:
 
 The language specification is provided as a LinkML schema (see `assets/studyflow.linkml.yaml`), and example diagrams are included in the repository.
 
-# Example
+# Research impact
 
-Common established research patterns can be naturally represented using Studyflow diagrams. For example, a CONSORT-style randomized controlled trial flow can be expressed with explicit randomization and exclusion pathways while preserving BPMN readability (Figure 1). Similarly, cognitive task designs can capture trial structure, instructions, branching logic, and data outputs as explicit workflow steps, supporting clearer protocol communication and replication.
+## Contributions
+
+Studyflow contributes a process-modeling framework that complements common data standards by making study protocols explicit, reviewable, and machine-validated. The project provides (i) an open language specification, (ii) representative example diagrams that encode common experimental patterns, and (iii) Studyflow Modeler: an open-source web-based modeler that operationalize the specification and lowers the barrier to producing shareable, version controlled workflow diagrams. Together, these artifacts provide a concrete foundation for integrating protocol diagrams into scientific practices and connecting high-level research intent to downstream data products in an interoperable format.
+
+## Example
+
+Established research patterns can be naturally represented using Studyflow diagrams. For example, a CONSORT-style randomized controlled trial flow can be expressed with explicit randomization and exclusion pathways while preserving BPMN readability (Figure 1). Similarly, cognitive task designs can capture trial structure, instructions, branching logic, and data outputs as explicit workflow steps, supporting clearer protocol communication and replication.
 
 
 ![Example Studyflow diagram showing randomization, exclusion pathways, and data annotations.](figures/figure1_consort_studyflow.png)
