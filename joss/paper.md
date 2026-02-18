@@ -1,5 +1,5 @@
 ---
-title: 'Studyflow: BPMN-based diagrams for scientific workflows'
+title: 'Studyflow: BPMN-based diagrams for experimental workflows in cognitive sciences'
 tags:
   - scientific workflows
   - BPMN
