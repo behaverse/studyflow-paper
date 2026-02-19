@@ -1,6 +1,6 @@
-# studyflow-modeler-paper
+# studyflow-paper
 
-Studyflow Modeler Paper
+Studyflow Paper
 
 
 ## Setup

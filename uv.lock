@@ -1193,7 +1193,7 @@ wheels = [
 ]
 
 [[package]]
-name = "studyflow-modeler-paper"
+name = "studyflow-paper"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

@@ -1,7 +1,7 @@
 [project]
-name = "studyflow-modeler-paper"
+name = "studyflow-paper"
 version = "0.1.0"
-description = "Behaverse Studyflow Modeler Paper in Quarto"
+description = "Studyflow Paper"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
