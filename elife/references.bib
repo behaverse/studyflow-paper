@@ -1,0 +1,877 @@
+% Merged bibliography for the eLife Studyflow paper.
+% Sources: studyflow-paper/references.bib + studyflow-paper/joss/joss_references.bib,
+% plus canonical references added for the [CITE: ...] placeholders in paper.md.
+% Entries marked %!VERIFY are well-known but I have not personally re-checked
+% volume/issue/page numbers; please verify in Zotero before submission.
+
+%% =====================================================================
+%% Reproducibility / replication crisis
+%% =====================================================================
+
+@article{osc2015,
+  title = {Estimating the Reproducibility of Psychological Science},
+  author = {{Open Science Collaboration}},
+  journal = {Science},
+  volume = {349},
+  number = {6251},
+  pages = {aac4716},
+  year = {2015},
+  doi = {10.1126/science.aac4716},
+  note = {%!VERIFY}
+}
+
+@article{bell2021perspectives,
+  title = {Perspectives on Machine Learning from Psychology's Reproducibility Crisis},
+  author = {Bell, Samuel J. and Kampman, Onno P.},
+  year = {2021},
+  eprint = {2104.08878},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.LG},
+  doi = {10.48550/arXiv.2104.08878}
+}
+
+@article{zeevi2020time,
+  title = {Time to Adjust: Improving Replicability in Experimental Psychology by Adjustment for Evident Selective Inference},
+  author = {Zeevi, Yoav and Astashenko, Sofi and Mudrik, Liad and Benjamini, Yoav},
+  year = {2020},
+  eprint = {2006.11585},
+  archiveprefix = {arXiv},
+  primaryclass = {stat.ME},
+  doi = {10.48550/arXiv.2006.11585}
+}
+
+@article{aguilar2022experiments,
+  title = {Experiments as Code: A Concept for Reproducible, Auditable, Debuggable, Reusable, \& Scalable Experiments},
+  author = {Aguilar, Leonel and Gath-Morad, Michal and Gr{\"u}bel, Jascha and Ermatinger, Jasper and Zhao, Hantao and Wehrli, Stefan and Sumner, Robert W. and Zhang, Ce and Helbing, Dirk and H{\"o}lscher, Christoph},
+  year = {2022},
+  eprint = {2202.12050},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.CY},
+  doi = {10.48550/arXiv.2202.12050}
+}
+
+@article{momeni2026guidelines,
+  title = {From Guidelines to Practice: Evaluating the Reproducibility of Methods in Computational Social Science},
+  author = {Momeni, Fakhri and Sajid, Sarah and Kiesel, Johannes},
+  year = {2026},
+  eprint = {2602.12747},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.HC},
+  doi = {10.48550/arXiv.2602.12747}
+}
+
+@article{Sehgal2011,
+  author = {Sehgal, Manu and Christopher, Divya and Pathak, A.N.},
+  title = {Significance of Data Models in Knowledge Discovery},
+  journal = {Data Mining and Knowledge Engineering},
+  volume = {3},
+  number = {4},
+  year = {2011},
+  issn = {0974--9578},
+  url = {https://www.ciitresearch.org/dl/index.php/dmke/article/view/DMKE032011001}
+}
+
+@article{ghosh2025reproducible_digital_health,
+  title = {Reproducible Workflow for Online {AI} in Digital Health},
+  author = {Ghosh, Susobhan and Gullapalli, Bhanu T. and Gao, Daiqi and Gazi, Asim and Trella, Anna and Xu, Ziping and Zhang, Kelly and Murphy, Susan A.},
+  year = {2025},
+  eprint = {2509.13499},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.CY},
+  doi = {10.48550/arXiv.2509.13499}
+}
+
+%% =====================================================================
+%% FAIR principles
+%% =====================================================================
+
+@article{fair,
+  title = {The {FAIR} Guiding Principles for Scientific Data Management and Stewardship},
+  author = {Wilkinson, Mark D. and Dumontier, Michel and Aalbersberg, IJsbrand Jan and Appleton, Gabrielle and Axton, Myles and Baak, Arie and Blomberg, Niklas and Boiten, Jan-Willem and {da Silva Santos}, Luiz Bonino and Bourne, Philip E. and others},
+  journal = {Scientific Data},
+  volume = {3},
+  number = {1},
+  pages = {160018},
+  year = {2016},
+  doi = {10.1038/sdata.2016.18},
+  note = {%!VERIFY}
+}
+
+%% =====================================================================
+%% Data standards (BIDS, Psych-DS, BDM, CSVW)
+%% =====================================================================
+
+@article{bids,
+  title = {The Brain Imaging Data Structure, a Format for Organizing and Describing Outputs of Neuroimaging Experiments},
+  author = {Gorgolewski, Krzysztof J. and Auer, Tibor and Calhoun, Vince D. and Craddock, R. Cameron and Das, Samir and Duff, Eugene P. and Flandin, Guillaume and Ghosh, Satrajit S. and Glatard, Tristan and Halchenko, Yaroslav O. and Handwerker, Daniel A. and Hanke, Michael and Keator, David and Li, Xiangrui and Michael, Zachary and Maumet, Camille and Nichols, B. Nolan and Nichols, Thomas E. and Pellman, John and Poline, Jean-Baptiste and Rokem, Ariel and Schaefer, Gunnar and Sochat, Vanessa and Triplett, William and Turner, Jessica A. and Varoquaux, Ga{\"e}l and Poldrack, Russell A.},
+  journal = {Scientific Data},
+  volume = {3},
+  number = {1},
+  pages = {160044},
+  year = {2016},
+  doi = {10.1038/sdata.2016.44},
+  note = {%!VERIFY}
+}
+
+@misc{psychds,
+  title = {{Psych-DS}: A Cross-Disciplinary Standard for Behavioral Data},
+  author = {{Psych-DS Working Group}},
+  year = {2024},
+  howpublished = {\url{https://psych-ds.github.io/}},
+  note = {Community specification; living document.}
+}
+
+@misc{bdm,
+  title = {Behaverse Data Model ({BDM}) Specification},
+  author = {{Behaverse Project}},
+  year = {2025},
+  howpublished = {\url{https://behaverse.org/data-model/}},
+  note = {Behaverse data-modelling specification covering events, trials, and statistics/models layers.}
+}
+
+@article{defossez2020bdm,
+  title = {The Structure of Behavioral Data},
+  author = {Defossez, Aliz{\'e}e and Ansarinia, Morteza and Clocher, Benoit and Schm{\"u}ck, Eva and Schrater, Paul and Cardoso-Leite, Pedro},
+  year = {2020},
+  eprint = {2012.12583},
+  archiveprefix = {arXiv},
+  primaryclass = {q-bio.NC},
+  doi = {10.48550/arXiv.2012.12583},
+  note = {Original Behaverse Data Model paper; canonical reference for BDM trials/events/models layers.}
+}
+
+@inproceedings{ansarinia2022cogenv,
+  title = {{CogEnv}: A Reinforcement Learning Environment for Cognitive Tests},
+  author = {Ansarinia, Morteza and Clocher, Benoit and Defossez, Aliz{\'e}e and Schm{\"u}ck, Eva and Cardoso-Leite, Pedro},
+  booktitle = {Conference on Cognitive Computational Neuroscience ({CCN})},
+  year = {2022},
+  url = {https://2022.ccneuro.org/proceedings/0000205.pdf},
+  note = {Original CogEnv for reinforcement-learning agents, built on DeepMind AndroidEnv. Administers Behaverse cognitive tests to agents under the same input modality and timing as human participants.}
+}
+
+@article{ansarinia2022cogtext,
+  title = {Linking Theories and Methods in Cognitive Sciences via Joint Embedding of the Scientific Literature: The Example of Cognitive Control},
+  author = {Ansarinia, Morteza and Schrater, Paul and Cardoso-Leite, Pedro},
+  year = {2022},
+  eprint = {2203.11016},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.CL},
+  doi = {10.48550/arXiv.2203.11016},
+  note = {{CogText}: cognitive-construct taxonomy derived by joint embedding of 630K PubMed abstracts.}
+}
+
+@article{steegen2016multiverse,
+  title = {Increasing Transparency Through a Multiverse Analysis},
+  author = {Steegen, Sara and Tuerlinckx, Francis and Gelman, Andrew and Vanpaemel, Wolf},
+  journal = {Perspectives on Psychological Science},
+  volume = {11},
+  number = {5},
+  pages = {702--712},
+  year = {2016},
+  doi = {10.1177/1745691616658637},
+  note = {%!VERIFY}
+}
+
+@misc{csvw,
+  title = {Model for Tabular Data and Metadata on the Web},
+  author = {Tennison, Jeni and Kellogg, Gregg and Herman, Ivan},
+  organization = {{W3C}},
+  year = {2015},
+  howpublished = {W3C Recommendation, \url{https://www.w3.org/TR/tabular-data-model/}},
+  note = {%!VERIFY}
+}
+
+@article{hoytO3GuidelinesOpen2024,
+  title = {The {{O3}} Guidelines: Open Data, Open Code, and Open Infrastructure for Sustainable Curated Scientific Resources},
+  shorttitle = {The {{O3}} Guidelines},
+  author = {Hoyt, Charles Tapley and Gyori, Benjamin M.},
+  date = {2024-05-29},
+  journaltitle = {Scientific Data},
+  shortjournal = {Sci Data},
+  volume = {11},
+  number = {1},
+  pages = {547},
+  issn = {2052-4463},
+  doi = {10.1038/s41597-024-03406-w},
+  url = {https://www.nature.com/articles/s41597-024-03406-w}
+}
+
+%% =====================================================================
+%% Reporting guidelines (CONSORT, SPIRIT, STROBE, STARD)
+%% =====================================================================
+
+@article{moher2012,
+  title = {{{CONSORT}} 2010 Explanation and Elaboration: Updated Guidelines for Reporting Parallel Group Randomised Trials},
+  author = {Moher, David and Hopewell, Sally and Schulz, Kenneth F. and Montori, Victor and Gøtzsche, Peter C. and Devereaux, P. J. and Elbourne, Diana and Egger, Matthias and Altman, Douglas G.},
+  date = {2012-01-01},
+  journaltitle = {International Journal of Surgery},
+  volume = {10},
+  number = {1},
+  pages = {28--55},
+  issn = {1743-9191},
+  doi = {10.1016/j.ijsu.2011.10.001},
+  url = {https://www.sciencedirect.com/science/article/pii/S1743919111005656}
+}
+
+@article{rennie2001,
+  title = {{{CONSORT}} Revised--Improving the Reporting of Randomized Trials},
+  author = {Rennie, D.},
+  date = {2001-04-18},
+  journaltitle = {JAMA},
+  volume = {285},
+  number = {15},
+  pages = {2006--2007},
+  doi = {10.1001/jama.285.15.2006}
+}
+
+@article{egger2001,
+  title = {Value of Flow Diagrams in Reports of Randomized Controlled Trials},
+  author = {Egger, Matthias},
+  date = {2001-04-18},
+  journaltitle = {JAMA},
+  volume = {285},
+  number = {15},
+  pages = {1996},
+  issn = {0098-7484},
+  doi = {10.1001/jama.285.15.1996}
+}
+
+@article{spirit2013,
+  title = {{SPIRIT} 2013 Statement: Defining Standard Protocol Items for Clinical Trials},
+  author = {Chan, An-Wen and Tetzlaff, Jennifer M. and G{\o}tzsche, Peter C. and Altman, Douglas G. and Mann, Howard and Berlin, Jesse A. and Dickersin, Kay and Hr{\'o}bjartsson, Asbj{\o}rn and Schulz, Kenneth F. and Parulekar, Wendy R. and Krleza-Jeric, Karmela and Laupacis, Andreas and Moher, David},
+  journal = {Annals of Internal Medicine},
+  volume = {158},
+  number = {3},
+  pages = {200--207},
+  year = {2013},
+  doi = {10.7326/0003-4819-158-3-201302050-00583},
+  note = {%!VERIFY -- canonical SPIRIT statement; SPIRIT 2025 revision is in development.}
+}
+
+@article{strobe,
+  title = {The Strengthening the Reporting of Observational Studies in Epidemiology ({STROBE}) Statement: Guidelines for Reporting Observational Studies},
+  author = {{von Elm}, Erik and Altman, Douglas G. and Egger, Matthias and Pocock, Stuart J. and G{\o}tzsche, Peter C. and Vandenbroucke, Jan P.},
+  journal = {PLoS Medicine},
+  volume = {4},
+  number = {10},
+  pages = {e296},
+  year = {2007},
+  doi = {10.1371/journal.pmed.0040296},
+  note = {%!VERIFY}
+}
+
+@article{stard,
+  title = {{STARD} 2015: An Updated List of Essential Items for Reporting Diagnostic Accuracy Studies},
+  author = {Bossuyt, Patrick M. and Reitsma, Johannes B. and Bruns, David E. and Gatsonis, Constantine A. and Glasziou, Paul P. and Irwig, Les and Lijmer, Jeroen G. and Moher, David and Rennie, Drummond and {de Vet}, Henrica C. W. and Kressel, Herbert Y. and Rifai, Nader and Golub, Robert M. and Altman, Douglas G. and Hooft, Lotty and Korevaar, Daniël A. and Cohen, Jérémie F.},
+  journal = {BMJ},
+  volume = {351},
+  pages = {h5527},
+  year = {2015},
+  doi = {10.1136/bmj.h5527},
+  note = {%!VERIFY}
+}
+
+%% =====================================================================
+%% Workflow engines / DSLs
+%% =====================================================================
+
+@article{nextflow,
+  title = {Nextflow Enables Reproducible Computational Workflows},
+  author = {{Di Tommaso}, Paolo and Chatzou, Maria and Floden, Evan W. and Barja, Pablo Prieto and Palumbo, Emilio and Notredame, Cedric},
+  journal = {Nature Biotechnology},
+  volume = {35},
+  number = {4},
+  pages = {316--319},
+  year = {2017},
+  doi = {10.1038/nbt.3820},
+  note = {%!VERIFY}
+}
+
+@article{cwl,
+  title = {Methods Included: Standardizing Computational Reuse and Portability with the Common Workflow Language},
+  author = {Crusoe, Michael R. and Abeln, Sanne and Iosup, Alexandru and Amstutz, Peter and Chilton, John and Tijani{\'c}, Nebojša and {M{\'e}nager}, Hervé and Soiland-Reyes, Stian and Gavrilović, Bogdan and Goble, Carole and others},
+  journal = {Communications of the ACM},
+  volume = {65},
+  number = {6},
+  pages = {54--63},
+  year = {2022},
+  doi = {10.1145/3486897},
+  note = {%!VERIFY}
+}
+
+@misc{pydra,
+  title = {Pydra -- a Pythonic Dataflow Engine},
+  author = {Jarecka, Dorota and Goncalves, Mathias and Markiewicz, Christopher J. and Esteban, Oscar and Lo, Nicole and Kaczmarzyk, Jakub and Ghosh, Satrajit},
+  year = {2020},
+  howpublished = {\url{https://github.com/nipype/pydra}},
+  note = {NiPype successor project; software.}
+}
+
+@online{kedro,
+  title = {Kedro},
+  organization = {{Kedro Project}},
+  url = {https://kedro.org/},
+  note = {Open-source Python framework for data-science workflows.}
+}
+
+@article{zhao2008scientific_workflows,
+  title = {Scientific Workflow Systems for 21st Century e-Science: New Bottle or New Wine?},
+  author = {Zhao, Yong and Raicu, Ioan and Foster, Ian},
+  year = {2008},
+  eprint = {0808.3545},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.SE},
+  doi = {10.48550/arXiv.0808.3545}
+}
+
+@article{cuevasvicenttin2013workflows,
+  title = {Scientific Workflows and Provenance: Introduction and Research Opportunities},
+  author = {Cuevas-Vicentt{\'i}n, V{\'i}ctor and Dey, Saumen and K{\"o}hler, Sven and Riddle, Sean and Lud{\"a}scher, Bertram},
+  year = {2013},
+  eprint = {1311.4610},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.DB},
+  doi = {10.48550/arXiv.1311.4610}
+}
+
+@article{souza2020provenance,
+  title = {Workflow Provenance in the Lifecycle of Scientific Machine Learning},
+  author = {Souza, Renan and Azevedo, Leonardo G. and Louren{\c{c}}o, V{\'i}tor and Soares, Elton and Thiago, Raphael and Brand{\~a}o, Rafael and Civitarese, Daniel and Vital Brazil, Emilio and Moreno, Marcio and Valduriez, Patrick and Mattoso, Marta and Cerqueira, Renato and Netto, Marco A. S.},
+  year = {2020},
+  eprint = {2010.00330},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.DB},
+  doi = {10.48550/arXiv.2010.00330}
+}
+
+@article{simmons2018provenance_sport,
+  title = {Data Provenance for Sport},
+  author = {Simmons, Andrew J. and Barnett, Scott and Vajda, Simon and Vasa, Rajesh},
+  year = {2018},
+  eprint = {1812.05804},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.DB},
+  doi = {10.48550/arXiv.1812.05804}
+}
+
+@inproceedings{kinsman2021,
+  title = {How Do Software Developers Use {GitHub Actions} to Automate Their Workflows?},
+  author = {Kinsman, Timothy and Wessel, Mairieli and Gerosa, Marco A. and Treude, Christoph},
+  booktitle = {Proceedings of the 18th International Conference on Mining Software Repositories ({MSR})},
+  pages = {420--431},
+  year = {2021},
+  doi = {10.1109/MSR52588.2021.00045},
+  note = {%!VERIFY}
+}
+
+@article{teytelman2016,
+  title = {Protocols.Io: Virtual Communities for Protocol Development and Discussion},
+  author = {Teytelman, Leonid and Stoliartchouk, Alexei and Kindler, Lori and Hurwitz, Bonnie L.},
+  journal = {PLOS Biology},
+  volume = {14},
+  number = {8},
+  pages = {e1002538},
+  year = {2016},
+  doi = {10.1371/journal.pbio.1002538},
+  note = {%!VERIFY}
+}
+
+@article{thegalaxycommunity2024,
+  title = {The Galaxy Platform for Accessible, Reproducible, and Collaborative Data Analyses: 2024 Update},
+  author = {{The Galaxy Community}},
+  journal = {Nucleic Acids Research},
+  volume = {52},
+  number = {W1},
+  pages = {W83--W94},
+  year = {2024},
+  doi = {10.1093/nar/gkae410}
+}
+
+@article{berthold2009,
+  title = {{KNIME} -- the Konstanz Information Miner: Version 2.0 and Beyond},
+  author = {Berthold, Michael R. and Cebron, Nicolas and Dill, Fabian and Gabriel, Thomas R. and K{\"o}tter, Tobias and Meinl, Thorsten and Ohl, Peter and Thiel, Kilian and Wiswedel, Bernd},
+  journal = {SIGKDD Explorations Newsletter},
+  volume = {11},
+  number = {1},
+  pages = {26--31},
+  year = {2009},
+  doi = {10.1145/1656274.1656280}
+}
+
+%% =====================================================================
+%% BPMN spec + extensions
+%% =====================================================================
+
+@manual{bpmnspec,
+  title = {Business Process Model and Notation ({BPMN}), Version 2.0.2},
+  author = {{Object Management Group}},
+  organization = {{OMG}},
+  year = {2014},
+  url = {https://www.omg.org/spec/BPMN/2.0.2/},
+  note = {OMG Document formal/2013-12-09.}
+}
+
+@article{white2004introduction,
+  title = {Introduction to {BPMN}},
+  author = {White, Stephen A},
+  journal = {IBM Cooperation},
+  volume = {2},
+  number = {0},
+  pages = {0},
+  year = {2004}
+}
+
+@incollection{stroppi2011,
+  title = {Extending {{BPMN}} 2.0: Method and Tool Support},
+  booktitle = {Business Process Model and Notation},
+  author = {Stroppi, Luis Jesús Ramón and Chiotti, Omar and Villarreal, Pablo David},
+  editor = {Dijkman, Remco and Hofstetter, Jörg and Koehler, Jana},
+  date = {2011},
+  volume = {95},
+  pages = {59--73},
+  publisher = {Springer Berlin Heidelberg},
+  location = {Berlin, Heidelberg},
+  doi = {10.1007/978-3-642-25160-3_5}
+}
+
+@inproceedings{braun2014,
+  title = {{{BPMN4CP}}: Design and Implementation of a {{BPMN}} Extension for Clinical Pathways},
+  booktitle = {2014 {{IEEE International Conference}} on {{Bioinformatics}} and {{Biomedicine}} ({{BIBM}})},
+  author = {Braun, Richard and Schlieter, Hannes and Burwitz, Martin and Esswein, Werner},
+  date = {2014-11},
+  pages = {9--16},
+  publisher = {IEEE},
+  doi = {10.1109/BIBM.2014.6999261}
+}
+
+@article{tetzlaff2022bpmn4sml,
+  title = {{BPMN4sML}: A {BPMN} Extension for Serverless Machine Learning},
+  author = {Tetzlaff, Laurens Martin},
+  year = {2022},
+  eprint = {2208.02030},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.SE},
+  doi = {10.48550/arXiv.2208.02030}
+}
+
+@article{ait2024bpmn_humanagent,
+  title = {Towards Modeling Human-Agentic Collaborative Workflows: A {BPMN} Extension},
+  author = {Ait, Adem and {C{\'a}novas Izquierdo}, Javier Luis and Cabot, Jordi},
+  year = {2024},
+  eprint = {2412.05958},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.SE},
+  doi = {10.48550/arXiv.2412.05958}
+}
+
+@online{ait2024,
+  title = {Towards Modeling Human-Agentic Collaborative Workflows: A {BPMN} Extension},
+  author = {Ait, Adem and Izquierdo, Javier Luis Cánovas and Cabot, Jordi},
+  date = {2024-12-12},
+  eprint = {2412.05958},
+  eprinttype = {arXiv},
+  doi = {10.48550/arXiv.2412.05958},
+  note = {Alias of @ait2024bpmn_humanagent.}
+}
+
+@article{magnani2009bpdmn,
+  title = {{BPDMN}: A Conservative Extension of {BPMN} with Enhanced Data Representation Capabilities},
+  author = {Magnani, Matteo and Montesi, Danilo},
+  year = {2009},
+  eprint = {0907.1978},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.SE},
+  doi = {10.48550/arXiv.0907.1978}
+}
+
+@article{pufahl2022,
+  title = {{BPMN} in Healthcare: Challenges and Best Practices},
+  author = {Pufahl, Luise and Zerbato, Francesca and Weber, Barbara and Weber, Ingo},
+  journal = {Information Systems},
+  volume = {107},
+  pages = {102013},
+  year = {2022},
+  doi = {10.1016/j.is.2022.102013}
+}
+
+@article{zarour2019,
+  title = {A Systematic Literature Review on {{BPMN}} Extensions},
+  author = {Zarour, Karim and Benmerzoug, Djamel and Guermouche, Nawal and Drira, Khalil},
+  journal = {Business Process Management Journal},
+  volume = {26},
+  number = {6},
+  pages = {1473--1503},
+  year = {2019},
+  doi = {10.1108/BPMJ-01-2019-0040}
+}
+
+@article{cimino2025,
+  title = {Evolution of {{BPMN}} and Simulation Integration: Trends, Challenges, and Future Directions},
+  author = {Cimino, Antonio and Filice, Anna Chiara and Longo, Francesco and Mirabelli, Giovanni and Solina, Vittorio and Mallek-Daclin, Sihem and Daclin, Nicolas and Zacharewicz, Gregory},
+  journal = {Procedia Computer Science},
+  volume = {253},
+  pages = {3235--3246},
+  year = {2025},
+  doi = {10.1016/j.procs.2025.02.048}
+}
+
+@incollection{kopke2025,
+  title = {Efficient {LLM}-Based Conversational Process Modeling},
+  booktitle = {Business Process Management Workshops},
+  author = {Köpke, Julius and Safan, Aya},
+  editor = {Gdowska, Katarzyna and Gómez-López, María Teresa and Rehse, Jana-Rebecca},
+  year = {2025},
+  volume = {534},
+  pages = {259--270},
+  publisher = {Springer Nature Switzerland},
+  doi = {10.1007/978-3-031-78666-2_20}
+}
+
+@online{guerreiro2024,
+  title = {{{DEMO}} Enhanced {{BPMN}}},
+  author = {Guerreiro, Sérgio and Dietz, Jan},
+  date = {2024-09-25},
+  eprint = {2410.08215},
+  eprinttype = {arXiv},
+  doi = {10.48550/arXiv.2410.08215}
+}
+
+@online{diagrid,
+  title = {Diagrid Workflows -- Generate Durable Apps Code from Diagrams},
+  url = {https://workflows.diagrid.io/},
+  note = {Visited 2025-05-18.}
+}
+
+%% Visual modelling languages in patient pathways (scoping review)
+
+@article{visualmodelinglanguagesscopingreview,
+  title = {Visual Modeling Languages in Patient Pathways: A Scoping Review},
+  author = {{[Authors to verify]}},
+  journal = {[Journal -- located via PubMed Central, PMC11607556]},
+  year = {2024},
+  url = {https://pmc.ncbi.nlm.nih.gov/articles/PMC11607556/},
+  note = {%!VERIFY -- PMC11607556; author list and venue need to be confirmed from PubMed Central.}
+}
+
+%% LLM-based BPMN authoring tools
+
+@article{kourani2024promoai,
+  title = {{ProMoAI}: Process Modeling with Generative {AI}},
+  author = {Kourani, Humam and Berti, Alessandro and Schuster, Daniel and {van der Aalst}, Wil M. P.},
+  year = {2024},
+  eprint = {2403.04327},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.DB},
+  doi = {10.48550/arXiv.2403.04327}
+}
+
+@article{kourani2024process_modeling_llm,
+  title = {Process Modeling with Large Language Models},
+  author = {Kourani, Humam and Berti, Alessandro and Schuster, Daniel and {van der Aalst}, Wil M. P.},
+  year = {2024},
+  eprint = {2403.07541},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.SE},
+  doi = {10.48550/arXiv.2403.07541}
+}
+
+@article{lauer2026assessing,
+  title = {Assessing the Business Process Modeling Competences of Large Language Models},
+  author = {Lauer, Chantale and Pfeiffer, Peter and Rombach, Alexander and Mehdiyev, Nijat},
+  year = {2026},
+  eprint = {2601.21787},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.SE},
+  doi = {10.48550/arXiv.2601.21787}
+}
+
+%% =====================================================================
+%% Schema / LinkML / ontology
+%% =====================================================================
+
+@article{moxon2025linkml,
+  title = {{LinkML}: An Open Data Modeling Framework},
+  author = {Moxon, Sierra A. T. and Solbrig, Harold and Harris, Nomi L. and Kalita, Patrick and Miller, Mark A. and Patil, Sujay and Schaper, Kevin and Bizon, Chris and Caufield, J. Harry and others},
+  year = {2025},
+  eprint = {2511.16935},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.DB},
+  doi = {10.48550/arXiv.2511.16935}
+}
+
+@article{norouzi2025semantic_processes,
+  title = {Semantic Representation of Processes with Ontology Design Patterns},
+  author = {Norouzi, Ebrahim and Hertling, Sven and Waitelonis, J{\"o}rg and Sack, Harald},
+  year = {2025},
+  eprint = {2509.23776},
+  archiveprefix = {arXiv},
+  primaryclass = {cs.IR},
+  doi = {10.48550/arXiv.2509.23776}
+}
+
+@article{novere2009,
+  title = {The Systems Biology Graphical Notation},
+  author = {Le Nov{\`e}re, Nicolas and Hucka, Michael and Mi, Huaiyu and Moodie, Stuart and Schreiber, Falk and Sorokin, Anatoly and Demir, Emek and Wegner, Katja and Aladjem, Mirit I. and Wimalaratne, Sarala M. and others},
+  journal = {Nature Biotechnology},
+  volume = {27},
+  number = {8},
+  pages = {735--741},
+  year = {2009},
+  doi = {10.1038/nbt.1558}
+}
+
+%% =====================================================================
+%% Software references (bpmn-js, bpmn-moddle, Behaverse Data Server)
+%% =====================================================================
+
+@misc{bpmnjs,
+  title = {{bpmn-js}: {BPMN} 2.0 Rendering Toolkit and Web Modeler},
+  author = {{Camunda Services GmbH and contributors}},
+  year = {2024},
+  howpublished = {\url{https://github.com/bpmn-io/bpmn-js}},
+  note = {JavaScript library; MIT licensed.}
+}
+
+@misc{bpmnmoddle,
+  title = {{bpmn-moddle}: Read, Modify and Write {BPMN} 2.0 Diagrams},
+  author = {{Camunda Services GmbH and contributors}},
+  year = {2024},
+  howpublished = {\url{https://github.com/bpmn-io/bpmn-moddle}},
+  note = {JavaScript library; MIT licensed.}
+}
+
+@misc{bds,
+  title = {Behaverse Data Server},
+  author = {{Behaverse Project}},
+  year = {2025},
+  howpublished = {\url{https://behaverse.org/data-server/}},
+  note = {Hosted runtime for executing Studyflow diagrams and collecting participant data.}
+}
+
+%% =====================================================================
+%% Adaptive / multi-agent designs
+%% =====================================================================
+
+@online{ghareeb2025,
+  title = {Robin: A Multi-Agent System for Automating Scientific Discovery},
+  author = {Ghareeb, Ali Essam and Chang, Benjamin and Mitchener, Ludovico and Yiu, Angela and Szostkiewicz, Caralyn J. and Laurent, Jon M. and Razzak, Muhammed T. and White, Andrew D. and Hinks, Michaela M. and Rodriques, Samuel G.},
+  date = {2025-05-19},
+  eprint = {2505.13400},
+  eprinttype = {arXiv},
+  doi = {10.48550/arXiv.2505.13400}
+}
+
+@article{barrowman2020vtree,
+  title = {Exploring Data Subsets with Vtree},
+  author = {Barrowman, Nick and Webster, Richard J.},
+  year = {2020},
+  eprint = {2010.13252},
+  archiveprefix = {arXiv},
+  primaryclass = {stat.CO},
+  doi = {10.48550/arXiv.2010.13252}
+}
+
+%% =====================================================================
+%% Workflow JOSS papers retained from the original references.bib
+%% (Most are useful citation fodder for §3.2 ecosystem positioning; only
+%% a handful are actually cited in paper.md, the rest remain as ready-
+%% to-pull references for revision.)
+%% =====================================================================
+
+@article{bengfort2019,
+  title = {Yellowbrick: Visualizing the Scikit-Learn Model Selection Process},
+  author = {Bengfort, Benjamin and Bilbro, Rebecca},
+  journal = {Journal of Open Source Software},
+  volume = {4},
+  number = {35},
+  pages = {1075},
+  year = {2019},
+  doi = {10.21105/joss.01075}
+}
+
+@article{buccheri2023,
+  title = {Excitingtools: An Exciting Workflow Tool},
+  author = {Buccheri, Alexander and Peschel, Fabian and Maurer, Benedikt and Voiculescu, Mara and Speckhard, Daniel T. and Kleine, Hannah and Stephan, Elisa and Kuban, Martin and Draxl, Claudia},
+  journal = {Journal of Open Source Software},
+  volume = {8},
+  number = {85},
+  pages = {5148},
+  year = {2023},
+  doi = {10.21105/joss.05148}
+}
+
+@article{cannoodt2024,
+  title = {Viash: A Meta-Framework for Building Reusable Workflow Modules},
+  author = {Cannoodt, Robrecht and Cannoodt, Hendrik and Schaumont, Dries and Waldrant, Kai and {Van De Kerckhove}, Eric and Boschmans, Andy and De Maeyer, Dries and Verbeiren, Toni},
+  journal = {Journal of Open Source Software},
+  volume = {9},
+  number = {93},
+  pages = {6089},
+  year = {2024},
+  doi = {10.21105/joss.06089}
+}
+
+@article{ghoshal2021,
+  title = {Science Capsule -- Capturing the Data Life Cycle},
+  author = {Ghoshal, Devarshi and Bianchi, Ludovico and Essiari, Abdelilah and Beach, Michael and Paine, Drew and Ramakrishnan, Lavanya},
+  journal = {Journal of Open Source Software},
+  volume = {6},
+  number = {62},
+  pages = {2484},
+  year = {2021},
+  doi = {10.21105/joss.02484}
+}
+
+@article{janssen2025,
+  title = {Executorlib -- Up-Scaling {Python} Workflows for Hierarchical Heterogeneous High-Performance Computing},
+  author = {Janssen, Jan and Taylor, Michael Gilbert and Yang, Ping and Neugebauer, Joerg and Perez, Danny},
+  journal = {Journal of Open Source Software},
+  volume = {10},
+  number = {108},
+  pages = {7782},
+  year = {2025},
+  doi = {10.21105/joss.07782}
+}
+
+@article{klampanos2020,
+  title = {{{DARE Platform}}: A Developer-Friendly and Self-Optimising Workflows-as-a-Service Framework for e-Science on the Cloud},
+  author = {Klampanos, Iraklis and Themeli, Chrysoula and Spinuso, Alessandro and Filgueira, Rosa and Atkinson, Malcolm and Gemünd, André and Karkaletsis, Vangelis},
+  journal = {Journal of Open Source Software},
+  volume = {5},
+  number = {54},
+  pages = {2664},
+  year = {2020},
+  doi = {10.21105/joss.02664}
+}
+
+@article{lavigne2021,
+  title = {Funsies: A Minimalist, Distributed and Dynamic Workflow Engine},
+  author = {Lavigne, Cyrille and Aspuru-Guzik, Alán},
+  journal = {Journal of Open Source Software},
+  volume = {6},
+  number = {66},
+  pages = {3274},
+  year = {2021},
+  doi = {10.21105/joss.03274}
+}
+
+@article{lund2019,
+  title = {{AnyPyTools}: A {Python} Package for Reproducible Research with the {AnyBody} Modeling System},
+  author = {Lund, Morten and Rasmussen, John and Andersen, Michael},
+  journal = {Journal of Open Source Software},
+  volume = {4},
+  number = {33},
+  pages = {1108},
+  year = {2019},
+  doi = {10.21105/joss.01108}
+}
+
+@article{makowski2018,
+  title = {The Psycho Package: An Efficient and Publishing-Oriented Workflow for Psychological Science},
+  author = {Makowski, Dominique},
+  journal = {Journal of Open Source Software},
+  volume = {3},
+  number = {22},
+  pages = {470},
+  year = {2018},
+  doi = {10.21105/joss.00470}
+}
+
+@article{radev2023,
+  title = {{BayesFlow}: Amortized {Bayesian} Workflows with Neural Networks},
+  author = {Radev, Stefan T. and Schmitt, Marvin and Schumacher, Lukas and Elsemüller, Lasse and Pratz, Valentin and Schälte, Yannik and Köthe, Ullrich and Bürkner, Paul-Christian},
+  journal = {Journal of Open Source Software},
+  volume = {8},
+  number = {89},
+  pages = {5702},
+  year = {2023},
+  doi = {10.21105/joss.05702}
+}
+
+@article{ritchie2020,
+  title = {Caliban: {Docker}-Based Job Manager for Reproducible Workflows},
+  author = {Ritchie, Sam and Slone, Ambrose and Ramasesh, Vinay},
+  journal = {Journal of Open Source Software},
+  volume = {5},
+  number = {53},
+  pages = {2403},
+  year = {2020},
+  doi = {10.21105/joss.02403}
+}
+
+@article{rosen2024,
+  title = {Jobflow: Computational Workflows Made Simple},
+  author = {Rosen, Andrew S. and Gallant, Max and George, Janine and Riebesell, Janosh and Sahasrabuddhe, Hrushikesh and Shen, Jimmy-Xuan and Wen, Mingjian and Evans, Matthew L. and Petretto, Guido and Waroquiers, David and Rignanese, Gian-Marco and Persson, Kristin A. and Jain, Anubhav and Ganose, Alex M.},
+  journal = {Journal of Open Source Software},
+  volume = {9},
+  number = {93},
+  pages = {5995},
+  year = {2024},
+  doi = {10.21105/joss.05995}
+}
+
+@article{seidler2024,
+  title = {Mantik: A Workflow Platform for the Development of Artificial Intelligence on High-Performance Computing Infrastructures},
+  author = {Seidler, Thomas and Emmerich, Fabian and Ehlert, Kristian and Berner, Rico and Nagel-Kanzler, Oliver and Schultz, Norbert and Quade, Markus and Schultz, Martin G. and Abel, Markus},
+  journal = {Journal of Open Source Software},
+  volume = {9},
+  number = {98},
+  pages = {6136},
+  year = {2024},
+  doi = {10.21105/joss.06136}
+}
+
+@article{strozzi2017,
+  title = {Pipengine: An Ultra-Light {YAML}-Based Pipeline Execution Engine},
+  author = {Strozzi, Francesco and {Jean Pierre Bonnal}, Raoul},
+  journal = {The Journal of Open Source Software},
+  volume = {2},
+  number = {16},
+  pages = {341},
+  year = {2017},
+  doi = {10.21105/joss.00341}
+}
+
+@article{uhrin2020,
+  title = {{kiwiPy}: Robust, High-Volume Messaging for Big-Data and Computational Science Workflows},
+  author = {Uhrin, Martin and Huber, Sebastiaan},
+  journal = {Journal of Open Source Software},
+  volume = {5},
+  number = {52},
+  pages = {2351},
+  year = {2020},
+  doi = {10.21105/joss.02351}
+}
+
+@article{uruchi2021,
+  title = {Autosubmit {GUI}: A {Javascript}-Based Graphical User Interface to Monitor Experiments Workflow Execution},
+  author = {Uruchi, Wilmer and Castrillo, Miguel and Beltrán, Daniel},
+  journal = {Journal of Open Source Software},
+  volume = {6},
+  number = {59},
+  pages = {3049},
+  year = {2021},
+  doi = {10.21105/joss.03049}
+}
+
+@article{willoughby2017,
+  title = {Documentation and Visualisation of Workflows for Effective Communication, Collaboration and Publication at Source},
+  author = {Willoughby, Cerys and Frey, Jeremy G.},
+  journal = {International Journal of Digital Curation},
+  volume = {12},
+  number = {1},
+  pages = {72--87},
+  year = {2017},
+  doi = {10.2218/ijdc.v12i1.532}
+}
+
+@article{wirth2024,
+  title = {Snk: A {Snakemake CLI} and Workflow Management System},
+  author = {Wirth, Wytamma and Mutch, Simon and Turnbull, Robert},
+  journal = {Journal of Open Source Software},
+  volume = {9},
+  number = {103},
+  pages = {7410},
+  year = {2024},
+  doi = {10.21105/joss.07410}
+}

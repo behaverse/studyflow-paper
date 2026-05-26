@@ -2,14 +2,14 @@ project:
   type: manuscript
   output-dir: _manuscript/
   render:
-    - 0_frontmatter.qmd
+    - archived/0_frontmatter.qmd
 
 manuscript: 
-  article: 0_frontmatter.qmd
+  article: archived/0_frontmatter.qmd
 
 format:
   html: default
   pdf:
     fontsize: 10pt
-    output-file: studyflow_modeler_paper.pdf
+    output-file: studyflow_paper.pdf
     # pdf-engine: latexmk  # for inline SVG
