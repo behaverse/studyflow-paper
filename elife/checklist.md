@@ -13,6 +13,7 @@
 - [ ] Conflict-of-interest declarations
 - [ ] Data and code availability statement: link to repo URLs.
 - [ ] eLife T&R pre-submission checklist
-- [ ] Word-count -- eLife T&R typical 8–12k. Trim if needed; §M.8 EBNF can move to supplementary.
+- [ ] Word-count -- eLife T&R typical 8–12k. Trim if needed.
+- [ ] Decision figure for §2.12 -- diagram or decision tree that helps a reader pick the right element with the three orthogonal questions. Anchors visually and gives reviewers the "when to use what" guidance.
 - [ ] Zotero pass on 11 `%!VERIFY` entries — 30 min.
 - [ ] Figures
