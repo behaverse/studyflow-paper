@@ -2,36 +2,30 @@
 
 **Working title:** *Studyflow: a BPMN-based notation, modeler, and runner for end-to-end specification of experimental research workflows in cognitive sciences*
 
-**Related files in this folder:**
-- [`paper.qmd`](./paper.qmd) — full manuscript draft
-- [`references.bib`](./references.bib) — merged bibliography
-- [`checklist.md`](./checklist.md) — checklist
-- [`nback_demo.qmd`](./nback_demo.qmd) — notebook for §2.6
-
 ---
 
 ## Paper structure
 
 ### §1 Introduction
 
-| § | Title | One-line summary | Status |
+| § | Title | Summary | Status |
 |---|---|---|---|
 | 1.1 | The reproducibility gap is in *processes*, not just data | Process is the missing half of reproducibility; voluntary narrative checklists have empirically failed and a machine-readable, human-understandable representation of the *processes* that generated the data is what's needed. | drafted |
 | 1.2 | Current practice fragments the study across artifacts | Today's tooling sorts into four families (figures, checklists, data standards, code) that each cover one slice and force researchers to maintain divergent artifacts that drift. | drafted |
-| 1.3 | BPMN as a foundation | Studyflow extends BPMN — a mature, ISO-standard process notation with a built-in extension mechanism — rather than inventing a new graphical language. | drafted |
-| 1.4 | Contributions and roadmap | Five independently usable artifacts: a LinkML language specification, layered moddle YAML runtime schemas, worked example diagrams, the Studyflow Modeler, and the Studyflow Runner. | drafted |
+| 1.3 | BPMN as a foundation | Studyflow extends BPMN; a mature, ISO-standard process notation with a built-in extension mechanism, rather than inventing a new language. | drafted |
+| 1.4 | Contributions and roadmap | Five independently usable artifacts: a LinkML language specification, layered schemas, worked example diagrams, the Studyflow Modeler, and the Studyflow Runner. | drafted |
 
 ### §2 Results
 
-| § | Title | One-line summary | Status |
+| § | Title | Summary | Status |
 |---|---|---|---|
-| 2.1 | The Studyflow language | BPMN 2.0 plus four research extensions (`Study` container, cognitive activity types, data elements and operations, research gateways), partitioned into a small core and optional domain schemas. | drafted |
+| 2.1 | The Studyflow language | BPMN 2.0 plus four research extensions (`Study` container, cognitive activity types, data elements and operations, decision making gateways), partitioned into a small core and domain-specific schemas. | drafted |
 | 2.2 | The Studyflow Modeler | A client-side, schema-driven React + `bpmn-js` editor whose palette and inspector are regenerated from the moddle schemas so language and editor stay in sync. | drafted |
 | 2.3 | The Studyflow Runner | A separate client-side application that parses, validates, and walks a participant or agent through a `.studyflow` diagram node by node, with seeded determinism and three response sources for Behaverse tasks. | drafted |
 | 2.4 | The three views (Study / Gantt / Checklist) | One source renders three ways — Study for procedural structure, Gantt for wall-clock timing, Checklist for reporting-guideline coverage — each tuned to a different reader. | drafted |
 | 2.5 | Demonstration I — CONSORT-style randomized controlled trial | A 423-line CONSORT-2025 reference diagram shows that attrition encoded as boundary error events makes the diagram's topology match the trial's topology, so the figure in the paper *is* the file that ran the trial. | drafted |
 | 2.6 | Demonstration II — N-back end-to-end | An N-back authored in the modeler and run in the runner closes the "single diagram, many audiences" loop, with Psych-DS-conformant trials emerging from the same source. | drafted; empirical `[GAP]` on the human pilot (the LLM-agent pilot is now §2.12). |
-| 2.7 | Demonstration III — A reproducible analysis pipeline | A reaction-time analysis encoded as data-operation markers with schema-bound input/output is itself the pre-registration of the analysis. | drafted; `[GAP]` on the specific RT dataset to use. |
+| 2.7 | Demonstration III — A reproducible analysis pipeline | A response-time analysis encoded as data-operation markers with schema-bound input/output is itself the pre-registration of the analysis. | drafted; `[GAP]` on the specific RT dataset to use. |
 | 2.8 | Coverage across reporting guidelines | Reporting guidelines are structurally a controlled vocabulary plus a checklist plus a flow diagram, so all eleven listed are expressible as a Studyflow and conformance becomes a property of the diagram. | drafted |
 | 2.9 | Process and data: one diagram | Process and data live on the same diagram with schema bindings to BIDS/Psych-DS/BDM/CSVW, so contracts between upstream and downstream tasks are verifiable without leaving the file. | drafted |
 | 2.10 | Beyond data collection: multimodal preprocessing and foundation-model training | ML pipelines face the same fragmentation as experimental protocols; an OmniProcess Studyflow can specify multimodal harmonisation (EEG, fMRI, behavioural) with multiverse-expansion branches as first-class elements. | drafted; deployed pipeline is forthcoming. |
@@ -42,9 +36,9 @@
 
 | § | Title | One-line summary | Status |
 |---|---|---|---|
-| 3.1 | What Studyflow changes | Six numbered advances (stakeholder alignment, versionable artifacts, specification independence, process-and-data on one diagram, reporting-guideline conformance as a property, one protocol with many executors) that together yield trust by construction. | drafted (restructured as numbered list, RSA-style) |
-| 3.2 | Relationship to existing ecosystems | Studyflow complements rather than replaces execution stacks (Nextflow, CWL), data standards (BIDS, BDM), reporting guidelines (CONSORT, SPIRIT), and sibling BPMN profiles, occupying the procedural plane that LinkML/NIDM/BIDS/ARTEM-IS together leave open. | drafted; the process-mining boundary moved here from §3.3 |
-| 3.3 | Future directions | Roadmap: timeseries/event-marker data structures, storage/governance operations, tidyverse-mirrored operators, runner support for parallel gateways and stratified allocation, downstream-engine emitters (Kedro, Nextflow, NiPype), empirical readability studies, and language extensions for adaptive and single-subject designs. | drafted; absorbs former limitations on adoption + awkward designs. |
+| 3.1 | What Studyflow changes | stakeholder alignment, versioned artifacts, independent specification, process-and-data on one diagram, one protocol with many executors, that together yield trust by construction. | drafted |
+| 3.2 | Relationship to existing ecosystems | Studyflow complements rather than replaces execution stacks (Nextflow, CWL), data standards (BIDS, BDM), reporting guidelines (CONSORT, SPIRIT), and sibling BPMN profiles, occupying the space that LinkML/NIDM/BIDS/ARTEM-IS together leave open. | drafted|
+| 3.3 | Future directions | Roadmap: timeseries/event-marker data structures, storage/governance operations, tidyverse-mirrored operators, runner support for other gateways (parallel gateways and stratified allocation), empirical UX studies, and language extensions. | drafted |
 
 ### Code and data availability
 
