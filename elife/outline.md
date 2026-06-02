@@ -99,7 +99,8 @@ One worked example threads the whole section: a single study that administers a 
 | Modeler docs | [`../../studyflow-modeler/docs/`](../../studyflow-modeler/docs/) |
 | Schemas | [`../../studyflow-modeler/src/assets/schemas/`](../../studyflow-modeler/src/assets/schemas/) |
 | Example diagrams | [`../../studyflow-modeler/src/assets/examples/`](../../studyflow-modeler/src/assets/examples/) |
-| **6-task battery (new, §2.6)** | [`cognitive_battery.studyflow`](../../studyflow-modeler/src/assets/examples/cognitive_battery.studyflow) |
+| **6-task battery (new, §2.6)** | [`cognitive_battery.studyflow`](../../studyflow-modeler/src/assets/examples/cognitive_battery.studyflow) — linear, runnable today |
+| **Full study (new, §2.5–§2.7)** | [`cognitive_study.studyflow`](cognitive_study.studyflow) (lives in this `elife/` folder, not the modeler examples) — CONSORT (eligibility + randomization gateways, allocation, attrition boundary events), Battery sub-process (trial-by-trial Ollama; text tasks n-back/digit-span, vision tasks MOT/PC/matrices/card-sorting via `llava` + screenshots), Analysis sub-process (read → filter → map → reduce → visualize script → write). Participant flow runnable; sub-processes await runner sub-process traversal (§3.3 roadmap). |
 | N-back study | [`lablink_demo1.studyflow`](../../studyflow-modeler/src/assets/examples/lablink_demo1.studyflow) |
 | CONSORT / SPIRIT templates | [`consort2025.studyflow`](../../studyflow-modeler/src/assets/examples/consort2025.studyflow) · [`spirit2025.studyflow`](../../studyflow-modeler/src/assets/examples/spirit2025.studyflow) |
 | Shipping bot demos | [`bot_external.studyflow`](../../studyflow-modeler/src/assets/examples/bot_external.studyflow) · [`bot_claude.studyflow`](../../studyflow-modeler/src/assets/examples/bot_claude.studyflow) · [`bot_ollama.studyflow`](../../studyflow-modeler/src/assets/examples/bot_ollama.studyflow) |
