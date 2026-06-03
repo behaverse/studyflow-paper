@@ -1,0 +1,101 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% ELIFE ARTICLE TEMPLATE (Quarto / Pandoc adaptation)
+%%% Mirrors elife-latex-template/elife-template.tex — only the
+%%% title/author/affiliation/abstract/body/bibliography blocks
+%%% are parameterised with pandoc variables. elife.cls is
+%%% unchanged and loaded as-is from the extension directory.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% PREAMBLE
+% Open Sans (loaded by elife.cls) has no scalable Type 1 metrics, so
+% microtype's font expansion can't be applied under pdflatex. Disable it
+% before elife.cls loads microtype.
+\PassOptionsToPackage{expansion=false}{microtype}
+\documentclass[$if(fontsize)$$fontsize$$else$9pt$endif$$if(linenumbers)$,lineno$endif$$if(linespacing)$,$linespacing$$endif$]{elife}
+
+%%% Packages preserved from the original eLife template
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\DeclareSIUnit\Molar{M}
+
+%%% Pandoc/Quarto scaffolding
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\pandocbounded}[1]{#1}
+$if(graphics)$
+\usepackage{graphicx}
+$endif$
+\usepackage{longtable,booktabs,array}
+\usepackage{calc}
+\usepackage{etoolbox}
+% pandoc emits \def\LTcaptype{none} for un-captioned longtables; the caption
+% package (loaded by elife.cls) then asks for a counter named "none". Define it.
+\makeatletter
+\@ifundefined{c@none}{\newcounter{none}}{}
+\makeatother
+% pandoc passes Shaded/Highlighting macros when code blocks are present
+$if(highlighting-macros)$
+$highlighting-macros$
+$endif$
+
+% Quarto cross-reference scaffolding (no-ops if quarto-scos isn't used)
+\providecommand{\citeproctext}{}
+\providecommand{\citeproc}[2]{\citep{#1}}
+
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% ARTICLE SETUP
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{$title$}
+
+$for(by-author)$
+\author[$for(it.affiliations)$$it.number$$sep$,$endfor$$if(it.attributes.corresponding)$*$endif$]{$it.name.literal$}
+$endfor$
+
+$for(by-affiliation)$
+\affil[$it.number$]{$it.name$$if(it.department)$, $it.department$$endif$$if(it.city)$, $it.city$$endif$$if(it.country)$, $it.country$$endif$}
+$endfor$
+
+$for(by-author)$$if(it.attributes.corresponding)$\corr{$it.email$}{$it.name.literal$}
+$endif$$endfor$
+
+$for(by-author)$$if(it.attributes.equal-contributor)$\contrib[\authfn{1}]{These authors contributed equally to this work.}
+$endif$$endfor$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% ARTICLE START
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$if(impact-statement)$
+\noindent\textbf{Impact statement.}\space $impact-statement$\par\medskip
+$endif$
+
+$if(keywords)$
+\noindent\textbf{Keywords:}\space $for(keywords)$$keywords$$sep$; $endfor$\par\medskip
+$endif$
+
+$body$
+
+$if(natbib)$
+$if(bibliography)$
+\bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
+$endif$
+$endif$
+$if(biblatex)$
+\printbibliography$if(biblio-title)$[title=$biblio-title$]$endif$
+$endif$
+
+\end{document}

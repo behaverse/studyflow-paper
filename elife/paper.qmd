@@ -1,26 +1,35 @@
-# Studyflow: a BPMN-based visual notation for end-to-end specification of experimental research in cognitive sciences
-
-**Authors:**
-Morteza Ansarinia^1,\*^ (ORCID 0000-0001-8335-6704),
-Hoorieh Afkari Roshan^1^ (ORCID 0000-0003-4787-8331),
-Pedro Cardoso-Leite^1^ (ORCID 0000-0002-2848-5527)
-
-^1^ University of Luxembourg, Luxembourg
-^\*^ Corresponding author: morteza.ansarinia@uni.lu
-
-## Abstract
-
-A scientific study passes through many people, and each of them usually works with a different artifact. The study moves from the researcher to the ethics committee and the participant, and then on to the data engineer, the analyst, the reviewer, and the replicator. The artifact changes at each step: a protocol PDF and an experiment script become a preprocessing notebook, then a manuscript figure and a CONSORT diagram. Because these artifacts drift apart, no single representation describes the study as it was actually run. **Studyflow** is a visual notation that closes this gap by extending Business Process Model and Notation (BPMN) with elements specific to experimental cognitive sciences: domain-specific activities (cognitive task, questionnaire, instruction), decision gateways (randomization, eligibility criteria), data operations (map, filter, reduce), and data elements bound to community practices (BIDS, Psych-DS, BDM, CSVW). A single `.studyflow` file then serves as protocol, specification, publication figure, and participant-facing application. We describe the language, an open source modeler, and a runner. We then follow one reproducible study through its full lifecycle, from protocol design to publication: a battery of cognitive tasks administered to human participants and to artificial agents, and then compared across tasks, models, and demographics.
-
-## Impact statement
-
-Studyflow turns a scientific study into a single source-of-truth diagram that can be reviewed, executed, and published. It replaces the divergent artifacts that currently fragment experimental research across stakeholders, such as protocols, scripts, pipeline parameters, and diagrams.
-
-## Keywords
-
-scientific workflows; process modeling; experimental design; BPMN; reproducibility
-
-
+---
+title: "Studyflow: a visual notation for end-to-end specification of experimental research in cognitive sciences"
+author:
+  - name: Morteza Ansarinia
+    orcid: 0000-0001-8335-6704
+    corresponding: true
+    email: morteza.ansarinia@uni.lu
+    affiliations:
+      - ref: ulux
+  - name: Hoorieh Afkari Roshan
+    orcid: 0000-0003-4787-8331
+    affiliations:
+      - ref: ulux
+  - name: Pedro Cardoso-Leite
+    orcid: 0000-0002-2848-5527
+    affiliations:
+      - ref: ulux
+affiliations:
+  - id: ulux
+    name: University of Luxembourg
+    country: Luxembourg
+abstract: |
+  A scientific study passes through many people, and each of them usually works with a different artifact. The study moves from the researcher to the ethics committee and the participant, and then on to the data engineer, the analyst, the reviewer, and the replicator. The artifact changes at each step: a protocol PDF and an experiment script become a preprocessing notebook, then a manuscript figure and a CONSORT diagram. Because these artifacts drift apart, no single representation describes the study as it was actually run. **Studyflow** is a visual notation that closes this gap by extending Business Process Model and Notation (BPMN) with elements specific to experimental cognitive sciences: domain-specific activities (cognitive task, questionnaire, instruction), decision gateways (randomization, eligibility criteria), data operations (map, filter, reduce), and data elements bound to community practices (BIDS, Psych-DS, BDM, CSVW). A single `.studyflow` file then serves as protocol, specification, publication figure, and participant-facing application. We describe the language, an open source modeler, and a runner. We then follow one reproducible study through its full lifecycle, from protocol design to publication: a battery of cognitive tasks administered to human participants and to artificial agents, and then compared across tasks, models, and demographics.
+impact-statement: |
+  Studyflow turns a scientific study into a single source-of-truth diagram that can be reviewed, executed, and published. It replaces the divergent artifacts that currently fragment experimental research across stakeholders, such as protocols, scripts, pipeline parameters, and diagrams.
+keywords:
+  - scientific workflows
+  - process modeling
+  - experimental design
+  - BPMN
+  - reproducibility
+bibliography: references.bib
 ---
 
 # 1. Introduction

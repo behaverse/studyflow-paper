@@ -1,0 +1,9 @@
+project:
+  type: manuscript
+
+manuscript:
+  article: paper.qmd
+
+format:
+  html: default
+  elife-pdf: default

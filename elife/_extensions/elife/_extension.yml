@@ -1,0 +1,17 @@
+title: eLife Journal Format
+author: Adapted from the eLife LaTeX template (v1.11, 2022-06)
+version: 0.1.0
+quarto-required: ">=1.7.0"
+contributes:
+  formats:
+    pdf:
+      template: template.tex
+      template-partials: []
+      cite-method: natbib
+      number-sections: false
+      pdf-engine: pdflatex
+      keep-tex: false
+      linenumbers: true
+      format-resources:
+        - elife.cls
+        - vancouver-elife.bst

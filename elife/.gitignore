@@ -1,0 +1,12 @@
+/.quarto/
+**/*.quarto_ipynb
+
+# Quarto render artifacts
+paper.pdf
+paper.tex
+paper.suppinfo
+paper_files/
+
+# Copied at render time by the elife extension's format-resources
+/elife.cls
+/vancouver-elife.bst
