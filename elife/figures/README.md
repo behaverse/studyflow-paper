@@ -69,7 +69,7 @@ Centre callout: "One study. Four artifacts. Four divergent representations of th
 
 **Where it lands:** §2.3 (The Studyflow Runner).
 
-**Status:** gap. Depends on §2.6 round-trip execution per [`../nback_demo.md`](../nback_demo.md).
+**Status:** gap. Depends on the §2.6 bot-mode round-trip (see [`../checklist.md`](../checklist.md)).
 
 **What it shows:** Four to six panels following a participant through the §2.6 N-back: consent screen → Welcome instruction → mid-1-back (Behaverse Unity iframe) → end-screen with completion code. Run on `seed=42` for reproducibility. Save as `fig4_runner-walkthrough.png` plus a thumbnail of the original `.studyflow` next to it.
 

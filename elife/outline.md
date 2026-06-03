@@ -17,7 +17,7 @@
 
 ### §2 Results
 
-One worked example threads the whole section: a single study that administers a **six-task Behaverse battery** (n-back, digit span, multiple-object tracking, pattern comparison, Belval matrices, Belval card sorting) to human participants and a **panel of agents (model × persona × task)**, walked through its full lifecycle. §2.1–§2.4 describe the artifacts; §2.5–§2.9 are the lifecycle (Design → Collect → Analyze → Model → Report).
+One worked example threads the whole section: a single study that administers a **six-task Behaverse battery** (n-back, digit span, multiple-object tracking, pattern comparison, Belval matrices, Belval card sorting) to human participants and **agents (model x trait x task)**, walked through its full lifecycle. §2.1–§2.4 describe the artifacts; §2.5–§2.9 are the lifecycle (Design → Collect → Analyze → Model → Report).
 
 | § | Title | Summary | Status |
 |---|---|---|---|
@@ -26,9 +26,9 @@ One worked example threads the whole section: a single study that administers a 
 | 2.3 | The Studyflow Runner | A separate client-side application that parses, validates, and walks a participant or agent through a `.studyflow` diagram node by node, with seeded determinism and three response sources for Behaverse tasks (Unity in-game bot, runner-side random, per-trial LLM bridge). | drafted |
 | 2.4 | The three views (Study / Gantt / Checklist) | One source renders three ways (Study for procedural structure, Gantt for wall-clock timing, Checklist for reporting-guideline coverage), each tuned to a different reader. | drafted |
 | 2.5 | Design: the protocol, randomization, and reporting scaffolding | The battery study designed as a CONSORT 2025 / SPIRIT 2025-scaffolded RCT; attrition encoded as boundary error events makes the diagram's topology match the trial's, so the published figure *is* the file that ran the study. | drafted (reframed from "Demonstration I — CONSORT") |
-| 2.6 | Collect: one diagram, many executors | The 6-task battery administered to humans + a model × persona × task agent panel; n-back is the worked detail (Figure 7); each task is a nested Behaverse timeline of blocks; the screenshot/vision pathway is essential for the spatial tasks; folds in multi-agent/choreography. | drafted; `[N]`/`[X.X]` placeholders pending real seed-42 runs (no human numbers claimed). Backed by `cognitive_battery.studyflow` (authored). |
-| 2.7 | Analyze and compare | A reproducible RT + accuracy pipeline over the collected trials, grouped by task × executor × persona, with process and data on one diagram and schema-bound I/O, is itself the pre-registration of the analysis. | drafted (folds old 2.7 + 2.9); `[GAP]` on the worked RT dataset. |
-| 2.8 | Model: a machine-learning pipeline in the same notation | The same battery trials feed a model; OmniProcess sketches multimodal preprocessing/training (EEG, fMRI, behavioral) with multiverse-expansion branches as first-class elements. | drafted (was 2.10); deployed pipeline forthcoming. |
+| 2.6 | Collect: one diagram, many executors | The 6-task battery administered to humans + a model × trait × task agent panel; n-back is the worked detail (Figure 7); each task is a nested Behaverse timeline of blocks; the screenshot/vision pathway is essential for the spatial tasks; folds in multi-agent/choreography. | drafted; `[N]`/`[X.X]` placeholders pending real seed-42 runs (no human numbers claimed). Backed by `cognitive_battery.studyflow` (authored). |
+| 2.7 | Analyze and compare | A reproducible RT + accuracy pipeline over the collected trials, grouped by task × executor × trait, with process and data on one diagram and schema-bound I/O, is itself the pre-registration of the analysis. | drafted (folds old 2.7 + 2.9); `[GAP]` on the worked RT dataset. |
+| 2.8 | Model: a machine-learning pipeline in the same notation | The same battery trials feed a model (e.g., a human-vs-agent classifier); the section then sketches a forthcoming multimodal preprocessing/training pipeline (EEG, fMRI, behavioral) whose multiverse-expansion branches are first-class elements. | drafted; trimmed to one paragraph and de-named (no "OmniProcess"); deployed pipeline forthcoming. |
 | 2.9 | Report and publish | The CONSORT figure is exported from the file that ran the study; reporting-guideline conformance (eleven listed) becomes a checkable diagram property. | drafted (folds old 2.8 reporting-guideline coverage) |
 
 ### §3 Discussion
@@ -63,27 +63,29 @@ One worked example threads the whole section: a single study that administers a 
 | **F8** | RT analysis pipeline + dplyr side-by-side | docs/reference/data.qmd; needs rendering |
 | **F9** | SPIRIT 2025 vs Studyflow SPIRIT (three views) | exists in examples |
 | **F10** | Process + data: EEG `bids:Dataset` example | now folded into §2.7 prose; figure no longer referenced — drop or re-cite |
-| **F11** | OmniProcess preprocessing pipeline | TODO; anchors §2.8 |
+| **F11** | Multimodal preprocessing/training pipeline (EEG/fMRI/behavioral) | TODO; anchors §2.8. Text now de-named (no "OmniProcess") -- update figure caption/asset to match. |
 | **F12** | Three-runtime composition (human / RL / LLM from one source) | TODO; anchors §2.6 |
-| **F13** | Agent-panel profile (accuracy + RT per model × persona × task vs. random baseline) | TODO; depends on running the bot demos + battery with seed 42 — placeholders in place in §2.6 |
+| **F13** | Agent-panel profile (accuracy + RT per model × trait × task vs. random baseline) | TODO; depends on running the bot demos + battery with seed 42 — placeholders in place in §2.6 |
 | **F14** | The 6-task battery as a Studyflow | render/export from `cognitive_battery.studyflow` (authored) |
 | **L1** | LinkML schema excerpt | now in supplementary (was Listing 1) |
 | **L2** | XML serialization example | now in supplementary (was Listing 2) |
 | **L3** | EBNF grammar | now in supplementary (was Listing 3) |
 | **Table 2** | Reporting-guideline coverage matrix (§2.9) | CONSORT/SPIRIT marked Yes; 9 others TODO. CONSORT 2025 = **30 items** (not 25). |
-| **Table 3** | Agent-panel profile summary (model × persona × task × accuracy × median RT × random-fallback rate) | TODO; depends on running the bot demos + battery with seed 42 — placeholders in place in §2.6 |
+| **Table 3** | Agent-panel profile summary (model × trait × task × accuracy × median RT × random-fallback rate) | TODO; depends on running the bot demos + battery with seed 42 — placeholders in place in §2.6 |
 
 ---
 
 ## Open decisions
 
-- **Empirical anchor for §2.6** — run the three bot demos (`bot_external`, `bot_claude`, `bot_ollama`) plus `cognitive_battery.studyflow` with seed 42 to fill the `[N]`/`[X.X]%` placeholders across model × persona × task (up to ~6 tasks × 3 models × 3 personas + random baseline). No human numbers are claimed; human arm is described as protocol.
+- **Empirical anchor for §2.6** — run the three bot demos (`bot_external`, `bot_claude`, `bot_ollama`) plus `cognitive_battery.studyflow` with seed 42 to fill the `[N]`/`[X.X]%` placeholders across model × trait × task (up to ~6 tasks × 3 models × 3 traits + random baseline). No human numbers are claimed; human arm is described as protocol.
 - **Empirical commitment for §2.7** — which worked RT dataset for Figure 8? The agent-panel pilot (seed 42) is the reproducible anchor; a human battery RT dataset can slot into the same schema when available.
 - **Ethics statement** — needed only if human-subject data is collected; the bot-mode battery pilot avoids this for the first submission.
 - **MIT LICENSE** — the `studyflow-modeler` repo has no top-level LICENSE file and no `license` field in `package.json` (only the LinkML schema header says MIT). The paper claims "MIT-licensed" in §2.2 and Code-and-data. Add the LICENSE file (spawned as a separate task).
 - **LinkML "versioned separately"** — §2.2 / Code-and-data say the canonical LinkML schema lives at `github.com/behaverse/schemas`, but in the modeler checkout it is bundled under `src/assets/schemas/studyflow.linkml.yaml`. Confirm the separate repo exists, or soften the claim.
 - **Schema version sync** — minor spread across files: `package.json` 26.0505.dev2, `studyflow.linkml.yaml` 26.0526-dev1, moddle schemas 26.0528. (The earlier 25.x mismatch is resolved.)
-- **`%!VERIFY` entries in `references.bib`** — Zotero double-check pending; new entries added this round: `hair2019iicarus` (IICARus PLOS ONE RCT) and `hopewell2025consort` (CONSORT 2025, co-published in BMJ/Lancet/JAMA/Nature Medicine/PLOS Medicine).
+- **`%!VERIFY` entries in `references.bib`** — Zotero double-check pending on 19 entries. New entries across rounds: `hair2019iicarus` (IICARus PLOS ONE RCT), `hopewell2025consort` (CONSORT 2025), `owen2005nback` (n-back working-memory meta-analysis), and `olive2007conceptual` (Olivé, *Conceptual Modeling of Information Systems*).
+- **Citation-content audit (done)** — verified cited sources against their claims and fixed mismatches: removed two stray `ghareeb2025` (Robin) cites in §3.3, removed a stray `defossez2020bdm` in §2.6, swapped `kourani2024promoai`→`tetzlaff2022bpmn4sml` (§2.8), `Sehgal2011`→`olive2007conceptual` (§1.1 data+process model), `bell2021perspectives`→`owen2005nback` (§2.6 n-back claim), and `ansarinia2022cogtext`→`ansarinia2022cogenv` (§2.6 "few models, many items"). Now-unused entries `ansarinia2022cogtext`, `Sehgal2011`, and `kourani2024promoai` can be pruned.
+- **Plain-language / readability pass (done)** — whole-paper Flesch-Kincaid ≈13.9 and Flesch Reading Ease ≈31 (original draft: 16.6 / 21.1). §2.8 trimmed and de-named; Abstract, §1.2, §1.3, §2.5, and §2.8 sentence-shortened. No technical terms, citations, GAP markers, or figure references altered.
 
 ---
 
@@ -92,7 +94,6 @@ One worked example threads the whole section: a single study that administers a 
 | What | Where |
 |---|---|
 | The full draft prose | [`paper.qmd`](paper.qmd) |
-| §2.6 task and protocol runbook | [`nback_demo.qmd`](nback_demo.qmd) — **stale**: describes the old N-back-only §2.6; needs updating to the 6-task battery |
 | Checklist | [`checklist.md`](checklist.md) |
 | Old draft | [`../archived/`](../archived/) |
 | The modeler app | [`../../studyflow-modeler/`](../../studyflow-modeler/) |
@@ -100,7 +101,7 @@ One worked example threads the whole section: a single study that administers a 
 | Schemas | [`../../studyflow-modeler/src/assets/schemas/`](../../studyflow-modeler/src/assets/schemas/) |
 | Example diagrams | [`../../studyflow-modeler/src/assets/examples/`](../../studyflow-modeler/src/assets/examples/) |
 | **6-task battery (new, §2.6)** | [`cognitive_battery.studyflow`](../../studyflow-modeler/src/assets/examples/cognitive_battery.studyflow) — linear, runnable today |
-| **Full study (new, §2.5–§2.7)** | [`cognitive_study.studyflow`](cognitive_study.studyflow) (lives in this `elife/` folder, not the modeler examples) — CONSORT (eligibility + randomization gateways, allocation, attrition boundary events), Battery sub-process (trial-by-trial Ollama; text tasks n-back/digit-span, vision tasks MOT/PC/matrices/card-sorting via `llava` + screenshots), Analysis sub-process (read → filter → map → reduce → visualize script → write). Participant flow runnable; sub-processes await runner sub-process traversal (§3.3 roadmap). |
+| **Full study (new, §2.5–§2.7)** | [`example.studyflow`](example.studyflow) (lives in this `elife/` folder, not the modeler examples; renamed from `cognitive_study.studyflow`) — CONSORT (eligibility + randomization gateways, allocation, attrition boundary events), Battery sub-process (trial-by-trial Ollama; text tasks n-back/digit-span, vision tasks MOT/PC/matrices/card-sorting via `llava` + screenshots), Analysis sub-process (read → filter → map → reduce → visualize script → write). Participant flow runnable; sub-processes await runner sub-process traversal (§3.3 roadmap). |
 | N-back study | [`lablink_demo1.studyflow`](../../studyflow-modeler/src/assets/examples/lablink_demo1.studyflow) |
 | CONSORT / SPIRIT templates | [`consort2025.studyflow`](../../studyflow-modeler/src/assets/examples/consort2025.studyflow) · [`spirit2025.studyflow`](../../studyflow-modeler/src/assets/examples/spirit2025.studyflow) |
 | Shipping bot demos | [`bot_external.studyflow`](../../studyflow-modeler/src/assets/examples/bot_external.studyflow) · [`bot_claude.studyflow`](../../studyflow-modeler/src/assets/examples/bot_claude.studyflow) · [`bot_ollama.studyflow`](../../studyflow-modeler/src/assets/examples/bot_ollama.studyflow) |
