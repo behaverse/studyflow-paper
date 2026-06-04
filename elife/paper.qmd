@@ -38,7 +38,7 @@ bibliography: references.bib
 
 A scientific study touches many people and systems. A researcher designs it; an ethics committee approves it; a participant runs it; a data pipeline ingests it; a model trains on it; a reviewer reads it as a manuscript; and a replicator tries to rebuild it. Reproducing the study later requires more than the data and the manuscript. It also requires an explicit and complete description of the *processes* that generated them [@aguilar2022experiments; @momeni2026guidelines]. A complete description of any computing system needs both a data model (for its structure) and a process model (for its behavior) [@olive2007conceptual]. In cognitive sciences, however, most standardization has focused on the data, so the processes that produce the data are documented only in narrative prose, ad-hoc lab conventions, box-and-arrow diagrams, or code repositories that drift away from the text they accompany [@bell2021perspectives; @osc2015]. The community has built strong standards for the data plane, notably BIDS and Psych-DS; the process plane, a machine-readable record of how those data came to be, has no equivalent. That asymmetry, not a shortage of data standards, is the gap this paper addresses.
 
-The cost of this missing process model becomes clear whenever someone other than the author has to re-read a study. The researcher's protocol PDF, the ethics application, the experiment script, the preprocessing notebook, the model card, the manuscript figure, and the CONSORT diagram all begin as different views of the same study, and they end as inconsistent ones. By that point, no single artifact describes the study *as it was actually run*. Reviewers and replicators reach the code and data through these artifacts, so divergence among them limits how far the code and data can be independently checked. Trust in research is built or lost at this point of divergence.
+The cost of this missing process model becomes clear whenever someone other than the author has to re-read a study. It is largest in neuroscience and clinical research, where one study may record EEG, fMRI, eye tracking, and behavior at once, pass through an ethics board and a trial registry, and end in a CONSORT flow diagram, each modality and each stage adding an artifact that must stay consistent with the rest. The researcher's protocol PDF, the ethics application, the experiment script, the preprocessing notebook, the model card, the manuscript figure, and the CONSORT diagram all begin as different views of the same study, and they end as inconsistent ones. By that point, no single artifact describes the study *as it was actually run*. Reviewers and replicators reach the code and data through these artifacts, so divergence among them limits how far the code and data can be independently checked. Trust in research is built or lost at this point of divergence.
 
 The usual way to compensate for a missing process model is voluntary narrative reporting: checklists, pre-registration forms, and journal endorsements. The available evidence suggests it has limited effect. A cross-sectional study of 400 psychology articles published in 2022 found that 7% to 14% had been preregistered and 14% to 16% shared raw data, despite more than a decade of reform [@hardwicke2024prevalence], and gaps between endorsement and adherence recur across fields and journal policies [@percie2020arrive; @hair2019iicarus; @hardwicke2024transparency]. The reason is structural rather than a matter of researcher compliance. A checklist records *what to mention* without requiring *what to share*, and it accepts a narrative description of a process in place of a formal, verifiable one, so the underlying process model stays implicit and open to interpretation.
 
@@ -84,7 +84,7 @@ Studyflow comprises five artifacts, each usable on its own:
 
 # 2. Results
 
-Studyflow's working artifacts are a language, a modeler, and a runner. A single `.studyflow` source feeds all three and renders in three ways (Study, Gantt, Checklist) for different readers. We test them on one study: a battery of cognitive tasks administered to both human participants and a panel of artificial agents. Every stage of that study, from protocol to publication, reads and writes the same source, so the protocol an ethics board approves is the one participants run, the one the analysis uses, and the one the published figure comes from. We present Studyflow in two parts. First, the artifacts that make it work: the language (§2.1), the modeler (§2.2), the runner (§2.3), and the three views they render (§2.4). Then a single study walked end to end through them: design (§2.5), data collection across human and artificial executors (§2.6), analysis (§2.7), modeling (§2.8), and reporting (§2.9). The same file is the only input at every stage.
+Studyflow's working artifacts are a language, a modeler, and a runner. A single `.studyflow` source feeds all three and renders in four ways (Study, Gantt, Checklist, Figure) for different readers. We test them on one study: a battery of cognitive tasks administered to both human participants and a panel of artificial agents. Every stage of that study, from protocol to publication, reads and writes the same source, so the protocol an ethics board approves is the one participants run, the one the analysis uses, and the one the published figure comes from. We present Studyflow in two parts. First, the artifacts that make it work: the language (§2.1), the modeler (§2.2), the runner (§2.3), and the four views they render (§2.4). Then a single study walked end to end through them: design (§2.5), data collection across human and artificial executors (§2.6), analysis (§2.7), modeling (§2.8), and reporting (§2.9). The same file is the only input at every stage.
 
 ## 2.1 The Studyflow language
 
@@ -94,7 +94,7 @@ Studyflow is a domain-specific profile of Business Process Model and Notation (B
 
 **What Studyflow inherits.** Studyflow reuses BPMN's full vocabulary for control flow and structure: start, end, intermediate, boundary, timer, and error *events*; tasks, sub-processes, and call activities; exclusive, parallel, inclusive, event-based, and complex *gateways*; sequence flows and message flows; data objects and data stores with their associations; pools and lanes; and choreography for multi-agent interactions. These elements use standard BPMN shapes and behave as the OMG specifies.
 
-**What Studyflow adds.** Four areas extend BPMN with vocabulary that experimental research routinely needs. First, a top-level **study container** groups every other element and carries study-level metadata (title, version, authors, runtime). Second, **domain-specific activity types** specialize the generic BPMN task with research-meaningful kinds (cognitive tasks, questionnaires, instructions, rest periods, video games, and our curated cognitive battery); each one shows a distinctive icon but remains a normal BPMN task underneath. Third, **research-specific data elements** add bindings to community schemas (BIDS [@bids], Psych-DS [@psychds], CSVW) and to our own Behaverse Data Model (BDM) [@bdm], on top of BPMN's generic data objects, and a small **data-operations vocabulary** (map, filter, reduce, group, transform, and compose) shows the *kind* of transformation as a task marker, so the flow of data is visible at a glance. Fourth, **research gateways** encode the branching patterns specific to experimental design: a random gateway for randomization, a stratified-allocation gateway, and an eligibility gateway that lists inclusion and exclusion criteria. Optional temporal attributes (onset, duration, progress) attach to activities and events, so the Gantt view can derive trial schedules and visit calendars from the same diagram.
+**What Studyflow adds.** Four areas extend BPMN with vocabulary that experimental research routinely needs. First, a top-level **study container** groups every other element and carries study-level metadata (title, version, authors, runtime). Second, **domain-specific activity types** specialize the generic BPMN task with research-meaningful kinds (cognitive tasks, questionnaires, instructions, rest periods, video games, and a curated cognitive battery); each one shows a distinctive icon but remains a normal BPMN task underneath. Third, **research-specific data elements** add bindings to community schemas (BIDS [@bids], Psych-DS [@psychds], CSVW) and to our own Behaverse Data Model (BDM) [@bdm], on top of BPMN's generic data objects, and a small **data-operations vocabulary** (map, filter, reduce, group, transform, and compose) shows the *kind* of transformation as a task marker, so the flow of data is visible at a glance. Fourth, **research gateways** encode the branching patterns specific to experimental design: a random gateway for randomization, a stratified-allocation gateway, and an eligibility gateway that lists inclusion and exclusion criteria. Optional temporal attributes (onset, duration, progress) attach to activities and events, so the Gantt view can derive trial schedules and visit calendars from the same diagram.
 
 **What Studyflow deliberately leaves alone.** Studyflow does not redefine BPMN's serialization conventions, and it leaves XML namespaces, element identifiers, and the base shape vocabulary untouched. Domain extensions live inside BPMN's native extension slot, so a generic BPMN renderer ignores them gracefully while a Studyflow-aware tool validates and renders them consistently.
 
@@ -254,15 +254,17 @@ After loading, the runner parses the diagram, validates it node by node, and tra
 
 Figure 4 walks a participant from consent through an instruction, a questionnaire, and a cognitive task to the end screen, all on the same diagram authored in §2.2 [FILL: runner screenshots from the seed-42 walkthrough].
 
-## 2.4 The three views: Study / Gantt / Checklist
+## 2.4 The four views: Study / Gantt / Checklist / Figure
 
-A single `.studyflow` source can be rendered in three ways, each suited to a different stakeholder need (Figure 5). The three views read the same file, so changes propagate automatically.
+A single `.studyflow` source can be rendered in four ways, each suited to a different stakeholder need (Figure 5). The four views read the same file, so changes propagate automatically.
 
 **Study view.** The default rendering is a BPMN-like graph that shows every element and connection. The Study view is *structural*: it shows what happens and in what order, but it does not commit to wall-clock timing. It is the standard view for Methods sections, for reviewers checking the logical structure, and for pipeline authors wiring up data flow.
 
 **Gantt view.** A Gantt-style rendering places time-sensitive elements along a time axis. BPMN has timer events but no native way to express activity duration, scheduled onset, or progress. Studyflow attaches these as optional attributes on BPMN activities and events: **onset**, **duration**, and **progress** (percentage or label). Resource allocation is expressed directly as BPMN pools and lanes, which the Gantt uses to group rows; there is no separate `resourceAllocation` attribute. When these temporal attributes are present, the Gantt view renders the diagram automatically. The same mechanism scales from trial-level timing (stimulus duration, ITI, response window) to study-level timing (visit schedule, follow-ups). A milestone is simply an element with zero duration, and hierarchical Gantt structures map directly onto BPMN sub-processes. The Gantt view is useful for longitudinal studies and for SPIRIT-style schedules of enrolment and assessment [@spirit2013].
 
 **Checklist view.** This task-oriented view flattens the diagram into a list of activities with their items and status. Every Studyflow element carries an optional `checklist` attribute (a markdown list) that the Checklist view extracts and aggregates. The view supports two uses: *running studies day-to-day* (what is next, what is done) and *adhering to reporting guidelines* (CONSORT, SPIRIT, STROBE, PRISMA, CARE). For the second use, guideline items map to the diagram elements that satisfy them, so a study can be audited without leaving the diagram. Checklists ship with the `.studyflow` file and can be exported to JSON or Markdown for external task managers.
+
+**Figure view.** The Figure view renders a diagram as a publication-ready SVG in which per-element annotations decide what is shown or hidden. A manuscript figure usually needs a curated subset of the full diagram: the protocol without the data layer, or a single highlighted path through a branch. Instead of redrawing the diagram by hand, an author marks elements to show or hide and exports the curated SVG. The exported SVG embeds the complete `.studyflow` source as metadata, so the published figure is not a picture of the study but the runnable file itself: a reader can lift the source back out, open it in the modeler, and re-run it. Because the visibility annotations live in the same `extensionElements` slot as the rest of the vocabulary, the figure stays valid BPMN and stays tied to the study it depicts. This is the mechanism behind the published CONSORT figure in §2.9.
 
 ::: {.list-table header-rows=1 aligns="l,l" tbl-colwidths="[65,35]"}
 - - If you need to communicate...
@@ -276,10 +278,12 @@ A single `.studyflow` source can be rendered in three ways, each suited to a dif
 
 - - Coverage against a reporting checklist or protocol
   - Checklist view
+
+- - A publication figure with selected elements shown or hidden
+  - Figure view
 :::
 
-A single `.studyflow` source therefore supports three ways of reading it (a methods diagram, a project schedule, and a reporting audit), without forcing authors to maintain three separate documents.
-
+A single `.studyflow` source therefore supports four ways of reading it (a methods diagram, a project schedule, a reporting audit, and a publication figure), without forcing authors to maintain four separate documents.
 
 ## 2.5 Design: the protocol, randomization, and reporting scaffolding
 
@@ -311,27 +315,22 @@ Data collection makes Studyflow's central idea concrete: *who executes the proto
 
 **Encoding the trials.** Figure 7 places the traditional slide-style N-back figure next to the Studyflow equivalent. The slide is intuitive but underspecified: timing values often live only in the caption, the boundary between trial and block stays implicit, and decisions like "what counts as a correct match" are buried in the analysis code. Studyflow instead encodes the trial as an explicit subgraph, built from a stimulus activity, a boundary timer for the response window, a second boundary timer for the inter-trial interval, and text annotations that label the target and non-target branches. The trial-by-trial encoding in Figure 7 is illustrative. For runs beyond a handful of trials, the same logic compresses into a single cognitive task. Its inline configuration declares the N level, stream specification, trial count, stimulus duration, and inter-trial interval, and the runner expands it into individual trials. Listing 3 shows how these primitives are serialized in the `.studyflow` file. The same compression applies to every task in the battery: each one is a cognitive-task node whose inline timeline, blocks, stop rules, and optional staircase the runner expands into trials. Each trial the runner emits is logged to our trials schema (BDM [@bdm]), which is Psych-DS-compatible [@psychds], so the same diagram produces a CSV whose columns are fixed by the schema and whose meaning is fixed by the diagram, identically across all six tasks. The trials CSV can be reviewed side by side with the diagram, and a third party with only those two files can reconstruct what each row means without running the modeler.
 
-**Listing 3.** The n-back task serialized in a `.studyflow` file (BPMN 2.0 XML, abridged). The task is a standard `bpmn:task` carrying a `behaverse:task` extension; its inline `cognitive:configurations` block declares the N level, the stimulus stream, and the timing, which the runner expands into individual trials.
+**Listing 3.** The n-back task serialized in a `.studyflow` file (BPMN 2.0 XML, abridged). The task is a standard `bpmn:task` carrying a `cognitive:task` extension; its inline `cognitive:configurations` block declares the N level, the stimulus stream, and the timing, which the runner expands into individual trials.
 
 ```xml
 <bpmn2:task id="Task_NB" name="N-back (text)">
   <bpmn2:extensionElements>
-    <behaverse:task scene="NB" configMode="inline" agentType="bot">
-      <cognitive:configurations>Blocks:
-  Study_NBack:
-    Parameters:
-      NValue: 2
-      Feature: Letters
-      Streams:
-        - StimulusValue:
-            Sequence:
-              Type: Ordered
-              Values: [3, 1, 2, 1, 3, 2, 3, 2, 1, 2, 3, 1]
-      StreamSize: 12
-      StimulusDisplayDuration: 0.5
-      InterStimulusInterval: 1.5
+    <cognitive:task scene="NB" configMode="inline">
+      <cognitive:configurations>
+        NValue: 2
+        Feature: Letters
+        Streams:
+          - StimulusValue: [3, 1, 2, 1, 3, 2, 3, 2, 1, 2, 3, 1]
+        StreamSize: 12
+        StimulusDisplayDuration: 0.5
+        InterStimulusInterval: 1.5
       </cognitive:configurations>
-    </behaverse:task>
+    </cognitive:task>
   </bpmn2:extensionElements>
   <bpmn2:incoming>Flow_B_Start_NB</bpmn2:incoming>
   <bpmn2:outgoing>Flow_NB_DS</bpmn2:outgoing>
@@ -388,9 +387,9 @@ Of these, the most demanding is a multimodal preprocessing and training pipeline
 
 ## 2.9 Report and publish: one file against the publication guidelines
 
-The lifecycle closes where it began, with the reporting guidelines that shaped the design. Because the study ran inside the same file, the CONSORT figure is not redrawn at write-up time; the modeler exports it from the protocol that ran the trial, with the attrition counts already written into the boundary error events. The figure that appears in the paper is the file that ran the study. This directly addresses the artifact-drift problem that motivates this work.
+The lifecycle closes where it began, with the reporting guidelines that shaped the design. Because the study ran inside the same file, the CONSORT figure is not redrawn at write-up time; the modeler's Figure view (§2.4) exports it from the protocol that ran the trial, with the attrition counts already written into the boundary error events and the `.studyflow` source embedded in the SVG as metadata. The figure that appears in the paper is, literally, the file that ran the study. This directly addresses the artifact-drift problem that motivates this work.
 
-Reporting against a guideline then becomes a property the diagram can be checked for, rather than a PDF assembled alongside it. Each guideline is, in structure, a controlled vocabulary, a checklist, and sometimes a flow diagram, and Studyflow handles all of them in the same way: checklist items become entries in the optional `checklist` attribute on the relevant element, flow diagrams become Studyflow renderings with boundary error events for attrition where applicable, and vocabulary becomes labels on activities, gateways, and data elements. Because the checklist attribute is machine-readable, the Checklist view shows the items as a markdown list, with each one linked back to the element that satisfies it, so a study can be audited without leaving the diagram. The EQUATOR network catalogs these standards [@simera2010equator]; @tbl-guidelines lists the eleven most widely used, together with Studyflow's current coverage.
+Reporting against a guideline then becomes a property the diagram can be checked for, rather than a PDF assembled alongside it. Each guideline is, in structure, a controlled vocabulary, a checklist, and sometimes a flow diagram, and Studyflow handles all of them in the same way: checklist items become entries in the optional `checklist` attribute on the relevant element, flow diagrams become Studyflow renderings with boundary error events for attrition where applicable, and vocabulary becomes labels on activities, gateways, and data elements. Because the checklist attribute is machine-readable, the Checklist view shows the items as a markdown list, with each one linked back to the element that satisfies it, so a study can be audited without leaving the diagram. The EQUATOR network catalogs these standards [@simera2010equator]; @tbl-guidelines lists the eleven most widely used, together with Studyflow's current coverage. The two that ship today (CONSORT and SPIRIT) exercise the full mechanism; the entries marked Roadmap are authoring work rather than missing capability, since the elements, attributes, and Checklist view they need are already in place and each takes about half a day to template.
 
 ::: {#tbl-guidelines .list-table header-rows=1 aligns="l,l,c,c" tbl-colwidths="[34,22,22,22]"}
 The eleven most widely used reporting guidelines (EQUATOR network) and Studyflow's current coverage.
@@ -456,9 +455,9 @@ The eleven most widely used reporting guidelines (EQUATOR network) and Studyflow
   - Roadmap
 :::
 
-Two guidelines ship as worked templates today: CONSORT 2025 and SPIRIT 2025. CONSORT 2025's 30-item checklist [@hopewell2025consort] maps onto the shipped CONSORT template, and SPIRIT 2025's 34 items across 9 topics [@chan2025spirit] map onto a Gantt view (Figure 9) that serves as both the study schedule and the SPIRIT checklist. The other nine are roadmap items rather than gaps in the mechanism: the elements, attributes, and Checklist view are already in place, and each remaining guideline takes roughly half a day of authoring, with STROBE and PRISMA next. The pattern recurs across the catalog. PRISMA 2020 [@page2021prisma] standardized the study-flow diagrams that are visual instances of what Studyflow generalizes. TIDieR [@hoffmann2014tidier] makes participant-facing intervention details first-class items that map almost line by line onto the participant branch. And ARRIVE 2.0 [@percie2020arrive], whose history of endorsement without adherence is itself one of the strongest arguments for an executable backbone, supplies the animal-research counterpart.
+Two guidelines ship as worked templates today: CONSORT 2025 and SPIRIT 2025. CONSORT 2025's 30-item checklist [@hopewell2025consort] maps onto the shipped CONSORT template, and SPIRIT 2025's 34 items across 9 topics [@chan2025spirit] map onto a Gantt view (Figure 9) that serves as both the study schedule and the SPIRIT checklist. STROBE and PRISMA are next. The pattern recurs across the catalog. PRISMA 2020 [@page2021prisma] standardized the study-flow diagrams that are visual instances of what Studyflow generalizes. TIDieR [@hoffmann2014tidier] makes participant-facing intervention details first-class items that map almost line by line onto the participant branch. And ARRIVE 2.0 [@percie2020arrive], whose history of endorsement without adherence is itself one of the strongest arguments for an executable backbone, supplies the animal-research counterpart.
 
-The deeper point is that reporting guidelines and execution specifications need not be different artifacts. A SPIRIT protocol is a *plan* and a CONSORT diagram is a *report*; in current practice the two are written by different people, at different times, into different files. Encoded as a Studyflow, they become the same file at two points in its lifecycle: the schedule before randomization, and the flow diagram with attrition counts afterward. At publication, the manuscript ships three artifacts that are all views of one source: the exported figure, the Checklist-view audit against the target guideline, and the `.studyflow` file itself, paired with the schema-conformant trials table. From these, a reader can reconstruct what every element and every column means, without rerunning the study.
+Reporting guidelines and execution specifications need not be different artifacts. A SPIRIT protocol is a *plan* and a CONSORT diagram is a *report*; in current practice the two are written by different people, at different times, into different files. Encoded as a Studyflow, they become the same file at two points in its lifecycle: the schedule before randomization, and the flow diagram with attrition counts afterward. At publication, the manuscript ships three artifacts that are all views of one source: the exported figure, the Checklist-view audit against the target guideline, and the `.studyflow` file itself, paired with the schema-conformant trials table. From these, a reader can reconstruct what every element and every column means, without rerunning the study.
 
 ---
 
