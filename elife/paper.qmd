@@ -75,17 +75,17 @@ A specification that closes the process-model gap (§1.1) must meet several desi
 
 1. **Single source of truth.** One artifact must serve as the protocol, the runnable study, the analysis pipeline, and the publication figure, so the views cannot drift apart.
 
-2. **Executable rather than merely descriptive.** The specification must run, so that a runner walks the same file a reviewer reads.
+2. **Executable rather than merely descriptive.** The specification must run, so that a runner application walks the same file a reviewer reads.
 
 3. **Legible to every audience without code.** Scientists, ethics boards, reviewers, and engineers must read one diagram, not four documents in four formats.
 
-4. **Grounded in standards and gracefully degrading.** The specification must be valid BPMN 2.0 that opens in any compliant tool, with bindings to community data standards such as BIDS, Psych-DS, CSVW, and BDM, and its domain extensions must degrade gracefully in a generic tool.
+4. **Grounded in standards and gracefully degrading.** The specification must be valid BPMN 2.0 that opens in any compliant tool, with bindings to community data standards such as BIDS, Psych-DS, CSVW, and BDM, and its domain extensions must degrade gracefully in a generic BPMN tool such as Camunda.
 
 5. **Process and data on one canvas.** Control flow and typed, schema-bound data must live in the same artifact, joined by data associations.
 
-6. **Extensible without forking.** New domain semantics must plug in as optional layers over a tool-independent schema, so that adding a cognitive or acquisition vocabulary does not change the core.
+6. **Extensible without forking.** New domain semantics must plug in as optional layers, so that adding new elements does not change the core.
 
-7. **Executor-agnostic.** Who executes the protocol, a person or an artificial agent, must be a runtime choice rather than a property of the diagram, so that one topology enrolls human and agent co-subjects into one schema-conformant table.
+7. **Executor-agnostic.** Who executes the protocol, a person or an artificial agent, must be a runtime choice rather than a property of the diagram, so that one topology enrolls human and computer subjects similarly and the same diagram is sufficient for both.
 
 The rest of the paper is organized around these desiderata: the framework (§2.1-§2.3) meets them, the worked study (§3) exercises them, and the discussion (§4) revisits where they hold and where they do not.
 
@@ -93,13 +93,11 @@ The rest of the paper is organized around these desiderata: the framework (§2.1
 
 Studyflow delivers on R1 through R7 as four artifacts, each usable on its own:
 
-1. **A versioned language specification** for Studyflow, a LinkML schema [@moxon2025linkml] that is the single source of truth for element types, attribute constraints, and validation rules, with FAIR-aligned [@fair] serialization. It is implementation-independent, so a third party can target it directly without the toolkit's code.
+1. **A versioned language specification** for Studyflow, a LinkML schema [@moxon2025linkml] that is the single source of truth for element types, attribute constraints, and validation rules, with FAIR-aligned [@fair] serialization. It is implementation-independent, so a third party can target it directly without specific toolkit or code. A layered set of schemas mirror diversity of research in the cognitive science: the studyflow core, a companion cognitive layer, and four optional domain extensions (a cognitive assessment battery, multimodal preprocessing orchestration, data transformation, and multimodal data acquisition). New domain semantics plug in without changing the core.
 
-2. **A layered set of runtime schemas** mirroring the specification in the YAML that BPMN tooling reads: the language core, a companion cognitive layer, and four optional domain extensions (a cognitive-assessment battery, process orchestration, large-scale data transformation, and multimodal acquisition for EEG and eye tracking). New domain semantics plug in without changing the core.
+3. **A library of worked example diagrams**: a complete CONSORT 2025 randomized-trial template, a SPIRIT 2025 protocol schedule, and patterns for cognitive tasks, data collection, analysis pipelines, MLOps, multi-agent choreography, and reporting guidelines.
 
-3. **A library of worked example diagrams** shipping with the toolkit: a complete CONSORT 2025 randomized-trial template, a SPIRIT 2025 protocol schedule, and patterns for cognitive tasks, data collection, analysis pipelines, MLOps, multi-agent choreography, and reporting guidelines.
-
-4. **An open-source reference toolkit** (MIT-licensed, client-side, browser-only), a modeler and a runner that are fully working prototypes built on the specification, included to show that the language is authorable, executable, and machine-readable rather than to ship production software. The *modeler* authors, inspects, simulates, validates, and publishes diagrams, with a palette and inspector generated from the schemas so the language and the editor stay in sync. The *runner* parses, validates, and walks a diagram step by step for either a participant or an artificial agent; it ships built-in renderers for consents, instructions, questionnaire instruments, generic tasks, and cognitive-assessment tasks, supports seeded determinism for reproducible branches, and drives human participants, classic reinforcement-learning agents, recurrent cognitive models, and language-model agents from one diagram, each addressed as an actor behind a single message-passing executor interface.
+4. **A reference toolkit** (MIT-licensed, browser-only), a modeler and a runner that are fully working prototypes built on the specification, included to show that the language is authorable, executable, and machine-readable. The *modeler* authors, inspects, simulates, validates, and publishes diagrams. The *runner* parses, validates, and walks a diagram step by step for either a participant or an artificial agent; it ships built-in renderers for consents, instructions, questionnaire instruments, generic tasks, and cognitive assessment tasks, and drives human participants, cognitive models, and language model agents from one diagram.
 
 ---
 
