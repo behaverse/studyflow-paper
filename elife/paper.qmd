@@ -85,32 +85,21 @@ A specification that closes the process-model gap (§1.1) must meet several desi
 
 6. **Extensible without forking.** New domain semantics must plug in as optional layers, so that adding new elements does not change the core.
 
-7. **Executor-agnostic.** Who executes the protocol, a person or an artificial agent, must be a runtime choice rather than a property of the diagram, so that one topology enrolls human and computer subjects similarly and the same diagram is sufficient for both.
+7. **Agnostic to execution environment.** Who executes the protocol, a person or an artificial agent, must be a runtime choice rather than a property of the diagram, so that one topology enrolls human and computer subjects similarly and the same diagram is sufficient for both.
 
-The rest of the paper is organized around these desiderata: the framework (§2.1-§2.3) meets them, the worked study (§3) exercises them, and the discussion (§4) revisits where they hold and where they do not.
+The rest of the paper is organized around these desiderata: the framework meets them, the example study exercises them, and the discussion revisits where they hold and where they do not. Mainly, the solution we describe here, studyflow, delivers the desiderata as three artifacts:
 
-## 1.5 Contributions
-
-Studyflow delivers on R1 through R7 as four artifacts, each usable on its own:
-
-1. **A versioned language specification** for Studyflow, a LinkML schema [@moxon2025linkml] that is the single source of truth for element types, attribute constraints, and validation rules, with FAIR-aligned [@fair] serialization. It is implementation-independent, so a third party can target it directly without specific toolkit or code. A layered set of schemas mirror diversity of research in the cognitive science: the studyflow core, a companion cognitive layer, and four optional domain extensions (a cognitive assessment battery, multimodal preprocessing orchestration, data transformation, and multimodal data acquisition). New domain semantics plug in without changing the core.
-
-3. **A library of worked example diagrams**: a complete CONSORT 2025 randomized-trial template, a SPIRIT 2025 protocol schedule, and patterns for cognitive tasks, data collection, analysis pipelines, MLOps, multi-agent choreography, and reporting guidelines.
-
-4. **A reference toolkit** (MIT-licensed, browser-only), a modeler and a runner that are fully working prototypes built on the specification, included to show that the language is authorable, executable, and machine-readable. The *modeler* authors, inspects, simulates, validates, and publishes diagrams. The *runner* parses, validates, and walks a diagram step by step for either a participant or an artificial agent; it ships built-in renderers for consents, instructions, questionnaire instruments, generic tasks, and cognitive assessment tasks, and drives human participants, cognitive models, and language model agents from one diagram.
 
 ---
 
 # 2. The Studyflow framework
 
-This section presents the Studyflow framework, the paper's primary contribution: a language (§2.1), four views of one source (§2.2), and an open-source toolkit built on top of them (§2.3). These artifacts satisfy the desiderata R1-R7 of §1.4. A single `.studyflow` source feeds the toolkit and renders in four ways (Study, Gantt, Checklist, Figure) for different readers, so the same file is at once the protocol, the runnable study, the analysis, and the publication figure.
-
-Each desideratum is met by a specific part of the framework (@tbl-requirements), developed in the subsections that follow.
+A single `.studyflow` file renders in four ways (Study, Gantt, Checklist, Figure) for different audiences, so the same file is at once the protocol, the runnable study, the analysis, and the publication figure. Each desideratum is met by a specific part of the framework (@tbl-requirements).
 
 ::: {#tbl-requirements .list-table header-rows=1 aligns="l,l" tbl-colwidths="[42,58]"}
 The seven desiderata of §1.4 and where the framework meets each.
 
-- - Desideratum (§1.4)
+- - Desideratum
   - Where the framework meets it
 
 - - R1 Single source of truth
@@ -135,9 +124,8 @@ The seven desiderata of §1.4 and where the framework meets each.
   - One executor interface behind the runner, demonstrated end to end in §3.2 (§2.3)
 :::
 
-To show that the framework meets R1-R7 in practice rather than in principle, §3 walks a single study end to end through it, from protocol to publication, as a demonstration subordinate to the framework: an existence proof that the capability holds, whose empirical numbers illustrate what the framework enables rather than report a finding about agents in their own right.
 
-## 2.1 Studyflow as a formal object
+## 2.1 Formal definition
 
 A Studyflow is a typed, attributed directed graph, a tuple $(N, E, T, \tau, \lambda)$, where $N$ is a finite set of nodes (events, activities, and gateways), $E \subseteq N \times N$ is a set of directed edges (sequence flows and data associations), $T$ is the set of node types the language defines, $\tau: N \to T$ assigns a type to each node, and $\lambda$ attaches typed attributes to each node, such as the `instrument` of a cognitive task, the `probabilityFunction` of a random gateway, or the `onset` and `duration` that drive the Gantt view. A versioned schema (below) fixes $T$ and the admissible attributes; a diagram is well-formed when its nodes, edges, and attributes validate against it. The graph is general rather than acyclic. Boundary events, message flows, and choreography express the interrupts, loops, and multi-party exchanges experimental procedures contain, which a directed acyclic graph represents only through external control logic. Everything that follows is grounded in this object; the four views of §2.2 are projections of it.
 
