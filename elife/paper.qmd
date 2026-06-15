@@ -20,7 +20,7 @@ affiliations:
     name: University of Luxembourg
     country: Luxembourg
 abstract: |
-  A study's protocol, experiment script, analysis pipeline, and publication figures all begin as views of one design, but they drift apart as the study runs, until no single artifact describes the study as it was actually run. What is missing is a shared record of the *process*: cognitive science has mature standards for its data (e.g., BIDS), yet the process that produced the data still lives in scattered text, slides, and custom code. We present *Studyflow*, a visual notation that fills this gap by giving the experimental process a single machine-readable, human-understandable, and executable representation. A study is a typed directed graph, realized as an extension of the Business Process Model and Notation (BPMN 2.0) with the elements experimental research needs: domain-specific activities (cognitive task, questionnaire, instruction), decision gateways (randomization, eligibility), data operations, and data elements bound to community standards. One Studyflow file is at once the protocol, the runnable study, the analysis specification, and the publication figure, projected as multiple views for different audiences. We demonstrate the notation end to end with a study in which human participants and a cohort of artificial agents perform the same cognitive tasks from one file, behind one execution interface: one registrable protocol that enrolls, runs, and analyzes both populations and exports the figure reporting where they agree and diverge.
+  A study's protocol, experiment script, analysis pipeline, and publication figures all begin as views of one design, but they drift apart as the study runs, until no single artifact describes the study as it was actually run. What is missing is a shared record of the *process*: cognitive science has mature standards for its data (e.g., BIDS), yet the process that produced the data still lives in scattered text, slides, and custom code. We present *Studyflow*, a visual notation that fills this gap by giving the experimental process a single machine-readable, human-understandable, and executable representation. A study is a typed directed graph, realized as an extension of the Business Process Model and Notation (BPMN 2.0) with the elements experimental research needs: domain-specific activities (cognitive task, questionnaire, instruction), decision gateways (randomization, eligibility), data operations, and data elements bound to community standards. One Studyflow file is at once the protocol, the runnable study, the analysis specification, and the publication figure, projected as multiple views for different audiences. We demonstrate the notation end to end with a study in which human participants and a cohort of artificial agents perform the same cognitive tasks from one file, behind one execution interface: one registrable protocol that enrolls, runs, and analyzes both populations and reports where they agree and diverge.
 impact-statement: |
   A single machine-readable diagram serves as a study's protocol, runnable experiment, analysis specification, and publication figure for both human participants and artificial agents.
 keywords:
@@ -332,7 +332,7 @@ This section follows one study from protocol to publication. Nine human particip
 
 The same file is the input at every stage; it opens in the reference modeler (see Supplementary materials and Data availability).
 
-## Design: a registrable agreement study of humans and agents
+## Design
 
 Our worked example asks an agreement question: across the six tasks, do humans and agents perform alike, and where do they diverge? Both measures are fixed in the protocol before the study runs. Agreement is an equivalence test on accuracy per task, with a preset margin; divergence is how well a classifier tells humans from each agent family, scored as AUC against chance (analysis stage, below).
 
@@ -477,7 +477,7 @@ Agent cohort results across the battery of six tasks (study seed 42, [TODO: k] r
 
 **Beyond one participant.** The notation already expresses interaction itself as the unit: BPMN 2.0's **choreography task** models a directed exchange with an explicit initiator [@pufahl2022; @decker2011choreography], and a choreography task between a human and an LLM agent is the same primitive as one between two humans (see Limitations) [@stroppi2011].
 
-## Measure agreement: human and agent comparison and the CONSORT flow
+## Measure agreement
 
 This stage answers the agreement question and closes the CONSORT flow by counting the analysis exclusions. Such analysis is usually a script whose structure lives in code and comments; here it is a typed pipeline of data operations, so the kind of work each step does is visible in the diagram (The Studyflow framework, above).
 
@@ -506,7 +506,7 @@ Preregistration of analysis then becomes the diagram itself. In current practice
 
 The worked dataset is the seed-42 agent cohort and the human battery of nine participants [TODO: summary RT values and per-task agreement once the analysis is run].
 
-## Model agreement: a human versus agent classifier
+## Model agreement
 
 The analysis stage reads agreement off group summaries; the same trials feed a model that learns the divergence readout declared in the design. For task $t$ and agent family $g$, a classifier $f_{t,g}$ predicts the population label from per-trial features (responses and accuracy, not latency), and its discriminability is the area under the ROC curve, estimated under cross-validation grouped by subject (or agent run). The two populations are indistinguishable on task $t$ when this score does not exceed the empirical chance level $c_{t,g}$ obtained by permuting the labels:
 $$
@@ -516,7 +516,7 @@ and they separate where $A_{t,g}$ exceeds $c_{t,g}$. The uniform random baseline
 
 Beyond the classifier, the same notation expresses a full multimodal preprocessing and training pipeline that harmonizes EEG and behavioral recordings across heterogeneous public datasets, which we specify in Supplementary Figure S1 rather than run here: the record of what ran is the diagram, the analytical multiverse is explicit branches rather than forks under version control [@steegen2016multiverse], and a preprocessing subprocess defined once applies to every dataset in the same format [@tetzlaff2022bpmn4sml; @ghosh2025reproducible_digital_health].
 
-## Report: export the figure and the checklist
+## Report
 
 The lifecycle closes where it began, with the reporting guidelines that shaped the design. The Figure view exports the CONSORT figure from the protocol itself, with the attrition counts already written into the boundary error events, so nothing is redrawn at write-up time. The same export doubles as the specification of the agreement benchmark, and the only difference between the registered protocol and the file as run is the attrition counts. Listing 3 shows that diff in full.
 
