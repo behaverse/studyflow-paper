@@ -369,15 +369,15 @@ CONSORT and SPIRIT were written for human trials, and routing an artificial agen
 
 ## Enroll and run
 
-The runner app now walks the diagram node by node, the same way for a participant or an agent.
+The runner app can now walk the diagram node by node, the same way for a human participant or an agent.
 
-**The cognitive battery.** Our study administers a Behaverse battery of six cognitive tasks including tasks conventionally associated with working memory (N-back [@owen2005nback; @redick2013nback] and digit span [@richardson2007span]), attention (multiple-object tracking [@pylyshyn1988mot]), processing speed (pattern comparison [@salthouse1991speed]), fluid reasoning (matrix reasoning [@raven2000matrices]), and set shifting (card sorting [@grant1948sorting]). Task and construct variance are confounded here, so humans and agents are compared at the task level throughout. The construct words name lineages, not measurement claims. Each task runs multiple trials per subject. The N-back serves as the worked example below, and the other five use the same machinery.
+*The cognitive battery.* Our study administers a battery of six cognitive tasks including tasks conventionally associated with working memory (N-back [@owen2005nback; @redick2013nback] and digit span [@richardson2007span]), attention (multiple-object tracking [@pylyshyn1988mot]), processing speed (pattern comparison [@salthouse1991speed]), fluid reasoning (matrix reasoning [@raven2000matrices]), and set shifting (card sorting [@grant1948sorting]). The construct words name for historical explainations of the task's origins, not measurement claims. Each task runs multiple trials per subject. Humans and agents are compared only at the task level. The N-back task serves as the worked example below, and the other five tasks use the same machinery.
 
 ::: {#tbl-battery .list-table header-rows=1 aligns="l,l,l,l" tbl-colwidths="[26,24,12,38]"}
-The selected cognitive tasks from the Behaverse battery and the construct each is historically associated with. The construct column names a lineage, a historical label, not a measurement claim: task and construct variance are confounded here, and humans and agents are compared at the task level (Results).
+The selected cognitive tasks from the Behaverse battery [@behaverse] and the construct each is historically associated with. The construct is a historical label, not a measurement claim.
 
 - - Task
-  - Construct (lineage)
+  - Construct
   - Reference
 
 - - N-back
@@ -406,31 +406,34 @@ The selected cognitive tasks from the Behaverse battery and the construct each i
 :::
 
 
-**Enroll, allocate, and follow up.** We authored the battery as one diagram that orchestrates the four CONSORT stages: enrollment through consent and baseline questionnaires, an eligibility gateway, randomized allocation to the self-paced and time-pressured paths, and follow-up through the six tasks. Each task is itself a set of trial blocks (a warm-up, the test blocks, and any adaptive staircase) that common methodology prose may flatten but the diagram keeps explicit. Once loaded into a study runner app, the diagram is checked for required parameters and then walked one node at a time (Supplementary Figure S3). Randomness policy fixes the subject's path, task order, stimulus order, and every random branch (Materials and methods). Each agent runs [TODO: k] times per condition under recorded sampling parameters, and its performance is reported aggregated over runs; this cheap repetition, impractical for a human participant, is what gives the benchmark its statistical power. The same flow runs for artificial agents and the two human anchor participants alike.
+*Enroll, allocate, and follow up.* We authored the battery as one diagram that orchestrates the four CONSORT stages: enrollment through consent and baseline questionnaires, an eligibility gateway, randomized allocation to the self-paced and time-pressured paths, and follow-up through the six tasks. Each task is itself a set of trial blocks that common methodology prose may flatten but the diagram keeps explicit (a tutorial, a practice, and the test blocks). Once loaded into a study runner app, the diagram is checked for required parameters and then walked one node at a time (Supplementary Figure S3). Randomness policy (i.e., a seed) fixes the subject's path, task order, stimulus order, and every randomized branch. Each agent runs [TODO: k] times per condition under predefined parameters, and its performance is reported aggregated over multiple runs. The same flow runs for artificial agents and the human participants alike.
 
-**Encoding the trials.** Figure 5 places the traditional figure of the N-back task (as slides) next to the studyflow equivalent. The traditional slide is intuitive but underspecified: timing values often live only in the caption, the boundary between trial and block stays implicit, and decisions like "what counts as a correct match" are buried in the analysis code. Studyflow instead encodes the trial as an explicit subgraph: a stimulus activity, a boundary timer for the response window, a second timer for the inter-trial interval, and target and non-target branches labeled by annotations and an explicit code reference. The trial-by-trial encoding in Figure 5 is illustrative. Beyond a handful of trials, the same logic compresses into a single cognitive task whose parametrization declares the N, trial count, stimulus type, duration, and inter-trial interval; the runner expands it into individual trials (Listing 2). The same parametrization format applies to every task in the battery. Each trial is logged to a standard data format (BDM [@bdm]): the data schema fixes the CSV columns and the diagram fixes their use.
+*Encoding the trials.* Figure 5 places the traditional figure of the N-back task (as slides) next to the studyflow equivalent. The traditional slide is intuitive but underspecified, e.g., timing values often live only in the caption, the boundary between trial and block stays implicit, and decisions like "what counts as a correct match" are buried in the analysis code. Studyflow instead encodes the trial as an explicit subprocess: a stimulus activity, a boundary timer for the response window, a second timer for the inter-trial interval, and target and non-target branches labeled by annotations and an explicit code reference. The same logic compresses into a single cognitive task whose parametrization declares the N, trial count, stimulus type, duration, and inter-trial interval. The same parametrization format applies to every task in the battery. Each trial is logged to a standard data format (BDM [@bdm]) which the data schema fixes the CSV columns and the diagram fixes their use.
 
-**Listing 2.** The N-back task serialized in a `.studyflow` file (BPMN 2.0 XML, abridged; the stimulus stream is truncated for display). The task is a standard `bpmn:Task` carrying a `behaverse:Task` extension that clarifies the parametrizations such as the N level, the stimulus stream, and the timing.
+*Listing 2.* The N-back task serialized in a `.studyflow` file (BPMN 2.0 XML; the stimulus stream is truncated for display). The task is a standard `bpmn:Task` carrying a `behaverse:Task` extension that clarifies the parametrizations such as the N in N-back, the stimulus stream, and the timing.
 
 ```xml
 <bpmn2:task id="Task_NB" name="N-back (digits)">
   <bpmn2:extensionElements>
     <behaverse:task scene="NB">
       <cognitive:configurations>Blocks:
-  NB2:
-    Parameters:
-      NValue: 2
-      Feature: Digits
-      Streams:
-        - StimulusValue:
-            Sequence: {Type: Ordered, Values: [3, 1, 2, 1, 3, 2, 3, 2, 1, 2, 3, 1]}
-      StreamSize: 12
-      StimulusDisplayDuration: 0.5
-      InterStimulusInterval: 1.5
-Timelines:
-  Main:
-    blocks:
-      - name: NB2</cognitive:configurations>
+        NB2:
+          Parameters:
+            NValue: 2
+            Feature: Digits
+            Streams:
+              - StimulusValue:
+                  Sequence:
+                    Type: Ordered
+                    Values: [3, 1, 2, 1, 3, 2, 3, 2, 1, 2, 3, 1]
+            StreamSize: 12
+            StimulusDisplayDuration: 0.5
+            InterStimulusInterval: 1.5
+      Timelines:
+        Main:
+          blocks:
+            - name: NB2
+      </cognitive:configurations>
     </behaverse:task>
   </bpmn2:extensionElements>
   <bpmn2:incoming>Flow_B_Start_NB</bpmn2:incoming>
@@ -438,13 +441,13 @@ Timelines:
 </bpmn2:task>
 ```
 
-**One executor, many actors.** The runner administers every actor through one interface. Per trial it sends the stimulus, the allowed responses, the timing constraint, and where needed a rendered frame; it records the response and, where applicable, the response time. Each actor keeps its own state locally, a participant's session, an agent's policy, a recurrent hidden state, or a language model's context.
+*One interface, many actors.* The runner administers every actor through one interface. Per trial it sends the stimulus, the allowed responses, the timing constraint, and where needed rendered frames (i.e., screenshot images). It records the response and, where applicable, the response time. Each actor keeps its own state locally, a participant's session, an agent's policy, a recurrent hidden state, or a language model's context.
 
-This example study fills the executor with three kinds of actor behind the one interface, plus a uniform random baseline that represents chance level. The *human* actor renders each trial in the GUI participants see and blocks until a person responds (Materials and methods). *Recurrent cognitive models* run through CogPonder [@ansarinia2023cogponder], a differentiable PonderNet-based model that returns both a response and a response time. *Language model agents* run through a proxy package that sends each trial to the configured language model with a trait prompt (below); models with vision input also read the rendered frame [@schulzebuschoff2025visual; @tangtartharakul2026deficits]. Response time is interpretable only where the actor produces it as behavior: measured for humans, predicted by the model for the recurrent family; language models yield elapsed latency, logged as infrastructure metadata and excluded from any latency analysis (@tbl-agents shows the response time interpretation per family).
+This example study fills the runner with three kinds of actor behind the one interface, plus a uniform random baseline that represents chance level. Runner for *human* actor renders each trial in the GUI that participants see and blocks until a person responds. *Recurrent models* run through CogPonder [@ansarinia2023cogponder], a differentiable PonderNet-based model that returns both a response and a response time. *Language model agents* sends each trial to a language model with trait and instruction prompts. Models with vision input also read the screenshots [@schulzebuschoff2025visual; @tangtartharakul2026deficits]. Note that response time is interpretable only where the actor produces it as behavior: measured for humans, predicted by the model for the recurrent family, and elapsed latency or token budget for language models (@tbl-agents shows the response time interpretation per family).
 
-If an actor replies outside the allowed response options, the runner records the raw reply and flags the trial as missing; no response is imputed. A run whose rate of failed trials exceeds [TODO: threshold]% on any task exits through the boundary error event of the CONSORT and is counted in the participant flow, so agent dropout goes through the same edge as human loss to follow-up. Failed trials are typed by failure mode (refusal, parse failure, timeout), reported in @tbl-agents. The full executor configuration is pinned to every run (Materials and methods) [@ivanova2025cognitive; @lampinen2024content].
+If an actor replies outside the allowed response options, the runner records the raw reply and flags the trial as missing; no response is imputed. A run whose rate of failed trials exceeds [TODO: threshold]% on any task exits through the boundary error event of the CONSORT and is counted in the participant flow, so agent dropout goes through the same edge as human loss to follow-up. Failed trials are typed by failure mode (invalid, timeout, refusal), reported in @tbl-agents. The full runner configuration is pinned to every run (Materials and methods) [@ivanova2025cognitive; @lampinen2024content].
 
-**The agent cohort.** We profile a matrix of agents over the whole battery, crossing three factors within each path. *Model*: a uniform random baseline, a recurrent model (CogPonder), several large language models served locally through Ollama, and a commercial vision-language model. *Trait*: response profiles drawn from human characterizations, a careful persona (a conservative decision criterion [@ratcliff2008diffusion]), a fatigued persona (intermittent attentional lapses [@robertson1997oops]), and a fast, error-prone persona (the speed-accuracy trade-off [@wickelgren1977sat]). The manipulation differs by family (a prompt for language models [@argyle2023silicon; @aher2023llms], the pondering cost for the recurrent model), so effects are read within a family. Trait prompts name a disposition, never a target accuracy, so they do not steer the agreement estimate. *Task*: the six battery tasks. Each model also runs a baseline mode with no trait prompt. Agents are allocated exhaustively, [TODO: k] runs per condition, a factorial rather than randomized allocation; the CONSORT allocation therefore applies only to the human participants, and the studyflow file makes that explicit rather than hiding it.
+*The agent cohort.* We profile a matrix of agents over the whole battery, crossing three factors within each path. *Model*: a uniform random baseline, a recurrent model (CogPonder), several large language models served locally through Ollama, and a commercial vision-language model. *Trait*: response profiles drawn from human characterizations, a careful persona (a conservative decision criterion [@ratcliff2008diffusion]), a fatigued persona (intermittent attentional lapses [@robertson1997oops]), and a fast, error-prone persona (the speed-accuracy trade-off [@wickelgren1977sat]). The manipulation differs by family (a prompt for language models [@argyle2023silicon; @aher2023llms], the pondering cost for the recurrent model), so effects are read within a family. Trait prompts name a disposition, never a target accuracy, so they do not steer the agreement estimate. *Task*: the six battery tasks. Each model also runs a baseline mode with no trait prompt. Agents are allocated exhaustively, [TODO: k] runs per condition, a factorial rather than randomized allocation; the CONSORT allocation therefore applies only to the human participants, and the studyflow file makes that explicit rather than hiding it.
 
 @tbl-agents reports accuracy, the rate of failed trials, and response time where it is a behavioral measure, for every condition, and Figure 6 shows these profiles across tasks against the two-participant human anchor band [TODO: values from the runs]. Rather than rank many models on a single task, a choice that itself may move rankings [@dehghani2021lottery], we vary the diagram (task, response window, trait) and measure a cohort of agents over a battery of parametrically related items, the design that recent AI evaluation literature has begun to call for [@wang2026psychometrics; @bean2025construct]. The nearest existing artifacts make the differentiation concrete: CogBench scores many language models on seven fixed paradigms behind one harness [@codaforno2024cogbench], and Psych-101 transcribes 160 experiments into text [@binz2025centaur]. Here the same protocol administers both, and the task battery re-parameterizes from the diagram.
 
