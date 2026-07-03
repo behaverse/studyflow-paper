@@ -1,0 +1,1295 @@
+id: studyflow_example_study
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+  xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
+  xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:bpmndi: http://www.omg.org/spec/BPMN/20100524/DI
+  xmlns:dc: http://www.omg.org/spec/DD/20100524/DC
+  xmlns:di: http://www.omg.org/spec/DD/20100524/DI
+  xmlns:bioc: http://bpmn.io/schema/bpmn/biocolor/1.0
+  xmlns:color: http://www.omg.org/spec/BPMN/non-normative/color/1.0
+  xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
+  xmlns:cognitive: http://behaverse.org/schemas/studyflow/cognitive
+  xmlns:behaverse: http://behaverse.org/schemas/studyflow/behaverse
+  xmlns:datatrove: https://w3id.org/studyflow/datatrove
+  xsi:schemaLocation: http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd
+Collaboration_1:
+  type: bpmn:Collaboration
+  participants:
+    Pool_Study:
+      name: Example study
+      processRef: Example_Study
+      bounds:
+        x: 160
+        "y": 80
+        width: 820
+        height: 1180
+      isHorizontal: true
+    Actor_Human:
+      extensionElements:
+        - type: cognitive:Actor
+      name: Human participants
+      bounds:
+        x: 1080
+        "y": 690
+        width: 280
+        height: 64
+      isHorizontal: true
+    Actor_LLM:
+      extensionElements:
+        - type: cognitive:Actor
+          actorType: llm
+          model: ollama/gemma3:e2b
+      name: Open-weight LLM (Ollama)
+      bounds:
+        x: 1080
+        "y": 770
+        width: 280
+        height: 64
+      isHorizontal: true
+    Actor_VLM:
+      extensionElements:
+        - type: cognitive:Actor
+          actorType: llm
+          model: claude-opus-4-8
+      name: Commercial VLM (vision)
+      bounds:
+        x: 1080
+        "y": 850
+        width: 280
+        height: 64
+      isHorizontal: true
+    Actor_Random:
+      extensionElements:
+        - type: cognitive:Actor
+          actorType: agent
+          agentSpec: uniform-random-baseline
+      name: Uniform random baseline
+      bounds:
+        x: 1080
+        "y": 930
+        width: 280
+        height: 64
+      isHorizontal: true
+  messageFlows:
+    MF_Human:
+      name: stimulus / response
+      sourceRef: Battery
+      targetRef: Actor_Human
+      waypoint:
+        - x: 590
+          "y": 778
+        - x: 835
+          "y": 778
+        - x: 835
+          "y": 722
+        - x: 1080
+          "y": 722
+    MF_LLM:
+      name: stimulus / response
+      sourceRef: Battery
+      targetRef: Actor_LLM
+      waypoint:
+        - x: 590
+          "y": 795
+        - x: 1080
+          "y": 802
+    MF_VLM:
+      name: stimulus + frame / response
+      sourceRef: Battery
+      targetRef: Actor_VLM
+      waypoint:
+        - x: 590
+          "y": 812
+        - x: 835
+          "y": 812
+        - x: 835
+          "y": 882
+        - x: 1080
+          "y": 882
+    MF_Random:
+      name: stimulus / response
+      sourceRef: Battery
+      targetRef: Actor_Random
+      waypoint:
+        - x: 590
+          "y": 828
+        - x: 900
+          "y": 828
+        - x: 900
+          "y": 962
+        - x: 1080
+          "y": 962
+Example_Study:
+  type: bpmn:Process
+  extensionElements:
+    - type: studyflow:Study
+      authors:
+        - Morteza Ansarinia
+        - Hoorieh Afkari Roshan
+        - Pedro Cardoso-Leite
+  name: Studyflow example study
+  flowElements:
+    Enrollment_Start:
+      type: bpmn:StartEvent
+      name: Enrollment & consent
+      outgoing:
+        - Flow_Start_Screening
+      consentFormUri: https://osf.io/example/consent.md
+      bounds:
+        x: 512
+        "y": 120
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 490
+          "y": 163
+          width: 82
+          height: 14
+    Activity_Screening:
+      type: bpmn:Task
+      extensionElements:
+        - type: cognitive:Questionnaire
+          instrument: screening
+      checklist: |-
+        - [ ] Demographic intake
+        - [ ] Language proficiency
+        - [ ] Device and input check
+        - [ ] Baseline attention screen
+      name: Screening
+      incoming:
+        - Flow_Start_Screening
+      outgoing:
+        - Flow_Screening_Eligibility
+      bounds:
+        x: 480
+        "y": 200
+        width: 100
+        height: 80
+    Eligibility_Gateway:
+      type: bpmn:ExclusiveGateway
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+          inclusionCriteria:
+            - Adult (18+)
+            - Fluent task-language reader
+          exclusionCriteria:
+            - Failed the baseline attention screen
+            - Incompatible device or input
+      name: Assessed for eligibility
+      incoming:
+        - Flow_Screening_Eligibility
+      outgoing:
+        - Flow_Eligible
+        - Flow_NotEligible
+      bounds:
+        x: 505
+        "y": 325
+        width: 50
+        height: 50
+      isMarkerVisible: true
+      label:
+        bounds:
+          x: 470
+          "y": 382
+          width: 120
+          height: 14
+    Screening_Excluded_End:
+      type: bpmn:EndEvent
+      name: Excluded (n=...)
+      attritionCount: ""
+      incoming:
+        - Flow_NotEligible
+      eventDefinitions:
+        ErrorDef_ScreeningExcluded:
+          type: bpmn:ErrorEventDefinition
+      bounds:
+        x: 732
+        "y": 332
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 722
+          "y": 375
+          width: 56
+          height: 14
+      stroke: "#ac5a54"
+      fill: "#f1d0cd"
+      background-color: "#f1d0cd"
+      border-color: "#ac5a54"
+    Randomize_Gateway:
+      type: bpmn:ExclusiveGateway
+      extensionElements:
+        - type: cognitive:RandomGateway
+      name: Random allocation
+      incoming:
+        - Flow_Eligible
+      outgoing:
+        - Flow_Alloc_SelfPaced
+        - Flow_Alloc_TimePressured
+      bounds:
+        x: 505
+        "y": 425
+        width: 50
+        height: 50
+      isMarkerVisible: true
+      label:
+        bounds:
+          x: 489
+          "y": 482
+          width: 82
+          height: 14
+    Alloc_SelfPaced:
+      type: bpmn:Task
+      checklist: |-
+        - [ ] No response deadline enforced
+        - [ ] Timing regime recorded per trial
+      name: "Allocated: self-paced (n=...)"
+      incoming:
+        - Flow_Alloc_SelfPaced
+      outgoing:
+        - Flow_SelfPaced_Merge
+      bounds:
+        x: 330
+        "y": 520
+        width: 120
+        height: 80
+    Alloc_TimePressured:
+      type: bpmn:Task
+      checklist: |-
+        - [ ] Response window enforced (human) / deadline in prompt (LLM)
+        - [ ] Timing regime recorded per trial
+      name: "Allocated: time-pressured (n=...)"
+      incoming:
+        - Flow_Alloc_TimePressured
+      outgoing:
+        - Flow_TimePressured_Merge
+      bounds:
+        x: 610
+        "y": 520
+        width: 120
+        height: 80
+    Battery_Merge:
+      type: bpmn:ExclusiveGateway
+      name: Begin battery
+      incoming:
+        - Flow_SelfPaced_Merge
+        - Flow_TimePressured_Merge
+      outgoing:
+        - Flow_Merge_Battery
+      bounds:
+        x: 505
+        "y": 650
+        width: 50
+        height: 50
+      isMarkerVisible: true
+      label:
+        bounds:
+          x: 495
+          "y": 707
+          width: 70
+          height: 14
+    Battery:
+      type: bpmn:SubProcess
+      checklist: |-
+        - [ ] One trial at a time
+        - [ ] Seeded task order, stimulus order, and branches
+        - [ ] Failed trials flagged, not imputed
+      name: Cognitive battery (7 tasks)
+      incoming:
+        - Flow_Merge_Battery
+      outgoing:
+        - Flow_Battery_Analysis
+      flowElements:
+        Battery_Start:
+          type: bpmn:StartEvent
+          name: Start battery
+          outgoing:
+            - bFlow_Start_NB
+        Task_NB:
+          type: bpmn:Task
+          uses: https://behaverse.org/tasks@v1.0#NB
+          extensionElements:
+            - type: behaverse:Task
+              configurations:
+                Blocks:
+                  NB2:
+                    Inherits: Default
+                    Parameters:
+                      NValue: 2
+                      Feature: Digits
+                      StreamSize: 12
+                      StimulusDisplayDuration: 0.5
+                      InterStimulusInterval: 1.5
+              scene: NB
+          name: N-back
+          incoming:
+            - bFlow_Start_NB
+          outgoing:
+            - bFlow_NB_DS
+        Task_DS:
+          type: bpmn:Task
+          uses: https://behaverse.org/tasks@v1.0#DS
+          extensionElements:
+            - type: behaverse:Task
+              scene: DS
+          name: Digit span
+          incoming:
+            - bFlow_NB_DS
+          outgoing:
+            - bFlow_DS_MOT
+        Task_MOT:
+          type: bpmn:Task
+          uses: https://behaverse.org/tasks@v1.0#MOT
+          extensionElements:
+            - type: behaverse:Task
+              scene: MOT
+          name: Multiple-object tracking
+          incoming:
+            - bFlow_DS_MOT
+          outgoing:
+            - bFlow_MOT_PC
+        Task_PC:
+          type: bpmn:Task
+          uses: https://behaverse.org/tasks@v1.0#PC
+          extensionElements:
+            - type: behaverse:Task
+              scene: PC
+          name: Pattern comparison
+          incoming:
+            - bFlow_MOT_PC
+          outgoing:
+            - bFlow_PC_BM
+        Task_BM:
+          type: bpmn:Task
+          uses: https://behaverse.org/tasks@v1.0#BM
+          extensionElements:
+            - type: behaverse:Task
+              scene: BM
+          name: Matrix reasoning
+          incoming:
+            - bFlow_PC_BM
+          outgoing:
+            - bFlow_BM_BCS
+        Task_BCS:
+          type: bpmn:Task
+          uses: https://behaverse.org/tasks@v1.0#BCS
+          extensionElements:
+            - type: behaverse:Task
+              scene: BCS
+          name: Card sorting
+          incoming:
+            - bFlow_BM_BCS
+          outgoing:
+            - bFlow_BCS_Flanker
+        Task_Flanker:
+          type: bpmn:Task
+          uses: https://github.com/jspsych/jspsych-contrib@v0.4.0#flanker
+          extensionElements:
+            - type: cognitive:CognitiveTask
+              instrument: jspsych
+              configurations:
+                n_trials: 96
+                InterStimulusInterval: 0.5
+          name: Flanker (jsPsych)
+          incoming:
+            - bFlow_BCS_Flanker
+          outgoing:
+            - bFlow_Flanker_End
+        Battery_End:
+          type: bpmn:EndEvent
+          name: Battery complete
+          incoming:
+            - bFlow_Flanker_End
+        bFlow_Start_NB:
+          type: bpmn:SequenceFlow
+          sourceRef: Battery_Start
+          targetRef: Task_NB
+        bFlow_NB_DS:
+          type: bpmn:SequenceFlow
+          sourceRef: Task_NB
+          targetRef: Task_DS
+        bFlow_DS_MOT:
+          type: bpmn:SequenceFlow
+          sourceRef: Task_DS
+          targetRef: Task_MOT
+        bFlow_MOT_PC:
+          type: bpmn:SequenceFlow
+          sourceRef: Task_MOT
+          targetRef: Task_PC
+        bFlow_PC_BM:
+          type: bpmn:SequenceFlow
+          sourceRef: Task_PC
+          targetRef: Task_BM
+        bFlow_BM_BCS:
+          type: bpmn:SequenceFlow
+          sourceRef: Task_BM
+          targetRef: Task_BCS
+        bFlow_BCS_Flanker:
+          type: bpmn:SequenceFlow
+          sourceRef: Task_BCS
+          targetRef: Task_Flanker
+        bFlow_Flanker_End:
+          type: bpmn:SequenceFlow
+          sourceRef: Task_Flanker
+          targetRef: Battery_End
+      bounds:
+        x: 470
+        "y": 750
+        width: 120
+        height: 90
+    Dropout_Boundary:
+      type: bpmn:BoundaryEvent
+      name: Dropped out (n=...)
+      outgoing:
+        - Flow_Dropout
+      eventDefinitions:
+        ErrorDef_Dropout:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Battery
+      bounds:
+        x: 492
+        "y": 822
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 400
+          "y": 860
+          width: 80
+          height: 27
+    FailedTrials_Boundary:
+      type: bpmn:BoundaryEvent
+      name: "Excluded: failed-trial rate > 20% (n=...)"
+      outgoing:
+        - Flow_FailedTrials
+      eventDefinitions:
+        ErrorDef_FailedTrials:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Battery
+      bounds:
+        x: 552
+        "y": 822
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 590
+          "y": 855
+          width: 110
+          height: 27
+    Analysis:
+      type: bpmn:SubProcess
+      checklist: |-
+        - [ ] Margins, levels, thresholds fixed before any run
+        - [ ] Manual outlier review is a visible node
+        - [ ] Cross-family contrasts hold the path fixed
+      name: Analysis pipeline
+      incoming:
+        - Flow_Battery_Analysis
+      outgoing:
+        - Flow_Analysis_Complete
+      flowElements:
+        Analysis_Start:
+          type: bpmn:StartEvent
+          name: Start analysis
+          outgoing:
+            - aFlow_Start_Read
+        Op_Read:
+          type: bpmn:ServiceTask
+          extensionElements:
+            - type: datatrove:Reader
+              className: CSVReader
+          name: Read raw trials
+          incoming:
+            - aFlow_Start_Read
+          outgoing:
+            - aFlow_Read_Filter
+          isDataOperation: true
+        Op_Filter:
+          type: bpmn:ServiceTask
+          extensionElements:
+            - type: datatrove:Filter
+          name: Filter invalid trials (RT<100ms, missing, flagged)
+          incoming:
+            - aFlow_Read_Filter
+          outgoing:
+            - aFlow_Filter_Map
+          isDataOperation: true
+        Op_Map:
+          type: bpmn:ServiceTask
+          extensionElements:
+            - type: datatrove:Map
+          name: Map to derived measures
+          incoming:
+            - aFlow_Filter_Map
+          outgoing:
+            - aFlow_Map_Branch
+          isDataOperation: true
+        Branch_Gateway:
+          type: bpmn:ExclusiveGateway
+          name: Comparison of interest
+          incoming:
+            - aFlow_Map_Branch
+          outgoing:
+            - aFlow_Branch_Agreement
+            - aFlow_Branch_Divergence
+        Op_Reduce_Subject:
+          type: bpmn:ServiceTask
+          extensionElements:
+            - type: datatrove:Reduce
+          name: "Reduce: per-run summaries"
+          incoming:
+            - aFlow_Branch_Agreement
+            - aFlow_Branch_Divergence
+          outgoing:
+            - aFlow_RS_RG
+          isDataOperation: true
+        Op_Reduce_Group:
+          type: bpmn:ServiceTask
+          extensionElements:
+            - type: datatrove:Reduce
+          name: "Reduce: group statistics"
+          incoming:
+            - aFlow_RS_RG
+          outgoing:
+            - aFlow_RG_Review
+          isDataOperation: true
+        Op_Review:
+          type: bpmn:Task
+          name: Manual outlier review
+          incoming:
+            - aFlow_RG_Review
+          outgoing:
+            - aFlow_Review_Write
+        Op_Write:
+          type: bpmn:ServiceTask
+          extensionElements:
+            - type: datatrove:Writer
+              className: ParquetWriter
+          name: Render & write figures
+          incoming:
+            - aFlow_Review_Write
+          outgoing:
+            - aFlow_Write_End
+          isDataOperation: true
+        Analysis_End:
+          type: bpmn:EndEvent
+          name: Analysis complete
+          incoming:
+            - aFlow_Write_End
+        aFlow_Start_Read:
+          type: bpmn:SequenceFlow
+          sourceRef: Analysis_Start
+          targetRef: Op_Read
+        aFlow_Read_Filter:
+          type: bpmn:SequenceFlow
+          sourceRef: Op_Read
+          targetRef: Op_Filter
+        aFlow_Filter_Map:
+          type: bpmn:SequenceFlow
+          sourceRef: Op_Filter
+          targetRef: Op_Map
+        aFlow_Map_Branch:
+          type: bpmn:SequenceFlow
+          sourceRef: Op_Map
+          targetRef: Branch_Gateway
+        aFlow_Branch_Agreement:
+          type: bpmn:SequenceFlow
+          name: agreement
+          sourceRef: Branch_Gateway
+          targetRef: Op_Reduce_Subject
+        aFlow_Branch_Divergence:
+          type: bpmn:SequenceFlow
+          name: divergence
+          sourceRef: Branch_Gateway
+          targetRef: Op_Reduce_Subject
+        aFlow_RS_RG:
+          type: bpmn:SequenceFlow
+          sourceRef: Op_Reduce_Subject
+          targetRef: Op_Reduce_Group
+        aFlow_RG_Review:
+          type: bpmn:SequenceFlow
+          sourceRef: Op_Reduce_Group
+          targetRef: Op_Review
+        aFlow_Review_Write:
+          type: bpmn:SequenceFlow
+          sourceRef: Op_Review
+          targetRef: Op_Write
+        aFlow_Write_End:
+          type: bpmn:SequenceFlow
+          sourceRef: Op_Write
+          targetRef: Analysis_End
+      bounds:
+        x: 470
+        "y": 920
+        width: 120
+        height: 90
+    AnalysisExcluded_Boundary:
+      type: bpmn:BoundaryEvent
+      name: Excluded from analysis (n=...)
+      outgoing:
+        - Flow_AnalysisExcluded
+      eventDefinitions:
+        ErrorDef_AnalysisExcluded:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Analysis
+      bounds:
+        x: 552
+        "y": 992
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 590
+          "y": 1025
+          width: 110
+          height: 27
+    Study_Complete_End:
+      type: bpmn:EndEvent
+      name: Completed
+      incoming:
+        - Flow_Analysis_Complete
+      redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
+      completionCodeType: dynamic
+      bounds:
+        x: 512
+        "y": 1110
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 503
+          "y": 1153
+          width: 55
+          height: 14
+    Dropout_End:
+      type: bpmn:EndEvent
+      name: Dropped out (n=...)
+      attritionCount: ""
+      incoming:
+        - Flow_Dropout
+      eventDefinitions:
+        ErrorDef_DropoutEnd:
+          type: bpmn:ErrorEventDefinition
+      bounds:
+        x: 732
+        "y": 782
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 722
+          "y": 825
+          width: 66
+          height: 14
+      stroke: "#ac5a54"
+      fill: "#f1d0cd"
+      background-color: "#f1d0cd"
+      border-color: "#ac5a54"
+    FailedTrials_End:
+      type: bpmn:EndEvent
+      name: Excluded (n=...)
+      attritionCount: ""
+      incoming:
+        - Flow_FailedTrials
+      eventDefinitions:
+        ErrorDef_FailedTrialsEnd:
+          type: bpmn:ErrorEventDefinition
+      bounds:
+        x: 732
+        "y": 862
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 722
+          "y": 905
+          width: 56
+          height: 14
+      stroke: "#ac5a54"
+      fill: "#f1d0cd"
+      background-color: "#f1d0cd"
+      border-color: "#ac5a54"
+    Analysis_Excluded_End:
+      type: bpmn:EndEvent
+      name: Excluded from analysis (n=...)
+      attritionCount: ""
+      incoming:
+        - Flow_AnalysisExcluded
+      eventDefinitions:
+        ErrorDef_AnalysisExcludedEnd:
+          type: bpmn:ErrorEventDefinition
+      bounds:
+        x: 732
+        "y": 962
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 712
+          "y": 1005
+          width: 78
+          height: 27
+      stroke: "#ac5a54"
+      fill: "#f1d0cd"
+      background-color: "#f1d0cd"
+      border-color: "#ac5a54"
+    Dataset_Trials:
+      type: bpmn:DataStoreReference
+      extensionElements:
+        - type: studyflow:Dataset
+          schema: Schema_Trials
+          format: bdm
+          bdmDataLevel: trials
+      name: Trial data (BDM)
+      bounds:
+        x: 315
+        "y": 775
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 300
+          "y": 828
+          width: 80
+          height: 14
+    Schema_Trials:
+      type: bpmn:DataObjectReference
+      extensionElements:
+        - type: studyflow:Schema
+          format: csvw
+      name: Trials schema (CSVW)
+      bounds:
+        x: 322
+        "y": 900
+        width: 36
+        height: 50
+      label:
+        bounds:
+          x: 298
+          "y": 953
+          width: 84
+          height: 14
+    Flow_Start_Screening:
+      type: bpmn:SequenceFlow
+      sourceRef: Enrollment_Start
+      targetRef: Activity_Screening
+      waypoint:
+        - x: 530
+          "y": 156
+        - x: 530
+          "y": 200
+    Flow_Screening_Eligibility:
+      type: bpmn:SequenceFlow
+      sourceRef: Activity_Screening
+      targetRef: Eligibility_Gateway
+      waypoint:
+        - x: 530
+          "y": 280
+        - x: 530
+          "y": 325
+    Flow_Eligible:
+      type: bpmn:SequenceFlow
+      name: eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Randomize_Gateway
+      waypoint:
+        - x: 530
+          "y": 375
+        - x: 530
+          "y": 425
+    Flow_NotEligible:
+      type: bpmn:SequenceFlow
+      name: not eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Screening_Excluded_End
+      waypoint:
+        - x: 555
+          "y": 350
+        - x: 732
+          "y": 350
+    Flow_Alloc_SelfPaced:
+      type: bpmn:SequenceFlow
+      name: self-paced
+      sourceRef: Randomize_Gateway
+      targetRef: Alloc_SelfPaced
+      waypoint:
+        - x: 505
+          "y": 450
+        - x: 390
+          "y": 450
+        - x: 390
+          "y": 520
+    Flow_Alloc_TimePressured:
+      type: bpmn:SequenceFlow
+      name: time-pressured
+      sourceRef: Randomize_Gateway
+      targetRef: Alloc_TimePressured
+      waypoint:
+        - x: 555
+          "y": 450
+        - x: 670
+          "y": 450
+        - x: 670
+          "y": 520
+    Flow_SelfPaced_Merge:
+      type: bpmn:SequenceFlow
+      sourceRef: Alloc_SelfPaced
+      targetRef: Battery_Merge
+      waypoint:
+        - x: 390
+          "y": 600
+        - x: 390
+          "y": 675
+        - x: 505
+          "y": 675
+    Flow_TimePressured_Merge:
+      type: bpmn:SequenceFlow
+      sourceRef: Alloc_TimePressured
+      targetRef: Battery_Merge
+      waypoint:
+        - x: 670
+          "y": 600
+        - x: 670
+          "y": 675
+        - x: 555
+          "y": 675
+    Flow_Merge_Battery:
+      type: bpmn:SequenceFlow
+      sourceRef: Battery_Merge
+      targetRef: Battery
+      waypoint:
+        - x: 530
+          "y": 700
+        - x: 530
+          "y": 750
+    Flow_Battery_Analysis:
+      type: bpmn:SequenceFlow
+      sourceRef: Battery
+      targetRef: Analysis
+      waypoint:
+        - x: 530
+          "y": 840
+        - x: 530
+          "y": 920
+    Flow_Analysis_Complete:
+      type: bpmn:SequenceFlow
+      sourceRef: Analysis
+      targetRef: Study_Complete_End
+      waypoint:
+        - x: 530
+          "y": 1010
+        - x: 530
+          "y": 1110
+    Flow_Dropout:
+      type: bpmn:SequenceFlow
+      sourceRef: Dropout_Boundary
+      targetRef: Dropout_End
+      waypoint:
+        - x: 510
+          "y": 858
+        - x: 510
+          "y": 800
+        - x: 732
+          "y": 800
+    Flow_FailedTrials:
+      type: bpmn:SequenceFlow
+      sourceRef: FailedTrials_Boundary
+      targetRef: FailedTrials_End
+      waypoint:
+        - x: 570
+          "y": 858
+        - x: 570
+          "y": 880
+        - x: 732
+          "y": 880
+    Flow_AnalysisExcluded:
+      type: bpmn:SequenceFlow
+      sourceRef: AnalysisExcluded_Boundary
+      targetRef: Analysis_Excluded_End
+      waypoint:
+        - x: 570
+          "y": 1028
+        - x: 570
+          "y": 980
+        - x: 732
+          "y": 980
+  artifacts:
+    Assoc_Battery_Trials:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Battery
+      targetRef: Dataset_Trials
+      waypoint:
+        - x: 470
+          "y": 800
+        - x: 365
+          "y": 800
+    Assoc_Trials_Analysis:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Dataset_Trials
+      targetRef: Analysis
+      waypoint:
+        - x: 355
+          "y": 825
+        - x: 400
+          "y": 965
+        - x: 470
+          "y": 965
+    Assoc_Schema_Trials:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Schema_Trials
+      targetRef: Dataset_Trials
+      waypoint:
+        - x: 340
+          "y": 900
+        - x: 340
+          "y": 825
+  isExecutable: false
+diagram:
+  - id: BPMNDiagram_1
+    plane:
+      id: BPMNPlane_1
+      bpmnElement: Collaboration_1
+  - id: BPMNDiagram_Battery
+    plane:
+      id: BPMNPlane_Battery
+      bpmnElement: Battery
+      planeElement:
+        Battery_Start_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Battery_Start
+          bounds:
+            x: 100
+            "y": 182
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 90
+              "y": 225
+              width: 60
+              height: 14
+        Task_NB_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Task_NB
+          bounds:
+            x: 190
+            "y": 160
+            width: 100
+            height: 80
+        Task_DS_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Task_DS
+          bounds:
+            x: 350
+            "y": 160
+            width: 100
+            height: 80
+        Task_MOT_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Task_MOT
+          bounds:
+            x: 510
+            "y": 160
+            width: 100
+            height: 80
+        Task_PC_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Task_PC
+          bounds:
+            x: 670
+            "y": 160
+            width: 100
+            height: 80
+        Task_BM_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Task_BM
+          bounds:
+            x: 830
+            "y": 160
+            width: 100
+            height: 80
+        Task_BCS_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Task_BCS
+          bounds:
+            x: 990
+            "y": 160
+            width: 100
+            height: 80
+        Task_Flanker_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Task_Flanker
+          bounds:
+            x: 1150
+            "y": 160
+            width: 100
+            height: 80
+        Battery_End_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Battery_End
+          bounds:
+            x: 1310
+            "y": 182
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 1298
+              "y": 225
+              width: 60
+              height: 14
+        bFlow_Start_NB_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: bFlow_Start_NB
+          waypoint:
+            - x: 136
+              "y": 200
+            - x: 190
+              "y": 200
+        bFlow_NB_DS_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: bFlow_NB_DS
+          waypoint:
+            - x: 290
+              "y": 200
+            - x: 350
+              "y": 200
+        bFlow_DS_MOT_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: bFlow_DS_MOT
+          waypoint:
+            - x: 450
+              "y": 200
+            - x: 510
+              "y": 200
+        bFlow_MOT_PC_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: bFlow_MOT_PC
+          waypoint:
+            - x: 610
+              "y": 200
+            - x: 670
+              "y": 200
+        bFlow_PC_BM_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: bFlow_PC_BM
+          waypoint:
+            - x: 770
+              "y": 200
+            - x: 830
+              "y": 200
+        bFlow_BM_BCS_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: bFlow_BM_BCS
+          waypoint:
+            - x: 930
+              "y": 200
+            - x: 990
+              "y": 200
+        bFlow_BCS_Flanker_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: bFlow_BCS_Flanker
+          waypoint:
+            - x: 1090
+              "y": 200
+            - x: 1150
+              "y": 200
+        bFlow_Flanker_End_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: bFlow_Flanker_End
+          waypoint:
+            - x: 1250
+              "y": 200
+            - x: 1310
+              "y": 200
+  - id: BPMNDiagram_Analysis
+    plane:
+      id: BPMNPlane_Analysis
+      bpmnElement: Analysis
+      planeElement:
+        Analysis_Start_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Analysis_Start
+          bounds:
+            x: 100
+            "y": 182
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 90
+              "y": 225
+              width: 60
+              height: 14
+        Op_Read_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Op_Read
+          bounds:
+            x: 180
+            "y": 160
+            width: 100
+            height: 80
+        Op_Filter_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Op_Filter
+          bounds:
+            x: 330
+            "y": 160
+            width: 120
+            height: 80
+        Op_Map_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Op_Map
+          bounds:
+            x: 500
+            "y": 160
+            width: 100
+            height: 80
+        Branch_Gateway_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Branch_Gateway
+          bounds:
+            x: 655
+            "y": 175
+            width: 50
+            height: 50
+          isMarkerVisible: true
+          label:
+            bounds:
+              x: 640
+              "y": 232
+              width: 82
+              height: 14
+        Op_Reduce_Subject_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Op_Reduce_Subject
+          bounds:
+            x: 760
+            "y": 160
+            width: 120
+            height: 80
+        Op_Reduce_Group_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Op_Reduce_Group
+          bounds:
+            x: 930
+            "y": 160
+            width: 120
+            height: 80
+        Op_Review_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Op_Review
+          bounds:
+            x: 1100
+            "y": 160
+            width: 100
+            height: 80
+        Op_Write_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Op_Write
+          bounds:
+            x: 1250
+            "y": 160
+            width: 100
+            height: 80
+        Analysis_End_di:
+          type: bpmndi:BPMNShape
+          bpmnElement: Analysis_End
+          bounds:
+            x: 1410
+            "y": 182
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 1398
+              "y": 225
+              width: 60
+              height: 14
+        aFlow_Start_Read_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_Start_Read
+          waypoint:
+            - x: 136
+              "y": 200
+            - x: 180
+              "y": 200
+        aFlow_Read_Filter_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_Read_Filter
+          waypoint:
+            - x: 280
+              "y": 200
+            - x: 330
+              "y": 200
+        aFlow_Filter_Map_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_Filter_Map
+          waypoint:
+            - x: 450
+              "y": 200
+            - x: 500
+              "y": 200
+        aFlow_Map_Branch_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_Map_Branch
+          waypoint:
+            - x: 600
+              "y": 200
+            - x: 655
+              "y": 200
+        aFlow_Branch_Agreement_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_Branch_Agreement
+          waypoint:
+            - x: 705
+              "y": 195
+            - x: 760
+              "y": 190
+        aFlow_Branch_Divergence_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_Branch_Divergence
+          waypoint:
+            - x: 705
+              "y": 205
+            - x: 760
+              "y": 215
+        aFlow_RS_RG_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_RS_RG
+          waypoint:
+            - x: 880
+              "y": 200
+            - x: 930
+              "y": 200
+        aFlow_RG_Review_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_RG_Review
+          waypoint:
+            - x: 1050
+              "y": 200
+            - x: 1100
+              "y": 200
+        aFlow_Review_Write_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_Review_Write
+          waypoint:
+            - x: 1200
+              "y": 200
+            - x: 1250
+              "y": 200
+        aFlow_Write_End_di:
+          type: bpmndi:BPMNEdge
+          bpmnElement: aFlow_Write_End
+          waypoint:
+            - x: 1350
+              "y": 200
+            - x: 1410
+              "y": 200

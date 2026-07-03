@@ -1,0 +1,193 @@
+id: fig4_nback
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+  xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
+  xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:bpmndi: http://www.omg.org/spec/BPMN/20100524/DI
+  xmlns:dc: http://www.omg.org/spec/DD/20100524/DC
+  xmlns:di: http://www.omg.org/spec/DD/20100524/DI
+  xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
+  xmlns:cognitive: http://behaverse.org/schemas/studyflow/cognitive
+NBack_Trial:
+  type: bpmn:Process
+  extensionElements:
+    - type: studyflow:Study
+  name: N-back trial
+  documentation: >-
+    Figure 4: the N-back trial as an explicit subprocess (stimulus activity, a boundary timer for the response window, a
+    second timer for the inter-trial interval, and labeled target / non-target branches) that compresses into a single
+    cognitive task declaring its parameters.
+  flowElements:
+    NBackTrial:
+      type: bpmn:SubProcess
+      name: N-back trial
+      bounds:
+        x: 80
+        "y": 80
+        width: 560
+        height: 240
+      isExpanded: true
+      flowElements:
+        nb_start:
+          type: bpmn:StartEvent
+          name: Next trial
+          bounds:
+            x: 120
+            "y": 182
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 110
+              "y": 225
+              width: 56
+              height: 14
+        nb_show:
+          type: bpmn:Task
+          extensionElements:
+            - type: cognitive:CognitiveTask
+              instrument: behaverse
+          name: Show stimulus
+          bounds:
+            x: 220
+            "y": 160
+            width: 120
+            height: 80
+        nb_resp:
+          type: bpmn:BoundaryEvent
+          name: response window
+          attachedToRef: nb_show
+          eventDefinitions:
+            nb_resp_def:
+              type: bpmn:TimerEventDefinition
+          cancelActivity: false
+          bounds:
+            x: 240
+            "y": 222
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 190
+              "y": 262
+              width: 96
+              height: 14
+        nb_iti:
+          type: bpmn:BoundaryEvent
+          name: inter-trial interval
+          attachedToRef: nb_show
+          eventDefinitions:
+            nb_iti_def:
+              type: bpmn:TimerEventDefinition
+          cancelActivity: false
+          bounds:
+            x: 300
+            "y": 222
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 300
+              "y": 262
+              width: 100
+              height: 14
+        nb_gw:
+          type: bpmn:ExclusiveGateway
+          name: match?
+          bounds:
+            x: 420
+            "y": 180
+            width: 50
+            height: 50
+          isMarkerVisible: true
+          label:
+            bounds:
+              x: 428
+              "y": 232
+              width: 40
+              height: 14
+        nb_end:
+          type: bpmn:EndEvent
+          name: Trial logged
+          bounds:
+            x: 560
+            "y": 182
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 548
+              "y": 225
+              width: 62
+              height: 14
+        nb_f1:
+          type: bpmn:SequenceFlow
+          sourceRef: nb_start
+          targetRef: nb_show
+          waypoint:
+            - x: 156
+              "y": 200
+            - x: 220
+              "y": 200
+        nb_f2:
+          type: bpmn:SequenceFlow
+          sourceRef: nb_show
+          targetRef: nb_gw
+          waypoint:
+            - x: 340
+              "y": 200
+            - x: 420
+              "y": 205
+        nb_target:
+          type: bpmn:SequenceFlow
+          name: target
+          sourceRef: nb_gw
+          targetRef: nb_show
+          waypoint:
+            - x: 445
+              "y": 180
+            - x: 445
+              "y": 120
+            - x: 280
+              "y": 120
+            - x: 280
+              "y": 160
+          label:
+            bounds:
+              x: 350
+              "y": 102
+              width: 40
+              height: 14
+        nb_nontarget:
+          type: bpmn:SequenceFlow
+          name: non-target
+          sourceRef: nb_gw
+          targetRef: nb_end
+          waypoint:
+            - x: 470
+              "y": 205
+            - x: 560
+              "y": 200
+          label:
+            bounds:
+              x: 486
+              "y": 186
+              width: 60
+              height: 14
+    NBackCompact:
+      type: bpmn:Task
+      extensionElements:
+        - type: cognitive:CognitiveTask
+          instrument: behaverse
+      name: N-back (digits)
+      checklist: |-
+        N: 2
+        ISI: 1.5 s
+        stimulus: 0.5 s
+        trials/block: 12
+      bounds:
+        x: 240
+        "y": 400
+        width: 120
+        height: 80
+  isExecutable: false

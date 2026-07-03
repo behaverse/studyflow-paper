@@ -1,0 +1,308 @@
+id: figS1_multimodal
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+  xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
+  xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:bpmndi: http://www.omg.org/spec/BPMN/20100524/DI
+  xmlns:dc: http://www.omg.org/spec/DD/20100524/DC
+  xmlns:di: http://www.omg.org/spec/DD/20100524/DI
+  xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
+  xmlns:cognitive: http://behaverse.org/schemas/studyflow/cognitive
+  xmlns:datatrove: https://w3id.org/studyflow/datatrove
+  xmlns:omniprocess: https://w3id.org/omniprocess
+Multimodal_Pipeline:
+  type: bpmn:Process
+  extensionElements:
+    - type: studyflow:Study
+  name: Multimodal preprocessing and training
+  documentation: >-
+    Figure S1: a use-case pipeline harmonizing EEG, fMRI, and behavioral recordings. Three source datasets feed
+    modality-specific preprocessing (fMRIPrep, EEGPrep, BDM conversion); a compose/expansion step produces a harmonized
+    corpus, then a training chain.
+  flowElements:
+    eeg_raw:
+      type: bpmn:DataStoreReference
+      extensionElements:
+        - type: studyflow:Dataset
+          catalog: openneuro
+          format: bids
+          bidsDataType: eeg
+      name: EEG (BIDS)
+      bounds:
+        x: 115
+        "y": 115
+        width: 60
+        height: 14
+    fmri_raw:
+      type: bpmn:DataStoreReference
+      extensionElements:
+        - type: studyflow:Dataset
+          catalog: openneuro
+          format: bids
+          bidsDataType: func
+      name: fMRI (BIDS)
+      bounds:
+        x: 112
+        "y": 315
+        width: 66
+        height: 14
+    beh_raw:
+      type: bpmn:DataStoreReference
+      extensionElements:
+        - type: studyflow:Dataset
+          catalog: behaverse
+          format: bdm
+          bdmDataLevel: events
+      name: behavior
+      bounds:
+        x: 121
+        "y": 515
+        width: 48
+        height: 14
+    EEGPrep:
+      type: bpmn:SubProcess
+      extensionElements:
+        - type: omniprocess:PreprocessEEG
+      name: EEGPrep
+      isDataOperation: true
+      bounds:
+        x: 280
+        "y": 40
+        width: 120
+        height: 80
+      properties:
+        Prop_da_eeg:
+          name: __targetRef_placeholder
+      dataInputAssociations:
+        da_eeg:
+          sourceRef:
+            - eeg_raw
+          targetRef: Prop_da_eeg
+          waypoint:
+            - x: 170
+              "y": 85
+            - x: 280
+              "y": 80
+    fMRIPrep:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: omniprocess:PreprocessfMRI
+      name: fMRIPrep
+      isDataOperation: true
+      bounds:
+        x: 280
+        "y": 260
+        width: 120
+        height: 80
+      properties:
+        Prop_da_fmri:
+          name: __targetRef_placeholder
+      dataInputAssociations:
+        da_fmri:
+          sourceRef:
+            - fmri_raw
+          targetRef: Prop_da_fmri
+          waypoint:
+            - x: 170
+              "y": 285
+            - x: 280
+              "y": 300
+    BehConv:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Map
+      name: BDM conversion
+      isDataOperation: true
+      uses: python://behaverse.to_bdm@1.0
+      bounds:
+        x: 280
+        "y": 460
+        width: 120
+        height: 80
+      properties:
+        Prop_da_beh:
+          name: __targetRef_placeholder
+      dataInputAssociations:
+        da_beh:
+          sourceRef:
+            - beh_raw
+          targetRef: Prop_da_beh
+          waypoint:
+            - x: 170
+              "y": 485
+            - x: 280
+              "y": 500
+    Compose:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Compose
+      name: Compose (multiverse)
+      isDataOperation: true
+      uses: python://omniprocess.compose@1.0
+      bounds:
+        x: 500
+        "y": 260
+        width: 120
+        height: 80
+      dataOutputAssociations:
+        da_harm:
+          targetRef: harmonized
+          waypoint:
+            - x: 620
+              "y": 300
+            - x: 690
+              "y": 295
+    harmonized:
+      type: bpmn:DataStoreReference
+      extensionElements:
+        - type: studyflow:Dataset
+          catalog: behaverse
+          format: bdm
+          bdmDataLevel: models
+      name: harmonized corpus
+      bounds:
+        x: 664
+        "y": 325
+        width: 102
+        height: 14
+    Split:
+      type: bpmn:ExclusiveGateway
+      name: Split train/test
+      bounds:
+        x: 837
+        "y": 320
+        width: 96
+        height: 14
+      isMarkerVisible: true
+      properties:
+        Prop_da_split:
+          name: __targetRef_placeholder
+      dataInputAssociations:
+        da_split:
+          sourceRef:
+            - harmonized
+          targetRef: Prop_da_split
+          waypoint:
+            - x: 740
+              "y": 295
+            - x: 860
+              "y": 290
+    Train:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Reduce
+      name: Train model
+      isDataOperation: true
+      uses: python://models.train@1.0
+      bounds:
+        x: 960
+        "y": 200
+        width: 120
+        height: 80
+    Evaluate:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Map
+      name: Evaluate
+      isDataOperation: true
+      uses: python://models.evaluate@1.0
+      bounds:
+        x: 960
+        "y": 320
+        width: 120
+        height: 80
+    Done:
+      type: bpmn:EndEvent
+      name: Done
+      bounds:
+        x: 1136
+        "y": 323
+        width: 24
+        height: 14
+    m1:
+      type: bpmn:SequenceFlow
+      sourceRef: EEGPrep
+      targetRef: Compose
+      waypoint:
+        - x: 400
+          "y": 80
+        - x: 500
+          "y": 300
+    m2:
+      type: bpmn:SequenceFlow
+      sourceRef: fMRIPrep
+      targetRef: Compose
+      waypoint:
+        - x: 400
+          "y": 300
+        - x: 500
+          "y": 300
+    m3:
+      type: bpmn:SequenceFlow
+      sourceRef: BehConv
+      targetRef: Compose
+      waypoint:
+        - x: 400
+          "y": 500
+        - x: 500
+          "y": 300
+    m4:
+      type: bpmn:SequenceFlow
+      sourceRef: Compose
+      targetRef: Split
+      waypoint:
+        - x: 620
+          "y": 300
+        - x: 860
+          "y": 290
+    m5:
+      type: bpmn:SequenceFlow
+      sourceRef: Split
+      targetRef: Train
+      name: train
+      waypoint:
+        - x: 910
+          "y": 290
+        - x: 960
+          "y": 240
+      label:
+        bounds:
+          x: 920
+          "y": 247
+          width: 30
+          height: 14
+    m6:
+      type: bpmn:SequenceFlow
+      sourceRef: Split
+      targetRef: Evaluate
+      name: test
+      waypoint:
+        - x: 910
+          "y": 290
+        - x: 960
+          "y": 360
+      label:
+        bounds:
+          x: 923
+          "y": 307
+          width: 24
+          height: 14
+    m7:
+      type: bpmn:SequenceFlow
+      sourceRef: Train
+      targetRef: Done
+      waypoint:
+        - x: 1080
+          "y": 240
+        - x: 1130
+          "y": 300
+    m8:
+      type: bpmn:SequenceFlow
+      sourceRef: Evaluate
+      targetRef: Done
+      waypoint:
+        - x: 1080
+          "y": 360
+        - x: 1130
+          "y": 300
+  isExecutable: false
