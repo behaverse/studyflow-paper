@@ -457,8 +457,7 @@ Similar notations against the requirements: R1 single source of truth, R2 execut
 
 *Data, provenance, and reporting standards* occupy the data space and describe the datasets [@bids; @bdm; @psychds; @csvw]. Studyflow references them and describes the process that produced the data. Provenance tools describe what was run after the fact [@w3cprov; @soilandreyes2022rocrate; @leo2024wfrunrocrate], and similarly studyflow specifies the study in advance in an interchangeable format that can be executed, diffed, and audited.
 
-## Limitations
-
+# Limitations
 
 That BPMN is heavyweight and one more notation to learn is a real cost. We reduce the cost by a small core vocabulary so comprehension of process models does not degrade with size [@reijers2011understandability; @bogale2024]. Studyflow diagram is just a flowchart with extra attributes for its rendering. This flowchart validates against a schema, diffs in Git, embeds in image files, and can be walked during execution.
 
@@ -470,17 +469,12 @@ We have not measured the readability of the studyflow diagrams against the proto
 
 Finally, language models in the example study are not substitute humans, treating their data as human evidence invites misinterpretation, and AI surrogates risk illusions of understanding [@dillion2023replace; @lin2025fallacies; @messeri2024illusions]. Most experimental research in cognitive sciences has so far engaged AI as the intervention, not the subject, which is the setting CONSORT-AI and SPIRIT-AI extend the guidelines for [@liu2020consortai; @cruzrivera2020spiritai]. The claim here stays at the level of notation, so the protocol topology is one diagram, and the same diagram can run either human or artificial agents cohorts. Whether the tasks measure the same constructs in agents as in humans is an open question the shared protocol makes testable rather than settles [@bean2025construct]. The clearest instance is memory: a language model's context is its memory system, and an N-back administered with the full transcript in context is a retrieval task rather than a working memory task.
 
-## Toward a community standard
+# Future work
 
-The nearest-term direction is community extension. Each new domain is a schema file plus optional rendering code, and the adoption signals we watch for are domain schemas authored outside our group, studies modeled by labs we have not met, and reporting-guideline templates contributed upstream. Becoming a shared standard, as BIDS did [@bids], takes social infrastructure we do not yet have, but the unit such a process acts on already exists: a versioned schema that tools support at graded levels (read, validate, execute). Two lines of empirical work come next: the usability study above, and demonstrations beyond this one, such as a multi-session longitudinal trial whose Gantt and SPIRIT views run over months, a neuroimaging pipeline through the `galea` extension (Supplementary Figure S1), and a bridge compiling the agent branch into an Inspect or lm-eval task [@aisi2024inspect; @biderman2024lessons].
+Experimental science increasingly runs on large datasets and automated pipelines, yet the process that produces data and results still has no counterpart to what BIDS gave the data in cognitive science. Studyflow is one candidate for that role. A study read, run, and trusted from a single source rather than a trail of documents about it. A study built this way ends with its documents in agreement, because it has only one.
 
-<!-- >>> proposed-addition: a compilation target for machine-generated studies -->
-A further direction is machine authorship. Systems that generate research, from hypothesis-generating agents to autonomous pipelines, currently emit their protocols as prose, which no validator can certify, and language models draft process diagrams fluently but without guarantees [@kourani2024promoai; @lauer2026assessing]. A typed schema with static well-formedness, flow-consistency, and data-contract checks is the missing compilation target: a model drafts the study, the validator certifies what can be certified, and a human reviews a diff rather than a manuscript. The notation then serves as the oversight interface for machine-generated studies, the same artifact working in both directions.
-<!-- <<< proposed-addition -->
+A further direction is machine authorship. Systems that generate research, from hypothesis generating agents to autonomous pipelines, currently emit their protocols as prose, which no validator can certify, and language models draft process diagrams fluently but without guarantees [@kourani2024promoai; @lauer2026assessing]. A typed, human-understandable notation with static well-formedness, consistency, and data contract is missing. A language model drafts the study, the validator certifies what can be confirmed, and a human reviews a diff rather than a manuscript. The notation then serves as the oversight interface for machine generated studies.
 
-Experimental science increasingly runs on large datasets and automated pipelines, yet the process that produces a result still has no counterpart to what BIDS gave the data. Studyflow is one candidate for that role: a study read, run, and trusted from a single source rather than a trail of documents about it. A study built this way ends with its documents in agreement, because it has only one.
-
----
 
 # Materials and methods
 
