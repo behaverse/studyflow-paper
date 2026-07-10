@@ -1,0 +1,166 @@
+id: step01_design
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+  xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
+  xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
+  xmlns:cognitive: http://behaverse.org/schemas/studyflow/cognitive
+
+Design:
+  type: bpmn:Process
+  documentation: >-
+    Step 1 of the example study: the design as a complete, runnable fragment,
+    covering the enrolment and allocation phases of the CONSORT participant
+    flow. A consented start event, a screening questionnaire carrying the audit
+    checklist, an eligibility gateway whose criteria are attributes of the
+    node, and a randomization gateway carrying its allocation rule. Every
+    early exit is a counted error event; the runner writes the participant-flow
+    counts onto these events at run time.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+  name: Step 1 - Design
+  isExecutable: true
+  flowElements:
+
+    Enroll:
+      type: bpmn:StartEvent
+      name: Enrolled and consented
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+
+    Screening:
+      type: bpmn:Task
+      extensionElements:
+        - type: cognitive:Questionnaire
+          instrument: screening
+      checklist: |-
+        - [ ] Informed consent recorded
+        - [ ] Demographic intake
+        - [ ] Inclusion criteria checked
+        - [ ] Exclusion criteria checked
+      name: Screening
+
+    Eligibility_Gateway:
+      type: bpmn:ExclusiveGateway
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+          inclusionCriteria:
+            - Aged 18 to 65 years (human cohort)
+            - Normal or corrected-to-normal vision (human cohort)
+            - Registered agent family with a pinned model version (artificial cohort)
+          exclusionCriteria:
+            - Prior exposure to the battery
+            - Failed comprehension check at screening
+      name: Assessed for eligibility
+      isMarkerVisible: true
+
+    Excluded_Pre:
+      type: bpmn:EndEvent
+      name: Excluded before allocation (n=...)
+      eventDefinitions:
+        ErrorDef_ExcludedPre:
+          type: bpmn:ErrorEventDefinition
+
+    Randomize_Gateway:
+      type: bpmn:ExclusiveGateway
+      extensionElements:
+        - type: cognitive:RandomGateway
+          algorithm: probabilistic
+          probabilityFunction: uniform
+      documentation: >-
+        Random allocation applies to the human cohort only; artificial agents
+        run the full factorial, so path contrasts hold within a family. Time
+        pressure is implemented per family: a response timeout for humans, a
+        prompt deadline for language models.
+      name: Randomization (time-pressure path)
+      isMarkerVisible: true
+
+    Allocate_Speeded:
+      type: bpmn:Task
+      name: Allocated to speeded path (n=...)
+
+    DidNotStart_Speeded:
+      type: bpmn:BoundaryEvent
+      name: Did not start (n=...)
+      eventDefinitions:
+        ErrorDef_DidNotStart_Speeded:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Allocate_Speeded
+      cancelActivity: true
+
+    Allocate_SelfPaced:
+      type: bpmn:Task
+      name: Allocated to self-paced path (n=...)
+
+    DidNotStart_SelfPaced:
+      type: bpmn:BoundaryEvent
+      name: Did not start (n=...)
+      eventDefinitions:
+        ErrorDef_DidNotStart_SelfPaced:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Allocate_SelfPaced
+      cancelActivity: true
+
+    Merge_Allocation:
+      type: bpmn:ExclusiveGateway
+      name: Begin battery
+
+    Designed:
+      type: bpmn:EndEvent
+      name: Ready to run
+
+    DidNotStart:
+      type: bpmn:EndEvent
+      name: Did not start (n=...)
+      eventDefinitions:
+        ErrorDef_DidNotStart:
+          type: bpmn:ErrorEventDefinition
+
+    Flow_Enroll_Screening:
+      type: bpmn:SequenceFlow
+      sourceRef: Enroll
+      targetRef: Screening
+    Flow_Screening_Eligibility:
+      type: bpmn:SequenceFlow
+      sourceRef: Screening
+      targetRef: Eligibility_Gateway
+    Flow_Eligible:
+      type: bpmn:SequenceFlow
+      name: eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Randomize_Gateway
+    Flow_Excluded_Pre:
+      type: bpmn:SequenceFlow
+      name: excluded
+      sourceRef: Eligibility_Gateway
+      targetRef: Excluded_Pre
+    Flow_Allocate_Speeded:
+      type: bpmn:SequenceFlow
+      name: speeded
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_Speeded
+    Flow_Allocate_SelfPaced:
+      type: bpmn:SequenceFlow
+      name: self-paced
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_SelfPaced
+    Flow_Speeded_Merge:
+      type: bpmn:SequenceFlow
+      sourceRef: Allocate_Speeded
+      targetRef: Merge_Allocation
+    Flow_SelfPaced_Merge:
+      type: bpmn:SequenceFlow
+      sourceRef: Allocate_SelfPaced
+      targetRef: Merge_Allocation
+    Flow_Merge_Designed:
+      type: bpmn:SequenceFlow
+      sourceRef: Merge_Allocation
+      targetRef: Designed
+    Flow_DidNotStart_Speeded:
+      type: bpmn:SequenceFlow
+      sourceRef: DidNotStart_Speeded
+      targetRef: DidNotStart
+    Flow_DidNotStart_SelfPaced:
+      type: bpmn:SequenceFlow
+      sourceRef: DidNotStart_SelfPaced
+      targetRef: DidNotStart

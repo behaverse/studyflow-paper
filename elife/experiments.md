@@ -91,7 +91,8 @@ allocation → battery), on the same deposited file, same interface.
   aggregate demographics → Methods "Human participants" `[TODO]`.
 - Consent must include publication of de-identified data. Release only
   de-identified trials; demographics aggregate-only.
-- Note: the manuscript's Listing 3 diff currently implies 3 people were
+- Note: the manuscript's deviation-diff listing (Listing 5 in paper-v3)
+  currently implies 3 people were
   screened and 1 excluded. That is a placeholder; the real screening/attrition
   numbers replace it (WP6).
 
@@ -136,7 +137,7 @@ validator's verbatim messages:
 Replace the two constructed `ERROR ...` blocks in Results "Amend and report"
 with the exact tool output.
 
-## WP6 — Deviation diff (Listing 3 and Figure 7)
+## WP6 — Deviation diff (Listing 5 in paper-v3 and Figure 7)
 
 **Do:** after all runs, produce the as-run file and generate the diff against
 the registered file MECHANICALLY (`git diff` or equivalent).
@@ -144,7 +145,7 @@ the registered file MECHANICALLY (`git diff` or equivalent).
 - Expected content: only run-time values (attrition counts) on elements that
   declared them at registration. If anything else changed, that is a real
   deviation — report it, do not clean it.
-- Replace Listing 3's diff (current counts 1/9/3 are placeholders).
+- Replace the deviation-diff listing (Listing 5 in paper-v3; current counts 1/9/3 are placeholders).
 - Tell the graphic designer the real counts: Figure 7's bottom panel shows
   them (see [figures.md](figures.md)).
 
@@ -190,7 +191,7 @@ disclosure; CONSORT 2025 figure redraw license (Figure 3a).
       agreement/divergence sentence replaced with real estimates
 - [ ] Prose claims re-checked against data ("profiles order as expected",
       "ordering preserved" on the timed path) and corrected where wrong
-- [ ] Listing 3 diff and Figure 7 counts regenerated mechanically
+- [ ] Deviation diff (Listing 5 in paper-v3) and Figure 7 counts regenerated mechanically
 - [ ] Both validator messages captured verbatim
 - [ ] Determinism + amendment-stability checks passed and pinned
 - [ ] Human participants' ethics, recruitment, and consent text confirmed

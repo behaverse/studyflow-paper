@@ -1,0 +1,215 @@
+id: step03_analyze
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+  xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
+  xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
+  xmlns:datatrove: https://w3id.org/studyflow/datatrove
+
+Analyze:
+  type: bpmn:Process
+  documentation: >-
+    Step 3 of the example study: the preregistered analysis pipeline as a
+    complete, runnable fragment. Typed data-operation nodes fixed before the
+    first run: read, filter (the analysis exclusion the CONSORT flow reports),
+    map to derived measures, branch on the comparison of interest, reduce in
+    two stages, and a manual outlier review before the final write in Step 4.
+    Each step delegates through a versioned `uses` reference, and the trials
+    dataset it reads is bound to the CSVW schema declared at Step 2.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+  name: Step 3 - Analyze
+  isExecutable: true
+  flowElements:
+
+    Analysis_Start:
+      type: bpmn:StartEvent
+      name: Data collected
+
+    Read:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Reader
+      name: Read raw trials
+      isDataOperation: true
+      uses: python://behaverse_analysis.read_trials@1.0
+      outputs:
+        - trials
+
+    Filter:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Filter
+      name: Filter invalid trials (analysis exclusion)
+      isDataOperation: true
+      uses: python://behaverse_analysis.filter_invalid@1.0
+      with:
+        min_rt_ms: 100
+        drop_missing: true
+        drop_flagged: true
+      inputs:
+        - trials
+      outputs:
+        - valid_trials
+
+    Map:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Map
+      name: Map to derived measures
+      isDataOperation: true
+      uses: python://behaverse_analysis.derive_measures@1.0
+      inputs:
+        - valid_trials
+      outputs:
+        - measures
+
+    Branch_Comparison:
+      type: bpmn:ExclusiveGateway
+      name: Comparison of interest
+
+    Reduce_Subject:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Reduce
+      name: Reduce to per-run summaries
+      isDataOperation: true
+      uses: python://behaverse_analysis.summarize_runs@1.0
+      inputs:
+        - measures
+      outputs:
+        - run_summaries
+
+    Reduce_Group:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Reduce
+      name: Reduce to group statistics (marker, agreement)
+      isDataOperation: true
+      uses: python://behaverse_analysis.group_stats@1.0
+      inputs:
+        - run_summaries
+      outputs:
+        - group_stats
+
+    Outlier_Review:
+      type: bpmn:UserTask
+      name: Manual outlier review
+
+    Classifier:
+      type: bpmn:ServiceTask
+      extensionElements:
+        - type: datatrove:Transform
+          operationType: fit
+      name: Train divergence classifier (distinguishability)
+      isDataOperation: true
+      uses: python://behaverse_analysis.train_classifier@1.0
+      inputs:
+        - measures
+      outputs:
+        - classifier_stats
+
+    Merge_Analysis:
+      type: bpmn:ExclusiveGateway
+      name: Collect outputs
+
+    Analysis_End:
+      type: bpmn:EndEvent
+      name: Analysis outputs ready
+
+    Dataset_Trials:
+      type: bpmn:DataStoreReference
+      extensionElements:
+        - type: studyflow:Dataset
+          format: bdm
+          bdmDataLevel: trials
+      name: Trials (BDM)
+
+    Schema_Trials:
+      type: bpmn:DataObjectReference
+      extensionElements:
+        - type: studyflow:Schema
+          format: csvw
+      name: Trial schema (CSVW)
+      dataObjectRef: DataObject_TrialSchema
+
+    DataObject_TrialSchema:
+      type: bpmn:DataObject
+
+    Dataset_Summaries:
+      type: bpmn:DataStoreReference
+      extensionElements:
+        - type: studyflow:Dataset
+          format: bdm
+          bdmDataLevel: models
+      name: Summaries and statistics (BDM)
+
+    Flow_AStart_Read:
+      type: bpmn:SequenceFlow
+      sourceRef: Analysis_Start
+      targetRef: Read
+    Flow_Read_Filter:
+      type: bpmn:SequenceFlow
+      sourceRef: Read
+      targetRef: Filter
+    Flow_Filter_Map:
+      type: bpmn:SequenceFlow
+      sourceRef: Filter
+      targetRef: Map
+    Flow_Map_Branch:
+      type: bpmn:SequenceFlow
+      sourceRef: Map
+      targetRef: Branch_Comparison
+    Flow_Branch_ReduceSubject:
+      type: bpmn:SequenceFlow
+      name: agreement / marker
+      sourceRef: Branch_Comparison
+      targetRef: Reduce_Subject
+    Flow_Branch_Classifier:
+      type: bpmn:SequenceFlow
+      name: divergence
+      sourceRef: Branch_Comparison
+      targetRef: Classifier
+    Flow_ReduceSubject_Group:
+      type: bpmn:SequenceFlow
+      sourceRef: Reduce_Subject
+      targetRef: Reduce_Group
+    Flow_Group_Outlier:
+      type: bpmn:SequenceFlow
+      sourceRef: Reduce_Group
+      targetRef: Outlier_Review
+    Flow_Outlier_Merge:
+      type: bpmn:SequenceFlow
+      sourceRef: Outlier_Review
+      targetRef: Merge_Analysis
+    Flow_Classifier_Merge:
+      type: bpmn:SequenceFlow
+      sourceRef: Classifier
+      targetRef: Merge_Analysis
+    Flow_Merge_AEnd:
+      type: bpmn:SequenceFlow
+      sourceRef: Merge_Analysis
+      targetRef: Analysis_End
+
+  artifacts:
+    Assoc_Trials_Read:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Dataset_Trials
+      targetRef: Read
+    Assoc_Schema_Trials:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Schema_Trials
+      targetRef: Dataset_Trials
+    Assoc_Group_Summaries:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Reduce_Group
+      targetRef: Dataset_Summaries
+    Assoc_Classifier_Summaries:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Classifier
+      targetRef: Dataset_Summaries

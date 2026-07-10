@@ -1,0 +1,188 @@
+id: step02_run
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+  xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
+  xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
+  xmlns:cognitive: http://behaverse.org/schemas/studyflow/cognitive
+  xmlns:behaverse: http://behaverse.org/schemas/studyflow/behaverse
+
+Run:
+  type: bpmn:Process
+  documentation: >-
+    Step 2 of the example study: the run as a complete, runnable fragment.
+    Six Behaverse tasks plus the jsPsych Flanker, administered one trial at a
+    time through one message-passing interface (human or artificial actor
+    alike); every trial is logged to the BDM trials dataset under the declared
+    schema. A run whose failed-trial rate exceeds 20% on any task exits
+    through a boundary error event to a counted error end event.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+  name: Step 2 - Run
+  isExecutable: true
+  flowElements:
+
+    Battery_Start:
+      type: bpmn:StartEvent
+      name: Begin battery
+
+    Task_NBack:
+      type: bpmn:Task
+      extensionElements:
+        - type: behaverse:Task
+          scene: NB
+          configurations:
+            NValue: 2
+            TrialsPerBlock: 40
+            InterStimulusInterval: 1.5
+      name: Working memory (N-Back)
+
+    Failed_NBack:
+      type: bpmn:BoundaryEvent
+      name: Failed-trial rate > 20%
+      eventDefinitions:
+        ErrorDef_Failed_NBack:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Task_NBack
+      cancelActivity: true
+
+    Task_DigitSpan:
+      type: bpmn:Task
+      extensionElements:
+        - type: behaverse:Task
+          scene: DS
+      name: Verbal span (Digit Span)
+
+    Task_Flanker:
+      type: bpmn:Task
+      extensionElements:
+        - type: cognitive:CognitiveTask
+          instrument: jspsych
+      name: Attention (Flanker)
+      uses: https://github.com/jspsych/jspsych-contrib@v0.4.0#flanker
+
+    Failed_Flanker:
+      type: bpmn:BoundaryEvent
+      name: Failed-trial rate > 20%
+      eventDefinitions:
+        ErrorDef_Failed_Flanker:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Task_Flanker
+      cancelActivity: true
+
+    Task_SART:
+      type: bpmn:Task
+      extensionElements:
+        - type: behaverse:Task
+          scene: SART
+      name: Sustained attention (SART)
+
+    Task_SRT:
+      type: bpmn:Task
+      extensionElements:
+        - type: behaverse:Task
+          scene: SRT
+      name: Processing speed (Serial RT)
+
+    Task_Matrices:
+      type: bpmn:Task
+      extensionElements:
+        - type: behaverse:Task
+          scene: BM
+      name: Fluid reasoning (Belval Matrices)
+
+    Task_CardSorting:
+      type: bpmn:Task
+      extensionElements:
+        - type: behaverse:Task
+          scene: BCS
+      name: Set-shifting (Belval Card Sorting)
+
+    ErrEnd_FailedTrials:
+      type: bpmn:EndEvent
+      name: Failed-trial rate > 20%
+      eventDefinitions:
+        ErrorDef_FailedTrials:
+          type: bpmn:ErrorEventDefinition
+
+    Battery_End:
+      type: bpmn:EndEvent
+      name: Battery completed
+
+    Dataset_Trials:
+      type: bpmn:DataStoreReference
+      extensionElements:
+        - type: studyflow:Dataset
+          format: bdm
+          bdmDataLevel: trials
+      name: Trials (BDM)
+
+    Schema_Trials:
+      type: bpmn:DataObjectReference
+      extensionElements:
+        - type: studyflow:Schema
+          format: csvw
+      name: Trial schema (CSVW)
+      dataObjectRef: DataObject_TrialSchema
+
+    DataObject_TrialSchema:
+      type: bpmn:DataObject
+
+    Flow_BStart_NBack:
+      type: bpmn:SequenceFlow
+      sourceRef: Battery_Start
+      targetRef: Task_NBack
+    Flow_NBack_DS:
+      type: bpmn:SequenceFlow
+      sourceRef: Task_NBack
+      targetRef: Task_DigitSpan
+    Flow_DS_Flanker:
+      type: bpmn:SequenceFlow
+      sourceRef: Task_DigitSpan
+      targetRef: Task_Flanker
+    Flow_Flanker_SART:
+      type: bpmn:SequenceFlow
+      sourceRef: Task_Flanker
+      targetRef: Task_SART
+    Flow_SART_SRT:
+      type: bpmn:SequenceFlow
+      sourceRef: Task_SART
+      targetRef: Task_SRT
+    Flow_SRT_Matrices:
+      type: bpmn:SequenceFlow
+      sourceRef: Task_SRT
+      targetRef: Task_Matrices
+    Flow_Matrices_CardSort:
+      type: bpmn:SequenceFlow
+      sourceRef: Task_Matrices
+      targetRef: Task_CardSorting
+    Flow_CardSort_BEnd:
+      type: bpmn:SequenceFlow
+      sourceRef: Task_CardSorting
+      targetRef: Battery_End
+    Flow_Failed_NBack:
+      type: bpmn:SequenceFlow
+      sourceRef: Failed_NBack
+      targetRef: ErrEnd_FailedTrials
+    Flow_Failed_Flanker:
+      type: bpmn:SequenceFlow
+      sourceRef: Failed_Flanker
+      targetRef: ErrEnd_FailedTrials
+
+  artifacts:
+    Assoc_NBack_Trials:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Task_NBack
+      targetRef: Dataset_Trials
+    Assoc_Flanker_Trials:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Task_Flanker
+      targetRef: Dataset_Trials
+    Assoc_Schema_Trials:
+      type: bpmn:Association
+      associationDirection: One
+      sourceRef: Schema_Trials
+      targetRef: Dataset_Trials
