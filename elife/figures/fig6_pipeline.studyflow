@@ -27,7 +27,7 @@ Analysis_Pipeline:
           catalog: behaverse
           format: bdm
           bdmDataLevel: trials
-      name: trials (BDM)
+      name: Trials (BDM)
       bounds:
         x: 529
         "y": 115
@@ -40,7 +40,7 @@ Analysis_Pipeline:
           className: ParquetReader
       name: Read raw trials
       isDataOperation: true
-      uses: python://dataflow.read@1.0
+      uses: python://behaverse_analysis.read_trials@1.0
       bounds:
         x: 340
         "y": 120
@@ -63,9 +63,9 @@ Analysis_Pipeline:
       type: bpmn:ServiceTask
       extensionElements:
         - type: datatrove:Filter
-      name: Filter invalid trials
+      name: Filter invalid trials (analysis exclusion)
       isDataOperation: true
-      uses: python://analysis.filter_invalid@1.0
+      uses: python://behaverse_analysis.filter_invalid@1.0
       bounds:
         x: 340
         "y": 220
@@ -77,7 +77,7 @@ Analysis_Pipeline:
         - type: datatrove:Map
       name: Map to derived measures
       isDataOperation: true
-      uses: python://analysis.derive@1.0
+      uses: python://behaverse_analysis.derive_measures@1.0
       bounds:
         x: 340
         "y": 320
@@ -96,9 +96,9 @@ Analysis_Pipeline:
       type: bpmn:ServiceTask
       extensionElements:
         - type: datatrove:Reduce
-      name: "Reduce: subject summaries"
+      name: Reduce to per-run summaries
       isDataOperation: true
-      uses: python://analysis.per_subject@1.0
+      uses: python://behaverse_analysis.summarize_runs@1.0
       bounds:
         x: 340
         "y": 520
@@ -108,16 +108,16 @@ Analysis_Pipeline:
       type: bpmn:ServiceTask
       extensionElements:
         - type: datatrove:Reduce
-      name: "Reduce: group statistics"
+      name: Reduce to group statistics (marker, agreement)
       isDataOperation: true
-      uses: python://analysis.group_stats@1.0
+      uses: python://behaverse_analysis.group_stats@1.0
       bounds:
         x: 340
         "y": 620
         width: 120
         height: 80
     ManualReview:
-      type: bpmn:ManualTask
+      type: bpmn:UserTask
       name: Manual outlier review
       bounds:
         x: 340
@@ -129,9 +129,9 @@ Analysis_Pipeline:
       extensionElements:
         - type: datatrove:Writer
           className: ParquetWriter
-      name: Render and write
+      name: Render and write report
       isDataOperation: true
-      uses: python://analysis.render@1.0
+      uses: python://behaverse_analysis.render_report@1.0
       bounds:
         x: 340
         "y": 820
@@ -152,7 +152,7 @@ Analysis_Pipeline:
           catalog: behaverse
           format: bdm
           bdmDataLevel: models
-      name: results
+      name: Summaries and statistics (BDM)
       bounds:
         x: 544
         "y": 895

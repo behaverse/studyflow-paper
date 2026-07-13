@@ -40,6 +40,9 @@ Example_Study:
   extensionElements:
     - type: studyflow:Study
       runtime: browser
+      # Study seed: with a subject identifier i, fixes each subject's path,
+      # task order, stimulus order, and every random branch draw.
+      seed: 42
   name: Example study (cognitive benchmark, human and artificial cohorts)
   isExecutable: true
 
@@ -162,7 +165,7 @@ Example_Study:
 
     Excluded_Pre:
       type: bpmn:EndEvent
-      name: Excluded before allocation (n=...)
+      name: Excluded (n=...)
       eventDefinitions:
         ErrorDef_ExcludedPre:
           type: bpmn:ErrorEventDefinition
@@ -192,7 +195,7 @@ Example_Study:
       documentation: >-
         Random allocation applies to the human cohort only; artificial agents
         run the full factorial, so path contrasts hold within a family.
-      name: Randomization (time-pressure path)
+      name: Randomized
       isMarkerVisible: true
       bounds:
         x: 535
@@ -220,7 +223,7 @@ Example_Study:
 
     DidNotStart_Speeded:
       type: bpmn:BoundaryEvent
-      name: Did not start (n=...)
+      name: Did not receive allocated intervention (n=...)
       eventDefinitions:
         ErrorDef_DidNotStart_Speeded:
           type: bpmn:ErrorEventDefinition
@@ -252,7 +255,7 @@ Example_Study:
 
     DidNotStart_SelfPaced:
       type: bpmn:BoundaryEvent
-      name: Did not start (n=...)
+      name: Did not receive allocated intervention (n=...)
       eventDefinitions:
         ErrorDef_DidNotStart_SelfPaced:
           type: bpmn:ErrorEventDefinition
@@ -584,7 +587,7 @@ Example_Study:
 
     Discontinued:
       type: bpmn:EndEvent
-      name: Discontinued or lost (n=...)
+      name: Discontinued intervention (n=...)
       eventDefinitions:
         ErrorDef_Discontinued:
           type: bpmn:ErrorEventDefinition
@@ -725,6 +728,45 @@ Example_Study:
             "y": 1990
             width: 160
             height: 80
+
+        # The analysis exclusion the CONSORT flow reports: runs dropped at the
+        # filter step leave through a counted error end, mirroring the enrolment
+        # and follow-up attrition exits.
+        ExclFromAnalysis:
+          type: bpmn:BoundaryEvent
+          name: analysis exclusion
+          eventDefinitions:
+            ErrorDef_ExclFromAnalysis:
+              type: bpmn:ErrorEventDefinition
+          attachedToRef: Filter
+          cancelActivity: true
+          bounds:
+            x: 622
+            "y": 2052
+            width: 36
+            height: 36
+
+        Excluded_Analysis:
+          type: bpmn:EndEvent
+          name: Excluded from analysis (n=...)
+          eventDefinitions:
+            ErrorDef_ExcludedAnalysis:
+              type: bpmn:ErrorEventDefinition
+          bounds:
+            x: 760
+            "y": 2020
+            width: 36
+            height: 36
+          label:
+            bounds:
+              x: 720
+              "y": 2060
+              width: 130
+              height: 27
+          stroke: "#ac5a54"
+          fill: "#f1d0cd"
+          background-color: "#f1d0cd"
+          border-color: "#ac5a54"
 
         Map:
           type: bpmn:ServiceTask
@@ -870,6 +912,19 @@ Example_Study:
               "y": 2070
             - x: 560
               "y": 2100
+        Flow_ExclFromAnalysis:
+          type: bpmn:SequenceFlow
+          sourceRef: ExclFromAnalysis
+          targetRef: Excluded_Analysis
+          waypoint:
+            - x: 640
+              "y": 2070
+            - x: 778
+              "y": 2070
+            - x: 778
+              "y": 2056
+          stroke: "#ac5a54"
+          border-color: "#ac5a54"
         Flow_Map_Branch:
           type: bpmn:SequenceFlow
           sourceRef: Map
@@ -1242,18 +1297,18 @@ Example_Study:
           "y": 2455
         - x: 935
           "y": 2455
-    Assoc_Render_Summaries:
+    Assoc_Summaries_Render:
       type: bpmn:Association
       associationDirection: One
-      sourceRef: Render_Write
-      targetRef: Dataset_Summaries
+      sourceRef: Dataset_Summaries
+      targetRef: Render_Write
       waypoint:
-        - x: 640
-          "y": 2860
-        - x: 960
-          "y": 2860
         - x: 960
           "y": 2480
+        - x: 960
+          "y": 2860
+        - x: 640
+          "y": 2860
 
     # ---------- Reader annotations ----------
     Ann_Randomization:

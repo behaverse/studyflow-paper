@@ -8,6 +8,7 @@ definitions:
   xmlns:di: http://www.omg.org/spec/DD/20100524/DI
   xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
   xmlns:cognitive: http://behaverse.org/schemas/studyflow/cognitive
+  xmlns:datatrove: https://w3id.org/studyflow/datatrove
   xmlns:bioc: http://bpmn.io/schema/bpmn/biocolor/1.0
   xmlns:color: http://www.omg.org/spec/BPMN/non-normative/color/1.0
 CONSORT_Studyflow:
@@ -60,7 +61,7 @@ CONSORT_Studyflow:
       bounds:
         x: 574
         "y": 197
-        width: 108
+        width: 130
         height: 14
       stroke: "#ac5a54"
       fill: "#f1d0cd"
@@ -70,7 +71,7 @@ CONSORT_Studyflow:
       type: bpmn:ExclusiveGateway
       extensionElements:
         - type: cognitive:RandomGateway
-      name: Randomize
+      name: Randomized
       bounds:
         x: 403
         "y": 355
@@ -106,7 +107,7 @@ CONSORT_Studyflow:
       extensionElements:
         - type: cognitive:CognitiveTask
           instrument: behaverse
-      name: Time-pressured battery
+      name: Speeded battery
       bounds:
         x: 560
         "y": 410
@@ -127,7 +128,7 @@ CONSORT_Studyflow:
         height: 14
     Dropped:
       type: bpmn:EndEvent
-      name: Dropped out (n = ...)
+      name: Discontinued intervention (n = ...)
       eventDefinitions:
         Dropped_def:
           type: bpmn:ErrorEventDefinition
@@ -205,7 +206,7 @@ CONSORT_Studyflow:
       border-color: "#ac5a54"
     Analyzed:
       type: bpmn:EndEvent
-      name: Analyzed
+      name: Analyzed (n = ...)
       bounds:
         x: 406
         "y": 741
@@ -267,7 +268,7 @@ CONSORT_Studyflow:
       type: bpmn:SequenceFlow
       sourceRef: Randomize
       targetRef: TimePressured
-      name: time-pressured
+      name: speeded
       waypoint:
         - x: 455
           "y": 325

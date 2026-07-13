@@ -19,6 +19,9 @@ Design:
   extensionElements:
     - type: studyflow:Study
       runtime: browser
+      # Study seed: with a subject identifier i, fixes each subject's path
+      # (allocation), task order, stimulus order, and every random branch draw.
+      seed: 42
   name: Step 1 - Design
   isExecutable: true
   flowElements:
@@ -56,7 +59,7 @@ Design:
 
     Excluded_Pre:
       type: bpmn:EndEvent
-      name: Excluded before allocation (n=...)
+      name: Excluded (n=...)
       eventDefinitions:
         ErrorDef_ExcludedPre:
           type: bpmn:ErrorEventDefinition
@@ -72,7 +75,7 @@ Design:
         run the full factorial, so path contrasts hold within a family. Time
         pressure is implemented per family: a response timeout for humans, a
         prompt deadline for language models.
-      name: Randomization (time-pressure path)
+      name: Randomized
       isMarkerVisible: true
 
     Allocate_Speeded:
@@ -81,7 +84,7 @@ Design:
 
     DidNotStart_Speeded:
       type: bpmn:BoundaryEvent
-      name: Did not start (n=...)
+      name: Did not receive allocated intervention (n=...)
       eventDefinitions:
         ErrorDef_DidNotStart_Speeded:
           type: bpmn:ErrorEventDefinition
@@ -94,7 +97,7 @@ Design:
 
     DidNotStart_SelfPaced:
       type: bpmn:BoundaryEvent
-      name: Did not start (n=...)
+      name: Did not receive allocated intervention (n=...)
       eventDefinitions:
         ErrorDef_DidNotStart_SelfPaced:
           type: bpmn:ErrorEventDefinition
@@ -111,7 +114,7 @@ Design:
 
     DidNotStart:
       type: bpmn:EndEvent
-      name: Did not start (n=...)
+      name: Did not receive allocated intervention (n=...)
       eventDefinitions:
         ErrorDef_DidNotStart:
           type: bpmn:ErrorEventDefinition

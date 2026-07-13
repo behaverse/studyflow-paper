@@ -53,6 +53,24 @@ Analyze:
       outputs:
         - valid_trials
 
+    # The analysis exclusion the CONSORT flow reports: runs dropped at the
+    # filter step leave through a counted error end.
+    ExclFromAnalysis:
+      type: bpmn:BoundaryEvent
+      name: analysis exclusion
+      eventDefinitions:
+        ErrorDef_ExclFromAnalysis:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Filter
+      cancelActivity: true
+
+    Excluded_Analysis:
+      type: bpmn:EndEvent
+      name: Excluded from analysis (n=...)
+      eventDefinitions:
+        ErrorDef_ExcludedAnalysis:
+          type: bpmn:ErrorEventDefinition
+
     Map:
       type: bpmn:ServiceTask
       extensionElements:
@@ -157,6 +175,10 @@ Analyze:
       type: bpmn:SequenceFlow
       sourceRef: Filter
       targetRef: Map
+    Flow_ExclFromAnalysis:
+      type: bpmn:SequenceFlow
+      sourceRef: ExclFromAnalysis
+      targetRef: Excluded_Analysis
     Flow_Map_Branch:
       type: bpmn:SequenceFlow
       sourceRef: Map

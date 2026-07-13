@@ -19,6 +19,9 @@ Run:
   extensionElements:
     - type: studyflow:Study
       runtime: browser
+      # Study seed: with a subject identifier i, fixes task order, stimulus
+      # order, and every random branch draw.
+      seed: 42
   name: Step 2 - Run
   isExecutable: true
   flowElements:
@@ -69,6 +72,52 @@ Run:
         ErrorDef_Failed_Flanker:
           type: bpmn:ErrorEventDefinition
       attachedToRef: Task_Flanker
+      cancelActivity: true
+
+    # The failed-trial boundary rule applies to every task in the battery.
+    Failed_DigitSpan:
+      type: bpmn:BoundaryEvent
+      name: Failed-trial rate > 20%
+      eventDefinitions:
+        ErrorDef_Failed_DigitSpan:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Task_DigitSpan
+      cancelActivity: true
+
+    Failed_SART:
+      type: bpmn:BoundaryEvent
+      name: Failed-trial rate > 20%
+      eventDefinitions:
+        ErrorDef_Failed_SART:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Task_SART
+      cancelActivity: true
+
+    Failed_SRT:
+      type: bpmn:BoundaryEvent
+      name: Failed-trial rate > 20%
+      eventDefinitions:
+        ErrorDef_Failed_SRT:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Task_SRT
+      cancelActivity: true
+
+    Failed_Matrices:
+      type: bpmn:BoundaryEvent
+      name: Failed-trial rate > 20%
+      eventDefinitions:
+        ErrorDef_Failed_Matrices:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Task_Matrices
+      cancelActivity: true
+
+    Failed_CardSorting:
+      type: bpmn:BoundaryEvent
+      name: Failed-trial rate > 20%
+      eventDefinitions:
+        ErrorDef_Failed_CardSorting:
+          type: bpmn:ErrorEventDefinition
+      attachedToRef: Task_CardSorting
       cancelActivity: true
 
     Task_SART:
@@ -168,6 +217,26 @@ Run:
     Flow_Failed_Flanker:
       type: bpmn:SequenceFlow
       sourceRef: Failed_Flanker
+      targetRef: ErrEnd_FailedTrials
+    Flow_Failed_DigitSpan:
+      type: bpmn:SequenceFlow
+      sourceRef: Failed_DigitSpan
+      targetRef: ErrEnd_FailedTrials
+    Flow_Failed_SART:
+      type: bpmn:SequenceFlow
+      sourceRef: Failed_SART
+      targetRef: ErrEnd_FailedTrials
+    Flow_Failed_SRT:
+      type: bpmn:SequenceFlow
+      sourceRef: Failed_SRT
+      targetRef: ErrEnd_FailedTrials
+    Flow_Failed_Matrices:
+      type: bpmn:SequenceFlow
+      sourceRef: Failed_Matrices
+      targetRef: ErrEnd_FailedTrials
+    Flow_Failed_CardSorting:
+      type: bpmn:SequenceFlow
+      sourceRef: Failed_CardSorting
       targetRef: ErrEnd_FailedTrials
 
   artifacts:

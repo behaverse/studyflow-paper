@@ -179,12 +179,11 @@ NBack_Trial:
       extensionElements:
         - type: cognitive:CognitiveTask
           instrument: behaverse
-      name: N-back (digits)
+      name: Working memory (N-Back)
       checklist: |-
         N: 2
         ISI: 1.5 s
-        stimulus: 0.5 s
-        trials/block: 12
+        trials/block: 40
       bounds:
         x: 240
         "y": 400
