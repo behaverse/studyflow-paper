@@ -3,29 +3,86 @@ definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
   xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
   xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:bpmndi: http://www.omg.org/spec/BPMN/20100524/DI
+  xmlns:dc: http://www.omg.org/spec/DD/20100524/DC
+  xmlns:di: http://www.omg.org/spec/DD/20100524/DI
+  xmlns:bioc: http://bpmn.io/schema/bpmn/biocolor/1.0
+  xmlns:color: http://www.omg.org/spec/BPMN/non-normative/color/1.0
   xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
   xmlns:datatrove: https://w3id.org/studyflow/datatrove
+
+Analyze_Collaboration:
+  type: bpmn:Collaboration
+  participants:
+    Participant_Analyze:
+      name: "Step 3 — Analyze"
+      processRef: Analyze
+      bounds:
+        x: 160
+        "y": 40
+        width: 1010
+        height: 1080
+      isHorizontal: true
 
 Analyze:
   type: bpmn:Process
   documentation: >-
     Step 3 of the example study: the preregistered analysis pipeline as a
-    complete, runnable fragment. Typed data-operation nodes fixed before the
-    first run: read, filter (the analysis exclusion the CONSORT flow reports),
-    map to derived measures, branch on the comparison of interest, reduce in
-    two stages, and a manual outlier review before the final write in Step 4.
-    Each step delegates through a versioned `uses` reference, and the trials
-    dataset it reads is bound to the CSVW schema declared at Step 2.
+    complete, runnable fragment, and the analysis phase of the CONSORT flow.
+    Typed data-operation nodes fixed before the first run: read, filter (the
+    analysis exclusion the CONSORT flow reports), map to derived measures,
+    branch on the comparison of interest, reduce in two stages, and a manual
+    outlier review before the final write in Step 4. Each step delegates
+    through a versioned `uses` reference, and the trials dataset it reads is
+    bound to the CSVW schema declared at Step 2.
   extensionElements:
     - type: studyflow:Study
       runtime: browser
   name: Step 3 - Analyze
   isExecutable: true
+
+  laneSets:
+    LaneSet_Analyze:
+      lanes:
+        Lane_Analysis:
+          name: Analysis
+          flowNodeRef:
+            - Analysis_Start
+            - Read
+            - Filter
+            - ExclFromAnalysis
+            - Excluded_Analysis
+            - Map
+            - Branch_Comparison
+            - Reduce_Subject
+            - Reduce_Group
+            - Outlier_Review
+            - Classifier
+            - Merge_Analysis
+            - Analysis_End
+          bounds:
+            x: 190
+            "y": 40
+            width: 980
+            height: 1080
+          isHorizontal: true
+
   flowElements:
 
     Analysis_Start:
       type: bpmn:StartEvent
       name: Data collected
+      bounds:
+        x: 412
+        "y": 72
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 456
+          "y": 83
+          width: 100
+          height: 14
 
     Read:
       type: bpmn:ServiceTask
@@ -36,6 +93,11 @@ Analyze:
       uses: python://behaverse_analysis.read_trials@1.0
       outputs:
         - trials
+      bounds:
+        x: 350
+        "y": 150
+        width: 160
+        height: 80
 
     Filter:
       type: bpmn:ServiceTask
@@ -52,9 +114,12 @@ Analyze:
         - trials
       outputs:
         - valid_trials
+      bounds:
+        x: 350
+        "y": 260
+        width: 160
+        height: 80
 
-    # The analysis exclusion the CONSORT flow reports: runs dropped at the
-    # filter step leave through a counted error end.
     ExclFromAnalysis:
       type: bpmn:BoundaryEvent
       name: analysis exclusion
@@ -63,6 +128,11 @@ Analyze:
           type: bpmn:ErrorEventDefinition
       attachedToRef: Filter
       cancelActivity: true
+      bounds:
+        x: 492
+        "y": 322
+        width: 36
+        height: 36
 
     Excluded_Analysis:
       type: bpmn:EndEvent
@@ -70,6 +140,21 @@ Analyze:
       eventDefinitions:
         ErrorDef_ExcludedAnalysis:
           type: bpmn:ErrorEventDefinition
+      bounds:
+        x: 642
+        "y": 303
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 620
+          "y": 345
+          width: 150
+          height: 14
+      stroke: "#ac5a54"
+      fill: "#f1d0cd"
+      background-color: "#f1d0cd"
+      border-color: "#ac5a54"
 
     Map:
       type: bpmn:ServiceTask
@@ -82,10 +167,26 @@ Analyze:
         - valid_trials
       outputs:
         - measures
+      bounds:
+        x: 350
+        "y": 370
+        width: 160
+        height: 80
 
     Branch_Comparison:
       type: bpmn:ExclusiveGateway
       name: Comparison of interest
+      bounds:
+        x: 405
+        "y": 480
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 366
+          "y": 538
+          width: 128
+          height: 14
 
     Reduce_Subject:
       type: bpmn:ServiceTask
@@ -98,6 +199,11 @@ Analyze:
         - measures
       outputs:
         - run_summaries
+      bounds:
+        x: 230
+        "y": 580
+        width: 160
+        height: 80
 
     Reduce_Group:
       type: bpmn:ServiceTask
@@ -110,10 +216,20 @@ Analyze:
         - run_summaries
       outputs:
         - group_stats
+      bounds:
+        x: 230
+        "y": 690
+        width: 160
+        height: 80
 
     Outlier_Review:
       type: bpmn:UserTask
       name: Manual outlier review
+      bounds:
+        x: 230
+        "y": 800
+        width: 160
+        height: 80
 
     Classifier:
       type: bpmn:ServiceTask
@@ -127,14 +243,41 @@ Analyze:
         - measures
       outputs:
         - classifier_stats
+      bounds:
+        x: 560
+        "y": 580
+        width: 160
+        height: 80
 
     Merge_Analysis:
       type: bpmn:ExclusiveGateway
       name: Collect outputs
+      bounds:
+        x: 405
+        "y": 910
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 465
+          "y": 923
+          width: 90
+          height: 14
 
     Analysis_End:
       type: bpmn:EndEvent
       name: Analysis outputs ready
+      bounds:
+        x: 412
+        "y": 1000
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 456
+          "y": 1011
+          width: 120
+          height: 14
 
     Dataset_Trials:
       type: bpmn:DataStoreReference
@@ -143,6 +286,17 @@ Analyze:
           format: bdm
           bdmDataLevel: trials
       name: Trials (BDM)
+      bounds:
+        x: 810
+        "y": 150
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 785
+          "y": 205
+          width: 110
+          height: 14
 
     Schema_Trials:
       type: bpmn:DataObjectReference
@@ -151,6 +305,17 @@ Analyze:
           format: csvw
       name: Trial schema (CSVW)
       dataObjectRef: DataObject_TrialSchema
+      bounds:
+        x: 930
+        "y": 150
+        width: 36
+        height: 50
+      label:
+        bounds:
+          x: 912
+          "y": 205
+          width: 120
+          height: 27
 
     DataObject_TrialSchema:
       type: bpmn:DataObject
@@ -162,57 +327,154 @@ Analyze:
           format: bdm
           bdmDataLevel: models
       name: Summaries and statistics (BDM)
+      bounds:
+        x: 810
+        "y": 690
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 785
+          "y": 745
+          width: 120
+          height: 27
 
     Flow_AStart_Read:
       type: bpmn:SequenceFlow
       sourceRef: Analysis_Start
       targetRef: Read
+      waypoint:
+        - x: 430
+          "y": 108
+        - x: 430
+          "y": 150
     Flow_Read_Filter:
       type: bpmn:SequenceFlow
       sourceRef: Read
       targetRef: Filter
+      waypoint:
+        - x: 430
+          "y": 230
+        - x: 430
+          "y": 260
     Flow_Filter_Map:
       type: bpmn:SequenceFlow
       sourceRef: Filter
       targetRef: Map
+      waypoint:
+        - x: 430
+          "y": 340
+        - x: 430
+          "y": 370
     Flow_ExclFromAnalysis:
       type: bpmn:SequenceFlow
       sourceRef: ExclFromAnalysis
       targetRef: Excluded_Analysis
+      waypoint:
+        - x: 528
+          "y": 340
+        - x: 600
+          "y": 340
+        - x: 600
+          "y": 321
+        - x: 642
+          "y": 321
+      stroke: "#ac5a54"
+      border-color: "#ac5a54"
     Flow_Map_Branch:
       type: bpmn:SequenceFlow
       sourceRef: Map
       targetRef: Branch_Comparison
+      waypoint:
+        - x: 430
+          "y": 450
+        - x: 430
+          "y": 480
     Flow_Branch_ReduceSubject:
       type: bpmn:SequenceFlow
       name: agreement / marker
       sourceRef: Branch_Comparison
       targetRef: Reduce_Subject
+      waypoint:
+        - x: 405
+          "y": 505
+        - x: 310
+          "y": 505
+        - x: 310
+          "y": 580
+      label:
+        bounds:
+          x: 235
+          "y": 486
+          width: 120
+          height: 14
     Flow_Branch_Classifier:
       type: bpmn:SequenceFlow
       name: divergence
       sourceRef: Branch_Comparison
       targetRef: Classifier
+      waypoint:
+        - x: 455
+          "y": 505
+        - x: 640
+          "y": 505
+        - x: 640
+          "y": 580
+      label:
+        bounds:
+          x: 590
+          "y": 486
+          width: 66
+          height: 14
     Flow_ReduceSubject_Group:
       type: bpmn:SequenceFlow
       sourceRef: Reduce_Subject
       targetRef: Reduce_Group
+      waypoint:
+        - x: 310
+          "y": 660
+        - x: 310
+          "y": 690
     Flow_Group_Outlier:
       type: bpmn:SequenceFlow
       sourceRef: Reduce_Group
       targetRef: Outlier_Review
+      waypoint:
+        - x: 310
+          "y": 770
+        - x: 310
+          "y": 800
     Flow_Outlier_Merge:
       type: bpmn:SequenceFlow
       sourceRef: Outlier_Review
       targetRef: Merge_Analysis
+      waypoint:
+        - x: 310
+          "y": 880
+        - x: 310
+          "y": 935
+        - x: 405
+          "y": 935
     Flow_Classifier_Merge:
       type: bpmn:SequenceFlow
       sourceRef: Classifier
       targetRef: Merge_Analysis
+      waypoint:
+        - x: 640
+          "y": 660
+        - x: 640
+          "y": 935
+        - x: 455
+          "y": 935
     Flow_Merge_AEnd:
       type: bpmn:SequenceFlow
       sourceRef: Merge_Analysis
       targetRef: Analysis_End
+      waypoint:
+        - x: 430
+          "y": 960
+        - x: 430
+          "y": 1000
 
   artifacts:
     Assoc_Trials_Read:
@@ -220,18 +482,38 @@ Analyze:
       associationDirection: One
       sourceRef: Dataset_Trials
       targetRef: Read
+      waypoint:
+        - x: 810
+          "y": 178
+        - x: 510
+          "y": 190
     Assoc_Schema_Trials:
       type: bpmn:Association
       associationDirection: One
       sourceRef: Schema_Trials
       targetRef: Dataset_Trials
+      waypoint:
+        - x: 930
+          "y": 175
+        - x: 860
+          "y": 175
     Assoc_Group_Summaries:
       type: bpmn:Association
       associationDirection: One
       sourceRef: Reduce_Group
       targetRef: Dataset_Summaries
+      waypoint:
+        - x: 390
+          "y": 725
+        - x: 810
+          "y": 717
     Assoc_Classifier_Summaries:
       type: bpmn:Association
       associationDirection: One
       sourceRef: Classifier
       targetRef: Dataset_Summaries
+      waypoint:
+        - x: 720
+          "y": 640
+        - x: 810
+          "y": 700

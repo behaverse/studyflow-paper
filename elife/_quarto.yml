@@ -2,7 +2,7 @@ project:
   type: manuscript
 
 manuscript:
-  article: paper-v2.qmd
+  article: paper-v3.qmd
 
 format:
   html: default

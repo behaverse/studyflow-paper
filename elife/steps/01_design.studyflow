@@ -3,19 +3,38 @@ definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
   xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
   xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:bpmndi: http://www.omg.org/spec/BPMN/20100524/DI
+  xmlns:dc: http://www.omg.org/spec/DD/20100524/DC
+  xmlns:di: http://www.omg.org/spec/DD/20100524/DI
+  xmlns:bioc: http://bpmn.io/schema/bpmn/biocolor/1.0
+  xmlns:color: http://www.omg.org/spec/BPMN/non-normative/color/1.0
   xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
   xmlns:cognitive: http://behaverse.org/schemas/studyflow/cognitive
+
+Design_Collaboration:
+  type: bpmn:Collaboration
+  participants:
+    Participant_Design:
+      name: "Step 1 — Design"
+      processRef: Design
+      bounds:
+        x: 160
+        "y": 40
+        width: 1000
+        height: 720
+      isHorizontal: true
 
 Design:
   type: bpmn:Process
   documentation: >-
     Step 1 of the example study: the design as a complete, runnable fragment,
     covering the enrolment and allocation phases of the CONSORT participant
-    flow. A consented start event, a screening questionnaire carrying the audit
-    checklist, an eligibility gateway whose criteria are attributes of the
-    node, and a randomization gateway carrying its allocation rule. Every
-    early exit is a counted error event; the runner writes the participant-flow
-    counts onto these events at run time.
+    flow. The two lanes are the CONSORT phases they implement. A consented start
+    event, a screening questionnaire carrying the audit checklist, an
+    eligibility gateway whose criteria are attributes of the node, and a
+    randomization gateway carrying its allocation rule. Every early exit is a
+    counted error event; the runner writes the participant-flow counts onto
+    these events at run time.
   extensionElements:
     - type: studyflow:Study
       runtime: browser
@@ -24,12 +43,59 @@ Design:
       seed: 42
   name: Step 1 - Design
   isExecutable: true
+
+  laneSets:
+    LaneSet_Design:
+      lanes:
+        Lane_Enrolment:
+          name: Enrolment
+          flowNodeRef:
+            - Enroll
+            - Screening
+            - Eligibility_Gateway
+            - Excluded_Pre
+          bounds:
+            x: 190
+            "y": 40
+            width: 970
+            height: 320
+          isHorizontal: true
+        Lane_Allocation:
+          name: Allocation
+          flowNodeRef:
+            - Randomize_Gateway
+            - Allocate_Speeded
+            - DidNotStart_Speeded
+            - Allocate_SelfPaced
+            - DidNotStart_SelfPaced
+            - Merge_Allocation
+            - Designed
+            - DidNotStart
+          bounds:
+            x: 190
+            "y": 360
+            width: 970
+            height: 400
+          isHorizontal: true
+
   flowElements:
 
+    # ---------- Enrolment ----------
     Enroll:
       type: bpmn:StartEvent
       name: Enrolled and consented
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+      bounds:
+        x: 542
+        "y": 82
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 596
+          "y": 90
+          width: 112
+          height: 27
 
     Screening:
       type: bpmn:Task
@@ -42,6 +108,11 @@ Design:
         - [ ] Inclusion criteria checked
         - [ ] Exclusion criteria checked
       name: Screening
+      bounds:
+        x: 480
+        "y": 160
+        width: 160
+        height: 80
 
     Eligibility_Gateway:
       type: bpmn:ExclusiveGateway
@@ -56,6 +127,17 @@ Design:
             - Failed comprehension check at screening
       name: Assessed for eligibility
       isMarkerVisible: true
+      bounds:
+        x: 535
+        "y": 275
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 395
+          "y": 293
+          width: 130
+          height: 14
 
     Excluded_Pre:
       type: bpmn:EndEvent
@@ -63,7 +145,23 @@ Design:
       eventDefinitions:
         ErrorDef_ExcludedPre:
           type: bpmn:ErrorEventDefinition
+      bounds:
+        x: 942
+        "y": 282
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 918
+          "y": 325
+          width: 90
+          height: 14
+      stroke: "#ac5a54"
+      fill: "#f1d0cd"
+      background-color: "#f1d0cd"
+      border-color: "#ac5a54"
 
+    # ---------- Allocation ----------
     Randomize_Gateway:
       type: bpmn:ExclusiveGateway
       extensionElements:
@@ -77,10 +175,26 @@ Design:
         prompt deadline for language models.
       name: Randomized
       isMarkerVisible: true
+      bounds:
+        x: 535
+        "y": 400
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 495
+          "y": 458
+          width: 130
+          height: 14
 
     Allocate_Speeded:
       type: bpmn:Task
       name: Allocated to speeded path (n=...)
+      bounds:
+        x: 300
+        "y": 495
+        width: 160
+        height: 80
 
     DidNotStart_Speeded:
       type: bpmn:BoundaryEvent
@@ -90,10 +204,26 @@ Design:
           type: bpmn:ErrorEventDefinition
       attachedToRef: Allocate_Speeded
       cancelActivity: true
+      bounds:
+        x: 322
+        "y": 557
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 210
+          "y": 595
+          width: 120
+          height: 27
 
     Allocate_SelfPaced:
       type: bpmn:Task
       name: Allocated to self-paced path (n=...)
+      bounds:
+        x: 660
+        "y": 495
+        width: 160
+        height: 80
 
     DidNotStart_SelfPaced:
       type: bpmn:BoundaryEvent
@@ -103,14 +233,47 @@ Design:
           type: bpmn:ErrorEventDefinition
       attachedToRef: Allocate_SelfPaced
       cancelActivity: true
+      bounds:
+        x: 752
+        "y": 557
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 764
+          "y": 595
+          width: 118
+          height: 27
 
     Merge_Allocation:
       type: bpmn:ExclusiveGateway
       name: Begin battery
+      bounds:
+        x: 535
+        "y": 610
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 595
+          "y": 628
+          width: 80
+          height: 14
 
     Designed:
       type: bpmn:EndEvent
       name: Ready to run
+      bounds:
+        x: 542
+        "y": 700
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 520
+          "y": 742
+          width: 80
+          height: 14
 
     DidNotStart:
       type: bpmn:EndEvent
@@ -118,52 +281,169 @@ Design:
       eventDefinitions:
         ErrorDef_DidNotStart:
           type: bpmn:ErrorEventDefinition
+      bounds:
+        x: 942
+        "y": 562
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 906
+          "y": 606
+          width: 150
+          height: 27
+      stroke: "#ac5a54"
+      fill: "#f1d0cd"
+      background-color: "#f1d0cd"
+      border-color: "#ac5a54"
 
+    # ---------- Sequence flows ----------
     Flow_Enroll_Screening:
       type: bpmn:SequenceFlow
       sourceRef: Enroll
       targetRef: Screening
+      waypoint:
+        - x: 560
+          "y": 118
+        - x: 560
+          "y": 160
     Flow_Screening_Eligibility:
       type: bpmn:SequenceFlow
       sourceRef: Screening
       targetRef: Eligibility_Gateway
+      waypoint:
+        - x: 560
+          "y": 240
+        - x: 560
+          "y": 275
     Flow_Eligible:
       type: bpmn:SequenceFlow
       name: eligible
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Gateway
+      waypoint:
+        - x: 560
+          "y": 325
+        - x: 560
+          "y": 400
+      label:
+        bounds:
+          x: 570
+          "y": 350
+          width: 44
+          height: 14
     Flow_Excluded_Pre:
       type: bpmn:SequenceFlow
       name: excluded
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
+      waypoint:
+        - x: 585
+          "y": 300
+        - x: 942
+          "y": 300
+      label:
+        bounds:
+          x: 720
+          "y": 282
+          width: 50
+          height: 14
+      stroke: "#ac5a54"
+      border-color: "#ac5a54"
     Flow_Allocate_Speeded:
       type: bpmn:SequenceFlow
       name: speeded
       sourceRef: Randomize_Gateway
       targetRef: Allocate_Speeded
+      waypoint:
+        - x: 535
+          "y": 425
+        - x: 380
+          "y": 425
+        - x: 380
+          "y": 495
+      label:
+        bounds:
+          x: 400
+          "y": 405
+          width: 48
+          height: 14
     Flow_Allocate_SelfPaced:
       type: bpmn:SequenceFlow
       name: self-paced
       sourceRef: Randomize_Gateway
       targetRef: Allocate_SelfPaced
+      waypoint:
+        - x: 585
+          "y": 425
+        - x: 740
+          "y": 425
+        - x: 740
+          "y": 495
+      label:
+        bounds:
+          x: 650
+          "y": 405
+          width: 58
+          height: 14
     Flow_Speeded_Merge:
       type: bpmn:SequenceFlow
       sourceRef: Allocate_Speeded
       targetRef: Merge_Allocation
+      waypoint:
+        - x: 380
+          "y": 575
+        - x: 380
+          "y": 635
+        - x: 535
+          "y": 635
     Flow_SelfPaced_Merge:
       type: bpmn:SequenceFlow
       sourceRef: Allocate_SelfPaced
       targetRef: Merge_Allocation
+      waypoint:
+        - x: 740
+          "y": 575
+        - x: 740
+          "y": 635
+        - x: 585
+          "y": 635
     Flow_Merge_Designed:
       type: bpmn:SequenceFlow
       sourceRef: Merge_Allocation
       targetRef: Designed
+      waypoint:
+        - x: 560
+          "y": 660
+        - x: 560
+          "y": 700
     Flow_DidNotStart_Speeded:
       type: bpmn:SequenceFlow
       sourceRef: DidNotStart_Speeded
       targetRef: DidNotStart
+      waypoint:
+        - x: 340
+          "y": 593
+        - x: 340
+          "y": 680
+        - x: 960
+          "y": 680
+        - x: 960
+          "y": 598
+      stroke: "#ac5a54"
+      border-color: "#ac5a54"
     Flow_DidNotStart_SelfPaced:
       type: bpmn:SequenceFlow
       sourceRef: DidNotStart_SelfPaced
       targetRef: DidNotStart
+      waypoint:
+        - x: 770
+          "y": 593
+        - x: 770
+          "y": 680
+        - x: 960
+          "y": 680
+        - x: 960
+          "y": 598
+      stroke: "#ac5a54"
+      border-color: "#ac5a54"

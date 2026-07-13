@@ -3,29 +3,73 @@ definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
   xmlns:xsi: http://www.w3.org/2001/XMLSchema-instance
   xmlns:bpmn2: http://www.omg.org/spec/BPMN/20100524/MODEL
+  xmlns:bpmndi: http://www.omg.org/spec/BPMN/20100524/DI
+  xmlns:dc: http://www.omg.org/spec/DD/20100524/DC
+  xmlns:di: http://www.omg.org/spec/DD/20100524/DI
   xmlns:studyflow: http://behaverse.org/schemas/studyflow/v1
   xmlns:datatrove: https://w3id.org/studyflow/datatrove
+
+Report_Collaboration:
+  type: bpmn:Collaboration
+  participants:
+    Participant_Report:
+      name: "Step 4 — Report"
+      processRef: Report
+      bounds:
+        x: 160
+        "y": 40
+        width: 900
+        height: 470
+      isHorizontal: true
 
 Report:
   type: bpmn:Process
   documentation: >-
-    Step 4 of the example study: the report as a complete, runnable fragment.
-    A render-and-write node turns the analysis outputs into the reporting
-    artifacts, and a completion end event issues each actor's completion code.
-    Everything else about reporting is a projection of the file itself: the
-    Study, Gantt, Checklist, and Figure views, the CONSORT/SPIRIT/CHART
-    guideline audits, and the deviation report (the diff between the
-    registered file and the file after the run).
+    Step 4 of the example study: the report as a complete, runnable fragment,
+    the Analysis lane's downstream continuation. A render-and-write node turns
+    the analysis outputs into the reporting artifacts, and a completion end
+    event issues each actor's completion code. Everything else about reporting
+    is a projection of the file itself: the Study, Gantt, Checklist, and Figure
+    views, the CONSORT/SPIRIT/CHART guideline audits, and the deviation report
+    (the diff between the registered file and the file after the run).
   extensionElements:
     - type: studyflow:Study
       runtime: browser
   name: Step 4 - Report
   isExecutable: true
+
+  laneSets:
+    LaneSet_Report:
+      lanes:
+        Lane_Report:
+          name: Report
+          flowNodeRef:
+            - Report_Start
+            - Render_Write
+            - Complete
+          bounds:
+            x: 190
+            "y": 40
+            width: 870
+            height: 470
+          isHorizontal: true
+
   flowElements:
 
     Report_Start:
       type: bpmn:StartEvent
       name: Analysis outputs ready
+      bounds:
+        x: 412
+        "y": 92
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 360
+          "y": 132
+          width: 140
+          height: 27
 
     Render_Write:
       type: bpmn:ServiceTask
@@ -40,12 +84,28 @@ Report:
         - classifier_stats
       outputs:
         - report
+      bounds:
+        x: 350
+        "y": 200
+        width: 160
+        height: 80
 
     Complete:
       type: bpmn:EndEvent
       name: Completed
       redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
       completionCodeType: dynamic
+      bounds:
+        x: 412
+        "y": 372
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 395
+          "y": 414
+          width: 70
+          height: 14
 
     Dataset_Summaries:
       type: bpmn:DataStoreReference
@@ -54,15 +114,36 @@ Report:
           format: bdm
           bdmDataLevel: models
       name: Summaries and statistics (BDM)
+      bounds:
+        x: 620
+        "y": 215
+        width: 50
+        height: 50
+      label:
+        bounds:
+          x: 585
+          "y": 270
+          width: 120
+          height: 27
 
     Flow_Start_Render:
       type: bpmn:SequenceFlow
       sourceRef: Report_Start
       targetRef: Render_Write
+      waypoint:
+        - x: 430
+          "y": 128
+        - x: 430
+          "y": 200
     Flow_Render_Complete:
       type: bpmn:SequenceFlow
       sourceRef: Render_Write
       targetRef: Complete
+      waypoint:
+        - x: 430
+          "y": 280
+        - x: 430
+          "y": 372
 
   artifacts:
     Assoc_Summaries_Render:
@@ -70,3 +151,8 @@ Report:
       associationDirection: One
       sourceRef: Dataset_Summaries
       targetRef: Render_Write
+      waypoint:
+        - x: 620
+          "y": 240
+        - x: 510
+          "y": 240

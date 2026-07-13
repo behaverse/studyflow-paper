@@ -17,17 +17,30 @@ CONSORT_Studyflow:
     - type: studyflow:Study
   name: CONSORT participant flow
   documentation: >-
-    Figure 3(b): the example study's participant flow in Studyflow. Attrition is encoded as boundary error events wired
-    to counted error end events, so the topology of the published CONSORT flow is the topology the runner executes.
+    Figure 3(b): the example study's participant flow in Studyflow, grouped into
+    the four CONSORT 2025 phases (enrolment, allocation, follow-up, analysis).
+    Attrition is encoded as boundary error events wired to counted error end
+    events, so the topology of the published CONSORT flow is the topology the
+    runner executes. The phase bands are bpmn:Group artifacts, a projection
+    device that only annotates and never changes the control flow.
+  isExecutable: false
   flowElements:
+
+    # ---------- Enrolment ----------
     Enrolled:
       type: bpmn:StartEvent
       name: Enrolled
       bounds:
-        x: 406
-        "y": 101
-        width: 48
-        height: 14
+        x: 432
+        "y": 92
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 414
+          "y": 74
+          width: 72
+          height: 14
     Screening:
       type: bpmn:Task
       extensionElements:
@@ -35,8 +48,8 @@ CONSORT_Studyflow:
           instrument: screening
       name: Screening
       bounds:
-        x: 370
-        "y": 150
+        x: 390
+        "y": 170
         width: 120
         height: 80
     Screen_fail:
@@ -48,10 +61,16 @@ CONSORT_Studyflow:
           type: bpmn:ErrorEventDefinition
       cancelActivity: true
       bounds:
-        x: 428
-        "y": 253
-        width: 60
-        height: 14
+        x: 492
+        "y": 232
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 500
+          "y": 270
+          width: 68
+          height: 14
     Excluded_pre:
       type: bpmn:EndEvent
       name: Excluded (n = ...)
@@ -59,25 +78,41 @@ CONSORT_Studyflow:
         Excluded_pre_def:
           type: bpmn:ErrorEventDefinition
       bounds:
-        x: 574
-        "y": 197
-        width: 130
-        height: 14
+        x: 720
+        "y": 232
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 690
+          "y": 272
+          width: 100
+          height: 14
       stroke: "#ac5a54"
       fill: "#f1d0cd"
       background-color: "#f1d0cd"
       border-color: "#ac5a54"
+
+    # ---------- Allocation ----------
     Randomize:
       type: bpmn:ExclusiveGateway
       extensionElements:
         - type: cognitive:RandomGateway
       name: Randomized
       bounds:
-        x: 403
-        "y": 355
-        width: 54
-        height: 14
+        x: 425
+        "y": 320
+        width: 50
+        height: 50
       isMarkerVisible: true
+      label:
+        bounds:
+          x: 485
+          "y": 333
+          width: 78
+          height: 14
+
+    # ---------- Follow-up ----------
     SelfPaced:
       type: bpmn:Task
       extensionElements:
@@ -85,8 +120,8 @@ CONSORT_Studyflow:
           instrument: behaverse
       name: Self-paced battery
       bounds:
-        x: 180
-        "y": 410
+        x: 240
+        "y": 430
         width: 120
         height: 80
     SelfPaced_drop:
@@ -98,10 +133,16 @@ CONSORT_Studyflow:
           type: bpmn:ErrorEventDefinition
       cancelActivity: true
       bounds:
-        x: 200
-        "y": 513
-        width: 24
-        height: 14
+        x: 342
+        "y": 492
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 320
+          "y": 530
+          width: 40
+          height: 14
     TimePressured:
       type: bpmn:Task
       extensionElements:
@@ -109,8 +150,8 @@ CONSORT_Studyflow:
           instrument: behaverse
       name: Speeded battery
       bounds:
-        x: 560
-        "y": 410
+        x: 540
+        "y": 430
         width: 120
         height: 80
     TimePressured_drop:
@@ -122,10 +163,16 @@ CONSORT_Studyflow:
           type: bpmn:ErrorEventDefinition
       cancelActivity: true
       bounds:
-        x: 636
-        "y": 513
-        width: 24
-        height: 14
+        x: 522
+        "y": 492
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 540
+          "y": 530
+          width: 40
+          height: 14
     Dropped:
       type: bpmn:EndEvent
       name: Discontinued intervention (n = ...)
@@ -133,14 +180,22 @@ CONSORT_Studyflow:
         Dropped_def:
           type: bpmn:ErrorEventDefinition
       bounds:
-        x: 367
-        "y": 561
-        width: 126
-        height: 14
+        x: 432
+        "y": 560
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 380
+          "y": 600
+          width: 140
+          height: 14
       stroke: "#ac5a54"
       fill: "#f1d0cd"
       background-color: "#f1d0cd"
       border-color: "#ac5a54"
+
+    # ---------- Analysis ----------
     Analyze_A:
       type: bpmn:ServiceTask
       extensionElements:
@@ -148,8 +203,8 @@ CONSORT_Studyflow:
       name: Analyze
       isDataOperation: true
       bounds:
-        x: 180
-        "y": 560
+        x: 240
+        "y": 670
         width: 120
         height: 80
     Analyze_A_excl:
@@ -161,10 +216,16 @@ CONSORT_Studyflow:
           type: bpmn:ErrorEventDefinition
       cancelActivity: true
       bounds:
-        x: 191
-        "y": 663
-        width: 42
-        height: 14
+        x: 342
+        "y": 732
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 316
+          "y": 770
+          width: 48
+          height: 14
     Analyze_B:
       type: bpmn:ServiceTask
       extensionElements:
@@ -172,8 +233,8 @@ CONSORT_Studyflow:
       name: Analyze
       isDataOperation: true
       bounds:
-        x: 560
-        "y": 560
+        x: 540
+        "y": 670
         width: 120
         height: 80
     Analyze_B_excl:
@@ -185,10 +246,16 @@ CONSORT_Studyflow:
           type: bpmn:ErrorEventDefinition
       cancelActivity: true
       bounds:
-        x: 627
-        "y": 663
-        width: 42
-        height: 14
+        x: 522
+        "y": 732
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 540
+          "y": 770
+          width: 48
+          height: 14
     Excluded_analysis:
       type: bpmn:EndEvent
       name: Excluded from analysis (n = ...)
@@ -196,10 +263,16 @@ CONSORT_Studyflow:
         Excluded_analysis_def:
           type: bpmn:ErrorEventDefinition
       bounds:
-        x: 365
-        "y": 701
-        width: 130
-        height: 14
+        x: 432
+        "y": 790
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 380
+          "y": 830
+          width: 140
+          height: 14
       stroke: "#ac5a54"
       fill: "#f1d0cd"
       background-color: "#f1d0cd"
@@ -208,43 +281,51 @@ CONSORT_Studyflow:
       type: bpmn:EndEvent
       name: Analyzed (n = ...)
       bounds:
-        x: 406
-        "y": 741
-        width: 48
-        height: 14
+        x: 432
+        "y": 860
+        width: 36
+        height: 36
+      label:
+        bounds:
+          x: 410
+          "y": 900
+          width: 82
+          height: 14
+
+    # ---------- Sequence flows ----------
     f_enr_scr:
       type: bpmn:SequenceFlow
       sourceRef: Enrolled
       targetRef: Screening
       waypoint:
-        - x: 430
-          "y": 96
-        - x: 430
-          "y": 150
+        - x: 450
+          "y": 128
+        - x: 450
+          "y": 170
     f_scr_rand:
       type: bpmn:SequenceFlow
       sourceRef: Screening
       targetRef: Randomize
       waypoint:
-        - x: 430
-          "y": 230
-        - x: 430
-          "y": 300
+        - x: 450
+          "y": 250
+        - x: 450
+          "y": 320
     f_screenfail:
       type: bpmn:SequenceFlow
       sourceRef: Screen_fail
       targetRef: Excluded_pre
       name: reason
       waypoint:
-        - x: 476
-          "y": 230
-        - x: 610
-          "y": 174
+        - x: 528
+          "y": 250
+        - x: 720
+          "y": 250
       label:
         bounds:
-          x: 525
-          "y": 184
-          width: 36
+          x: 604
+          "y": 232
+          width: 40
           height: 14
       stroke: "#ac5a54"
       border-color: "#ac5a54"
@@ -254,15 +335,17 @@ CONSORT_Studyflow:
       targetRef: SelfPaced
       name: self-paced
       waypoint:
-        - x: 405
-          "y": 325
+        - x: 425
+          "y": 345
         - x: 300
-          "y": 450
+          "y": 345
+        - x: 300
+          "y": 430
       label:
         bounds:
-          x: 323
-          "y": 370
-          width: 60
+          x: 246
+          "y": 325
+          width: 62
           height: 14
     f_rand_b:
       type: bpmn:SequenceFlow
@@ -270,15 +353,17 @@ CONSORT_Studyflow:
       targetRef: TimePressured
       name: speeded
       waypoint:
-        - x: 455
-          "y": 325
-        - x: 560
-          "y": 450
+        - x: 475
+          "y": 345
+        - x: 600
+          "y": 345
+        - x: 600
+          "y": 430
       label:
         bounds:
-          x: 466
-          "y": 370
-          width: 84
+          x: 556
+          "y": 325
+          width: 60
           height: 14
     f_a_drop:
       type: bpmn:SequenceFlow
@@ -286,15 +371,17 @@ CONSORT_Studyflow:
       targetRef: Dropped
       name: reason
       waypoint:
-        - x: 230
-          "y": 490
-        - x: 412
-          "y": 538
+        - x: 360
+          "y": 528
+        - x: 360
+          "y": 578
+        - x: 432
+          "y": 578
       label:
         bounds:
-          x: 303
-          "y": 496
-          width: 36
+          x: 366
+          "y": 560
+          width: 40
           height: 14
       stroke: "#ac5a54"
       border-color: "#ac5a54"
@@ -304,15 +391,17 @@ CONSORT_Studyflow:
       targetRef: Dropped
       name: reason
       waypoint:
-        - x: 630
-          "y": 490
-        - x: 448
-          "y": 538
+        - x: 540
+          "y": 528
+        - x: 540
+          "y": 578
+        - x: 468
+          "y": 578
       label:
         bounds:
-          x: 521
-          "y": 496
-          width: 36
+          x: 494
+          "y": 560
+          width: 40
           height: 14
       stroke: "#ac5a54"
       border-color: "#ac5a54"
@@ -321,28 +410,30 @@ CONSORT_Studyflow:
       sourceRef: SelfPaced
       targetRef: Analyze_A
       waypoint:
-        - x: 240
-          "y": 490
-        - x: 240
-          "y": 560
+        - x: 300
+          "y": 510
+        - x: 300
+          "y": 670
     f_b_an:
       type: bpmn:SequenceFlow
       sourceRef: TimePressured
       targetRef: Analyze_B
       waypoint:
-        - x: 620
-          "y": 490
-        - x: 620
-          "y": 560
+        - x: 600
+          "y": 510
+        - x: 600
+          "y": 670
     f_a_excl:
       type: bpmn:SequenceFlow
       sourceRef: Analyze_A_excl
       targetRef: Excluded_analysis
       waypoint:
-        - x: 230
-          "y": 640
-        - x: 412
-          "y": 678
+        - x: 360
+          "y": 768
+        - x: 360
+          "y": 808
+        - x: 432
+          "y": 808
       stroke: "#ac5a54"
       border-color: "#ac5a54"
     f_b_excl:
@@ -350,10 +441,12 @@ CONSORT_Studyflow:
       sourceRef: Analyze_B_excl
       targetRef: Excluded_analysis
       waypoint:
-        - x: 630
-          "y": 640
-        - x: 448
-          "y": 678
+        - x: 540
+          "y": 768
+        - x: 540
+          "y": 808
+        - x: 468
+          "y": 808
       stroke: "#ac5a54"
       border-color: "#ac5a54"
     f_a_done:
@@ -362,16 +455,98 @@ CONSORT_Studyflow:
       targetRef: Analyzed
       waypoint:
         - x: 300
-          "y": 600
-        - x: 412
-          "y": 718
+          "y": 750
+        - x: 300
+          "y": 878
+        - x: 432
+          "y": 878
     f_b_done:
       type: bpmn:SequenceFlow
       sourceRef: Analyze_B
       targetRef: Analyzed
       waypoint:
-        - x: 560
-          "y": 600
-        - x: 448
-          "y": 718
-  isExecutable: false
+        - x: 600
+          "y": 750
+        - x: 600
+          "y": 878
+        - x: 468
+          "y": 878
+
+  artifacts:
+    Group_Enrolment:
+      type: bpmn:Group
+      categoryValueRef: CategoryValue_Enrolment
+      bounds:
+        x: 100
+        "y": 70
+        width: 720
+        height: 230
+      label:
+        bounds:
+          x: 116
+          "y": 78
+          width: 80
+          height: 14
+    Group_Allocation:
+      type: bpmn:Group
+      categoryValueRef: CategoryValue_Allocation
+      bounds:
+        x: 100
+        "y": 300
+        width: 720
+        height: 110
+      label:
+        bounds:
+          x: 116
+          "y": 308
+          width: 80
+          height: 14
+    Group_Followup:
+      type: bpmn:Group
+      categoryValueRef: CategoryValue_Followup
+      bounds:
+        x: 100
+        "y": 410
+        width: 720
+        height: 230
+      label:
+        bounds:
+          x: 116
+          "y": 418
+          width: 80
+          height: 14
+    Group_Analysis:
+      type: bpmn:Group
+      categoryValueRef: CategoryValue_Analysis
+      bounds:
+        x: 100
+        "y": 640
+        width: 720
+        height: 270
+      label:
+        bounds:
+          x: 116
+          "y": 648
+          width: 80
+          height: 14
+
+Category_Enrolment:
+  type: bpmn:Category
+  categoryValue:
+    CategoryValue_Enrolment:
+      value: Enrolment
+Category_Allocation:
+  type: bpmn:Category
+  categoryValue:
+    CategoryValue_Allocation:
+      value: Allocation
+Category_Followup:
+  type: bpmn:Category
+  categoryValue:
+    CategoryValue_Followup:
+      value: Follow-up
+Category_Analysis:
+  type: bpmn:Category
+  categoryValue:
+    CategoryValue_Analysis:
+      value: Analysis
