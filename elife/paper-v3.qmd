@@ -82,7 +82,7 @@ Studyflow notation implements the object $S$ as a domain-specific profile of BPM
 
 Studyflow extends BPMN, but it is itself extensible via a simpler strategy. A new element plugs in through a schema $\\Sigma'$ that extends the core $\\Sigma$. Each new type subclasses a core type and adds its own attributes, so the extended diagram stays valid Studyflow, stays valid BPMN 2.0, and gains new semantics. The core $\\Sigma$ already covers common experimental designs, and extensions such as data transforms or multimodal brain-imaging processing add what a specific domain needs (@fig-extensions).
 
-![Studyflow's extension mechanism. The core schema specializes BPMN 2.0, and domain extensions (for example, data transforms or multimodal brain-imaging processing) subclass the core types to add new semantics without changing the core or the tooling. *Placeholder figure; final art to be added.*](figures/todo_fig_extensions.svg){#fig-extensions width=80%}
+![Studyflow's extension mechanism. The core schema specializes BPMN 2.0, and domain extensions (for example, data transforms or multimodal brain-imaging processing) subclass the core types to add new semantics without changing the core or the tooling.](figures/todo_fig_extensions.svg){#fig-extensions width=80%}
 
 ## **Serialization**
 
@@ -306,7 +306,7 @@ The fourth step closes the study lifecycle. A node turns the analysis outputs in
 
 The same mechanism serves three reporting guidelines simultaneously. The SPIRIT 2025 schedule of enrollment and assessment is the Gantt view \[@chan2025spirit; @spirit2013\]. The CONSORT flow diagram is the Figure view of the same file after execution, with attrition already written into the boundary events (@fig-views). CHART's language-model report draws on the executor configuration pinned to each run (the model id, digest, sampling parameters, and trait prompt of the actors the file administered), recorded alongside the file rather than inside the protocol topology. At publication, these artifacts are exported rather than redrawn by hand.
 
-![Step 4 (Report): the single source file shown as its Study view (`study.studyflow`). The same file projects to a Gantt schedule (from each activity's onset and duration), a Checklist (from the declared checklists), and the post-run CONSORT participant flow (from the boundary error events and the counts written onto them, shown here as `n = …`). Because projections only discard and never rewrite, editing the file updates every view.](figures/fig7_single_source.svg){#fig-views width=42%}
+![Step 4 (Report): the single source file shown as its Study view (`study.studyflow`). The same file projects to a Gantt schedule (from each activity's onset and duration), a Checklist (from the declared checklists), and the post-run CONSORT participant flow (from the boundary error events and the counts written onto them, shown here as `n = ...`). Because projections only discard and never rewrite, editing the file updates every view.](figures/fig7_single_source.svg){#fig-views width=42%}
 
 The study's deviation report is likewise mechanical. A deviation from the preregistration entry is simply the diff between the registered Studyflow file and the file after execution (Listing 5). Any deviation that touches the topology or a parameter therefore appears in the diff, e.g., a rewired branch, a changed threshold, and a modified time interval. A prose comparison between a preregistration entry and a published paper cannot promise that \[@claesen2021adherence; @cummins2026regcheck\].
 
