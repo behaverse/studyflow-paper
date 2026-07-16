@@ -16,7 +16,7 @@ This folder collects the figures and listings referenced by [`../paper.qmd`](../
 | # | Title | §  | Status | Effort |
 |---|---|---|---|---|
 | F1 | "Many artifacts, one study" schematic | §1.2 | **gap** | half-day |
-| F2 | Studyflow element palette / layers | §2.1 | exists; needs caption | 30 min |
+| F2 | Studyflow element palette / layers | §2.1 | **drafted** — `fig2_elements.svg` | needs caption |
 | F3 | Modeler UI composite | §2.3 | needs composition | 2 h |
 | F4 | Runner walkthrough composite | §2.3 | **gap** (depends on §3.2 round-trip) | half-day |
 | F5 | Four views: Study / Gantt / Checklist / Figure | §2.2 | partial — Checklist screenshot is a gap | 30 min once Checklist view ships |
@@ -51,9 +51,9 @@ Centre callout: "One study. Four artifacts. Four divergent representations of th
 ### F2 — Studyflow element palette / layers
 **Where it lands:** §2.1 (Studyflow as a formal object).
 
-**Status:** exists at [`../../assets/figures/fig1.studyflow.svg`](../../assets/figures/fig1.studyflow.svg).
+**Status:** drafted — [`svg+studyflow/fig2_elements.svg`](svg+studyflow/fig2_elements.svg), exported (2026-07-16) from `studyflow-modeler/src/assets/examples/kitchensink.studyflow` (the *Studyflow element catalog*). One live instance of every palette element, one labelled band per schema: the BPMN 2.0 base first (events, gateways, activities, data), then the studyflow core and the domain extensions that specialize it. Attribute values echo the paper's example study (consent form, completion code, eligibility criteria, N-back scene, BDM trials dataset). The SVG embeds the full `.studyflow` source in its `<metadata>`, so the deposited figure is the editable diagram.
 
-**Action:** copy into this folder as `fig2_element-palette.svg`. Caption from §2.1 (core vs optional domain layers).
+**Action:** caption from §2.1 (core vs optional domain layers). Re-export from the modeler if the schemas change.
 
 ### F3 — Modeler UI composite
 **Where it lands:** §2.3 (The Studyflow toolkit — modeler).
