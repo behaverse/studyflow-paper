@@ -13,7 +13,7 @@ Domain glossary for the eLife paper *"Studyflow: an executable visual notation f
 | **`.bpmn` projection** | The lossless BPMN 2.0 XML form of a `.studyflow` file, for generic-tool interoperability. | "the XML" |
 | **Language schema (Σ)** | The versioned LinkML schema that defines Studyflow's element types, attributes, and validation rules independently of any tool. | bare "schema" (collides with *data schema* — see ambiguities); "the spec" |
 | **Element** | Any typed node or edge in a diagram, each specializing a BPMN base type. | "box", "typed box", "component" |
-| **Extension (schema extension)** | A schema `Σ'` that subclasses core types to add a domain, leaving the diagram valid BPMN 2.0. | "plugin", "fork" |
+| **Studyflow extension** | A schema `Σ'` that subclasses core types to add a domain, leaving the diagram valid BPMN 2.0. | "plugin", "fork" |
 
 ## The formal object
 
@@ -25,15 +25,15 @@ Domain glossary for the eLife paper *"Studyflow: an executable visual notation f
 | **Sequence flow** | A control-flow edge; the set of them induces the control flow graph `G_ctrl`. | "flow" unqualified |
 | **Data association** | A typed edge joining a data element to a flow node; induces the data flow graph `G_data`. | "dashed edge" in prose (use in captions only) |
 | **Well-formed** | A diagram satisfying the four validity conditions (schema, typed endpoints, sound control flow, valid BPMN XML). | "valid" used loosely, "correct" |
-| **Control flow graph (`G_ctrl`)** | The directed (not acyclic) graph of sequence flows that execution walks. | "the DAG" (it is deliberately *not* a DAG) |
+| **Control flow (`G_ctrl`)** | The directed (not acyclic) graph of sequence flows that execution walks. | "the DAG" (it is deliberately *not* a DAG) |
 
 ## Study lifecycle and design
 
 | Term | Definition | Aliases to avoid |
 | --- | --- | --- |
 | **Protocol** | The study seen as a registered plan, before the run. | "the file" (a protocol is a role a file plays, not the file itself) |
-| **Example study** | The single demonstration study that exercises the notation end to end. | "the benchmark", "the experiment", "our study" |
-| **Battery** | The ordered set of cognitive tasks administered to each actor. | "test suite", "task set" |
+| **Example study** | The single demonstration study that exercises the notation end to end. | "the example study", "the experiment" |
+| **Battery** | The ordered set of cognitive tasks administered to each actor. | "cognitive tests" |
 | **Task** | One instrument node in the battery (a cognitive task, questionnaire, instruction, rest, or video game). | bare "task" for a BPMN base type — say *`bpmn:Task`* |
 | **Trial** | One stimulus–response exchange within a task. | "item", "round" |
 | **Run** | One administration of the whole protocol to one subject (k = 30 runs per condition). | "session" (reserve for humans), "participant" |
