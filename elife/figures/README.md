@@ -11,7 +11,18 @@ This folder collects the figures and listings referenced by [`../paper.qmd`](../
 
 ### Regenerating a figure
 
-Edit it where it came from, then re-export **PNG** from the modeler with both embed toggles on (Export dialog → Image → PNG → *Embed Studyflow source* + *Embed draw.io diagram*). The app's PNG export rasterizes at 1×, which is fine on screen but under print resolution; for a figure going into the manuscript, export SVG and rasterize it at the scale above, then re-attach both chunks (`src/modeler/models/exporters/pngEmbedding.ts` in `studyflow-modeler` has `embedStudyflowIntoPng` / `embedDrawioIntoPng`).
+From `studyflow-modeler`:
+
+```
+npm run figures:render -- ../studyflow-paper/elife/figures fig-nback     # one
+npm run figures:render -- ../studyflow-paper/elife/figures --all        # every figure
+```
+
+It opens each figure in the modeler, exports **SVG** (vector, and the format the modeler embeds both payloads into), rasterizes it at the figure's current pixel width, and writes the `studyflow` and `mxfile` chunks back on. Two things that matter: the app's own PNG export rasterizes at 1×, which is under print resolution, and re-using the existing width means nothing shifts in the manuscript layout. The diagram interchange inside the payload is preserved, so a re-render reproduces the authored layout rather than re-flowing it.
+
+A figure is rendered from `<stem>.migrated.xml` if one sits beside it, otherwise from the diagram already inside its own `.png` — which is how a schema migration or a hand edit gets applied: drop the XML next to the figure, render, delete the XML.
+
+By hand instead: re-export **PNG** from the modeler with both embed toggles on (Export dialog → Image → PNG → *Embed Studyflow source* + *Embed draw.io diagram*), accepting the 1× raster; `src/modeler/models/exporters/pngEmbedding.ts` has `embedStudyflowIntoPng` / `embedDrawioIntoPng` if you rasterize yourself.
 
 To read a figure back: open the `.png` directly in the modeler (`Open File…`), or in draw.io. `fig-overview.png` is draw.io-authored and carries only the draw.io payload; the two `fig1_gap_panel*.png` sketches are hand-written SVG with no diagram source and carry neither.
 
@@ -23,26 +34,26 @@ One file per cross-reference: the filename **is** the `@fig-…` label the manus
 
 | File | Cited as | Embedded diagram | Pixels | `studyflow` | `mxfile` | Size |
 |---|---|---|---|---|---|---|
-| `fig-overview.png` | `@fig-overview` | *(draw.io, 3 panels: Problem / Gap / Solution)* | 4419×3753 | — | yes | 478 KB |
-| `fig-elements.png` | `@fig-elements` | Studyflow element catalog (kitchen sink) | 3900×6312 | yes | yes | 700 KB |
-| `fig-consort.png` | `@fig-consort` | CONSORT participant flow | 4252×5079 | yes | yes | 662 KB |
-| `fig-example-design.png` | `@fig-example-design` | Step 1 — Design | 4252×3089 | yes | yes | 333 KB |
-| `fig-nback.png` | `@fig-nback` (panel b) | N-back trial | 4252×3087 | yes | yes | 278 KB |
+| `fig-overview.png` | `@fig-overview` | *(draw.io, 3 panels: Problem / Gap / Solution)* | 4419×3753 | — | yes | 479 KB |
+| `fig-elements.png` | `@fig-elements` | Studyflow element catalog (kitchen sink) | 3900×6312 | yes | yes | 1243 KB |
+| `fig-consort.png` | `@fig-consort` | CONSORT participant flow | 4252×5079 | yes | yes | 1135 KB |
+| `fig-example-design.png` | `@fig-example-design` | Step 1 — Design | 4252×3061 | yes | yes | 615 KB |
+| `fig-nback.png` | `@fig-nback` (panel b) | N-back trial | 4252×3037 | yes | yes | 562 KB |
 | `fig-nback-classic.png` | `@fig-nback` (panel a) | *(raster slide, no source)* | 584×220 | — | — | 13 KB |
-| `fig-example-run.png` | `@fig-example-run` | Step 2 — Run | 4252×4086 | yes | yes | 481 KB |
-| `fig-pipeline.png` | `@fig-pipeline` | Analysis pipeline | 1866×5669 | yes | yes | 348 KB |
-| `fig-example-analyze.png` | `@fig-example-analyze` | Step 3 — Analyze | 4252×4540 | yes | yes | 458 KB |
-| `fig-example-report.png` | `@fig-example-report` | Step 4 — Report | 4252×2273 | yes | yes | 141 KB |
-| `fig-views.png` | `@fig-views` | study.studyflow | 2601×5669 | yes | yes | 463 KB |
-| `fig-combined.png` | `@fig-combined` | Example study (human and artificial cohorts) | 3792×9252 | yes | yes | 1106 KB |
+| `fig-example-run.png` | `@fig-example-run` | Step 2 — Run | 4252×4082 | yes | yes | 870 KB |
+| `fig-pipeline.png` | `@fig-pipeline` | Analysis pipeline | 1866×6012 | yes | yes | 665 KB |
+| `fig-example-analyze.png` | `@fig-example-analyze` | Step 3 — Analyze | 4252×4547 | yes | yes | 882 KB |
+| `fig-example-report.png` | `@fig-example-report` | Step 4 — Report | 4252×2220 | yes | yes | 325 KB |
+| `fig-views.png` | `@fig-views` | study.studyflow | 2601×5904 | yes | yes | 893 KB |
+| `fig-combined.png` | `@fig-combined` | Example study (human and artificial cohorts) | 3792×9358 | yes | yes | 1959 KB |
 
 **Not yet cited by the caption list**, left under their old names rather than given invented labels:
 
 | File | Embedded diagram | Pixels | `studyflow` | `mxfile` |
 |---|---|---|---|---|
-| `figS1_multimodal.png` | Multimodal preprocessing and training | 4252×2068 | yes | yes |
-| `figS3_runner.png` | Runner walkthrough | 1936×4752 | yes | yes |
-| `rt_analysis.png` | RT Analysis | 4252×2436 | yes | yes |
+| `figS1_multimodal.png` | Multimodal preprocessing and training | 4252×2116 | yes | yes |
+| `figS3_runner.png` | Runner walkthrough | 1936×6224 | yes | yes |
+| `rt_analysis.png` | RT Analysis | 4252×2227 | yes | yes |
 | `fig1_gap_panelA.png`, `fig1_gap_panelB.png` | *(hand-written SVG sketches, superseded by `fig-overview.png`)* | — | — | — |
 | `todo_fig_extensions.png` | *(raster, no source)* | 2400×1080 | — | — |
 
