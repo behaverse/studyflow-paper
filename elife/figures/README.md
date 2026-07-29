@@ -4,10 +4,41 @@ This folder collects the figures and listings referenced by [`../paper.qmd`](../
 
 ## Conventions
 
-- **File naming.** `fig1_shortname.svg`, `fig2_…`, … `fig12_…` matching the figure numbers in `paper.qmd`. Lowercase, no zero-padding. Use SVG for line drawings/diagrams, PNG for screenshots/composites.
-- **Sizing.** Target eLife column widths: 88 mm (single column) for inline figures, 180 mm (full width) for multi-panel composites.
-- **Source files.** When a figure is composed from a Studyflow diagram, commit both the rendered SVG and the underlying `.studyflow` source (or pin a commit SHA from `studyflow-modeler/src/assets/examples/`) so reviewers can verify the figure traces back to a runnable file.
-- **Captions.** Drafted in `paper.qmd` next to each figure reference. Keep captions self-contained: a reader skimming figures should understand the claim without reading the body.
+- **One PNG per figure, and the PNG is the source.** Every figure lives in this folder as a single flat `.png` — no `svg/`, no `png/`, no separate `.studyflow` sidecar. The diagram source travels *inside* the image: the Studyflow BPMN XML in a `studyflow` `iTXt` chunk (before `IEND`), and a draw.io `<mxfile>` in an `mxfile` `tEXt` chunk (before `IDAT`, URI-encoded). So each deposited figure reopens in the Studyflow modeler *and* in draw.io as an editable diagram, which is the claim §2.2 and the Discussion make about deposited figures.
+- **File naming.** `fig1_shortname.png`, `fig2_…`, matching the figure numbers in the manuscript; the four lifecycle fragments keep their step order (`01_design.png` … `05_full.png`). Lowercase.
+- **Sizing.** Target eLife column widths: 88 mm (single column) for inline figures, 180 mm (full width) for multi-panel composites. Figures are rasterized to fill a 180 × 240 mm box at 600 dpi (scale clamped to 3×–8× of the diagram's own pixel size), so every one clears 300 dpi at print width with headroom.
+- **Captions.** Drafted in `paper-v3.qmd` next to each figure reference. Keep captions self-contained: a reader skimming figures should understand the claim without reading the body.
+
+### Regenerating a figure
+
+Edit it where it came from, then re-export **PNG** from the modeler with both embed toggles on (Export dialog → Image → PNG → *Embed Studyflow source* + *Embed draw.io diagram*). The app's PNG export rasterizes at 1×, which is fine on screen but under print resolution; for a figure going into the manuscript, export SVG and rasterize it at the scale above, then re-attach both chunks (`src/modeler/models/exporters/pngEmbedding.ts` in `studyflow-modeler` has `embedStudyflowIntoPng` / `embedDrawioIntoPng`).
+
+To read a figure back: open the `.png` directly in the modeler (`Open File…`), or in draw.io. `fig1_overview.png` is draw.io-authored and carries only the draw.io payload; the two `fig1_gap_panel*.png` sketches are hand-written SVG with no diagram source and carry neither.
+
+---
+
+## Files on disk (2026-07-28)
+
+| File | Pixels | `studyflow` chunk | `mxfile` chunk | Size |
+|---|---|---|---|---|
+| `01_design.png` | 4252×3089 | yes | yes | 333 KB |
+| `02_run.png` | 4252×4086 | yes | yes | 481 KB |
+| `03_analyze.png` | 4252×4540 | yes | yes | 458 KB |
+| `04_report.png` | 4252×2273 | yes | yes | 141 KB |
+| `05_full.png` | 3792×9252 | yes | yes | 1106 KB |
+| `fig1_overview.png` | 4419×3753 | — | yes | 478 KB |
+| `fig2_elements.png` | 3900×6312 | yes | yes | 700 KB |
+| `fig3_consort.png` | 4252×5079 | yes | yes | 662 KB |
+| `fig4_nback.png` | 4252×3087 | yes | yes | 278 KB |
+| `fig6_pipeline.png` | 1866×5669 | yes | yes | 348 KB |
+| `fig7_single_source.png` | 2601×5669 | yes | yes | 463 KB |
+| `figS1_multimodal.png` | 4252×2068 | yes | yes | 244 KB |
+| `figS3_runner.png` | 1936×4752 | yes | yes | 165 KB |
+| `rt_analysis.png` | 4252×2436 | yes | yes | 162 KB |
+
+Source-less rasters kept because nothing can regenerate them: `fig4_nback_classic.png` (584×220, the traditional N-back slide that is panel a of F7/`@fig-nback`), `todo_fig_extensions.png` (2400×1080), and the two `fig1_gap_panel*.png` sketches superseded by `fig1_overview.png`.
+
+`elife_figures.drawio` stays as the draw.io master: its `overview` page is the one embedded in `fig1_overview.png`, but its second page (`consort`) is not carried by any figure here, so deleting the master would lose it.
 
 ---
 
@@ -51,7 +82,7 @@ Centre callout: "One study. Four artifacts. Four divergent representations of th
 ### F2 — Studyflow element palette / layers
 **Where it lands:** §2.1 (Studyflow as a formal object).
 
-**Status:** drafted — [`svg+studyflow/fig2_elements.svg`](svg+studyflow/fig2_elements.svg), exported (2026-07-16) from `studyflow-modeler/src/assets/examples/kitchensink.studyflow` (the *Studyflow element catalog*). One live instance of every palette element, one labelled band per schema: the BPMN 2.0 base first (events, gateways, activities, data), then the studyflow core and the domain extensions that specialize it. Attribute values echo the paper's example study (consent form, completion code, eligibility criteria, N-back scene, BDM trials dataset). The SVG embeds the full `.studyflow` source in its `<metadata>`, so the deposited figure is the editable diagram.
+**Status:** drafted — [`fig2_elements.png`](fig2_elements.png), exported (2026-07-16) from `studyflow-modeler/src/assets/examples/kitchensink.studyflow` (the *Studyflow element catalog*). One live instance of every palette element, one labelled band per schema: the BPMN 2.0 base first (events, gateways, activities, data), then the studyflow core and the domain extensions that specialize it. Attribute values echo the paper's example study (consent form, completion code, eligibility criteria, N-back scene, BDM trials dataset). The PNG carries the full source in its `studyflow` chunk, so the deposited figure is the editable diagram.
 
 **Action:** caption from §2.1 (core vs optional domain layers). Re-export from the modeler if the schemas change.
 
