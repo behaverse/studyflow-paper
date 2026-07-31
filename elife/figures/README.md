@@ -4,25 +4,20 @@ This folder collects the figures and listings referenced by [`../paper.qmd`](../
 
 ## Conventions
 
-- **One PNG per figure, and the PNG is the source.** Every figure lives in this folder as a single flat `.png` — no `svg/`, no `png/`, no separate `.studyflow` sidecar. The diagram source travels *inside* the image: the Studyflow BPMN XML in a `studyflow` `iTXt` chunk (before `IEND`), and a draw.io `<mxfile>` in an `mxfile` `tEXt` chunk (before `IDAT`, URI-encoded). So each deposited figure reopens in the Studyflow modeler *and* in draw.io as an editable diagram, which is the claim §2.2 and the Discussion make about deposited figures.
-- **File naming.** `fig-<label>.png`, where `<label>` is exactly the `@fig-…` cross-reference the manuscript cites (`fig-overview.png` for `@fig-overview`). Lowercase, hyphenated. Where a figure has panels that are not composited yet, the panel takes a suffix (`fig-nback-classic.png`).
+- **One PNG per figure, and the PNG is the source.** Every figure lives in this folder as a single flat PNG — no `svg/`, no `png/`, no separate `.studyflow` sidecar. The diagram source travels *inside* the image: the Studyflow BPMN XML in a `studyflow` `iTXt` chunk (before `IEND`), and a draw.io `<mxfile>` in an `mxfile` `tEXt` chunk (before `IDAT`, URI-encoded). So each deposited figure reopens in the Studyflow modeler *and* in draw.io as an editable diagram, which is the claim §2.2 and the Discussion make about deposited figures.
+- **File naming.** `fig-<label>.studyflow.png`, where `<label>` is exactly the `@fig-…` cross-reference the manuscript cites (`fig-elements.studyflow.png` for `@fig-elements`). Lowercase, hyphenated. The `.studyflow.png` double extension is the modeler's convention (after `.drawio.png`): it marks the image as a *source* whose diagram — provenance trail included — travels inside it, so the filename says which figures are editable diagrams. A figure with no embedded studyflow stays a plain `.png` (`fig-overview.png`, draw.io-only; `fig-nback-classic.png`, a raster slide). Where a figure has panels that are not composited yet, the panel takes a suffix (`fig-nback-classic.png`).
 - **Sizing.** Target eLife column widths: 88 mm (single column) for inline figures, 180 mm (full width) for multi-panel composites. Figures are rasterized to fill a 180 × 240 mm box at 600 dpi (scale clamped to 3×–8× of the diagram's own pixel size), so every one clears 300 dpi at print width with headroom.
 - **Captions.** Drafted in `paper-v3.qmd` next to each figure reference. Keep captions self-contained: a reader skimming figures should understand the claim without reading the body.
 
 ### Regenerating a figure
 
-From `studyflow-modeler`:
+There is no `figures:render` script yet — regeneration is the by-hand path
+below. (A script would mirror the modeler's `examples:render`: open each
+figure, export SVG, rasterize at the figure's current pixel width, and write
+the `studyflow` and `mxfile` chunks back on, so a re-render keeps print
+resolution and the authored layout.)
 
-```
-npm run figures:render -- ../studyflow-paper/elife/figures fig-nback     # one
-npm run figures:render -- ../studyflow-paper/elife/figures --all        # every figure
-```
-
-It opens each figure in the modeler, exports **SVG** (vector, and the format the modeler embeds both payloads into), rasterizes it at the figure's current pixel width, and writes the `studyflow` and `mxfile` chunks back on. Two things that matter: the app's own PNG export rasterizes at 1×, which is under print resolution, and re-using the existing width means nothing shifts in the manuscript layout. The diagram interchange inside the payload is preserved, so a re-render reproduces the authored layout rather than re-flowing it.
-
-A figure is rendered from `<stem>.migrated.xml` if one sits beside it, otherwise from the diagram already inside its own `.png` — which is how a schema migration or a hand edit gets applied: drop the XML next to the figure, render, delete the XML.
-
-By hand instead: re-export **PNG** from the modeler with both embed toggles on (Export dialog → Image → PNG → *Embed Studyflow source* + *Embed draw.io diagram*), accepting the 1× raster; `src/modeler/models/exporters/pngEmbedding.ts` has `embedStudyflowIntoPng` / `embedDrawioIntoPng` if you rasterize yourself.
+By hand: re-export **PNG** from the modeler with both embed toggles on (Export dialog → Image → PNG → *Embed Studyflow source* + *Embed draw.io diagram*), accepting the 1× raster; `src/modeler/models/exporters/pngEmbedding.ts` has `embedStudyflowIntoPng` / `embedDrawioIntoPng` if you rasterize yourself.
 
 To read a figure back: open the `.png` directly in the modeler (`Open File…`), or in draw.io. `fig-overview.png` is draw.io-authored and carries only the draw.io payload; the two `fig1_gap_panel*.png` sketches are hand-written SVG with no diagram source and carry neither.
 
@@ -35,29 +30,29 @@ One file per cross-reference: the filename **is** the `@fig-…` label the manus
 | File | Cited as | Embedded diagram | Pixels | `studyflow` | `mxfile` | Size |
 |---|---|---|---|---|---|---|
 | `fig-overview.png` | `@fig-overview` | *(draw.io, 3 panels: Problem / Gap / Solution)* | 4419×3753 | — | yes | 479 KB |
-| `fig-elements.png` | `@fig-elements` | Studyflow element catalog (kitchen sink) | 3900×6312 | yes | yes | 1243 KB |
-| `fig-consort.png` | `@fig-consort` | CONSORT participant flow | 4252×5079 | yes | yes | 1135 KB |
-| `fig-example-design.png` | `@fig-example-design` | Step 1 — Design | 4252×3061 | yes | yes | 615 KB |
-| `fig-nback.png` | `@fig-nback` (panel b) | N-back trial | 4252×3037 | yes | yes | 562 KB |
+| `fig-elements.studyflow.png` | `@fig-elements` | Studyflow element catalog (kitchen sink) | 3900×6312 | yes | yes | 1243 KB |
+| `fig-consort.studyflow.png` | `@fig-consort` | CONSORT participant flow | 4252×5079 | yes | yes | 1135 KB |
+| `fig-example-design.studyflow.png` | `@fig-example-design` | Step 1 — Design | 4252×3061 | yes | yes | 615 KB |
+| `fig-nback.studyflow.png` | `@fig-nback` (panel b) | N-back trial | 4252×3037 | yes | yes | 562 KB |
 | `fig-nback-classic.png` | `@fig-nback` (panel a) | *(raster slide, no source)* | 584×220 | — | — | 13 KB |
-| `fig-example-run.png` | `@fig-example-run` | Step 2 — Run | 4252×4082 | yes | yes | 870 KB |
-| `fig-pipeline.png` | `@fig-pipeline` | Analysis pipeline | 1866×6012 | yes | yes | 665 KB |
-| `fig-example-analyze.png` | `@fig-example-analyze` | Step 3 — Analyze | 4252×4547 | yes | yes | 882 KB |
-| `fig-example-report.png` | `@fig-example-report` | Step 4 — Report | 4252×2220 | yes | yes | 325 KB |
-| `fig-views.png` | `@fig-views` | study.studyflow | 2601×5904 | yes | yes | 893 KB |
-| `fig-combined.png` | `@fig-combined` | Example study (human and artificial cohorts) | 3792×9358 | yes | yes | 1959 KB |
+| `fig-example-run.studyflow.png` | `@fig-example-run` | Step 2 — Run | 4252×4082 | yes | yes | 870 KB |
+| `fig-pipeline.studyflow.png` | `@fig-pipeline` | Analysis pipeline | 1866×6012 | yes | yes | 665 KB |
+| `fig-example-analyze.studyflow.png` | `@fig-example-analyze` | Step 3 — Analyze | 4252×4547 | yes | yes | 882 KB |
+| `fig-example-report.studyflow.png` | `@fig-example-report` | Step 4 — Report | 4252×2220 | yes | yes | 325 KB |
+| `fig-views.studyflow.png` | `@fig-views` | study.studyflow | 2601×5904 | yes | yes | 893 KB |
+| `fig-combined.studyflow.png` | `@fig-combined` | Example study (human and artificial cohorts) | 3792×9358 | yes | yes | 1959 KB |
 
 **Not yet cited by the caption list**, left under their old names rather than given invented labels:
 
 | File | Embedded diagram | Pixels | `studyflow` | `mxfile` |
 |---|---|---|---|---|
-| `figS1_multimodal.png` | Multimodal preprocessing and training | 4252×2116 | yes | yes |
-| `figS3_runner.png` | Runner walkthrough | 1936×6224 | yes | yes |
-| `rt_analysis.png` | RT Analysis | 4252×2227 | yes | yes |
+| `figS1_multimodal.studyflow.png` | Multimodal preprocessing and training | 4252×2116 | yes | yes |
+| `figS3_runner.studyflow.png` | Runner walkthrough | 1936×6224 | yes | yes |
+| `rt_analysis.studyflow.png` | RT Analysis | 4252×2227 | yes | yes |
 | `fig1_gap_panelA.png`, `fig1_gap_panelB.png` | *(hand-written SVG sketches, superseded by `fig-overview.png`)* | — | — | — |
 | `todo_fig_extensions.png` | *(raster, no source)* | 2400×1080 | — | — |
 
-**Panels still to composite.** `@fig-consort` panel a is the published CONSORT 2025 reference flow, which is not in this folder; `fig-consort.png` is panel b only. `@fig-nback` is split across `fig-nback-classic.png` (a) and `fig-nback.png` (b). `@fig-views` shows the Study view; the Gantt, Checklist, and post-run CONSORT projections are not rendered yet.
+**Panels still to composite.** `@fig-consort` panel a is the published CONSORT 2025 reference flow, which is not in this folder; `fig-consort.studyflow.png` is panel b only. `@fig-nback` is split across `fig-nback-classic.png` (a) and `fig-nback.studyflow.png` (b). `@fig-views` shows the Study view; the Gantt, Checklist, and post-run CONSORT projections are not rendered yet.
 
 `elife_figures.drawio` stays as the draw.io master, now three pages:
 
@@ -72,7 +67,7 @@ One file per cross-reference: the filename **is** the `@fig-…` label the manus
 | # | Title | §  | Status | Effort |
 |---|---|---|---|---|
 | F1 | "Many artifacts, one study" schematic | §1.2 | **gap** | half-day |
-| F2 | Studyflow element palette / layers | §2.1 | **drafted** — `fig-elements.png` | needs caption |
+| F2 | Studyflow element palette / layers | §2.1 | **drafted** — `fig-elements.studyflow.png` | needs caption |
 | F3 | Modeler UI composite | §2.3 | needs composition | 2 h |
 | F4 | Runner walkthrough composite | §2.3 | **gap** (depends on §3.2 round-trip) | half-day |
 | F5 | Four views: Study / Gantt / Checklist / Figure | §2.2 | partial — Checklist screenshot is a gap | 30 min once Checklist view ships |
@@ -107,7 +102,7 @@ Centre callout: "One study. Four artifacts. Four divergent representations of th
 ### F2 — Studyflow element palette / layers
 **Where it lands:** §2.1 (Studyflow as a formal object).
 
-**Status:** drafted — [`fig-elements.png`](fig-elements.png), exported (2026-07-16) from `studyflow-modeler/src/assets/examples/kitchensink.studyflow` (the *Studyflow element catalog*). One live instance of every palette element, one labelled band per schema: the BPMN 2.0 base first (events, gateways, activities, data), then the studyflow core and the domain extensions that specialize it. Attribute values echo the paper's example study (consent form, completion code, eligibility criteria, N-back scene, BDM trials dataset). The PNG carries the full source in its `studyflow` chunk, so the deposited figure is the editable diagram.
+**Status:** drafted — [`fig-elements.studyflow.png`](fig-elements.studyflow.png), exported (2026-07-16) from `studyflow-modeler/src/assets/examples/kitchensink.studyflow.png` (the *Studyflow element catalog*). One live instance of every palette element, one labelled band per schema: the BPMN 2.0 base first (events, gateways, activities, data), then the studyflow core and the domain extensions that specialize it. Attribute values echo the paper's example study (consent form, completion code, eligibility criteria, N-back scene, BDM trials dataset). The PNG carries the full source in its `studyflow` chunk, so the deposited figure is the editable diagram.
 
 **Action:** caption from §2.1 (core vs optional domain layers). Re-export from the modeler if the schemas change.
 
@@ -189,9 +184,9 @@ Authorable in the modeler from the `omniprocess` schema layer (`PreprocessfMRI`,
 ### F12 — SPIRIT 2025: three-view rendering
 **Where it lands:** §3.5 (Report).
 
-**Source:** [`../../../studyflow-modeler/src/assets/examples/spirit2025.studyflow`](../../../studyflow-modeler/src/assets/examples/spirit2025.studyflow) (exists). Reference image: [`../../assets/figures/old/spirit2025.jpg`](../../assets/figures/old/spirit2025.jpg).
+**Source:** [`../../../studyflow-modeler/src/assets/examples/spirit2025.studyflow.png`](../../../studyflow-modeler/src/assets/examples/spirit2025.studyflow.png) (exists). Reference image: [`../../assets/figures/old/spirit2025.jpg`](../../assets/figures/old/spirit2025.jpg).
 
-**Action:** render Study, Gantt (the SPIRIT schedule), and Checklist views from `spirit2025.studyflow`, alongside the reference image as a composite. Save as `fig12_spirit.png`.
+**Action:** render Study, Gantt (the SPIRIT schedule), and Checklist views from `spirit2025.studyflow.png`, alongside the reference image as a composite. Save as `fig12_spirit.png`.
 
 ---
 
