@@ -1,0 +1,206 @@
+id: step1_design
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Design_Collaboration:
+  type: Collaboration
+  name: Step 1 - Design
+  participants:
+    Participant_Design:
+      name: Example study, Step 1 (Design)
+      processRef: Design
+      bounds: 160 40 1000 760
+      isHorizontal: true
+Design:
+  type: Process
+  name: Step 1 - Design
+  documentation: >-
+    Step 1 of the example study: the enrolment and allocation phases of the CONSORT participant flow as a
+    complete, runnable fragment. The two lanes are the CONSORT phases. Every early exit is a boundary error
+    event terminating at an error end event that declares a `count` property; the runner increments it as
+    subjects leave, and the label cites it as `n={count}`.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+      version: "1.0"
+      registration: OSF-XXXXX
+      ethicsApproval: ERP-2026-042
+      authors:
+        - Example Study Authors
+  seed: 42
+  properties:
+    P_arm:
+      name: arm
+  laneSets:
+    LaneSet_Design:
+      lanes:
+        Lane_Enrolment:
+          name: Enrolment
+          flowNodeRef: [Enroll, Screening, Eligibility_Gateway, Excluded_Pre]
+          bounds: 190 40 970 330
+          isHorizontal: true
+        Lane_Allocation:
+          name: Allocation
+          flowNodeRef: [Randomize_Gateway, Allocate_Speeded, DidNotStart_Speeded, Allocate_SelfPaced, DidNotStart_SelfPaced, Merge_Allocation, Designed, DidNotStart]
+          bounds: 190 370 970 430
+          isHorizontal: true
+  flowElements:
+    Enroll:
+      type: StartEvent
+      name: Enrolled and consented
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+      onset: T0
+      bounds: 542 82 36 36
+    Screening:
+      type: Task
+      name: Screening
+      extensionElements:
+        - type: cognitive:Questionnaire
+          instrument: screening
+      checklist: |-
+        - [ ] Informed consent recorded
+        - [ ] Demographic intake
+        - [ ] Inclusion criteria checked
+        - [ ] Exclusion criteria checked
+      onset: T0
+      duration: 5min
+      bounds: 480 160 160 80
+    Eligibility_Gateway:
+      type: ExclusiveGateway
+      name: Assessed for eligibility
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+          inclusionCriteria:
+            - Aged 18 to 65 years, normal or corrected-to-normal vision (human cohort)
+            - Registered agent family with a pinned model version (artificial cohort)
+          exclusionCriteria:
+            - Prior exposure to the battery
+            - Failed comprehension check at screening
+      bounds: 535 280 50 50
+      isMarkerVisible: true
+      label: 380 298 140 14
+    Excluded_Pre:
+      type: EndEvent
+      name: Excluded (n={count})
+      properties:
+        P_count_pre:
+          name: count
+          value: "0"
+      eventDefinitions:
+        ErrorDef_ExcludedPre: { type: ErrorEventDefinition }
+      bounds: 942 287 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Randomize_Gateway:
+      type: ExclusiveGateway
+      name: Randomized
+      extensionElements:
+        - type: cognitive:RandomGateway
+          algorithm: block
+          allocationRatio: "1:1"
+          blockSize: 4
+      documentation: >-
+        Allocation is concealed: the draw comes from the study seed and the subject identifier, so it cannot be
+        predicted by whoever enrols the subject.
+      bounds: 535 420 50 50
+      isMarkerVisible: true
+      label: 520 478 80 14
+    Allocate_Speeded:
+      type: Task
+      name: Allocated to speeded path (n={reached})
+      extensionElements:
+        - type: cognitive:Instruction
+          content: You will have 3 seconds to answer each trial.
+      onset: T0+5min
+      duration: 1min
+      bounds: 300 520 160 80
+    DidNotStart_Speeded:
+      type: BoundaryEvent
+      name: Did not receive allocated intervention
+      eventDefinitions:
+        ErrorDef_DidNotStart_Speeded: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_Speeded
+      bounds: 322 582 36 36
+      label: 220 622 130 27
+    Allocate_SelfPaced:
+      type: Task
+      name: Allocated to self-paced path (n={reached})
+      extensionElements:
+        - type: cognitive:Instruction
+          content: Take as long as you need to answer each trial.
+      onset: T0+5min
+      duration: 1min
+      bounds: 660 520 160 80
+    DidNotStart_SelfPaced:
+      type: BoundaryEvent
+      name: Did not receive allocated intervention
+      eventDefinitions:
+        ErrorDef_DidNotStart_SelfPaced: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_SelfPaced
+      bounds: 762 582 36 36
+      label: 770 622 130 27
+    Merge_Allocation:
+      type: ExclusiveGateway
+      name: Begin battery
+      bounds: 535 650 50 50
+      label: 595 690 80 14
+    Designed:
+      type: EndEvent
+      name: Ready to run
+      bounds: 542 740 36 36
+    DidNotStart:
+      type: EndEvent
+      name: Did not receive allocated intervention (n={count})
+      properties:
+        P_count_dns:
+          name: count
+          value: "0"
+      eventDefinitions:
+        ErrorDef_DidNotStart: { type: ErrorEventDefinition }
+      bounds: 942 702 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Flow_Enroll_Screening: Enroll -> Screening
+    Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
+    Flow_Eligible:
+      name: eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Randomize_Gateway
+    Flow_Excluded_Pre:
+      name: not eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Excluded_Pre
+      stroke: "#ac5a54"
+    Flow_Allocate_Speeded:
+      name: speeded
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_Speeded
+      waypoint: 535,445 380,445 380,520
+    Flow_Allocate_SelfPaced:
+      name: self-paced
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_SelfPaced
+      waypoint: 585,445 740,445 740,520
+    Flow_Speeded_Merge:
+      sourceRef: Allocate_Speeded
+      targetRef: Merge_Allocation
+      waypoint: 380,600 380,675 535,675
+    Flow_SelfPaced_Merge:
+      sourceRef: Allocate_SelfPaced
+      targetRef: Merge_Allocation
+      waypoint: 740,600 740,675 585,675
+    Flow_Merge_Designed: Merge_Allocation -> Designed
+    Flow_DidNotStart_Speeded:
+      sourceRef: DidNotStart_Speeded
+      targetRef: DidNotStart
+      waypoint: 340,618 340,720 942,720
+      stroke: "#ac5a54"
+    Flow_DidNotStart_SelfPaced:
+      sourceRef: DidNotStart_SelfPaced
+      targetRef: DidNotStart
+      waypoint: 780,618 780,720 942,720
+      stroke: "#ac5a54"
+state:
+  _meta:
+    reached: { Allocate_Speeded: 0, Allocate_SelfPaced: 0 }
+  Excluded_Pre: { count: 0 }
+  DidNotStart: { count: 0 }

@@ -1,0 +1,73 @@
+id: step4_report
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Report:
+  type: Process
+  name: Step 4 - Report
+  documentation: >-
+    Step 4 of the example study: one activity renders the reporting artifacts from the results dataset, a
+    debrief closes the session, and a completion end event issues the code a recruitment platform exchanges for
+    payment. Nothing else is added for reporting: the CONSORT flow, the SPIRIT schedule, the checklist, and the
+    deviation report are views of the same file.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+  seed: 42
+  flowElements:
+    R_Start:
+      type: StartEvent
+      name: Analyzed
+      bounds: 182 182 36 36
+    Render:
+      type: ServiceTask
+      name: Render reporting artifacts
+      implementation: python://behaverse_report.render@1.0
+      checklist: |-
+        - [ ] CONSORT participant flow exported from the Figure view
+        - [ ] SPIRIT schedule exported from the Gantt view
+        - [ ] CHART items recorded from the run provenance
+      onset: T0+45min
+      duration: 2min
+      dataInputAssociations:
+        In_Results:
+          sourceRef: [Dataset_Results]
+          waypoint: 355,110 355,160
+      dataOutputAssociations:
+        Out_Report:
+          targetRef: Report_Artifacts
+          waypoint: 355,240 355,300
+      bounds: 280 160 150 80
+    Debrief:
+      type: Task
+      name: Debrief
+      extensionElements:
+        - type: cognitive:Instruction
+          content: |
+            Thank you for taking part. The study compared how different actors perform a battery of cognitive
+            tasks. Your completion code follows on the next page.
+      onset: T0+47min
+      duration: 1min
+      bounds: 500 160 150 80
+    R_End:
+      type: EndEvent
+      name: Completed
+      redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
+      completionCodeType: dynamic
+      bounds: 720 182 36 36
+    Dataset_Results:
+      type: DataStoreReference
+      name: Results (Psych-DS)
+      extensionElements:
+        - type: studyflow:Dataset
+          format: psych-ds
+          uri: results/
+      bounds: 330 60 50 50
+      label: 290 30 130 27
+    Report_Artifacts:
+      type: DataObjectReference
+      name: Reporting artifacts (figures, tables, checklist)
+      uri: report/
+      bounds: 337 300 36 50
+    F_0: R_Start -> Render
+    F_1: Render -> Debrief
+    F_2: Debrief -> R_End

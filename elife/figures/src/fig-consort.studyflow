@@ -1,0 +1,333 @@
+id: example_study_consort
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Example_Study:
+  type: Process
+  name: Example study, CONSORT participant flow (Figure view after execution)
+  documentation: >-
+    The example study projected as its CONSORT participant flow: the Figure view of the executed file, with
+    the battery and the analysis collapsed. Groups are the four CONSORT phases plus the report. Attrition is
+    encoded as boundary error events terminating at counted error end events; every `n` is a run-state value
+    the runner wrote as the cohort ran.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+      version: "1.0"
+      registration: OSF-XXXXX
+      ethicsApproval: ERP-2026-042
+      authors:
+        - Example Study Authors
+      dependencies:
+        - behaverse-analysis==1.0
+        - scikit-learn>=1.5
+  seed: 42
+  properties:
+    P_arm:
+      name: arm
+  flowElements:
+    Enroll:
+      type: StartEvent
+      name: Enrolled and consented (n={reached})
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+      onset: T0
+      bounds: 542 82 36 36
+      label: 590 88 150 27
+    Screening:
+      type: Task
+      name: Screening
+      extensionElements:
+        - type: cognitive:Questionnaire
+          instrument: screening
+      checklist: |-
+        - [x] Informed consent recorded
+        - [x] Demographic intake
+        - [x] Inclusion criteria checked
+        - [x] Exclusion criteria checked
+      onset: T0
+      duration: 5min
+      bounds: 480 160 160 80
+    Eligibility_Gateway:
+      type: ExclusiveGateway
+      name: Assessed for eligibility (n={reached})
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+          inclusionCriteria:
+            - Aged 18 to 65 years, normal or corrected-to-normal vision (human cohort)
+            - Registered agent family with a pinned model version (artificial cohort)
+          exclusionCriteria:
+            - Prior exposure to the battery
+            - Failed comprehension check at screening
+      bounds: 535 280 50 50
+      isMarkerVisible: true
+      label: 370 291 150 27
+    Excluded_Pre:
+      type: EndEvent
+      name: Excluded (n={count})
+      properties:
+        P_count_pre: { name: count, value: "0" }
+      eventDefinitions:
+        Err_ExcludedPre: { type: ErrorEventDefinition }
+      bounds: 1042 287 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Randomize_Gateway:
+      type: ExclusiveGateway
+      name: Randomized (n={reached})
+      extensionElements:
+        - type: cognitive:RandomGateway
+          algorithm: block
+          allocationRatio: "1:1"
+          blockSize: 4
+      bounds: 535 410 50 50
+      isMarkerVisible: true
+      label: 500 468 120 14
+    Allocate_Speeded:
+      type: Task
+      name: Allocated to speeded path (n={reached})
+      extensionElements:
+        - type: cognitive:Instruction
+          content: You will have 3 seconds to answer each trial.
+      onset: T0+5min
+      duration: 1min
+      bounds: 300 500 160 80
+    DidNotStart_Speeded:
+      type: BoundaryEvent
+      name: Did not receive allocated intervention
+      eventDefinitions:
+        Err_DNS_Speeded: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_Speeded
+      bounds: 322 562 36 36
+      label: 215 602 130 27
+    Allocate_SelfPaced:
+      type: Task
+      name: Allocated to self-paced path (n={reached})
+      extensionElements:
+        - type: cognitive:Instruction
+          content: Take as long as you need to answer each trial.
+      onset: T0+5min
+      duration: 1min
+      bounds: 660 500 160 80
+    DidNotStart_SelfPaced:
+      type: BoundaryEvent
+      name: Did not receive allocated intervention
+      eventDefinitions:
+        Err_DNS_SelfPaced: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_SelfPaced
+      bounds: 762 562 36 36
+      label: 775 602 130 27
+    Merge_Allocation:
+      type: ExclusiveGateway
+      bounds: 535 620 50 50
+    DidNotStart:
+      type: EndEvent
+      name: Did not receive allocated intervention (n={count})
+      properties:
+        P_count_dns: { name: count, value: "0" }
+      eventDefinitions:
+        Err_DidNotStart: { type: ErrorEventDefinition }
+      bounds: 1042 662 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Battery:
+      type: SubProcess
+      name: Cognitive battery, one trial at a time (n={reached})
+      properties:
+        P_failed_trials: { name: failed_trials, value: "0" }
+      onset: T0+6min
+      duration: 30min
+      bounds: 480 800 160 80
+      isExpanded: false
+    Battery_Error:
+      type: BoundaryEvent
+      name: failed-trial rate above 20%
+      eventDefinitions:
+        Err_BatteryExit: { type: ErrorEventDefinition }
+      attachedToRef: Battery
+      bounds: 602 862 36 36
+      label: 560 902 120 27
+    Discontinued:
+      type: EndEvent
+      name: Discontinued intervention (n={count})
+      properties:
+        P_count_disc: { name: count, value: "0" }
+      eventDefinitions:
+        Err_Discontinued: { type: ErrorEventDefinition }
+      bounds: 1042 862 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Analysis:
+      type: SubProcess
+      name: Analysis pipeline, preregistered (n={reached})
+      onset: T0+40min
+      duration: 10min
+      bounds: 480 1030 160 80
+      isExpanded: false
+    Analysis_Error:
+      type: BoundaryEvent
+      name: fewer than 50% valid trials
+      eventDefinitions:
+        Err_AnalysisExit: { type: ErrorEventDefinition }
+      attachedToRef: Analysis
+      bounds: 602 1092 36 36
+      label: 560 1132 120 27
+    Excluded_Analysis:
+      type: EndEvent
+      name: Excluded from analysis (n={count})
+      properties:
+        P_count_excl: { name: count, value: "0" }
+      eventDefinitions:
+        Err_ExcludedAnalysis: { type: ErrorEventDefinition }
+      bounds: 1042 1092 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Render:
+      type: ServiceTask
+      name: Render reporting artifacts
+      implementation: python://behaverse_report.render@1.0
+      onset: T0+50min
+      duration: 2min
+      bounds: 380 1260 160 70
+    Debrief:
+      type: Task
+      name: Debrief
+      extensionElements:
+        - type: cognitive:Instruction
+          content: Thank you for taking part. Your completion code follows on the next page.
+      onset: T0+52min
+      duration: 1min
+      bounds: 600 1260 160 70
+    Completed:
+      type: EndEvent
+      name: Completed (n={reached})
+      redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
+      completionCodeType: dynamic
+      bounds: 840 1277 36 36
+    Flow_Enroll_Screening: Enroll -> Screening
+    Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
+    Flow_Eligible:
+      name: eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Randomize_Gateway
+      label: 570 345 60 14
+    Flow_Excluded_Pre:
+      name: not eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Excluded_Pre
+      stroke: "#ac5a54"
+    Flow_Allocate_Speeded:
+      name: speeded
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_Speeded
+      waypoint: 535,435 380,435 380,500
+    Flow_Allocate_SelfPaced:
+      name: self-paced
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_SelfPaced
+      waypoint: 585,435 740,435 740,500
+    Flow_Speeded_Merge:
+      sourceRef: Allocate_Speeded
+      targetRef: Merge_Allocation
+      waypoint: 380,580 380,645 535,645
+    Flow_SelfPaced_Merge:
+      sourceRef: Allocate_SelfPaced
+      targetRef: Merge_Allocation
+      waypoint: 740,580 740,645 585,645
+    Flow_DNS_Speeded:
+      sourceRef: DidNotStart_Speeded
+      targetRef: DidNotStart
+      waypoint: 340,598 340,680 1042,680
+      stroke: "#ac5a54"
+    Flow_DNS_SelfPaced:
+      sourceRef: DidNotStart_SelfPaced
+      targetRef: DidNotStart
+      waypoint: 780,598 780,680 1042,680
+      stroke: "#ac5a54"
+    Flow_Merge_Battery: Merge_Allocation -> Battery
+    Flow_Battery_Discontinued:
+      sourceRef: Battery_Error
+      targetRef: Discontinued
+      waypoint: 638,880 1042,880
+      stroke: "#ac5a54"
+    Flow_Battery_Analysis: Battery -> Analysis
+    Flow_Analysis_Excluded:
+      sourceRef: Analysis_Error
+      targetRef: Excluded_Analysis
+      waypoint: 638,1110 1042,1110
+      stroke: "#ac5a54"
+    Flow_Analysis_Render:
+      sourceRef: Analysis
+      targetRef: Render
+      waypoint: 560,1110 560,1210 460,1210 460,1260
+    Flow_Render_Debrief: Render -> Debrief
+    Flow_Debrief_Completed: Debrief -> Completed
+  artifacts:
+    Group_Enrolment:
+      type: Group
+      categoryValueRef: CV_Enrolment
+      bounds: 160 40 1000 330
+    Group_Allocation:
+      type: Group
+      categoryValueRef: CV_Allocation
+      bounds: 160 380 1000 370
+    Group_Followup:
+      type: Group
+      categoryValueRef: CV_Followup
+      bounds: 160 760 1000 220
+    Group_Analysis:
+      type: Group
+      categoryValueRef: CV_Analysis
+      bounds: 160 990 1000 220
+    Group_Report:
+      type: Group
+      categoryValueRef: CV_Report
+      bounds: 160 1220 1000 150
+Category_Enrolment:
+  type: Category
+  categoryValue:
+    CV_Enrolment:
+      value: Enrolment
+Category_Allocation:
+  type: Category
+  categoryValue:
+    CV_Allocation:
+      value: Allocation
+Category_Followup:
+  type: Category
+  categoryValue:
+    CV_Followup:
+      value: Follow-up
+Category_Analysis:
+  type: Category
+  categoryValue:
+    CV_Analysis:
+      value: Analysis
+Category_Report:
+  type: Category
+  categoryValue:
+    CV_Report:
+      value: Report
+state:
+  _meta:
+    prov:
+      - action: created
+        when: "2026-08-01T09:00:00Z"
+        who: Example Study Authors
+        with: studyflow-modeler/26.9.5
+      - action: executed
+        when: "2026-09-01T14:20:00Z"
+        with: studyflow-cli/26.9.5
+        seed: 42
+        run: runs/2026-09-01/example_study
+    reached:
+      Enroll: 96
+      Eligibility_Gateway: 96
+      Randomize_Gateway: 90
+      Allocate_Speeded: 45
+      Allocate_SelfPaced: 45
+      Battery: 88
+      Analysis: 79
+      Completed: 76
+  Excluded_Pre: { count: 6 }
+  DidNotStart: { count: 2 }
+  Discontinued: { count: 9 }
+  Excluded_Analysis: { count: 3 }

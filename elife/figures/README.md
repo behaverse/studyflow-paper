@@ -5,7 +5,7 @@ This folder collects the figures and listings referenced by [`../paper.qmd`](../
 ## Conventions
 
 - **One PNG per figure, and the PNG is the source.** Every figure lives in this folder as a single flat PNG — no `svg/`, no `png/`, no separate `.studyflow` sidecar. The diagram source travels *inside* the image: the Studyflow BPMN XML in a `studyflow` `iTXt` chunk (before `IEND`), and a draw.io `<mxfile>` in an `mxfile` `tEXt` chunk (before `IDAT`, URI-encoded). So each deposited figure reopens in the Studyflow modeler *and* in draw.io as an editable diagram, which is the claim §2.2 and the Discussion make about deposited figures.
-- **File naming.** `fig-<label>.studyflow.png`, where `<label>` is exactly the `@fig-…` cross-reference the manuscript cites (`fig-elements.studyflow.png` for `@fig-elements`). Lowercase, hyphenated. The `.studyflow.png` double extension is the modeler's convention (after `.drawio.png`): it marks the image as a *source* whose diagram — provenance trail included — travels inside it, so the filename says which figures are editable diagrams. A figure with no embedded studyflow stays a plain `.png` (`fig-overview.png`, draw.io-only; `fig-nback-classic.png`, a raster slide). Where a figure has panels that are not composited yet, the panel takes a suffix (`fig-nback-classic.png`).
+- **File naming.** `fig-<label>.studyflow.png`, where `<label>` is exactly the `@fig-…` cross-reference the manuscript cites (`fig-elements.studyflow.png` for `@fig-elements`). Lowercase, hyphenated. The `.studyflow.png` double extension is the modeler's convention (after `.drawio.png`): it marks the image as a *source* whose diagram — provenance trail included — travels inside it, so the filename says which figures are editable diagrams. A figure with no embedded studyflow stays a plain `.png` (`fig-overview.png`, draw.io-only; `fig-step2-nback-classic.png`, a raster slide). Where a figure has panels that are not composited yet, the panel takes a suffix (`fig-step2-nback-classic.png`).
 - **Sizing.** Target eLife column widths: 88 mm (single column) for inline figures, 180 mm (full width) for multi-panel composites. Figures are rasterized to fill a 180 × 240 mm box at 600 dpi (scale clamped to 3×–8× of the diagram's own pixel size), so every one clears 300 dpi at print width with headroom.
 - **Captions.** Drafted in `paper-v3.qmd` next to each figure reference. Keep captions self-contained: a reader skimming figures should understand the claim without reading the body.
 
@@ -23,36 +23,38 @@ To read a figure back: open the `.png` directly in the modeler (`Open File…`),
 
 ---
 
-## Files on disk (2026-07-28)
+## Files on disk (2026-09-07, redrawn)
+
+Figure files for the example study are named by results step (`fig-step1-design`, `fig-step2-run`, ...) to match the Step 1 to Step 4 structure of `paper-v3.qmd`. All `fig-*.studyflow.png` files except `figS1` and `figS3` were redrawn from the hand-written sources in [`src/`](src/) against schema version 26.0902 and rendered with `src/render.sh`; `fig-views` is a composite (Study, Gantt, Checklist, Provenance, Figure views) whose embedded studyflow is the combined study.
 
 One file per cross-reference: the filename **is** the `@fig-…` label the manuscript cites. The embedded diagram's own name is quoted below because it is what identifies the figure — not the filename, which is derived from it.
 
 | File | Cited as | Embedded diagram | Pixels | `studyflow` | `mxfile` | Size |
 |---|---|---|---|---|---|---|
-| `fig-overview.png` | `@fig-overview` | *(draw.io, 3 panels: Problem / Gap / Solution)* | 4419×3753 | — | yes | 479 KB |
-| `fig-elements.studyflow.png` | `@fig-elements` | Studyflow element catalog (kitchen sink) | 3900×6312 | yes | yes | 1243 KB |
-| `fig-consort.studyflow.png` | `@fig-consort` | CONSORT participant flow | 4252×5079 | yes | yes | 1135 KB |
-| `fig-example-design.studyflow.png` | `@fig-example-design` | Step 1 — Design | 4252×3061 | yes | yes | 615 KB |
-| `fig-nback.studyflow.png` | `@fig-nback` (panel b) | N-back trial | 4252×3037 | yes | yes | 562 KB |
-| `fig-nback-classic.png` | `@fig-nback` (panel a) | *(raster slide, no source)* | 584×220 | — | — | 13 KB |
-| `fig-example-run.studyflow.png` | `@fig-example-run` | Step 2 — Run | 4252×4082 | yes | yes | 870 KB |
-| `fig-pipeline.studyflow.png` | `@fig-pipeline` | Analysis pipeline | 1866×6012 | yes | yes | 665 KB |
-| `fig-example-analyze.studyflow.png` | `@fig-example-analyze` | Step 3 — Analyze | 4252×4547 | yes | yes | 882 KB |
-| `fig-example-report.studyflow.png` | `@fig-example-report` | Step 4 — Report | 4252×2220 | yes | yes | 325 KB |
-| `fig-views.studyflow.png` | `@fig-views` | study.studyflow | 2601×5904 | yes | yes | 893 KB |
-| `fig-combined.studyflow.png` | `@fig-combined` | Example study (human and artificial cohorts) | 3792×9358 | yes | yes | 1959 KB |
+| `fig-overview.png` | `@fig-overview` | *(draw.io, 3 panels: Problem / Gap / Solution)* | 4419x3753 | — | yes | 478 KB |
+| `fig-elements.studyflow.png` | `@fig-elements` (cited in text as `@fig-elements-full`) | Studyflow element catalog (kitchen sink) | 5232x8008 | yes | - | 754 KB |
+| `fig-consort.studyflow.png` | `@fig-consort` | CONSORT participant flow | 4032x5352 | yes | - | 499 KB |
+| `fig-step1-design.studyflow.png` | `@fig-step1-design` | Step 1 — Design | 4032x3072 | yes | - | 282 KB |
+| `fig-step2-nback.studyflow.png` | `@fig-step2-nback` (panel b) | N-back trial | 4672x2252 | yes | - | 381 KB |
+| `fig-step2-nback-classic.png` | `@fig-step2-nback` (panel a) | *(raster slide, no source)* | 584x220 | — | — | 13 KB |
+| `fig-step2-run.studyflow.png` | `@fig-step2-run` | Step 2 — Run | 5712x2752 | yes | - | 436 KB |
+| `fig-step3-pipeline.studyflow.png` | `@fig-step3-pipeline` | Analysis pipeline | 6568x1436 | yes | - | 316 KB |
+| `fig-step3-analyze.studyflow.png` | `@fig-step3-analyze` | Step 3 — Analyze | 6856x1900 | yes | - | 381 KB |
+| `fig-step4-report.studyflow.png` | `@fig-step4-report` | Step 4 — Report | 2380x1544 | yes | - | 104 KB |
+| `fig-views.studyflow.png` | `@fig-views` | study.studyflow | 5879x3143 | yes | - | 1786 KB |
+| `fig-combined.studyflow.png` | `@fig-combined` | Example study (human and artificial cohorts) | 4032x8312 | yes | - | 1022 KB |
 
 **Not yet cited by the caption list**, left under their old names rather than given invented labels:
 
 | File | Embedded diagram | Pixels | `studyflow` | `mxfile` |
 |---|---|---|---|---|
-| `figS1_multimodal.studyflow.png` | Multimodal preprocessing and training | 4252×2116 | yes | yes |
-| `figS3_runner.studyflow.png` | Runner walkthrough | 1936×6224 | yes | yes |
+| `figS1-multimodal.studyflow.png` | Multimodal preprocessing and training | 4252×2116 | yes | yes |
+| `figS3-runner.studyflow.png` | Runner walkthrough | 1936×6224 | yes | yes |
 | `rt_analysis.studyflow.png` | RT Analysis | 4252×2227 | yes | yes |
 | `fig1_gap_panelA.png`, `fig1_gap_panelB.png` | *(hand-written SVG sketches, superseded by `fig-overview.png`)* | — | — | — |
 | `todo_fig_extensions.png` | *(raster, no source)* | 2400×1080 | — | — |
 
-**Panels still to composite.** `@fig-consort` panel a is the published CONSORT 2025 reference flow, which is not in this folder; `fig-consort.studyflow.png` is panel b only. `@fig-nback` is split across `fig-nback-classic.png` (a) and `fig-nback.studyflow.png` (b). `@fig-views` shows the Study view; the Gantt, Checklist, and post-run CONSORT projections are not rendered yet.
+**Panels still to composite.** `@fig-consort` panel a is the published CONSORT 2025 reference flow, which is not in this folder; `fig-consort.studyflow.png` is panel b only. `@fig-step2-nback` is split across `fig-step2-nback-classic.png` (a) and `fig-step2-nback.studyflow.png` (b); Quarto composes them.
 
 `elife_figures.drawio` stays as the draw.io master, now three pages:
 

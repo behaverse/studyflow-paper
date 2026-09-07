@@ -1,0 +1,205 @@
+id: step2_nback
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+NBack:
+  type: Process
+  name: The N-back, drawn out and collapsed
+  documentation: >-
+    (a) One N-back trial as an explicit subprocess repeated 40 times: a stimulus activity reading its parameters
+    from a Parameters element, a boundary timer that closes the response window, labelled target and
+    non-target branches, and a timer for the inter-stimulus interval. (b) The same block collapsed into a
+    single Behaverse task whose configurations carry the same parameters; the runner expands them into trials.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+  seed: 42
+  flowElements:
+    A_Start:
+      type: StartEvent
+      name: Begin block
+      bounds: 200 195 36 36
+    Trial:
+      type: SubProcess
+      name: Trial (repeated 40 times)
+      loopCharacteristics:
+        type: StandardLoopCharacteristics
+        loopCondition: state._meta.reached.Trial < 40
+        loopMaximum: 40
+      bounds: 280 80 880 250
+      isExpanded: true
+      flowElements:
+        T_Start:
+          type: StartEvent
+          bounds: 300 195 36 36
+        Present:
+          type: Task
+          name: Present letter (500 ms)
+          extensionElements:
+            - type: cognitive:CognitiveTask
+              instrument: behaverse
+              implementation: behaverse://scenes/NB#present
+          dataInputAssociations:
+            In_Params:
+              sourceRef: [Params_NBack]
+              waypoint: 435,145 435,173
+          bounds: 370 173 130 80
+        Response_Window:
+          type: BoundaryEvent
+          name: Response window (3 s)
+          eventDefinitions:
+            Timer_RW:
+              type: TimerEventDefinition
+              timeDuration: PT3S
+          attachedToRef: Present
+          bounds: 470 235 36 36
+          label: 400 275 110 27
+        Match:
+          type: ExclusiveGateway
+          name: n-back match?
+          bounds: 550 188 50 50
+          label: 535 245 80 27
+        Target:
+          type: Task
+          name: "Target: record hit or miss"
+          bounds: 650 100 150 60
+        NonTarget:
+          type: Task
+          name: "Non-target: record correct rejection or false alarm"
+          bounds: 650 183 150 60
+        Timeout:
+          type: Task
+          name: Record timeout
+          bounds: 650 262 150 46
+        Merge:
+          type: ExclusiveGateway
+          bounds: 840 188 50 50
+        ISI:
+          type: IntermediateCatchEvent
+          name: Inter-stimulus interval (1.5 s)
+          eventDefinitions:
+            Timer_ISI:
+              type: TimerEventDefinition
+              timeDuration: PT1.5S
+          bounds: 940 195 36 36
+        T_End:
+          type: EndEvent
+          bounds: 1040 195 36 36
+        TF_1: T_Start -> Present
+        TF_2: Present -> Match
+        TF_Target:
+          name: target
+          sourceRef: Match
+          targetRef: Target
+          waypoint: 575,188 575,130 650,130
+        TF_NonTarget:
+          name: non-target
+          sourceRef: Match
+          targetRef: NonTarget
+        TF_Timeout:
+          sourceRef: Response_Window
+          targetRef: Timeout
+          waypoint: 488,271 488,285 650,285
+        TF_Target_Merge:
+          sourceRef: Target
+          targetRef: Merge
+          waypoint: 800,130 865,130 865,188
+        TF_NonTarget_Merge: NonTarget -> Merge
+        TF_Timeout_Merge:
+          sourceRef: Timeout
+          targetRef: Merge
+          waypoint: 800,285 865,285 865,238
+        TF_Merge_ISI: Merge -> ISI
+        TF_ISI_End: ISI -> T_End
+      dataOutputAssociations:
+        Out_Trials:
+          targetRef: Dataset_Trials
+          waypoint: 1160,125 1240,125
+    A_End:
+      type: EndEvent
+      name: Block complete
+      bounds: 1210 195 36 36
+    Params_NBack:
+      type: DataObjectReference
+      name: N-back parameters
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            NValue: 2
+            TrialsPerBlock: 40
+            StimulusDisplayDuration: 0.5
+            MaxResponseTime: 3
+            InterStimulusInterval: 1.5
+      bounds: 417 95 36 50
+      label: 458 108 120 27
+    Dataset_Trials:
+      type: DataStoreReference
+      name: Trials (BDM)
+      extensionElements:
+        - type: studyflow:Dataset
+          format: bdm
+          bdmDataLevel: trials
+      bounds: 1240 100 50 50
+    AF_1: A_Start -> Trial
+    AF_2: Trial -> A_End
+    B_Start:
+      type: StartEvent
+      name: Begin block
+      bounds: 200 455 36 36
+    Task_NBack:
+      type: Task
+      name: Working memory (N-Back)
+      extensionElements:
+        - type: cognitive:BehaverseTask
+          behaverseScene: NB
+          configurations:
+            NValue: 2
+            TrialsPerBlock: 40
+            StimulusDisplayDuration: 0.5
+            MaxResponseTime: 3
+            InterStimulusInterval: 1.5
+      dataOutputAssociations:
+        Out_Trials_B:
+          targetRef: Dataset_Trials_B
+          waypoint: 380,513 380,525
+      bounds: 300 433 160 80
+    Dataset_Trials_B:
+      type: DataStoreReference
+      name: Trials (BDM)
+      extensionElements:
+        - type: studyflow:Dataset
+          format: bdm
+          bdmDataLevel: trials
+      bounds: 355 525 50 50
+    B_End:
+      type: EndEvent
+      name: Block complete
+      bounds: 540 455 36 36
+    BF_1: B_Start -> Task_NBack
+    BF_2: Task_NBack -> B_End
+  artifacts:
+    Group_A:
+      type: Group
+      categoryValueRef: CV_A
+      bounds: 160 40 1160 330
+    Group_B:
+      type: Group
+      categoryValueRef: CV_B
+      bounds: 160 400 1160 190
+    Note_B:
+      type: TextAnnotation
+      text: The same block as one task. Its configurations are the parameters of (a); the runner expands them into trials.
+      bounds: 640 430 300 60
+    Assoc_Note_B:
+      sourceRef: Note_B
+      targetRef: Task_NBack
+      waypoint: 640,445 460,445
+Category_A:
+  type: Category
+  categoryValue:
+    CV_A:
+      value: (a) One trial, drawn out
+Category_B:
+  type: Category
+  categoryValue:
+    CV_B:
+      value: (b) The same block as one task

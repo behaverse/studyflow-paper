@@ -1,0 +1,249 @@
+id: step3_pipeline
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Pipeline:
+  type: Process
+  name: Step 3 - Analysis pipeline
+  documentation: >-
+    The analysis pipeline as data operations. Each operation is a service task whose `implementation` names the
+    pinned external code that runs it, and whose inputs and outputs are the data elements wired to it. The
+    thresholds live in Parameters elements, so a change of exclusion rule is a data edit, not a redraw. Every
+    dataset declares its format and schema, so an operation that reads a column no schema defines fails
+    validation before any data moves.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: local
+      dependencies:
+        - behaverse-analysis==1.0
+        - pandas>=2.0
+        - scikit-learn>=1.5
+  seed: 42
+  flowElements:
+    P_Start:
+      type: StartEvent
+      name: Battery complete
+      bounds: 182 182 36 36
+    Read:
+      type: ServiceTask
+      name: Read trials
+      implementation: python://behaverse_analysis.read_trials@1.0
+      dataInputAssociations:
+        In_Read:
+          sourceRef: [Dataset_Trials]
+          waypoint: 290,110 320,160
+      dataOutputAssociations:
+        Out_Read:
+          targetRef: T_Raw
+          waypoint: 380,160 445,100
+      bounds: 260 160 130 80
+    Filter:
+      type: ServiceTask
+      name: Filter invalid trials
+      implementation: python://behaverse_analysis.filter_invalid@1.0
+      dataInputAssociations:
+        In_Filter:
+          sourceRef: [T_Raw]
+          waypoint: 445,100 480,160
+        In_Filter_Params:
+          sourceRef: [Params_Exclusion]
+          waypoint: 525,300 525,240
+      dataOutputAssociations:
+        Out_Filter:
+          targetRef: T_Valid
+          waypoint: 580,160 645,100
+      bounds: 460 160 130 80
+    Map:
+      type: ServiceTask
+      name: Map to derived measures
+      implementation: python://behaverse_analysis.derive_measures@1.0
+      dataInputAssociations:
+        In_Map:
+          sourceRef: [T_Valid]
+          waypoint: 645,100 680,160
+      dataOutputAssociations:
+        Out_Map:
+          targetRef: T_Measures
+          waypoint: 780,160 845,100
+      bounds: 660 160 130 80
+    Reduce_Run:
+      type: ServiceTask
+      name: Reduce to per-run summaries
+      implementation: python://behaverse_analysis.summarize_runs@1.0
+      dataInputAssociations:
+        In_ReduceRun:
+          sourceRef: [T_Measures]
+          waypoint: 845,100 880,160
+      dataOutputAssociations:
+        Out_ReduceRun:
+          targetRef: T_Runs
+          waypoint: 980,160 1045,100
+      bounds: 860 160 130 80
+    Reduce_Group:
+      type: ServiceTask
+      name: Reduce to group statistics
+      implementation: python://behaverse_analysis.group_stats@1.0
+      dataInputAssociations:
+        In_ReduceGroup:
+          sourceRef: [T_Runs]
+          waypoint: 1045,100 1080,160
+        In_Rules:
+          sourceRef: [Params_Rules]
+          waypoint: 1125,300 1125,240
+      dataOutputAssociations:
+        Out_ReduceGroup:
+          targetRef: T_Group
+          waypoint: 1180,160 1245,100
+      bounds: 1060 160 130 80
+    Review:
+      type: ManualTask
+      name: Manual outlier review
+      documentation: The human analyst inspects the group statistics before anything is reported.
+      dataInputAssociations:
+        In_Review:
+          sourceRef: [T_Group]
+          waypoint: 1245,100 1280,160
+      dataOutputAssociations:
+        Out_Review:
+          targetRef: T_Reviewed
+          waypoint: 1380,160 1445,100
+      bounds: 1260 160 130 80
+    Render:
+      type: ServiceTask
+      name: Render and write results
+      implementation: python://behaverse_analysis.render_results@1.0
+      dataInputAssociations:
+        In_Render:
+          sourceRef: [T_Reviewed]
+          waypoint: 1445,100 1480,160
+      dataOutputAssociations:
+        Out_Render:
+          targetRef: Dataset_Results
+          waypoint: 1590,180 1650,175
+      bounds: 1460 160 130 80
+    P_End:
+      type: EndEvent
+      name: Analyzed
+      bounds: 1750 202 36 36
+    Dataset_Trials:
+      type: DataStoreReference
+      name: Trials (BDM)
+      extensionElements:
+        - type: studyflow:Dataset
+          format: bdm
+          bdmDataLevel: trials
+          uri: data/trials/
+      bounds: 265 60 50 50
+      label: 220 30 140 27
+    Schema_Trials:
+      type: DataObjectReference
+      name: Trial schema (CSVW)
+      extensionElements:
+        - type: studyflow:Schema
+          format: csvw
+          body: |
+            columns:
+              - name: subject_id
+              - name: task
+              - name: trial_index
+              - name: response
+              - name: response_time
+                datatype: number
+              - name: correct
+                datatype: boolean
+              - name: failure_mode
+      bounds: 182 50 36 50
+      label: 140 20 120 27
+    T_Raw:
+      type: DataObjectReference
+      name: Raw trials
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 427 50 36 50
+      label: 385 20 120 27
+    T_Valid:
+      type: DataObjectReference
+      name: Valid trials
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 627 50 36 50
+      label: 585 20 120 27
+    T_Measures:
+      type: DataObjectReference
+      name: Trial measures
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 827 50 36 50
+      label: 785 20 120 27
+    T_Runs:
+      type: DataObjectReference
+      name: Per-run summaries
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 1027 50 36 50
+      label: 985 20 120 27
+    T_Group:
+      type: DataObjectReference
+      name: Group statistics
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 1227 50 36 50
+      label: 1185 20 120 27
+    T_Reviewed:
+      type: DataObjectReference
+      name: Reviewed statistics
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 1427 50 36 50
+      label: 1385 20 120 27
+    Params_Exclusion:
+      type: DataObjectReference
+      name: Exclusion criteria
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            min_response_time: 0.1
+            drop_missing: true
+            drop_flagged: true
+            max_failed_rate: 0.2
+      bounds: 507 300 36 50
+    Params_Rules:
+      type: DataObjectReference
+      name: Decision rules
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            congruency_threshold_ms: 20
+            equivalence_margin: 0.05
+            classifier_auc_criterion: 0.6
+      bounds: 1107 300 36 50
+    Dataset_Results:
+      type: DataStoreReference
+      name: Results (Psych-DS)
+      extensionElements:
+        - type: studyflow:Dataset
+          format: psych-ds
+          uri: results/
+      bounds: 1650 150 50 50
+    F_0: P_Start -> Read
+    F_1: Read -> Filter
+    F_2: Filter -> Map
+    F_3: Map -> Reduce_Run
+    F_4: Reduce_Run -> Reduce_Group
+    F_5: Reduce_Group -> Review
+    F_6: Review -> Render
+    F_7:
+      sourceRef: Render
+      targetRef: P_End
+      waypoint: 1590,220 1750,220
+  artifacts:
+    Assoc_Schema_Trials:
+      associationDirection: One
+      sourceRef: Schema_Trials
+      targetRef: Dataset_Trials
+      waypoint: 218,80 265,85

@@ -1,0 +1,673 @@
+id: example_study
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Example_Study:
+  type: Process
+  name: Example study (cognitive benchmark, human and artificial cohorts)
+  documentation: >-
+    The complete example study as one Studyflow file, after execution. Read top to bottom, it is Steps 1 to 4
+    in order, laid out in groups named for the CONSORT phases. The battery and the analysis are expanded
+    subprocesses. Every exit is a boundary error event terminating at an error end event that declares a
+    `count` property; the labels cite `{count}` and `{reached}`, which the runner filled in as the cohort ran,
+    so the figure is the CONSORT participant flow of the study as executed.
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+      version: "1.0"
+      registration: OSF-XXXXX
+      ethicsApproval: ERP-2026-042
+      authors:
+        - Example Study Authors
+      dependencies:
+        - behaverse-analysis==1.0
+        - scikit-learn>=1.5
+  seed: 42
+  properties:
+    P_arm:
+      name: arm
+  flowElements:
+    Enroll:
+      type: StartEvent
+      name: Enrolled and consented (n={reached})
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+      onset: T0
+      bounds: 542 82 36 36
+      label: 590 88 150 27
+    Screening:
+      type: Task
+      name: Screening
+      extensionElements:
+        - type: cognitive:Questionnaire
+          instrument: screening
+      checklist: |-
+        - [x] Informed consent recorded
+        - [x] Demographic intake
+        - [x] Inclusion criteria checked
+        - [x] Exclusion criteria checked
+      onset: T0
+      duration: 5min
+      bounds: 480 160 160 80
+    Eligibility_Gateway:
+      type: ExclusiveGateway
+      name: Assessed for eligibility (n={reached})
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+          inclusionCriteria:
+            - Aged 18 to 65 years, normal or corrected-to-normal vision (human cohort)
+            - Registered agent family with a pinned model version (artificial cohort)
+          exclusionCriteria:
+            - Prior exposure to the battery
+            - Failed comprehension check at screening
+      bounds: 535 280 50 50
+      isMarkerVisible: true
+      label: 370 291 150 27
+    Excluded_Pre:
+      type: EndEvent
+      name: Excluded (n={count})
+      properties:
+        P_count_pre: { name: count, value: "0" }
+      eventDefinitions:
+        Err_ExcludedPre: { type: ErrorEventDefinition }
+      bounds: 1042 287 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Randomize_Gateway:
+      type: ExclusiveGateway
+      name: Randomized (n={reached})
+      extensionElements:
+        - type: cognitive:RandomGateway
+          algorithm: block
+          allocationRatio: "1:1"
+          blockSize: 4
+      bounds: 535 410 50 50
+      isMarkerVisible: true
+      label: 500 468 120 14
+    Allocate_Speeded:
+      type: Task
+      name: Allocated to speeded path (n={reached})
+      extensionElements:
+        - type: cognitive:Instruction
+          content: You will have 3 seconds to answer each trial.
+      onset: T0+5min
+      duration: 1min
+      bounds: 300 500 160 80
+    DidNotStart_Speeded:
+      type: BoundaryEvent
+      name: Did not receive allocated intervention
+      eventDefinitions:
+        Err_DNS_Speeded: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_Speeded
+      bounds: 322 562 36 36
+      label: 215 602 130 27
+    Allocate_SelfPaced:
+      type: Task
+      name: Allocated to self-paced path (n={reached})
+      extensionElements:
+        - type: cognitive:Instruction
+          content: Take as long as you need to answer each trial.
+      onset: T0+5min
+      duration: 1min
+      bounds: 660 500 160 80
+    DidNotStart_SelfPaced:
+      type: BoundaryEvent
+      name: Did not receive allocated intervention
+      eventDefinitions:
+        Err_DNS_SelfPaced: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_SelfPaced
+      bounds: 762 562 36 36
+      label: 775 602 130 27
+    Merge_Allocation:
+      type: ExclusiveGateway
+      bounds: 535 620 50 50
+    DidNotStart:
+      type: EndEvent
+      name: Did not receive allocated intervention (n={count})
+      properties:
+        P_count_dns: { name: count, value: "0" }
+      eventDefinitions:
+        Err_DidNotStart: { type: ErrorEventDefinition }
+      bounds: 1042 662 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Battery:
+      type: SubProcess
+      name: Cognitive battery, one trial at a time (n={reached})
+      documentation: >-
+        Six Behaverse tasks and the jsPsych Flanker. The subprocess declares a `failed_trials` counter in its
+        scope; a task whose failed-trial rate exceeds 20% raises its boundary error, which ends the subprocess,
+        and the subprocess's own boundary error routes to the counted Discontinued exit.
+      properties:
+        P_failed_trials: { name: failed_trials, value: "0" }
+      onset: T0+6min
+      duration: 30min
+      bounds: 240 790 660 440
+      isExpanded: true
+      flowElements:
+        Sub_Start:
+          type: StartEvent
+          bounds: 262 857 36 36
+        Task_NBack:
+          type: Task
+          name: Working memory (N-Back)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: NB
+              configurations:
+                NValue: 2
+                TrialsPerBlock: 40
+                InterStimulusInterval: 1.5
+          onset: T0+6min
+          duration: 5min
+          bounds: 330 840 120 70
+        Failed_NBack:
+          type: BoundaryEvent
+          name: "> 20% failed"
+          eventDefinitions:
+            Err_NBack: { type: ErrorEventDefinition }
+          attachedToRef: Task_NBack
+          bounds: 414 892 36 36
+          label: 380 932 100 14
+        Task_DigitSpan:
+          type: Task
+          name: Verbal span (Digit Span)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: DS
+          onset: T0+11min
+          duration: 4min
+          bounds: 470 840 120 70
+        Failed_DigitSpan:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_DS: { type: ErrorEventDefinition }
+          attachedToRef: Task_DigitSpan
+          bounds: 554 892 36 36
+        Task_SART:
+          type: Task
+          name: Sustained attention (SART)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: SART
+          onset: T0+15min
+          duration: 4min
+          bounds: 610 840 120 70
+        Failed_SART:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_SART: { type: ErrorEventDefinition }
+          attachedToRef: Task_SART
+          bounds: 694 892 36 36
+        Task_SRT:
+          type: Task
+          name: Processing speed (Serial RT)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: SRT
+          onset: T0+19min
+          duration: 4min
+          bounds: 750 840 120 70
+        Failed_SRT:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_SRT: { type: ErrorEventDefinition }
+          attachedToRef: Task_SRT
+          bounds: 834 892 36 36
+        Task_Matrices:
+          type: Task
+          name: Reasoning (Belval Matrices)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: BM
+          onset: T0+23min
+          duration: 5min
+          bounds: 750 1000 120 70
+        Failed_Matrices:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_BM: { type: ErrorEventDefinition }
+          attachedToRef: Task_Matrices
+          bounds: 834 1052 36 36
+        Task_CardSorting:
+          type: Task
+          name: Set-shifting (Belval Card Sorting)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: BCS
+          onset: T0+28min
+          duration: 4min
+          bounds: 610 1000 120 70
+        Failed_CardSorting:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_BCS: { type: ErrorEventDefinition }
+          attachedToRef: Task_CardSorting
+          bounds: 694 1052 36 36
+        Task_Flanker:
+          type: Task
+          name: Attention (Flanker, jsPsych)
+          extensionElements:
+            - type: cognitive:CognitiveTask
+              instrument: jspsych
+              construct: selective attention
+              implementation: https://github.com/jspsych/jspsych-contrib@v0.4.0#flanker
+          onset: T0+32min
+          duration: 4min
+          bounds: 470 1000 120 70
+        Failed_Flanker:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_Flanker: { type: ErrorEventDefinition }
+          attachedToRef: Task_Flanker
+          bounds: 554 1052 36 36
+        Sub_End:
+          type: EndEvent
+          name: Battery complete
+          bounds: 370 1017 36 36
+        ErrEnd_Failed:
+          type: EndEvent
+          name: Failed-trial rate above 20%
+          eventDefinitions:
+            Err_Battery: { type: ErrorEventDefinition }
+          bounds: 262 1132 36 36
+          fill: "#f1d0cd"
+          stroke: "#ac5a54"
+        BF_0: Sub_Start -> Task_NBack
+        BF_1: Task_NBack -> Task_DigitSpan
+        BF_2: Task_DigitSpan -> Task_SART
+        BF_3: Task_SART -> Task_SRT
+        BF_4: Task_SRT -> Task_Matrices
+        BF_5: Task_Matrices -> Task_CardSorting
+        BF_6: Task_CardSorting -> Task_Flanker
+        BF_7: Task_Flanker -> Sub_End
+        BF_Failed_NBack:
+          sourceRef: Failed_NBack
+          targetRef: ErrEnd_Failed
+          waypoint: 432,928 432,960 280,960 280,1132
+          stroke: "#ac5a54"
+        BF_Failed_DS:
+          sourceRef: Failed_DigitSpan
+          targetRef: ErrEnd_Failed
+          waypoint: 572,928 572,960 280,960 280,1132
+          stroke: "#ac5a54"
+        BF_Failed_SART:
+          sourceRef: Failed_SART
+          targetRef: ErrEnd_Failed
+          waypoint: 712,928 712,960 280,960 280,1132
+          stroke: "#ac5a54"
+        BF_Failed_SRT:
+          sourceRef: Failed_SRT
+          targetRef: ErrEnd_Failed
+          waypoint: 852,928 852,960 280,960 280,1132
+          stroke: "#ac5a54"
+        BF_Failed_BM:
+          sourceRef: Failed_Matrices
+          targetRef: ErrEnd_Failed
+          waypoint: 852,1088 852,1150 298,1150
+          stroke: "#ac5a54"
+        BF_Failed_BCS:
+          sourceRef: Failed_CardSorting
+          targetRef: ErrEnd_Failed
+          waypoint: 712,1088 712,1150 298,1150
+          stroke: "#ac5a54"
+        BF_Failed_Flanker:
+          sourceRef: Failed_Flanker
+          targetRef: ErrEnd_Failed
+          waypoint: 572,1088 572,1150 298,1150
+          stroke: "#ac5a54"
+      dataOutputAssociations:
+        Out_Trials:
+          targetRef: Dataset_Trials
+          waypoint: 900,965 960,965
+    Battery_Error:
+      type: BoundaryEvent
+      name: battery error
+      eventDefinitions:
+        Err_BatteryExit: { type: ErrorEventDefinition }
+      attachedToRef: Battery
+      bounds: 860 1212 36 36
+      label: 800 1252 120 14
+    Discontinued:
+      type: EndEvent
+      name: Discontinued intervention (n={count})
+      properties:
+        P_count_disc: { name: count, value: "0" }
+      eventDefinitions:
+        Err_Discontinued: { type: ErrorEventDefinition }
+      bounds: 1042 1212 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Dataset_Trials:
+      type: DataStoreReference
+      name: Trials (BDM)
+      extensionElements:
+        - type: studyflow:Dataset
+          format: bdm
+          bdmDataLevel: trials
+          uri: data/trials/
+      bounds: 960 940 50 50
+    Schema_Trials:
+      type: DataObjectReference
+      name: Trial schema (CSVW)
+      extensionElements:
+        - type: studyflow:Schema
+          format: csvw
+      bounds: 1062 940 36 50
+    Analysis:
+      type: SubProcess
+      name: Analysis pipeline, preregistered (n={reached})
+      documentation: >-
+        Read, filter (the analysis exclusion the CONSORT flow reports), map to derived measures, branch on the
+        comparison of interest, reduce to per-run and then group statistics, manual outlier review. Each
+        operation names its pinned implementation.
+      onset: T0+40min
+      duration: 8min
+      bounds: 240 1360 660 500
+      isExpanded: true
+      flowElements:
+        An_Start:
+          type: StartEvent
+          bounds: 262 1427 36 36
+        Read:
+          type: ServiceTask
+          name: Read trials
+          implementation: python://behaverse_analysis.read_trials@1.0
+          bounds: 330 1410 120 70
+        Filter:
+          type: ServiceTask
+          name: Filter invalid trials
+          implementation: python://behaverse_analysis.filter_invalid@1.0
+          bounds: 470 1410 120 70
+        Filter_Excluded:
+          type: BoundaryEvent
+          name: "< 50% valid trials"
+          eventDefinitions:
+            Err_Filter: { type: ErrorEventDefinition }
+          attachedToRef: Filter
+          bounds: 480 1462 36 36
+          label: 520 1486 110 14
+        ErrEnd_Excluded:
+          type: EndEvent
+          name: Excluded from analysis
+          eventDefinitions:
+            Err_Analysis: { type: ErrorEventDefinition }
+          bounds: 262 1502 36 36
+          fill: "#f1d0cd"
+          stroke: "#ac5a54"
+        Map:
+          type: ServiceTask
+          name: Map to derived measures
+          implementation: python://behaverse_analysis.derive_measures@1.0
+          bounds: 610 1410 120 70
+        Which:
+          type: ExclusiveGateway
+          name: Which comparison?
+          bounds: 780 1420 50 50
+          label: 840 1438 110 14
+        Congruency:
+          type: ServiceTask
+          name: Congruency effect (Flanker RT and accuracy)
+          implementation: python://behaverse_analysis.congruency_effect@1.0
+          bounds: 330 1550 160 70
+        Agreement:
+          type: ServiceTask
+          name: Agreement (equivalence of accuracy)
+          implementation: python://behaverse_analysis.equivalence_test@1.0
+          bounds: 520 1550 160 70
+        Divergence:
+          type: ServiceTask
+          name: Divergence (classifier vs random baseline)
+          implementation: python://behaverse_analysis.train_classifier@1.0
+          bounds: 725 1550 160 70
+        Join:
+          type: ExclusiveGateway
+          bounds: 780 1660 50 50
+        Reduce_Run:
+          type: ServiceTask
+          name: Reduce to per-run summaries
+          implementation: python://behaverse_analysis.summarize_runs@1.0
+          bounds: 745 1740 120 70
+        Reduce_Group:
+          type: ServiceTask
+          name: Reduce to group statistics
+          implementation: python://behaverse_analysis.group_stats@1.0
+          bounds: 585 1740 120 70
+        Review:
+          type: ManualTask
+          name: Manual outlier review
+          bounds: 425 1740 120 70
+        An_End:
+          type: EndEvent
+          name: Analyzed
+          bounds: 332 1757 36 36
+        AF_0: An_Start -> Read
+        AF_1: Read -> Filter
+        AF_2: Filter -> Map
+        AF_3: Map -> Which
+        AF_Excluded:
+          sourceRef: Filter_Excluded
+          targetRef: ErrEnd_Excluded
+          waypoint: 498,1498 498,1520 298,1520
+          stroke: "#ac5a54"
+        AF_Congruency:
+          name: congruency
+          sourceRef: Which
+          targetRef: Congruency
+          waypoint: 805,1470 805,1530 410,1530 410,1550
+          label: 415 1533 70 14
+        AF_Agreement:
+          name: agreement
+          sourceRef: Which
+          targetRef: Agreement
+          waypoint: 805,1470 805,1530 600,1530 600,1550
+          label: 605 1533 70 14
+        AF_Divergence:
+          name: divergence
+          sourceRef: Which
+          targetRef: Divergence
+          waypoint: 805,1470 805,1550
+          label: 810 1510 70 14
+        AF_Congruency_Join:
+          sourceRef: Congruency
+          targetRef: Join
+          waypoint: 410,1620 410,1640 805,1640 805,1660
+        AF_Agreement_Join:
+          sourceRef: Agreement
+          targetRef: Join
+          waypoint: 600,1620 600,1640 805,1640 805,1660
+        AF_Divergence_Join: Divergence -> Join
+        AF_4: Join -> Reduce_Run
+        AF_5: Reduce_Run -> Reduce_Group
+        AF_6: Reduce_Group -> Review
+        AF_7: Review -> An_End
+      dataInputAssociations:
+        In_Trials:
+          sourceRef: [Dataset_Trials]
+          waypoint: 985,990 985,1390 900,1390
+      dataOutputAssociations:
+        Out_Results:
+          targetRef: Dataset_Results
+          waypoint: 900,1775 960,1775
+    Analysis_Error:
+      type: BoundaryEvent
+      name: analysis error
+      eventDefinitions:
+        Err_AnalysisExit: { type: ErrorEventDefinition }
+      attachedToRef: Analysis
+      bounds: 860 1842 36 36
+      label: 800 1882 120 14
+    Excluded_Analysis:
+      type: EndEvent
+      name: Excluded from analysis (n={count})
+      properties:
+        P_count_excl: { name: count, value: "0" }
+      eventDefinitions:
+        Err_ExcludedAnalysis: { type: ErrorEventDefinition }
+      bounds: 1042 1842 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Dataset_Results:
+      type: DataStoreReference
+      name: Results (Psych-DS)
+      extensionElements:
+        - type: studyflow:Dataset
+          format: psych-ds
+          uri: results/
+      bounds: 960 1750 50 50
+    Render:
+      type: ServiceTask
+      name: Render reporting artifacts
+      implementation: python://behaverse_report.render@1.0
+      checklist: |-
+        - [x] CONSORT participant flow exported from the Figure view
+        - [x] SPIRIT schedule exported from the Gantt view
+        - [x] CHART items recorded from the run provenance
+      onset: T0+48min
+      duration: 2min
+      bounds: 380 1990 160 70
+    Debrief:
+      type: Task
+      name: Debrief
+      extensionElements:
+        - type: cognitive:Instruction
+          content: Thank you for taking part. Your completion code follows on the next page.
+      onset: T0+50min
+      duration: 1min
+      bounds: 600 1990 160 70
+    Completed:
+      type: EndEvent
+      name: Completed (n={reached})
+      redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
+      completionCodeType: dynamic
+      bounds: 840 2007 36 36
+    Flow_Enroll_Screening: Enroll -> Screening
+    Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
+    Flow_Eligible:
+      name: eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Randomize_Gateway
+      label: 570 345 60 14
+    Flow_Excluded_Pre:
+      name: not eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Excluded_Pre
+      stroke: "#ac5a54"
+    Flow_Allocate_Speeded:
+      name: speeded
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_Speeded
+      waypoint: 535,435 380,435 380,500
+    Flow_Allocate_SelfPaced:
+      name: self-paced
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_SelfPaced
+      waypoint: 585,435 740,435 740,500
+    Flow_Speeded_Merge:
+      sourceRef: Allocate_Speeded
+      targetRef: Merge_Allocation
+      waypoint: 380,580 380,645 535,645
+    Flow_SelfPaced_Merge:
+      sourceRef: Allocate_SelfPaced
+      targetRef: Merge_Allocation
+      waypoint: 740,580 740,645 585,645
+    Flow_DNS_Speeded:
+      sourceRef: DidNotStart_Speeded
+      targetRef: DidNotStart
+      waypoint: 340,598 340,680 1042,680
+      stroke: "#ac5a54"
+    Flow_DNS_SelfPaced:
+      sourceRef: DidNotStart_SelfPaced
+      targetRef: DidNotStart
+      waypoint: 780,598 780,680 1042,680
+      stroke: "#ac5a54"
+    Flow_Merge_Battery: Merge_Allocation -> Battery
+    Flow_Battery_Discontinued:
+      sourceRef: Battery_Error
+      targetRef: Discontinued
+      stroke: "#ac5a54"
+    Flow_Battery_Analysis: Battery -> Analysis
+    Flow_Analysis_Excluded:
+      sourceRef: Analysis_Error
+      targetRef: Excluded_Analysis
+      stroke: "#ac5a54"
+    Flow_Analysis_Render:
+      sourceRef: Analysis
+      targetRef: Render
+      waypoint: 570,1860 570,1940 460,1940 460,1990
+    Flow_Render_Debrief: Render -> Debrief
+    Flow_Debrief_Completed: Debrief -> Completed
+  artifacts:
+    Group_Enrolment:
+      type: Group
+      categoryValueRef: CV_Enrolment
+      bounds: 160 40 1000 330
+    Group_Allocation:
+      type: Group
+      categoryValueRef: CV_Allocation
+      bounds: 160 380 1000 370
+    Group_Followup:
+      type: Group
+      categoryValueRef: CV_Followup
+      bounds: 160 760 1000 560
+    Group_Analysis:
+      type: Group
+      categoryValueRef: CV_Analysis
+      bounds: 160 1330 1000 620
+    Group_Report:
+      type: Group
+      categoryValueRef: CV_Report
+      bounds: 160 1960 1000 150
+    Assoc_Schema_Trials:
+      associationDirection: One
+      sourceRef: Schema_Trials
+      targetRef: Dataset_Trials
+      waypoint: 1062,965 1010,965
+Category_Enrolment:
+  type: Category
+  categoryValue:
+    CV_Enrolment:
+      value: Enrolment
+Category_Allocation:
+  type: Category
+  categoryValue:
+    CV_Allocation:
+      value: Allocation
+Category_Followup:
+  type: Category
+  categoryValue:
+    CV_Followup:
+      value: Follow-up
+Category_Analysis:
+  type: Category
+  categoryValue:
+    CV_Analysis:
+      value: Analysis
+Category_Report:
+  type: Category
+  categoryValue:
+    CV_Report:
+      value: Report
+state:
+  _meta:
+    prov:
+      - action: created
+        when: "2026-08-01T09:00:00Z"
+        who: Example Study Authors
+        with: studyflow-modeler/26.9.5
+      - action: executed
+        when: "2026-09-01T14:20:00Z"
+        with: studyflow-cli/26.9.5
+        seed: 42
+        run: runs/2026-09-01/example_study
+    reached:
+      Enroll: 96
+      Eligibility_Gateway: 96
+      Randomize_Gateway: 90
+      Allocate_Speeded: 45
+      Allocate_SelfPaced: 45
+      Battery: 88
+      Analysis: 79
+      Completed: 76
+  Excluded_Pre: { count: 6 }
+  DidNotStart: { count: 2 }
+  Discontinued: { count: 9 }
+  Excluded_Analysis: { count: 3 }

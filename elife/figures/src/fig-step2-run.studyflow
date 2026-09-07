@@ -1,0 +1,366 @@
+id: step2_run
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Run_Collaboration:
+  type: Collaboration
+  name: Step 2 - Run
+  documentation: >-
+    Step 2 of the example study: the follow-up phase, a cognitive battery administered one trial at a time
+    through one interface. The runner (top pool) walks the diagram; at every trial it sends an observation to
+    the actor and receives a response. Each actor pool is a family of the cohort. The same battery, unchanged,
+    is administered to whichever pool takes the study.
+  participants:
+    Participant_Runner:
+      name: Runner (Step 2, Run)
+      processRef: Run
+      bounds: 160 40 1420 420
+      isHorizontal: true
+    Participant_Human:
+      name: Human participant
+      extensionElements:
+        - type: cognitive:Actor
+          actorType: human
+      bounds: 300 530 250 190
+      isHorizontal: true
+    Participant_Random:
+      name: Uniform random baseline
+      extensionElements:
+        - type: cognitive:Actor
+          actorType: agent
+          identifier: behaverse://bots/uniform-random@1.0
+      bounds: 580 530 250 190
+      isHorizontal: true
+    Participant_LLM:
+      name: Open-weight language model
+      extensionElements:
+        - type: cognitive:Actor
+          actorType: llm
+          identifier: ollama/llama3.3
+          promptTemplate: |
+            {{disposition}}
+
+            {{stimulus}}
+            Reply with exactly one of {{options}}.
+      bounds: 860 530 250 190
+      isHorizontal: true
+    Participant_VLM:
+      name: Vision-language model
+      extensionElements:
+        - type: cognitive:Actor
+          actorType: llm
+          identifier: claude-opus-4-8
+          promptTemplate: |
+            {{disposition}}
+
+            The screenshot shows the current trial. {{stimulus}}
+            Reply with exactly one of {{options}}.
+      bounds: 1140 530 250 190
+      isHorizontal: true
+  messageFlows:
+    Msg_Obs_Human:
+      name: observation (stimulus, options, timing, frame)
+      sourceRef: Battery
+      targetRef: Participant_Human
+      waypoint: 400,340 400,530
+      label: 240 420 150 40
+    Msg_Resp_Human:
+      name: response, latency
+      sourceRef: Participant_Human
+      targetRef: Battery
+      waypoint: 450,530 450,340
+      label: 460 428 110 14
+    Msg_Obs_Random:
+      sourceRef: Battery
+      targetRef: Participant_Random
+      waypoint: 680,340 680,530
+    Msg_Resp_Random:
+      sourceRef: Participant_Random
+      targetRef: Battery
+      waypoint: 730,530 730,340
+    Msg_Obs_LLM:
+      sourceRef: Battery
+      targetRef: Participant_LLM
+      waypoint: 960,340 960,530
+    Msg_Resp_LLM:
+      sourceRef: Participant_LLM
+      targetRef: Battery
+      waypoint: 1010,530 1010,340
+    Msg_Obs_VLM:
+      sourceRef: Battery
+      targetRef: Participant_VLM
+      waypoint: 1240,340 1240,530
+    Msg_Resp_VLM:
+      sourceRef: Participant_VLM
+      targetRef: Battery
+      waypoint: 1290,530 1290,340
+Run:
+  type: Process
+  name: Step 2 - Run
+  extensionElements:
+    - type: studyflow:Study
+      runtime: browser
+  seed: 42
+  properties:
+    P_arm:
+      name: arm
+  flowElements:
+    Battery_Start:
+      type: StartEvent
+      name: Begin battery
+      bounds: 200 192 36 36
+    Battery:
+      type: SubProcess
+      name: Cognitive battery (one trial at a time)
+      documentation: >-
+        Six Behaverse tasks and the jsPsych Flanker, each declaring its instrument and parameters. The
+        subprocess declares a `failed_trials` counter in its scope; a task whose failed-trial rate exceeds 20%
+        raises its boundary error, which ends the subprocess, and the subprocess's own boundary error routes
+        to the counted Discontinued exit.
+      properties:
+        P_failed_trials:
+          name: failed_trials
+          value: "0"
+      onset: T0+6min
+      duration: 30min
+      bounds: 280 80 1180 260
+      isExpanded: true
+      flowElements:
+        Sub_Start:
+          type: StartEvent
+          bounds: 300 162 36 36
+        Task_NBack:
+          type: Task
+          name: Working memory (N-Back)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: NB
+              configurations:
+                NValue: 2
+                TrialsPerBlock: 40
+                InterStimulusInterval: 1.5
+          onset: T0+6min
+          duration: 5min
+          bounds: 360 140 110 80
+        Failed_NBack:
+          type: BoundaryEvent
+          name: "> 20% failed"
+          eventDefinitions:
+            Err_NBack: { type: ErrorEventDefinition }
+          attachedToRef: Task_NBack
+          bounds: 434 202 36 36
+        Task_DigitSpan:
+          type: Task
+          name: Verbal span (Digit Span)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: DS
+          onset: T0+11min
+          duration: 4min
+          bounds: 490 140 110 80
+        Failed_DigitSpan:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_DS: { type: ErrorEventDefinition }
+          attachedToRef: Task_DigitSpan
+          bounds: 564 202 36 36
+        Task_SART:
+          type: Task
+          name: Sustained attention (SART)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: SART
+          onset: T0+15min
+          duration: 4min
+          bounds: 620 140 110 80
+        Failed_SART:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_SART: { type: ErrorEventDefinition }
+          attachedToRef: Task_SART
+          bounds: 694 202 36 36
+        Task_SRT:
+          type: Task
+          name: Processing speed (Serial RT)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: SRT
+          onset: T0+19min
+          duration: 4min
+          bounds: 750 140 110 80
+        Failed_SRT:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_SRT: { type: ErrorEventDefinition }
+          attachedToRef: Task_SRT
+          bounds: 824 202 36 36
+        Task_Matrices:
+          type: Task
+          name: Reasoning (Belval Matrices)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: BM
+          onset: T0+23min
+          duration: 5min
+          bounds: 880 140 110 80
+        Failed_Matrices:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_BM: { type: ErrorEventDefinition }
+          attachedToRef: Task_Matrices
+          bounds: 954 202 36 36
+        Task_CardSorting:
+          type: Task
+          name: Set-shifting (Belval Card Sorting)
+          extensionElements:
+            - type: cognitive:BehaverseTask
+              behaverseScene: BCS
+          onset: T0+28min
+          duration: 4min
+          bounds: 1010 140 110 80
+        Failed_CardSorting:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_BCS: { type: ErrorEventDefinition }
+          attachedToRef: Task_CardSorting
+          bounds: 1084 202 36 36
+        Task_Flanker:
+          type: Task
+          name: Attention (Flanker, jsPsych)
+          extensionElements:
+            - type: cognitive:CognitiveTask
+              instrument: jspsych
+              construct: selective attention
+              implementation: https://github.com/jspsych/jspsych-contrib@v0.4.0#flanker
+          onset: T0+32min
+          duration: 4min
+          bounds: 1140 140 110 80
+        Failed_Flanker:
+          type: BoundaryEvent
+          eventDefinitions:
+            Err_Flanker: { type: ErrorEventDefinition }
+          attachedToRef: Task_Flanker
+          bounds: 1214 202 36 36
+        Sub_End:
+          type: EndEvent
+          name: Battery complete
+          bounds: 1400 162 36 36
+        ErrEnd_Failed:
+          type: EndEvent
+          name: Failed-trial rate above 20%
+          eventDefinitions:
+            Err_Battery: { type: ErrorEventDefinition }
+          bounds: 1400 244 36 36
+          fill: "#f1d0cd"
+          stroke: "#ac5a54"
+        F_Start_NBack: Sub_Start -> Task_NBack
+        F_1: Task_NBack -> Task_DigitSpan
+        F_2: Task_DigitSpan -> Task_SART
+        F_3: Task_SART -> Task_SRT
+        F_4: Task_SRT -> Task_Matrices
+        F_5: Task_Matrices -> Task_CardSorting
+        F_6: Task_CardSorting -> Task_Flanker
+        F_End: Task_Flanker -> Sub_End
+        F_Failed_NBack:
+          sourceRef: Failed_NBack
+          targetRef: ErrEnd_Failed
+          waypoint: 452,238 452,262 1400,262
+          stroke: "#ac5a54"
+        F_Failed_DS:
+          sourceRef: Failed_DigitSpan
+          targetRef: ErrEnd_Failed
+          waypoint: 582,238 582,262 1400,262
+          stroke: "#ac5a54"
+        F_Failed_SART:
+          sourceRef: Failed_SART
+          targetRef: ErrEnd_Failed
+          waypoint: 712,238 712,262 1400,262
+          stroke: "#ac5a54"
+        F_Failed_SRT:
+          sourceRef: Failed_SRT
+          targetRef: ErrEnd_Failed
+          waypoint: 842,238 842,262 1400,262
+          stroke: "#ac5a54"
+        F_Failed_BM:
+          sourceRef: Failed_Matrices
+          targetRef: ErrEnd_Failed
+          waypoint: 972,238 972,262 1400,262
+          stroke: "#ac5a54"
+        F_Failed_BCS:
+          sourceRef: Failed_CardSorting
+          targetRef: ErrEnd_Failed
+          waypoint: 1102,238 1102,262 1400,262
+          stroke: "#ac5a54"
+        F_Failed_Flanker:
+          sourceRef: Failed_Flanker
+          targetRef: ErrEnd_Failed
+          waypoint: 1232,238 1232,262 1400,262
+          stroke: "#ac5a54"
+      dataOutputAssociations:
+        Out_Trials:
+          targetRef: Dataset_Trials
+          waypoint: 1350,340 1350,365
+    Battery_Error:
+      type: BoundaryEvent
+      name: battery error
+      eventDefinitions:
+        Err_BatteryExit: { type: ErrorEventDefinition }
+      attachedToRef: Battery
+      bounds: 1400 322 36 36
+    Discontinued:
+      type: EndEvent
+      name: Discontinued intervention (n={count})
+      properties:
+        P_count_disc:
+          name: count
+          value: "0"
+      eventDefinitions:
+        Err_Discontinued: { type: ErrorEventDefinition }
+      bounds: 1510 322 36 36
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+    Run_End:
+      type: EndEvent
+      name: Ready for analysis
+      bounds: 1510 192 36 36
+    Dataset_Trials:
+      type: DataStoreReference
+      name: Trials (BDM)
+      extensionElements:
+        - type: studyflow:Dataset
+          format: bdm
+          bdmDataLevel: trials
+          uri: data/trials/
+      bounds: 1325 365 50 50
+    Schema_Trials:
+      type: DataObjectReference
+      name: Trial schema (CSVW)
+      extensionElements:
+        - type: studyflow:Schema
+          format: csvw
+          body: |
+            columns:
+              - name: subject_id
+              - name: task
+              - name: trial_index
+              - name: stimulus
+              - name: response
+              - name: response_time
+                datatype: number
+              - name: correct
+                datatype: boolean
+              - name: failure_mode
+      bounds: 1250 365 36 50
+    Flow_Start_Battery: Battery_Start -> Battery
+    Flow_Battery_End: Battery -> Run_End
+    Flow_Error_Discontinued:
+      sourceRef: Battery_Error
+      targetRef: Discontinued
+      stroke: "#ac5a54"
+  artifacts:
+    Assoc_Schema_Trials:
+      associationDirection: One
+      sourceRef: Schema_Trials
+      targetRef: Dataset_Trials
+      waypoint: 1286,390 1325,390
+state:
+  Discontinued: { count: 0 }
