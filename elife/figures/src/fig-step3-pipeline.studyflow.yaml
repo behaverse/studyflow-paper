@@ -12,12 +12,12 @@ Pipeline:
     validation before any data moves.
   extensionElements:
     - type: studyflow:Study
+      seed: 42
       runtime: local
       dependencies:
         - behaverse-analysis==1.0
         - pandas>=2.0
         - scikit-learn>=1.5
-  seed: 42
   flowElements:
     P_Start:
       type: StartEvent
@@ -128,9 +128,8 @@ Pipeline:
       type: DataStoreReference
       name: Trials (BDM)
       extensionElements:
-        - type: studyflow:Dataset
-          format: bdm
-          bdmDataLevel: trials
+        - type: behaverse:BDMDataset
+          dataLevel: trials
           uri: data/trials/
       bounds: 265 60 50 50
       label: 220 30 140 27

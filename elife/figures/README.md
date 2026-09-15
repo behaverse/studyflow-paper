@@ -23,9 +23,9 @@ To read a figure back: open the `.png` directly in the modeler (`Open File…`),
 
 ---
 
-## Files on disk (2026-09-07, redrawn)
+## Files on disk (2026-09-15, redrawn)
 
-Figure files for the example study are named by results step (`fig-step1-design`, `fig-step2-run`, ...) to match the Step 1 to Step 4 structure of `paper-v3.qmd`. All `fig-*.studyflow.png` files except `figS1` and `figS3` were redrawn from the hand-written sources in [`src/`](src/) against schema version 26.0902 and rendered with `src/render.sh`; `fig-views` is a composite (Study, Gantt, Checklist, Provenance, Figure views) whose embedded studyflow is the combined study.
+Figure files for the example study are named by results step (`fig-step1-design`, `fig-step2-run`, ...) to match the Step 1 to Step 4 structure of `paper-v3.qmd`. All `fig-*.studyflow.png` files and `figS1` were redrawn from the hand-written `.studyflow.yaml` sources in [`src/`](src/) against the modeler's 26.9.22 schemas (skill vocabularies: `behaverse:Task`, `studyflow:Actor`, `agentic:Prompt`, `behaverse:BDMDataset`) and rendered with `src/render.sh`; `fig-elements` is the modeler's current kitchen sink; `fig-views` is a composite (Study, Gantt, Checklist, Provenance, Figure views) whose embedded studyflow is the combined study.
 
 One file per cross-reference: the filename **is** the `@fig-…` label the manuscript cites. The embedded diagram's own name is quoted below because it is what identifies the figure — not the filename, which is derived from it.
 
@@ -35,20 +35,20 @@ One file per cross-reference: the filename **is** the `@fig-…` label the manus
 | `fig-elements.studyflow.png` | `@fig-elements` (cited in text as `@fig-elements-full`) | Studyflow element catalog (kitchen sink) | 5232x8008 | yes | - | 754 KB |
 | `fig-consort.studyflow.png` | `@fig-consort` | CONSORT participant flow | 4032x5352 | yes | - | 499 KB |
 | `fig-step1-design.studyflow.png` | `@fig-step1-design` | Step 1 — Design | 4032x3072 | yes | - | 282 KB |
-| `fig-step2-nback.studyflow.png` | `@fig-step2-nback` (panel b) | N-back trial | 4672x2252 | yes | - | 381 KB |
+| `fig-step2-nback.studyflow.png` | `@fig-step2-nback` (panel b) | N-back trial | 4672x2432 | yes | - | 381 KB |
 | `fig-step2-nback-classic.png` | `@fig-step2-nback` (panel a) | *(raster slide, no source)* | 584x220 | — | — | 13 KB |
 | `fig-step2-run.studyflow.png` | `@fig-step2-run` | Step 2 — Run | 5712x2752 | yes | - | 436 KB |
 | `fig-step3-pipeline.studyflow.png` | `@fig-step3-pipeline` | Analysis pipeline | 6568x1436 | yes | - | 316 KB |
-| `fig-step3-analyze.studyflow.png` | `@fig-step3-analyze` | Step 3 — Analyze | 6856x1900 | yes | - | 381 KB |
-| `fig-step4-report.studyflow.png` | `@fig-step4-report` | Step 4 — Report | 2380x1544 | yes | - | 104 KB |
-| `fig-views.studyflow.png` | `@fig-views` | study.studyflow | 5879x3143 | yes | - | 1786 KB |
-| `fig-combined.studyflow.png` | `@fig-combined` | Example study (human and artificial cohorts) | 4032x8312 | yes | - | 1022 KB |
+| `fig-step3-analyze.studyflow.png` | `@fig-step3-analyze` | Step 3 — Analyze | 6848x1900 | yes | - | 381 KB |
+| `fig-step4-report.studyflow.png` | `@fig-step4-report` | Step 4 — Report | 2384x1544 | yes | - | 104 KB |
+| `fig-views.studyflow.png` | `@fig-views` | Example study (human and artificial cohorts) | 5833x3138 | yes | - | 1786 KB |
+| `fig-combined.studyflow.png` | `@fig-combined` | Example study (human and artificial cohorts) | 4032x8592 | yes | - | 1022 KB |
 
 **Not yet cited by the caption list**, left under their old names rather than given invented labels:
 
 | File | Embedded diagram | Pixels | `studyflow` | `mxfile` |
 |---|---|---|---|---|
-| `figS1-multimodal.studyflow.png` | Multimodal preprocessing and training | 4252×2116 | yes | yes |
+| `figS1-multimodal.studyflow.png` | Multimodal preprocessing and training | 4008×2052 | yes | - |
 | `figS3-runner.studyflow.png` | Runner walkthrough | 1936×6224 | yes | yes |
 | `rt_analysis.studyflow.png` | RT Analysis | 4252×2227 | yes | yes |
 | `fig1_gap_panelA.png`, `fig1_gap_panelB.png` | *(hand-written SVG sketches, superseded by `fig-overview.png`)* | — | — | — |

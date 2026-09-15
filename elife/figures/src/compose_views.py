@@ -5,7 +5,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 study, gantt, check, prov, figure, out = sys.argv[1:7]
 H = 3000; GAP = 90; PAD = 60; LABEL_H = 110
-font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 84)
+font = next(ImageFont.truetype(p, 84) for p in ('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', '/System/Library/Fonts/Supplemental/Arial Bold.ttf') if __import__('os').path.exists(p))
 def fit_h(path, h):
     im = Image.open(path).convert('RGB'); return im.resize((round(im.width * h / im.height), h), Image.LANCZOS)
 def fit_w(path, w):

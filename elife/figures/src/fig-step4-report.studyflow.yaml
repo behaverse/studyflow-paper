@@ -11,8 +11,8 @@ Report:
     deviation report are views of the same file.
   extensionElements:
     - type: studyflow:Study
+      seed: 42
       runtime: browser
-  seed: 42
   flowElements:
     R_Start:
       type: StartEvent

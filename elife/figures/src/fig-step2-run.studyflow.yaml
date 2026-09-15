@@ -6,8 +6,8 @@ Run_Collaboration:
   name: Step 2 - Run
   documentation: >-
     Step 2 of the example study: the follow-up phase, a cognitive battery administered one trial at a time
-    through one interface. The runner (top pool) walks the diagram; at every trial it sends an observation to
-    the actor and receives a response. Each actor pool is a family of the cohort. The same battery, unchanged,
+    through one interface. The runner (top pool) walks the diagram; at every trial it sends a trial to the
+    actor and receives a response. Each actor pool is a family of the cohort. The same battery, unchanged,
     is administered to whichever pool takes the study.
   participants:
     Participant_Runner:
@@ -18,42 +18,32 @@ Run_Collaboration:
     Participant_Human:
       name: Human participant
       extensionElements:
-        - type: cognitive:Actor
+        - type: studyflow:Actor
           actorType: human
       bounds: 300 530 250 190
       isHorizontal: true
     Participant_Random:
       name: Uniform random baseline
       extensionElements:
-        - type: cognitive:Actor
-          actorType: agent
-          identifier: behaverse://bots/uniform-random@1.0
+        - type: studyflow:Actor
+          actorType: software
+          implementation: random
       bounds: 580 530 250 190
       isHorizontal: true
     Participant_LLM:
       name: Open-weight language model
       extensionElements:
-        - type: cognitive:Actor
+        - type: studyflow:Actor
           actorType: llm
-          identifier: ollama/llama3.3
-          promptTemplate: |
-            {{disposition}}
-
-            {{stimulus}}
-            Reply with exactly one of {{options}}.
+          implementation: ollama://llama3.3
       bounds: 860 530 250 190
       isHorizontal: true
     Participant_VLM:
       name: Vision-language model
       extensionElements:
-        - type: cognitive:Actor
+        - type: studyflow:Actor
           actorType: llm
-          identifier: claude-opus-4-8
-          promptTemplate: |
-            {{disposition}}
-
-            The screenshot shows the current trial. {{stimulus}}
-            Reply with exactly one of {{options}}.
+          implementation: claude://claude-opus-4-8
       bounds: 1140 530 250 190
       isHorizontal: true
   messageFlows:
@@ -61,45 +51,65 @@ Run_Collaboration:
       name: observation (stimulus, options, timing, frame)
       sourceRef: Battery
       targetRef: Participant_Human
+      messageRef: Trial
       waypoint: 400,340 400,530
       label: 240 420 150 40
     Msg_Resp_Human:
       name: response, latency
       sourceRef: Participant_Human
       targetRef: Battery
+      messageRef: Response
       waypoint: 450,530 450,340
       label: 460 428 110 14
     Msg_Obs_Random:
       sourceRef: Battery
       targetRef: Participant_Random
+      messageRef: Trial
       waypoint: 680,340 680,530
     Msg_Resp_Random:
       sourceRef: Participant_Random
       targetRef: Battery
+      messageRef: Response
       waypoint: 730,530 730,340
     Msg_Obs_LLM:
       sourceRef: Battery
       targetRef: Participant_LLM
+      messageRef: Trial
       waypoint: 960,340 960,530
     Msg_Resp_LLM:
       sourceRef: Participant_LLM
       targetRef: Battery
+      messageRef: Response
       waypoint: 1010,530 1010,340
     Msg_Obs_VLM:
       sourceRef: Battery
       targetRef: Participant_VLM
+      messageRef: Trial
       waypoint: 1240,340 1240,530
     Msg_Resp_VLM:
       sourceRef: Participant_VLM
       targetRef: Battery
+      messageRef: Response
       waypoint: 1290,530 1290,340
+Trial:
+  type: Message
+  itemRef: Trial_Item
+Response:
+  type: Message
+  itemRef: Response_Item
+Trial_Item:
+  type: ItemDefinition
+  structureRef: behaverse:Trial
+Response_Item:
+  type: ItemDefinition
+  structureRef: behaverse:Response
 Run:
   type: Process
   name: Step 2 - Run
   extensionElements:
     - type: studyflow:Study
+      seed: 42
       runtime: browser
-  seed: 42
   properties:
     P_arm:
       name: arm
@@ -129,18 +139,39 @@ Run:
           type: StartEvent
           bounds: 300 162 36 36
         Task_NBack:
-          type: Task
+          type: ChoreographyTask
           name: Working memory (N-Back)
           extensionElements:
-            - type: cognitive:BehaverseTask
-              behaverseScene: NB
-              configurations:
-                NValue: 2
-                TrialsPerBlock: 40
-                InterStimulusInterval: 1.5
+            - type: behaverse:Task
+              scene: NB
           onset: T0+6min
           duration: 5min
+          dataInputAssociations:
+            In_Params_NBack:
+              sourceRef: [Params_NBack]
+              waypoint: 390,285 390,220
           bounds: 360 140 110 80
+        Params_NBack:
+          type: DataObjectReference
+          name: N-back parameters
+          extensionElements:
+            - type: studyflow:Parameters
+              values:
+                Blocks:
+                  NBack_2:
+                    Name: NBack_2
+                    Inherits: Default
+                    Parameters:
+                      NValue: 2
+                      StreamSize: 40
+                      InterStimulusInterval: 1.5
+                Timelines:
+                  NBack_2:
+                    Name: NBack_2
+                    blocks:
+                      - name: NBack_2
+          bounds: 372 285 36 50
+          label: 290 298 80 27
         Failed_NBack:
           type: BoundaryEvent
           name: "> 20% failed"
@@ -149,11 +180,11 @@ Run:
           attachedToRef: Task_NBack
           bounds: 434 202 36 36
         Task_DigitSpan:
-          type: Task
+          type: ChoreographyTask
           name: Verbal span (Digit Span)
           extensionElements:
-            - type: cognitive:BehaverseTask
-              behaverseScene: DS
+            - type: behaverse:Task
+              scene: DS
           onset: T0+11min
           duration: 4min
           bounds: 490 140 110 80
@@ -164,11 +195,11 @@ Run:
           attachedToRef: Task_DigitSpan
           bounds: 564 202 36 36
         Task_SART:
-          type: Task
+          type: ChoreographyTask
           name: Sustained attention (SART)
           extensionElements:
-            - type: cognitive:BehaverseTask
-              behaverseScene: SART
+            - type: behaverse:Task
+              scene: SART
           onset: T0+15min
           duration: 4min
           bounds: 620 140 110 80
@@ -179,11 +210,11 @@ Run:
           attachedToRef: Task_SART
           bounds: 694 202 36 36
         Task_SRT:
-          type: Task
+          type: ChoreographyTask
           name: Processing speed (Serial RT)
           extensionElements:
-            - type: cognitive:BehaverseTask
-              behaverseScene: SRT
+            - type: behaverse:Task
+              scene: SRT
           onset: T0+19min
           duration: 4min
           bounds: 750 140 110 80
@@ -194,11 +225,11 @@ Run:
           attachedToRef: Task_SRT
           bounds: 824 202 36 36
         Task_Matrices:
-          type: Task
+          type: ChoreographyTask
           name: Reasoning (Belval Matrices)
           extensionElements:
-            - type: cognitive:BehaverseTask
-              behaverseScene: BM
+            - type: behaverse:Task
+              scene: BM
           onset: T0+23min
           duration: 5min
           bounds: 880 140 110 80
@@ -209,11 +240,11 @@ Run:
           attachedToRef: Task_Matrices
           bounds: 954 202 36 36
         Task_CardSorting:
-          type: Task
+          type: ChoreographyTask
           name: Set-shifting (Belval Card Sorting)
           extensionElements:
-            - type: cognitive:BehaverseTask
-              behaverseScene: BCS
+            - type: behaverse:Task
+              scene: BCS
           onset: T0+28min
           duration: 4min
           bounds: 1010 140 110 80
@@ -224,7 +255,7 @@ Run:
           attachedToRef: Task_CardSorting
           bounds: 1084 202 36 36
         Task_Flanker:
-          type: Task
+          type: ChoreographyTask
           name: Attention (Flanker, jsPsych)
           extensionElements:
             - type: cognitive:CognitiveTask
@@ -295,10 +326,25 @@ Run:
           targetRef: ErrEnd_Failed
           waypoint: 1232,238 1232,262 1400,262
           stroke: "#ac5a54"
+      dataInputAssociations:
+        In_Prompt:
+          sourceRef: [Prompt_Trait]
+          waypoint: 1118,375 1118,340
       dataOutputAssociations:
         Out_Trials:
           targetRef: Dataset_Trials
           waypoint: 1350,340 1350,365
+    Prompt_Trait:
+      type: DataObjectReference
+      name: Trait prompt
+      extensionElements:
+        - type: agentic:Prompt
+          template: |
+            {disposition}
+
+            {stimulus}
+            Reply with exactly one of {options}.
+      bounds: 1100 375 36 50
     Battery_Error:
       type: BoundaryEvent
       name: battery error
@@ -326,9 +372,8 @@ Run:
       type: DataStoreReference
       name: Trials (BDM)
       extensionElements:
-        - type: studyflow:Dataset
-          format: bdm
-          bdmDataLevel: trials
+        - type: behaverse:BDMDataset
+          dataLevel: trials
           uri: data/trials/
       bounds: 1325 365 50 50
     Schema_Trials:

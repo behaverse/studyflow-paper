@@ -1,19 +1,18 @@
 import { chromium } from '@playwright/test';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { spawn, execFileSync } from 'node:child_process';
-// usage: node render.mjs <in.studyflow|.bpmn|.png> <out.studyflow.png> [scale]
+// usage: node views.mjs <in.studyflow.yaml> <outDir>
 const origin = 'http://127.0.0.1:4175';
 const [input, outDir] = process.argv.slice(2);
 const cli = 'packages/cli/dist/studyflow.mjs';
-const xmlPath = '/tmp/render_input.bpmn';
-execFileSync('node', [cli, 'convert', input, xmlPath], { stdio: 'inherit' });
 async function up(){ try { return (await fetch(origin+'/app')).ok } catch { return false } }
 let child;
 if (!(await up())) {
   child = spawn('npm',['run','dev','-w','@behaverse/studyflow-modeler','--','--host','127.0.0.1','--port','4175'],{stdio:'ignore'});
   const t=Date.now()+120000; while(Date.now()<t && !(await up())) await new Promise(r=>setTimeout(r,500));
 }
-const browser = await chromium.launch();
+// Playwright's own Chromium when installed, else this machine's Chrome.
+const browser = await chromium.launch().catch(() => chromium.launch({ channel: 'chrome' }));
 const ctx = await browser.newContext({acceptDownloads:true, viewport:{width:1400,height:1000}, deviceScaleFactor: 3});
 const page = await ctx.newPage();
 page.on('console', m => { if (['error','warning'].includes(m.type())) console.log('[console.'+m.type()+']', m.text().slice(0,200)); });
@@ -32,7 +31,7 @@ await page.route(/api\.iconify\.design\/([^/]+)\/([^/.]+)\.svg/, async (route) =
 await page.addInitScript(() => { for (const k of ['showOpenFilePicker','showSaveFilePicker']) Object.defineProperty(window,k,{configurable:true,value:undefined}); });
 await page.goto(origin+'/app');
 await page.getByTestId('modeler-ready').waitFor({state:'attached',timeout:60000});
-await page.getByTestId('open-file-input').setInputFiles({name:'x.bpmn',mimeType:'application/xml',buffer:readFileSync(xmlPath)});
+await page.getByTestId('open-file-input').setInputFiles({name:'figure.studyflow.yaml',mimeType:'text/yaml',buffer:readFileSync(input)});
 await page.locator('.sf-shape').first().waitFor({timeout:30000});
 await page.waitForTimeout(1500);
 

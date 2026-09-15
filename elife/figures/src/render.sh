@@ -1,5 +1,5 @@
 #!/bin/sh
-# Render one manuscript figure from its .studyflow source.
+# Render one manuscript figure from its .studyflow.yaml source.
 #   MODELER=/path/to/studyflow-modeler ./render.sh fig-step1-design [scale]
 # Needs the modeler repo with `npm ci` done, `npx playwright install chromium`,
 # and `npm run build -w @behaverse/studyflow-cli`. Copies render.mjs next to the
@@ -11,6 +11,7 @@ SRC=$(cd "$(dirname "$0")" && pwd)
 MODELER=${MODELER:?set MODELER to the studyflow-modeler checkout}
 OUT=${OUT:-$SRC/..}
 mkdir -p /tmp/studyflow-figs
-python3 "$SRC/layout.py" "$SRC/$1.studyflow" "/tmp/studyflow-figs/$1.studyflow"
+python3 "$SRC/layout.py" "$SRC/$1.studyflow.yaml" "/tmp/studyflow-figs/$1.studyflow.yaml"
 cp "$SRC/render.mjs" "$SRC/views.mjs" "$MODELER/"
-cd "$MODELER" && node render.mjs "/tmp/studyflow-figs/$1.studyflow" "$OUT/$1.studyflow.png" "${2:-4}"
+trap 'rm -f "$MODELER/render.mjs" "$MODELER/views.mjs"' EXIT
+cd "$MODELER" && node render.mjs "/tmp/studyflow-figs/$1.studyflow.yaml" "$OUT/$1.studyflow.png" "${2:-4}"

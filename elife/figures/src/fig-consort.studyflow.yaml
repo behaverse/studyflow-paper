@@ -11,6 +11,7 @@ Example_Study:
     the runner wrote as the cohort ran.
   extensionElements:
     - type: studyflow:Study
+      seed: 42
       runtime: browser
       version: "1.0"
       registration: OSF-XXXXX
@@ -20,7 +21,6 @@ Example_Study:
       dependencies:
         - behaverse-analysis==1.0
         - scikit-learn>=1.5
-  seed: 42
   properties:
     P_arm:
       name: arm

@@ -20,13 +20,13 @@ Design:
     subjects leave, and the label cites it as `n={count}`.
   extensionElements:
     - type: studyflow:Study
+      seed: 42
       runtime: browser
       version: "1.0"
       registration: OSF-XXXXX
       ethicsApproval: ERP-2026-042
       authors:
         - Example Study Authors
-  seed: 42
   properties:
     P_arm:
       name: arm
