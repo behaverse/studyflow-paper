@@ -5,8 +5,8 @@ Example_Study:
   type: Process
   name: Example study (cognitive benchmark, human and artificial cohorts)
   documentation: >-
-    The complete example study as one Studyflow file, after execution. Read top to bottom, it is Steps 1 to 4
-    in order, laid out in groups named for the CONSORT phases. The battery and the analysis are expanded
+    The complete example study as one Studyflow file, after execution. Read row by row, left to right, it is
+    Steps 1 to 4 in order, laid out in groups named for the CONSORT phases. The battery and the analysis are expanded
     subprocesses. Every exit is a boundary error event terminating at an error end event that declares a
     `count` property; the labels cite `{count}` and `{reached}`, which the runner filled in as the cohort ran,
     so the figure is the CONSORT participant flow of the study as executed.
@@ -31,8 +31,8 @@ Example_Study:
       name: Enrolled and consented (n={reached})
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
       onset: T0
-      bounds: 542 82 36 36
-      label: 590 88 150 27
+      bounds: 200 112 36 36
+      label: 168 152 100 27
     Screening:
       type: Task
       name: Screening
@@ -46,7 +46,7 @@ Example_Study:
         - [x] Exclusion criteria checked
       onset: T0
       duration: 5min
-      bounds: 480 160 160 80
+      bounds: 290 95 150 70
     Eligibility_Gateway:
       type: ExclusiveGateway
       name: Assessed for eligibility (n={reached})
@@ -58,9 +58,9 @@ Example_Study:
           exclusionCriteria:
             - Prior exposure to the battery
             - Failed comprehension check at screening
-      bounds: 535 280 50 50
+      bounds: 510 105 50 50
       isMarkerVisible: true
-      label: 370 291 150 27
+      label: 440 170 90 40
     Excluded_Pre:
       type: EndEvent
       name: Excluded (n={count})
@@ -68,7 +68,7 @@ Example_Study:
         P_count_pre: { name: count, value: "0" }
       eventDefinitions:
         Err_ExcludedPre: { type: ErrorEventDefinition }
-      bounds: 1042 287 36 36
+      bounds: 517 250 36 36
       fill: "#f1d0cd"
       stroke: "#ac5a54"
     Randomize_Gateway:
@@ -79,9 +79,9 @@ Example_Study:
           algorithm: block
           allocationRatio: "1:1"
           blockSize: 4
-      bounds: 535 410 50 50
+      bounds: 1030 105 50 50
       isMarkerVisible: true
-      label: 500 468 120 14
+      label: 1086 123 110 14
     Allocate_Speeded:
       type: Task
       name: Allocated to speeded path (n={reached})
@@ -90,15 +90,15 @@ Example_Study:
           content: You will have 3 seconds to answer each trial.
       onset: T0+5min
       duration: 1min
-      bounds: 300 500 160 80
+      bounds: 850 215 150 70
     DidNotStart_Speeded:
       type: BoundaryEvent
       name: Did not receive allocated intervention
       eventDefinitions:
         Err_DNS_Speeded: { type: ErrorEventDefinition }
       attachedToRef: Allocate_Speeded
-      bounds: 322 562 36 36
-      label: 215 602 130 27
+      bounds: 862 267 36 36
+      label: 796 305 80 54
     Allocate_SelfPaced:
       type: Task
       name: Allocated to self-paced path (n={reached})
@@ -107,18 +107,18 @@ Example_Study:
           content: Take as long as you need to answer each trial.
       onset: T0+5min
       duration: 1min
-      bounds: 660 500 160 80
+      bounds: 1110 215 150 70
     DidNotStart_SelfPaced:
       type: BoundaryEvent
       name: Did not receive allocated intervention
       eventDefinitions:
         Err_DNS_SelfPaced: { type: ErrorEventDefinition }
       attachedToRef: Allocate_SelfPaced
-      bounds: 762 562 36 36
-      label: 775 602 130 27
+      bounds: 1212 267 36 36
+      label: 1236 305 80 54
     Merge_Allocation:
       type: ExclusiveGateway
-      bounds: 535 620 50 50
+      bounds: 1030 300 50 50
     DidNotStart:
       type: EndEvent
       name: Did not receive allocated intervention (n={count})
@@ -126,9 +126,10 @@ Example_Study:
         P_count_dns: { name: count, value: "0" }
       eventDefinitions:
         Err_DidNotStart: { type: ErrorEventDefinition }
-      bounds: 1042 662 36 36
+      bounds: 1262 372 36 36
       fill: "#f1d0cd"
       stroke: "#ac5a54"
+      label: 1106 398 150 27
     Battery:
       type: SubProcess
       name: Cognitive battery, one trial at a time (n={reached})
@@ -140,12 +141,12 @@ Example_Study:
         P_failed_trials: { name: failed_trials, value: "0" }
       onset: T0+6min
       duration: 30min
-      bounds: 240 790 660 510
+      bounds: 180 540 590 445
       isExpanded: true
       flowElements:
         Sub_Start:
           type: StartEvent
-          bounds: 262 857 36 36
+          bounds: 196 627 36 36
         Task_NBack:
           type: ChoreographyTask
           name: Working memory (N-Back)
@@ -157,37 +158,16 @@ Example_Study:
           dataInputAssociations:
             In_Params_NBack:
               sourceRef: [Params_NBack]
-              waypoint: 358,950 358,910
-          bounds: 330 840 120 70
-        Params_NBack:
-          type: DataObjectReference
-          name: N-back parameters
-          extensionElements:
-            - type: studyflow:Parameters
-              values:
-                Blocks:
-                  NBack_2:
-                    Name: NBack_2
-                    Inherits: Default
-                    Parameters:
-                      NValue: 2
-                      StreamSize: 40
-                      InterStimulusInterval: 1.5
-                Timelines:
-                  NBack_2:
-                    Name: NBack_2
-                    blocks:
-                      - name: NBack_2
-          bounds: 340 950 36 50
-          label: 246 962 90 27
+              waypoint: 306,520 306,600
+          bounds: 248 600 115 90
         Failed_NBack:
           type: BoundaryEvent
           name: "> 20% failed"
           eventDefinitions:
             Err_NBack: { type: ErrorEventDefinition }
           attachedToRef: Task_NBack
-          bounds: 414 892 36 36
-          label: 380 932 100 84
+          bounds: 333 672 36 36
+          label: 372 712 80 14
         Task_DigitSpan:
           type: ChoreographyTask
           name: Verbal span (Digit Span)
@@ -196,13 +176,13 @@ Example_Study:
               scene: DS
           onset: T0+11min
           duration: 4min
-          bounds: 470 840 120 70
+          bounds: 381 600 115 90
         Failed_DigitSpan:
           type: BoundaryEvent
           eventDefinitions:
             Err_DS: { type: ErrorEventDefinition }
           attachedToRef: Task_DigitSpan
-          bounds: 554 892 36 36
+          bounds: 466 672 36 36
         Task_SART:
           type: ChoreographyTask
           name: Sustained attention (SART)
@@ -211,13 +191,13 @@ Example_Study:
               scene: SART
           onset: T0+15min
           duration: 4min
-          bounds: 610 840 120 70
+          bounds: 514 600 115 90
         Failed_SART:
           type: BoundaryEvent
           eventDefinitions:
             Err_SART: { type: ErrorEventDefinition }
           attachedToRef: Task_SART
-          bounds: 694 892 36 36
+          bounds: 599 672 36 36
         Task_SRT:
           type: ChoreographyTask
           name: Processing speed (Serial RT)
@@ -226,13 +206,13 @@ Example_Study:
               scene: SRT
           onset: T0+19min
           duration: 4min
-          bounds: 750 840 120 70
+          bounds: 647 600 115 90
         Failed_SRT:
           type: BoundaryEvent
           eventDefinitions:
             Err_SRT: { type: ErrorEventDefinition }
           attachedToRef: Task_SRT
-          bounds: 834 892 36 36
+          bounds: 732 672 36 36
         Task_Matrices:
           type: ChoreographyTask
           name: Reasoning (Belval Matrices)
@@ -241,13 +221,13 @@ Example_Study:
               scene: BM
           onset: T0+23min
           duration: 5min
-          bounds: 750 1070 120 70
+          bounds: 647 780 115 90
         Failed_Matrices:
           type: BoundaryEvent
           eventDefinitions:
             Err_BM: { type: ErrorEventDefinition }
           attachedToRef: Task_Matrices
-          bounds: 834 1122 36 36
+          bounds: 732 852 36 36
         Task_CardSorting:
           type: ChoreographyTask
           name: Set-shifting (Belval Card Sorting)
@@ -256,13 +236,13 @@ Example_Study:
               scene: BCS
           onset: T0+28min
           duration: 4min
-          bounds: 610 1070 120 70
+          bounds: 514 780 115 90
         Failed_CardSorting:
           type: BoundaryEvent
           eventDefinitions:
             Err_BCS: { type: ErrorEventDefinition }
           attachedToRef: Task_CardSorting
-          bounds: 694 1122 36 36
+          bounds: 599 852 36 36
         Task_Flanker:
           type: ChoreographyTask
           name: Attention (Flanker, jsPsych)
@@ -273,80 +253,106 @@ Example_Study:
               implementation: https://github.com/jspsych/jspsych-contrib@v0.4.0#flanker
           onset: T0+32min
           duration: 4min
-          bounds: 470 1070 120 70
+          bounds: 381 780 115 90
         Failed_Flanker:
           type: BoundaryEvent
           eventDefinitions:
             Err_Flanker: { type: ErrorEventDefinition }
           attachedToRef: Task_Flanker
-          bounds: 554 1122 36 36
+          bounds: 466 852 36 36
         Sub_End:
           type: EndEvent
           name: Battery complete
-          bounds: 370 1087 36 36
+          bounds: 318 807 36 36
+          label: 288 847 70 27
         ErrEnd_Failed:
           type: EndEvent
           name: Failed-trial rate above 20%
           eventDefinitions:
             Err_Battery: { type: ErrorEventDefinition }
-          bounds: 262 1202 36 36
+          bounds: 196 912 36 36
           fill: "#f1d0cd"
           stroke: "#ac5a54"
+          label: 180 952 100 27
         BF_0: Sub_Start -> Task_NBack
         BF_1: Task_NBack -> Task_DigitSpan
         BF_2: Task_DigitSpan -> Task_SART
         BF_3: Task_SART -> Task_SRT
-        BF_4: Task_SRT -> Task_Matrices
+        BF_4:
+          sourceRef: Task_SRT
+          targetRef: Task_Matrices
+          waypoint: 704.5,690 704.5,780
         BF_5: Task_Matrices -> Task_CardSorting
         BF_6: Task_CardSorting -> Task_Flanker
         BF_7: Task_Flanker -> Sub_End
         BF_Failed_NBack:
           sourceRef: Failed_NBack
           targetRef: ErrEnd_Failed
-          waypoint: 432,928 432,1030 280,1030 280,1202
+          waypoint: 351,708 351,735 214,735 214,912
           stroke: "#ac5a54"
         BF_Failed_DS:
           sourceRef: Failed_DigitSpan
           targetRef: ErrEnd_Failed
-          waypoint: 572,928 572,1030 280,1030 280,1202
+          waypoint: 484,708 484,735 214,735 214,912
           stroke: "#ac5a54"
         BF_Failed_SART:
           sourceRef: Failed_SART
           targetRef: ErrEnd_Failed
-          waypoint: 712,928 712,1030 280,1030 280,1202
+          waypoint: 617,708 617,735 214,735 214,912
           stroke: "#ac5a54"
         BF_Failed_SRT:
           sourceRef: Failed_SRT
           targetRef: ErrEnd_Failed
-          waypoint: 852,928 852,1030 280,1030 280,1202
+          waypoint: 750,708 750,735 214,735 214,912
           stroke: "#ac5a54"
         BF_Failed_BM:
           sourceRef: Failed_Matrices
           targetRef: ErrEnd_Failed
-          waypoint: 852,1158 852,1220 298,1220
+          waypoint: 750,888 750,930 232,930
           stroke: "#ac5a54"
         BF_Failed_BCS:
           sourceRef: Failed_CardSorting
           targetRef: ErrEnd_Failed
-          waypoint: 712,1158 712,1220 298,1220
+          waypoint: 617,888 617,930 232,930
           stroke: "#ac5a54"
         BF_Failed_Flanker:
           sourceRef: Failed_Flanker
           targetRef: ErrEnd_Failed
-          waypoint: 572,1158 572,1220 298,1220
+          waypoint: 484,888 484,930 232,930
           stroke: "#ac5a54"
       dataOutputAssociations:
         Out_Trials:
           targetRef: Dataset_Trials
-          waypoint: 900,1035 960,1035
+          waypoint: 750,540 750,495 830,495
+    Params_NBack:
+      type: DataObjectReference
+      name: N-back parameters
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            Blocks:
+              NBack_2:
+                Name: NBack_2
+                Inherits: Default
+                Parameters:
+                  NValue: 2
+                  StreamSize: 40
+                  InterStimulusInterval: 1.5
+            Timelines:
+              NBack_2:
+                Name: NBack_2
+                blocks:
+                  - name: NBack_2
+      bounds: 288 470 36 50
+      label: 330 482 100 27
     Battery_Error:
       type: BoundaryEvent
       name: battery error
       eventDefinitions:
         Err_BatteryExit: { type: ErrorEventDefinition }
       attachedToRef: Battery
-      bounds: 860 1282 36 36
-      label: 800 1322 120 14
+      bounds: 300 967 36 36
+      label: 222 1005 76 14
     Discontinued:
       type: EndEvent
       name: Discontinued intervention (n={count})
@@ -354,9 +360,10 @@ Example_Study:
         P_count_disc: { name: count, value: "0" }
       eventDefinitions:
         Err_Discontinued: { type: ErrorEventDefinition }
-      bounds: 1042 1282 36 36
+      bounds: 400 1012 36 36
       fill: "#f1d0cd"
       stroke: "#ac5a54"
+      label: 442 1016 140 27
     Dataset_Trials:
       type: DataStoreReference
       name: Trials (BDM)
@@ -364,14 +371,16 @@ Example_Study:
         - type: behaverse:BDMDataset
           dataLevel: trials
           uri: data/trials/
-      bounds: 960 1010 50 50
+      bounds: 830 470 50 50
+      label: 890 470 84 14
     Schema_Trials:
       type: DataObjectReference
       name: Trial schema (CSVW)
       extensionElements:
         - type: studyflow:Schema
           format: csvw
-      bounds: 1062 1010 36 50
+      bounds: 1100 470 36 50
+      label: 1142 480 110 27
     Analysis:
       type: SubProcess
       name: Analysis pipeline, preregistered (n={reached})
@@ -381,140 +390,150 @@ Example_Study:
         operation names its pinned implementation.
       onset: T0+40min
       duration: 8min
-      bounds: 240 1430 660 500
+      bounds: 810 540 490 520
       isExpanded: true
       flowElements:
         An_Start:
           type: StartEvent
-          bounds: 262 1497 36 36
+          bounds: 824 612 36 36
         Read:
           type: ServiceTask
           name: Read trials
           implementation: python://behaverse_analysis.read_trials@1.0
-          bounds: 330 1480 120 70
+          bounds: 874 590 110 80
         Filter:
           type: ServiceTask
           name: Filter invalid trials
           implementation: python://behaverse_analysis.filter_invalid@1.0
-          bounds: 470 1480 120 70
+          bounds: 1002 590 110 80
         Filter_Excluded:
           type: BoundaryEvent
           name: "< 50% valid trials"
           eventDefinitions:
             Err_Filter: { type: ErrorEventDefinition }
           attachedToRef: Filter
-          bounds: 480 1532 36 36
-          label: 520 1556 110 14
+          bounds: 1014 652 36 36
+          label: 922 674 88 27
         ErrEnd_Excluded:
           type: EndEvent
           name: Excluded from analysis
           eventDefinitions:
             Err_Analysis: { type: ErrorEventDefinition }
-          bounds: 262 1572 36 36
+          bounds: 1014 712 36 36
           fill: "#f1d0cd"
           stroke: "#ac5a54"
+          label: 916 722 94 27
         Map:
           type: ServiceTask
           name: Map to derived measures
           implementation: python://behaverse_analysis.derive_measures@1.0
-          bounds: 610 1480 120 70
+          bounds: 1130 590 110 80
         Which:
           type: ExclusiveGateway
           name: Which comparison?
-          bounds: 780 1490 50 50
-          label: 840 1508 110 14
+          bounds: 1160 700 50 50
+          label: 1080 716 76 27
         Congruency:
           type: ServiceTask
           name: Congruency effect (Flanker RT and accuracy)
           implementation: python://behaverse_analysis.congruency_effect@1.0
-          bounds: 330 1620 160 70
+          bounds: 818 790 138 90
         Agreement:
           type: ServiceTask
           name: Agreement (equivalence of accuracy)
           implementation: python://behaverse_analysis.equivalence_test@1.0
-          bounds: 520 1620 160 70
+          bounds: 966 790 138 90
         Divergence:
           type: ServiceTask
           name: Divergence (classifier vs random baseline)
           implementation: python://behaverse_analysis.train_classifier@1.0
-          bounds: 725 1620 160 70
+          bounds: 1116 790 138 90
         Join:
           type: ExclusiveGateway
-          bounds: 780 1730 50 50
+          bounds: 1160 900 50 50
         Reduce_Run:
           type: ServiceTask
           name: Reduce to per-run summaries
           implementation: python://behaverse_analysis.summarize_runs@1.0
-          bounds: 745 1810 120 70
+          bounds: 1130 970 110 80
         Reduce_Group:
           type: ServiceTask
           name: Reduce to group statistics
           implementation: python://behaverse_analysis.group_stats@1.0
-          bounds: 585 1810 120 70
+          bounds: 1002 970 110 80
         Review:
           type: ManualTask
           name: Manual outlier review
-          bounds: 425 1810 120 70
+          bounds: 874 970 110 80
         An_End:
           type: EndEvent
           name: Analyzed
-          bounds: 332 1827 36 36
+          bounds: 824 992 36 36
         AF_0: An_Start -> Read
         AF_1: Read -> Filter
         AF_2: Filter -> Map
-        AF_3: Map -> Which
+        AF_3:
+          sourceRef: Map
+          targetRef: Which
+          waypoint: 1185,670 1185,700
         AF_Excluded:
           sourceRef: Filter_Excluded
           targetRef: ErrEnd_Excluded
-          waypoint: 498,1568 498,1590 298,1590
+          waypoint: 1032,688 1032,712
           stroke: "#ac5a54"
         AF_Congruency:
           name: congruency
           sourceRef: Which
           targetRef: Congruency
-          waypoint: 805,1540 805,1600 410,1600 410,1620
-          label: 415 1603 70 14
+          waypoint: 1185,750 1185,765 887,765 887,790
+          label: 893 768 70 14
         AF_Agreement:
           name: agreement
           sourceRef: Which
           targetRef: Agreement
-          waypoint: 805,1540 805,1600 600,1600 600,1620
-          label: 605 1603 70 14
+          waypoint: 1185,750 1185,765 1035,765 1035,790
+          label: 1041 768 62 14
         AF_Divergence:
           name: divergence
           sourceRef: Which
           targetRef: Divergence
-          waypoint: 805,1540 805,1620
-          label: 810 1580 70 14
+          waypoint: 1185,750 1185,790
+          label: 1191 768 66 14
         AF_Congruency_Join:
           sourceRef: Congruency
           targetRef: Join
-          waypoint: 410,1690 410,1710 805,1710 805,1730
+          waypoint: 887,880 887,925 1160,925
         AF_Agreement_Join:
           sourceRef: Agreement
           targetRef: Join
-          waypoint: 600,1690 600,1710 805,1710 805,1730
-        AF_Divergence_Join: Divergence -> Join
-        AF_4: Join -> Reduce_Run
+          waypoint: 1035,880 1035,925 1160,925
+        AF_Divergence_Join:
+          sourceRef: Divergence
+          targetRef: Join
+          waypoint: 1185,880 1185,900
+        AF_4:
+          sourceRef: Join
+          targetRef: Reduce_Run
+          waypoint: 1185,950 1185,970
         AF_5: Reduce_Run -> Reduce_Group
         AF_6: Reduce_Group -> Review
         AF_7: Review -> An_End
       dataInputAssociations:
         In_Trials:
           sourceRef: [Dataset_Trials]
-          waypoint: 985,1060 985,1460 900,1460
+          waypoint: 855,520 855,540
       dataOutputAssociations:
         Out_Results:
           targetRef: Dataset_Results
-          waypoint: 900,1845 960,1845
+          waypoint: 1050,1060 1050,1110
     Analysis_Error:
       type: BoundaryEvent
       name: analysis error
       eventDefinitions:
         Err_AnalysisExit: { type: ErrorEventDefinition }
       attachedToRef: Analysis
-      bounds: 860 1912 36 36
-      label: 800 1952 120 14
+      bounds: 1264 1042 36 36
+      label: 1180 1078 80 14
     Excluded_Analysis:
       type: EndEvent
       name: Excluded from analysis (n={count})
@@ -522,9 +541,10 @@ Example_Study:
         P_count_excl: { name: count, value: "0" }
       eventDefinitions:
         Err_ExcludedAnalysis: { type: ErrorEventDefinition }
-      bounds: 1042 1912 36 36
+      bounds: 1264 1110 36 36
       fill: "#f1d0cd"
       stroke: "#ac5a54"
+      label: 1150 1116 110 40
     Dataset_Results:
       type: DataStoreReference
       name: Results (Psych-DS)
@@ -532,7 +552,7 @@ Example_Study:
         - type: studyflow:Dataset
           format: psych-ds
           uri: results/
-      bounds: 960 1820 50 50
+      bounds: 1025 1110 50 50
     Render:
       type: ServiceTask
       name: Render reporting artifacts
@@ -543,7 +563,7 @@ Example_Study:
         - [x] CHART items recorded from the run provenance
       onset: T0+48min
       duration: 2min
-      bounds: 380 2060 160 70
+      bounds: 600 1120 150 70
     Debrief:
       type: Task
       name: Debrief
@@ -552,95 +572,120 @@ Example_Study:
           content: Thank you for taking part. Your completion code follows on the next page.
       onset: T0+50min
       duration: 1min
-      bounds: 600 2060 160 70
+      bounds: 400 1120 150 70
     Completed:
       type: EndEvent
       name: Completed (n={reached})
       redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
       completionCodeType: dynamic
-      bounds: 840 2077 36 36
-    Flow_Enroll_Screening: Enroll -> Screening
-    Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
+      bounds: 300 1137 36 36
+    Flow_Enroll_Screening:
+      sourceRef: Enroll
+      targetRef: Screening
+      waypoint: 236,130 290,130
+    Flow_Screening_Eligibility:
+      sourceRef: Screening
+      targetRef: Eligibility_Gateway
+      waypoint: 440,130 510,130
     Flow_Eligible:
       name: eligible
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Gateway
-      label: 570 345 60 14
+      label: 620 112 60 14
+      waypoint: 560,130 1030,130
     Flow_Excluded_Pre:
       name: not eligible
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
       stroke: "#ac5a54"
+      waypoint: 535,155 535,250
+      label: 541 195 70 14
     Flow_Allocate_Speeded:
       name: speeded
       sourceRef: Randomize_Gateway
       targetRef: Allocate_Speeded
-      waypoint: 535,435 380,435 380,500
+      waypoint: 1055,155 1055,185 925,185 925,215
+      label: 931 167 56 14
     Flow_Allocate_SelfPaced:
       name: self-paced
       sourceRef: Randomize_Gateway
       targetRef: Allocate_SelfPaced
-      waypoint: 585,435 740,435 740,500
+      waypoint: 1055,155 1055,185 1185,185 1185,215
+      label: 1119 167 66 14
     Flow_Speeded_Merge:
       sourceRef: Allocate_Speeded
       targetRef: Merge_Allocation
-      waypoint: 380,580 380,645 535,645
+      waypoint: 925,285 925,325 1030,325
     Flow_SelfPaced_Merge:
       sourceRef: Allocate_SelfPaced
       targetRef: Merge_Allocation
-      waypoint: 740,580 740,645 585,645
+      waypoint: 1185,285 1185,325 1080,325
     Flow_DNS_Speeded:
       sourceRef: DidNotStart_Speeded
       targetRef: DidNotStart
-      waypoint: 340,598 340,680 1042,680
+      waypoint: 880,303 880,390 1262,390
       stroke: "#ac5a54"
     Flow_DNS_SelfPaced:
       sourceRef: DidNotStart_SelfPaced
       targetRef: DidNotStart
-      waypoint: 780,598 780,680 1042,680
+      waypoint: 1230,303 1230,390 1262,390
       stroke: "#ac5a54"
-    Flow_Merge_Battery: Merge_Allocation -> Battery
+    Flow_Merge_Battery:
+      sourceRef: Merge_Allocation
+      targetRef: Battery
+      waypoint: 1055,350 1055,450 720,450 720,540
     Flow_Battery_Discontinued:
       sourceRef: Battery_Error
       targetRef: Discontinued
       stroke: "#ac5a54"
-    Flow_Battery_Analysis: Battery -> Analysis
+      waypoint: 318,1003 318,1030 400,1030
+    Flow_Battery_Analysis:
+      sourceRef: Battery
+      targetRef: Analysis
+      waypoint: 770,760 810,760
     Flow_Analysis_Excluded:
       sourceRef: Analysis_Error
       targetRef: Excluded_Analysis
       stroke: "#ac5a54"
+      waypoint: 1282,1078 1282,1110
     Flow_Analysis_Render:
       sourceRef: Analysis
       targetRef: Render
-      waypoint: 570,1930 570,2010 460,2010 460,2060
-    Flow_Render_Debrief: Render -> Debrief
-    Flow_Debrief_Completed: Debrief -> Completed
+      waypoint: 840,1060 840,1155 750,1155
+    Flow_Render_Debrief:
+      sourceRef: Render
+      targetRef: Debrief
+      waypoint: 600,1155 550,1155
+    Flow_Debrief_Completed:
+      sourceRef: Debrief
+      targetRef: Completed
+      waypoint: 400,1155 336,1155
   artifacts:
     Group_Enrolment:
       type: Group
       categoryValueRef: CV_Enrolment
-      bounds: 160 40 1000 330
+      bounds: 160 40 610 400
     Group_Allocation:
       type: Group
       categoryValueRef: CV_Allocation
-      bounds: 160 380 1000 370
+      bounds: 790 40 530 400
     Group_Followup:
       type: Group
       categoryValueRef: CV_Followup
-      bounds: 160 760 1000 630
+      bounds: 160 460 610 600
     Group_Analysis:
       type: Group
       categoryValueRef: CV_Analysis
-      bounds: 160 1400 1000 620
+      bounds: 790 460 530 760
     Group_Report:
       type: Group
       categoryValueRef: CV_Report
-      bounds: 160 2030 1000 150
+      bounds: 160 1080 610 140
     Assoc_Schema_Trials:
       associationDirection: One
       sourceRef: Schema_Trials
       targetRef: Dataset_Trials
-      waypoint: 1062,1035 1010,1035
+      waypoint: 1100,495 880,495
 Category_Enrolment:
   type: Category
   categoryValue:

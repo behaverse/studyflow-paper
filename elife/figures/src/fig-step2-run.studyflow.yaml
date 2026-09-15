@@ -13,30 +13,30 @@ Run_Collaboration:
     Participant_Runner:
       name: Runner (Step 2, Run)
       processRef: Run
-      bounds: 160 40 1420 420
+      bounds: 160 40 1020 600
       isHorizontal: true
     Participant_Human:
       name: Human participant
       extensionElements:
         - type: studyflow:Actor
           actorType: human
-      bounds: 300 530 250 190
+      bounds: 230 680 180 160
       isHorizontal: true
     Participant_Random:
-      name: Uniform random baseline
+      name: Random baseline
       extensionElements:
         - type: studyflow:Actor
           actorType: software
           implementation: random
-      bounds: 580 530 250 190
+      bounds: 423 680 180 160
       isHorizontal: true
     Participant_LLM:
-      name: Open-weight language model
+      name: Open-weight LLM
       extensionElements:
         - type: studyflow:Actor
           actorType: llm
           implementation: ollama://llama3.3
-      bounds: 860 530 250 190
+      bounds: 616 680 180 160
       isHorizontal: true
     Participant_VLM:
       name: Vision-language model
@@ -44,53 +44,53 @@ Run_Collaboration:
         - type: studyflow:Actor
           actorType: llm
           implementation: claude://claude-opus-4-8
-      bounds: 1140 530 250 190
+      bounds: 809 680 180 160
       isHorizontal: true
   messageFlows:
     Msg_Obs_Human:
-      name: observation (stimulus, options, timing, frame)
+      name: trial
       sourceRef: Battery
       targetRef: Participant_Human
       messageRef: Trial
-      waypoint: 400,340 400,530
-      label: 240 420 150 40
+      waypoint: 290,560 290,680
+      label: 250 600 34 14
     Msg_Resp_Human:
       name: response, latency
       sourceRef: Participant_Human
       targetRef: Battery
       messageRef: Response
-      waypoint: 450,530 450,340
-      label: 460 428 110 14
+      waypoint: 350,680 350,560
+      label: 356 600 104 14
     Msg_Obs_Random:
       sourceRef: Battery
       targetRef: Participant_Random
       messageRef: Trial
-      waypoint: 680,340 680,530
+      waypoint: 483,560 483,680
     Msg_Resp_Random:
       sourceRef: Participant_Random
       targetRef: Battery
       messageRef: Response
-      waypoint: 730,530 730,340
+      waypoint: 543,680 543,560
     Msg_Obs_LLM:
       sourceRef: Battery
       targetRef: Participant_LLM
       messageRef: Trial
-      waypoint: 960,340 960,530
+      waypoint: 676,560 676,680
     Msg_Resp_LLM:
       sourceRef: Participant_LLM
       targetRef: Battery
       messageRef: Response
-      waypoint: 1010,530 1010,340
+      waypoint: 736,680 736,560
     Msg_Obs_VLM:
       sourceRef: Battery
       targetRef: Participant_VLM
       messageRef: Trial
-      waypoint: 1240,340 1240,530
+      waypoint: 869,560 869,680
     Msg_Resp_VLM:
       sourceRef: Participant_VLM
       targetRef: Battery
       messageRef: Response
-      waypoint: 1290,530 1290,340
+      waypoint: 929,680 929,560
 Trial:
   type: Message
   itemRef: Trial_Item
@@ -117,7 +117,8 @@ Run:
     Battery_Start:
       type: StartEvent
       name: Begin battery
-      bounds: 200 192 36 36
+      bounds: 200 332 36 36
+      label: 194 294 48 27
     Battery:
       type: SubProcess
       name: Cognitive battery (one trial at a time)
@@ -132,12 +133,12 @@ Run:
           value: "0"
       onset: T0+6min
       duration: 30min
-      bounds: 280 80 1180 260
+      bounds: 260 140 750 420
       isExpanded: true
       flowElements:
         Sub_Start:
           type: StartEvent
-          bounds: 300 162 36 36
+          bounds: 280 222 36 36
         Task_NBack:
           type: ChoreographyTask
           name: Working memory (N-Back)
@@ -149,36 +150,16 @@ Run:
           dataInputAssociations:
             In_Params_NBack:
               sourceRef: [Params_NBack]
-              waypoint: 390,285 390,220
-          bounds: 360 140 110 80
-        Params_NBack:
-          type: DataObjectReference
-          name: N-back parameters
-          extensionElements:
-            - type: studyflow:Parameters
-              values:
-                Blocks:
-                  NBack_2:
-                    Name: NBack_2
-                    Inherits: Default
-                    Parameters:
-                      NValue: 2
-                      StreamSize: 40
-                      InterStimulusInterval: 1.5
-                Timelines:
-                  NBack_2:
-                    Name: NBack_2
-                    blocks:
-                      - name: NBack_2
-          bounds: 372 285 36 50
-          label: 290 298 80 27
+              waypoint: 410,110 410,200
+          bounds: 340 200 140 80
         Failed_NBack:
           type: BoundaryEvent
           name: "> 20% failed"
           eventDefinitions:
             Err_NBack: { type: ErrorEventDefinition }
           attachedToRef: Task_NBack
-          bounds: 434 202 36 36
+          bounds: 450 262 36 36
+          label: 488 290 80 14
         Task_DigitSpan:
           type: ChoreographyTask
           name: Verbal span (Digit Span)
@@ -187,13 +168,13 @@ Run:
               scene: DS
           onset: T0+11min
           duration: 4min
-          bounds: 490 140 110 80
+          bounds: 510 200 140 80
         Failed_DigitSpan:
           type: BoundaryEvent
           eventDefinitions:
             Err_DS: { type: ErrorEventDefinition }
           attachedToRef: Task_DigitSpan
-          bounds: 564 202 36 36
+          bounds: 620 262 36 36
         Task_SART:
           type: ChoreographyTask
           name: Sustained attention (SART)
@@ -202,13 +183,13 @@ Run:
               scene: SART
           onset: T0+15min
           duration: 4min
-          bounds: 620 140 110 80
+          bounds: 680 200 140 80
         Failed_SART:
           type: BoundaryEvent
           eventDefinitions:
             Err_SART: { type: ErrorEventDefinition }
           attachedToRef: Task_SART
-          bounds: 694 202 36 36
+          bounds: 790 262 36 36
         Task_SRT:
           type: ChoreographyTask
           name: Processing speed (Serial RT)
@@ -217,13 +198,13 @@ Run:
               scene: SRT
           onset: T0+19min
           duration: 4min
-          bounds: 750 140 110 80
+          bounds: 850 200 140 80
         Failed_SRT:
           type: BoundaryEvent
           eventDefinitions:
             Err_SRT: { type: ErrorEventDefinition }
           attachedToRef: Task_SRT
-          bounds: 824 202 36 36
+          bounds: 960 262 36 36
         Task_Matrices:
           type: ChoreographyTask
           name: Reasoning (Belval Matrices)
@@ -232,13 +213,13 @@ Run:
               scene: BM
           onset: T0+23min
           duration: 5min
-          bounds: 880 140 110 80
+          bounds: 850 360 140 80
         Failed_Matrices:
           type: BoundaryEvent
           eventDefinitions:
             Err_BM: { type: ErrorEventDefinition }
           attachedToRef: Task_Matrices
-          bounds: 954 202 36 36
+          bounds: 960 422 36 36
         Task_CardSorting:
           type: ChoreographyTask
           name: Set-shifting (Belval Card Sorting)
@@ -247,13 +228,13 @@ Run:
               scene: BCS
           onset: T0+28min
           duration: 4min
-          bounds: 1010 140 110 80
+          bounds: 680 360 140 80
         Failed_CardSorting:
           type: BoundaryEvent
           eventDefinitions:
             Err_BCS: { type: ErrorEventDefinition }
           attachedToRef: Task_CardSorting
-          bounds: 1084 202 36 36
+          bounds: 790 422 36 36
         Task_Flanker:
           type: ChoreographyTask
           name: Attention (Flanker, jsPsych)
@@ -264,76 +245,101 @@ Run:
               implementation: https://github.com/jspsych/jspsych-contrib@v0.4.0#flanker
           onset: T0+32min
           duration: 4min
-          bounds: 1140 140 110 80
+          bounds: 510 360 140 80
         Failed_Flanker:
           type: BoundaryEvent
           eventDefinitions:
             Err_Flanker: { type: ErrorEventDefinition }
           attachedToRef: Task_Flanker
-          bounds: 1214 202 36 36
+          bounds: 620 422 36 36
         Sub_End:
           type: EndEvent
           name: Battery complete
-          bounds: 1400 162 36 36
+          bounds: 430 382 36 36
         ErrEnd_Failed:
           type: EndEvent
           name: Failed-trial rate above 20%
           eventDefinitions:
             Err_Battery: { type: ErrorEventDefinition }
-          bounds: 1400 244 36 36
+          bounds: 280 482 36 36
           fill: "#f1d0cd"
           stroke: "#ac5a54"
+          label: 250 522 100 27
         F_Start_NBack: Sub_Start -> Task_NBack
         F_1: Task_NBack -> Task_DigitSpan
         F_2: Task_DigitSpan -> Task_SART
         F_3: Task_SART -> Task_SRT
-        F_4: Task_SRT -> Task_Matrices
+        F_4:
+          sourceRef: Task_SRT
+          targetRef: Task_Matrices
+          waypoint: 990,240 1000,240 1000,400 990,400
         F_5: Task_Matrices -> Task_CardSorting
         F_6: Task_CardSorting -> Task_Flanker
         F_End: Task_Flanker -> Sub_End
         F_Failed_NBack:
           sourceRef: Failed_NBack
           targetRef: ErrEnd_Failed
-          waypoint: 452,238 452,262 1400,262
+          waypoint: 468,298 468,325 298,325 298,482
           stroke: "#ac5a54"
         F_Failed_DS:
           sourceRef: Failed_DigitSpan
           targetRef: ErrEnd_Failed
-          waypoint: 582,238 582,262 1400,262
+          waypoint: 638,298 638,325 298,325 298,482
           stroke: "#ac5a54"
         F_Failed_SART:
           sourceRef: Failed_SART
           targetRef: ErrEnd_Failed
-          waypoint: 712,238 712,262 1400,262
+          waypoint: 808,298 808,325 298,325 298,482
           stroke: "#ac5a54"
         F_Failed_SRT:
           sourceRef: Failed_SRT
           targetRef: ErrEnd_Failed
-          waypoint: 842,238 842,262 1400,262
+          waypoint: 978,298 978,325 298,325 298,482
           stroke: "#ac5a54"
         F_Failed_BM:
           sourceRef: Failed_Matrices
           targetRef: ErrEnd_Failed
-          waypoint: 972,238 972,262 1400,262
+          waypoint: 978,458 978,500 316,500
           stroke: "#ac5a54"
         F_Failed_BCS:
           sourceRef: Failed_CardSorting
           targetRef: ErrEnd_Failed
-          waypoint: 1102,238 1102,262 1400,262
+          waypoint: 808,458 808,500 316,500
           stroke: "#ac5a54"
         F_Failed_Flanker:
           sourceRef: Failed_Flanker
           targetRef: ErrEnd_Failed
-          waypoint: 1232,238 1232,262 1400,262
+          waypoint: 638,458 638,500 316,500
           stroke: "#ac5a54"
       dataInputAssociations:
         In_Prompt:
           sourceRef: [Prompt_Trait]
-          waypoint: 1118,375 1118,340
+          waypoint: 618,110 618,140
       dataOutputAssociations:
         Out_Trials:
           targetRef: Dataset_Trials
-          waypoint: 1350,340 1350,365
+          waypoint: 885,140 885,110
+    Params_NBack:
+      type: DataObjectReference
+      name: N-back parameters
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            Blocks:
+              NBack_2:
+                Name: NBack_2
+                Inherits: Default
+                Parameters:
+                  NValue: 2
+                  StreamSize: 40
+                  InterStimulusInterval: 1.5
+            Timelines:
+              NBack_2:
+                Name: NBack_2
+                blocks:
+                  - name: NBack_2
+      bounds: 392 60 36 50
+      label: 434 72 110 27
     Prompt_Trait:
       type: DataObjectReference
       name: Trait prompt
@@ -344,14 +350,16 @@ Run:
 
             {stimulus}
             Reply with exactly one of {options}.
-      bounds: 1100 375 36 50
+      bounds: 600 60 36 50
+      label: 642 78 70 14
     Battery_Error:
       type: BoundaryEvent
       name: battery error
       eventDefinitions:
         Err_BatteryExit: { type: ErrorEventDefinition }
       attachedToRef: Battery
-      bounds: 1400 322 36 36
+      bounds: 985 542 36 36
+      label: 940 582 64 14
     Discontinued:
       type: EndEvent
       name: Discontinued intervention (n={count})
@@ -361,13 +369,13 @@ Run:
           value: "0"
       eventDefinitions:
         Err_Discontinued: { type: ErrorEventDefinition }
-      bounds: 1510 322 36 36
+      bounds: 1090 542 36 36
       fill: "#f1d0cd"
       stroke: "#ac5a54"
     Run_End:
       type: EndEvent
       name: Ready for analysis
-      bounds: 1510 192 36 36
+      bounds: 1090 332 36 36
     Dataset_Trials:
       type: DataStoreReference
       name: Trials (BDM)
@@ -375,7 +383,8 @@ Run:
         - type: behaverse:BDMDataset
           dataLevel: trials
           uri: data/trials/
-      bounds: 1325 365 50 50
+      bounds: 860 60 50 50
+      label: 784 72 70 27
     Schema_Trials:
       type: DataObjectReference
       name: Trial schema (CSVW)
@@ -394,18 +403,23 @@ Run:
               - name: correct
                 datatype: boolean
               - name: failure_mode
-      bounds: 1250 365 36 50
+      bounds: 1000 60 36 50
+      label: 1042 66 110 27
     Flow_Start_Battery: Battery_Start -> Battery
-    Flow_Battery_End: Battery -> Run_End
+    Flow_Battery_End:
+      sourceRef: Battery
+      targetRef: Run_End
+      waypoint: 1010,350 1090,350
     Flow_Error_Discontinued:
       sourceRef: Battery_Error
       targetRef: Discontinued
       stroke: "#ac5a54"
+      waypoint: 1021,560 1090,560
   artifacts:
     Assoc_Schema_Trials:
       associationDirection: One
       sourceRef: Schema_Trials
       targetRef: Dataset_Trials
-      waypoint: 1286,390 1325,390
+      waypoint: 1000,85 910,85
 state:
   Discontinued: { count: 0 }

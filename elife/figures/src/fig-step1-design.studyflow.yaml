@@ -50,6 +50,7 @@ Design:
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
       onset: T0
       bounds: 542 82 36 36
+      label: 586 93 150 14
     Screening:
       type: Task
       name: Screening
@@ -142,7 +143,7 @@ Design:
       type: ExclusiveGateway
       name: Begin battery
       bounds: 535 650 50 50
-      label: 595 690 80 14
+      label: 592 690 90 14
     Designed:
       type: EndEvent
       name: Ready to run
@@ -165,6 +166,7 @@ Design:
       name: eligible
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Gateway
+      label: 568 386 50 14
     Flow_Excluded_Pre:
       name: not eligible
       sourceRef: Eligibility_Gateway

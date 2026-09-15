@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="196" viewBox="0 0 520 196" font-family="IBM Plex Sans, Helvetica, Arial, sans-serif" font-size="11" fill="#292524">
+  <!-- The slide-style N-back figure, redrawn at the figures' print scale; timing as in panel (b). -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#44403c"/>
+    </marker>
+    <style>
+      rect { fill: #fff; stroke: #292524; stroke-width: 1.2; }
+      .letter { font-size: 28; font-weight: 700; text-anchor: middle; }
+      .tag { font-size: 10; font-weight: 700; }
+      path.arrow { fill: none; stroke: #44403c; stroke-width: 1.2; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="520" height="196" style="stroke:none"/>
+
+  <text x="8" y="22" font-weight="600">Stimulus presentation</text>
+  <text x="8" y="36">= 0.5 s</text>
+  <text x="8" y="100" font-weight="600">ISI</text>
+  <text x="8" y="114">= 1.5 s</text>
+  <path class="arrow" d="M60,74 L112,112"/>
+
+  <rect x="150" y="8" width="120" height="64"/>
+  <text class="letter" x="186" y="38">b</text>
+  <rect x="214" y="44" width="120" height="64"/>
+  <text class="letter" x="250" y="74">d</text>
+  <rect x="278" y="80" width="120" height="64"/>
+  <text class="letter" x="314" y="110" fill="#2f7d4f">B</text>
+  <text class="tag" x="332" y="110" fill="#2f7d4f">Target</text>
+  <rect x="342" y="116" width="120" height="64"/>
+  <text class="letter" x="378" y="146" fill="#ac5a54">G</text>
+  <text class="tag" x="396" y="146" fill="#ac5a54">Non-target</text>
+
+  <path class="arrow" d="M412,10 L512,110"/>
+  <text x="470" y="44">Time</text>
+</svg>

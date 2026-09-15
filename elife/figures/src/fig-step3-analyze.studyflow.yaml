@@ -6,23 +6,26 @@ Analyze:
   name: Step 3 - Analyze
   documentation: >-
     Step 3 of the example study: the analysis phase of the CONSORT flow, drawn in the same notation as the study
-    it analyzes. The filter step is the analysis exclusion the CONSORT flow reports, counted on its error exit.
-    An exclusive gateway branches on the comparison of interest: the Flanker congruency effect, an agreement
-    (equivalence) test between agents, and a divergence test that trains a classifier against the random
-    baseline. Each branch is fixed before the first run, so the registered and the executed analysis are the
-    same object.
+    it analyzes. Each operation is a service task whose `implementation` names the pinned external code that
+    runs it; the typed tables between operations are what flows from one to the next, and the thresholds live
+    in Parameters elements, so a change of rule is a data edit, not a redraw. The filter step is the analysis
+    exclusion the CONSORT flow reports, counted on its error exit. An exclusive gateway branches on the
+    comparison of interest: the Flanker congruency effect, an agreement (equivalence) test between agents, and a
+    divergence test that trains a classifier against the random baseline. Each branch is fixed before the first
+    run, so the registered and the executed analysis are the same object.
   extensionElements:
     - type: studyflow:Study
       seed: 42
       runtime: local
       dependencies:
         - behaverse-analysis==1.0
+        - pandas>=2.0
         - scikit-learn>=1.5
   flowElements:
     A_Start:
       type: StartEvent
       name: Battery complete
-      bounds: 182 262 36 36
+      bounds: 180 222 36 36
     Read:
       type: ServiceTask
       name: Read trials
@@ -31,8 +34,12 @@ Analyze:
       dataInputAssociations:
         In_Read:
           sourceRef: [Dataset_Trials]
-          waypoint: 345,160 345,240
-      bounds: 280 240 130 80
+          waypoint: 275,110 275,200
+      dataOutputAssociations:
+        Out_Read:
+          targetRef: T_Raw
+          waypoint: 360,200 360,95 397,95
+      bounds: 250 200 130 80
     Filter:
       type: ServiceTask
       name: Filter invalid trials
@@ -41,18 +48,25 @@ Analyze:
         Drops trials with a response time below 100 ms, missing data, or a failure flag from Step 2. A subject
         left with fewer than half of its trials is excluded from analysis through the boundary error.
       dataInputAssociations:
+        In_Filter:
+          sourceRef: [T_Raw]
+          waypoint: 433,95 470,95 470,200
         In_Filter_Params:
           sourceRef: [Params_Exclusion]
-          waypoint: 525,140 525,240
-      bounds: 460 240 130 80
+          waypoint: 515,120 515,200
+      dataOutputAssociations:
+        Out_Filter:
+          targetRef: T_Valid
+          waypoint: 560,200 560,95 597,95
+      bounds: 450 200 130 80
     Filter_Excluded:
       type: BoundaryEvent
       name: fewer than 50% valid trials
       eventDefinitions:
         Err_Filter: { type: ErrorEventDefinition }
       attachedToRef: Filter
-      bounds: 540 302 36 36
-      label: 470 342 120 27
+      bounds: 462 262 36 36
+      label: 364 304 100 27
     Excluded_Analysis:
       type: EndEvent
       name: Excluded from analysis (n={count})
@@ -62,29 +76,34 @@ Analyze:
           value: "0"
       eventDefinitions:
         Err_ExcludedAnalysis: { type: ErrorEventDefinition }
-      bounds: 540 440 36 36
+      bounds: 462 380 36 36
+      label: 354 384 104 40
       fill: "#f1d0cd"
       stroke: "#ac5a54"
     Map:
       type: ServiceTask
       name: Map to derived measures
       implementation: python://behaverse_analysis.derive_measures@1.0
-      bounds: 640 240 130 80
+      dataInputAssociations:
+        In_Map:
+          sourceRef: [T_Valid]
+          waypoint: 633,95 670,95 670,200
+      bounds: 650 200 130 80
     Which:
       type: ExclusiveGateway
       name: Which comparison?
-      bounds: 820 255 50 50
-      label: 790 312 110 27
+      bounds: 830 215 50 50
+      label: 886 233 110 14
     Congruency:
       type: ServiceTask
       name: Congruency effect (Flanker RT and accuracy)
       implementation: python://behaverse_analysis.congruency_effect@1.0
-      bounds: 940 110 180 70
+      bounds: 555 400 150 95
     Agreement:
       type: ServiceTask
       name: Agreement (equivalence of accuracy)
       implementation: python://behaverse_analysis.equivalence_test@1.0
-      bounds: 940 245 180 70
+      bounds: 715 400 150 95
     Divergence:
       type: ServiceTask
       name: Divergence (classifier vs random baseline)
@@ -92,44 +111,112 @@ Analyze:
       additionalArguments:
         model: logistic_regression
         cv_folds: 5
-      bounds: 940 380 180 70
+      bounds: 875 400 150 95
     Join:
       type: ExclusiveGateway
-      bounds: 1180 255 50 50
+      bounds: 765 520 50 50
     Reduce_Run:
       type: ServiceTask
       name: Reduce to per-run summaries
       implementation: python://behaverse_analysis.summarize_runs@1.0
-      bounds: 1280 240 130 80
+      dataOutputAssociations:
+        Out_ReduceRun:
+          targetRef: T_Runs
+          waypoint: 740,700 740,765 716,765
+      bounds: 725 620 130 80
     Reduce_Group:
       type: ServiceTask
       name: Reduce to group statistics
       implementation: python://behaverse_analysis.group_stats@1.0
       dataInputAssociations:
+        In_ReduceGroup:
+          sourceRef: [T_Runs]
+          waypoint: 680,765 650,765 650,700
         In_Rules:
           sourceRef: [Params_Rules]
-          waypoint: 1525,140 1525,240
+          waypoint: 605,590 605,620
       dataOutputAssociations:
-        Out_Results:
-          targetRef: Dataset_Results
-          waypoint: 1525,320 1525,400
-      bounds: 1460 240 130 80
+        Out_ReduceGroup:
+          targetRef: T_Group
+          waypoint: 560,700 560,765 533,765
+      bounds: 540 620 130 80
     Review:
       type: ManualTask
       name: Manual outlier review
-      bounds: 1640 240 130 80
+      documentation: The human analyst inspects the group statistics before anything is reported.
+      dataInputAssociations:
+        In_Review:
+          sourceRef: [T_Group]
+          waypoint: 497,765 470,765 470,700
+      dataOutputAssociations:
+        Out_Review:
+          targetRef: Dataset_Results
+          waypoint: 380,700 380,765 350,765
+      bounds: 360 620 130 80
     A_End:
       type: EndEvent
       name: Analyzed (n={reached})
-      bounds: 1820 262 36 36
+      bounds: 280 642 36 36
     Dataset_Trials:
       type: DataStoreReference
       name: Trials (BDM)
       extensionElements:
         - type: behaverse:BDMDataset
           dataLevel: trials
-      bounds: 320 110 50 50
-      label: 280 80 130 27
+          uri: data/trials/
+      bounds: 250 60 50 50
+      label: 230 42 90 14
+    Schema_Trials:
+      type: DataObjectReference
+      name: Trial schema (CSVW)
+      extensionElements:
+        - type: studyflow:Schema
+          format: csvw
+          body: |
+            columns:
+              - name: subject_id
+              - name: task
+              - name: trial_index
+              - name: response
+              - name: response_time
+                datatype: number
+              - name: correct
+                datatype: boolean
+              - name: failure_mode
+      bounds: 180 60 36 50
+      label: 158 28 80 27
+    T_Raw:
+      type: DataObjectReference
+      name: Raw trials
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 397 70 36 50
+      label: 370 52 90 14
+    T_Valid:
+      type: DataObjectReference
+      name: Valid trials
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 597 70 36 50
+      label: 570 52 90 14
+    T_Runs:
+      type: DataObjectReference
+      name: Per-run summaries
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 680 740 36 50
+      label: 646 795 104 14
+    T_Group:
+      type: DataObjectReference
+      name: Group statistics
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 497 740 36 50
+      label: 465 795 100 14
     Params_Exclusion:
       type: DataObjectReference
       name: Exclusion criteria
@@ -140,8 +227,8 @@ Analyze:
             drop_missing: true
             drop_flagged: true
             min_valid_fraction: 0.5
-      bounds: 507 90 36 50
-      label: 465 60 120 27
+      bounds: 497 70 36 50
+      label: 470 34 90 14
     Params_Rules:
       type: DataObjectReference
       name: Decision rules
@@ -151,15 +238,17 @@ Analyze:
             congruency_threshold_ms: 20
             equivalence_margin: 0.05
             classifier_auc_criterion: 0.6
-      bounds: 1507 90 36 50
-      label: 1465 60 120 27
+      bounds: 587 540 36 50
+      label: 496 552 86 14
     Dataset_Results:
       type: DataStoreReference
       name: Results (Psych-DS)
       extensionElements:
         - type: studyflow:Dataset
           format: psych-ds
-      bounds: 1500 400 50 50
+          uri: results/
+      bounds: 300 740 50 50
+      label: 275 795 100 14
     F_0: A_Start -> Read
     F_1: Read -> Filter
     F_2: Filter -> Map
@@ -168,27 +257,29 @@ Analyze:
       name: congruency
       sourceRef: Which
       targetRef: Congruency
-      waypoint: 845,255 845,145 940,145
-      label: 870 125 70 14
+      waypoint: 855,265 855,360 630,360 630,400
+      label: 636 343 70 14
     F_Agreement:
       name: agreement
       sourceRef: Which
       targetRef: Agreement
+      waypoint: 855,265 855,360 790,360 790,400
+      label: 796 377 62 14
     F_Divergence:
       name: divergence
       sourceRef: Which
       targetRef: Divergence
-      waypoint: 845,305 845,415 940,415
-      label: 870 420 70 14
+      waypoint: 855,265 855,360 950,360 950,400
+      label: 956 377 72 14
     F_Congruency_Join:
       sourceRef: Congruency
       targetRef: Join
-      waypoint: 1120,145 1205,145 1205,255
+      waypoint: 630,495 630,545 765,545
     F_Agreement_Join: Agreement -> Join
     F_Divergence_Join:
       sourceRef: Divergence
       targetRef: Join
-      waypoint: 1120,415 1205,415 1205,305
+      waypoint: 950,495 950,545 815,545
     F_4: Join -> Reduce_Run
     F_5: Reduce_Run -> Reduce_Group
     F_6: Reduce_Group -> Review
@@ -197,6 +288,12 @@ Analyze:
       sourceRef: Filter_Excluded
       targetRef: Excluded_Analysis
       stroke: "#ac5a54"
+  artifacts:
+    Assoc_Schema_Trials:
+      associationDirection: One
+      sourceRef: Schema_Trials
+      targetRef: Dataset_Trials
+      waypoint: 216,85 250,85
 state:
   _meta:
     reached: { A_End: 0 }

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="594" viewBox="0 0 380 594" font-family="IBM Plex Sans, Helvetica, Arial, sans-serif" font-size="11" fill="#292524">
+  <!-- The CONSORT 2025 participant flow template (Hopewell et al. 2025), redrawn at the figures' print scale. -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#44403c"/>
+    </marker>
+    <style>
+      rect { fill: #f5f5f4; stroke: #78716c; stroke-width: 1; }
+      path.flow { fill: none; stroke: #44403c; stroke-width: 1.2; marker-end: url(#arrow); }
+      .phase { font-weight: 600; text-anchor: middle; }
+      .head { font-weight: 600; }
+      .mid { text-anchor: middle; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="380" height="594" style="fill:#fff;stroke:none"/>
+
+  <text class="phase" x="190" y="18">Enrolment</text>
+  <rect x="8" y="28" width="364" height="28" rx="3"/>
+  <text class="mid" x="190" y="46">Assessed for eligibility (n = )</text>
+  <path class="flow" d="M100,56 V186"/>
+  <path class="flow" d="M100,115 H128"/>
+  <rect x="130" y="70" width="242" height="90" rx="3"/>
+  <text x="140" y="88" class="head">Excluded (n = )</text>
+  <text x="140" y="106">Not meeting inclusion criteria (n = )</text>
+  <text x="140" y="124">Declined to participate (n = )</text>
+  <text x="140" y="142">Other reasons (n = )</text>
+  <rect x="8" y="188" width="364" height="28" rx="3"/>
+  <text class="mid" x="190" y="206">Randomised (n = )</text>
+
+  <path class="flow" d="M190,216 V226 H98 V248"/>
+  <path class="flow" d="M190,226 H282 V248"/>
+  <text class="phase" x="190" y="242">Allocation</text>
+  <g>
+    <rect x="8" y="250" width="178" height="116" rx="3"/>
+    <rect x="194" y="250" width="178" height="116" rx="3"/>
+    <text x="16" y="266" class="head">Allocated to intervention</text><text x="16" y="280" class="head">(n = )</text>
+    <text x="16" y="298">Received allocated</text><text x="16" y="312">intervention (n = )</text>
+    <text x="16" y="330">Did not receive allocated</text><text x="16" y="344">intervention (give reasons)</text><text x="16" y="358">(n = )</text>
+    <text x="202" y="266" class="head">Allocated to intervention</text><text x="202" y="280" class="head">(n = )</text>
+    <text x="202" y="298">Received allocated</text><text x="202" y="312">intervention (n = )</text>
+    <text x="202" y="330">Did not receive allocated</text><text x="202" y="344">intervention (give reasons)</text><text x="202" y="358">(n = )</text>
+  </g>
+
+  <path class="flow" d="M98,366 V394"/>
+  <path class="flow" d="M282,366 V394"/>
+  <text class="phase" x="190" y="386">Follow-up</text>
+  <g>
+    <rect x="8" y="396" width="178" height="86" rx="3"/>
+    <rect x="194" y="396" width="178" height="86" rx="3"/>
+    <text x="16" y="412">Discontinued intervention</text><text x="16" y="426">(give reasons) (n = )</text>
+    <text x="16" y="444">Lost to follow-up for</text><text x="16" y="458">primary outcome</text><text x="16" y="472">(give reasons) (n = )</text>
+    <text x="202" y="412">Discontinued intervention</text><text x="202" y="426">(give reasons) (n = )</text>
+    <text x="202" y="444">Lost to follow-up for</text><text x="202" y="458">primary outcome</text><text x="202" y="472">(give reasons) (n = )</text>
+  </g>
+
+  <path class="flow" d="M98,482 V510"/>
+  <path class="flow" d="M282,482 V510"/>
+  <text class="phase" x="190" y="502">Analysis</text>
+  <g>
+    <rect x="8" y="512" width="178" height="74" rx="3"/>
+    <rect x="194" y="512" width="178" height="74" rx="3"/>
+    <text x="16" y="528">Analysed for primary</text><text x="16" y="542">outcome (n = )</text>
+    <text x="16" y="560">Excluded from analysis</text><text x="16" y="574">(give reasons) (n = )</text>
+    <text x="202" y="528">Analysed for primary</text><text x="202" y="542">outcome (n = )</text>
+    <text x="202" y="560">Excluded from analysis</text><text x="202" y="574">(give reasons) (n = )</text>
+  </g>
+</svg>

@@ -49,7 +49,7 @@ for (const [label, id, title] of [['gantt','View as Gantt...','Gantt View'],['ch
   const box = await page.evaluate((title) => {
     const el = [...document.querySelectorAll('h1,h2,h3,div,span')].find(e => e.childElementCount === 0 && e.textContent.trim().startsWith(title));
     let n = el, best = null;
-    while (n && n !== document.body) { const r = n.getBoundingClientRect(); if (r.width < innerWidth * 0.95 && r.height < innerHeight * 0.95 && r.width > 200) best = {x:r.x,y:r.y,width:r.width,height:r.height}; n = n.parentElement; }
+    while (n && n !== document.body) { const r = n.getBoundingClientRect(); if (r.width <= innerWidth - 8 && r.height < innerHeight * 0.95 && r.width > 200) best = {x:r.x,y:r.y,width:r.width,height:r.height}; n = n.parentElement; }
     return best;
   }, title);
   console.log(label, JSON.stringify(box));

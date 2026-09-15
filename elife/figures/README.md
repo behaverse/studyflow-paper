@@ -6,18 +6,17 @@ This folder collects the figures and listings referenced by [`../paper.qmd`](../
 
 - **One PNG per figure, and the PNG is the source.** Every figure lives in this folder as a single flat PNG — no `svg/`, no `png/`, no separate `.studyflow` sidecar. The diagram source travels *inside* the image: the Studyflow BPMN XML in a `studyflow` `iTXt` chunk (before `IEND`), and a draw.io `<mxfile>` in an `mxfile` `tEXt` chunk (before `IDAT`, URI-encoded). So each deposited figure reopens in the Studyflow modeler *and* in draw.io as an editable diagram, which is the claim §2.2 and the Discussion make about deposited figures.
 - **File naming.** `fig-<label>.studyflow.png`, where `<label>` is exactly the `@fig-…` cross-reference the manuscript cites (`fig-elements.studyflow.png` for `@fig-elements`). Lowercase, hyphenated. The `.studyflow.png` double extension is the modeler's convention (after `.drawio.png`): it marks the image as a *source* whose diagram — provenance trail included — travels inside it, so the filename says which figures are editable diagrams. A figure with no embedded studyflow stays a plain `.png` (`fig-overview.png`, draw.io-only; `fig-step2-nback-classic.png`, a raster slide). Where a figure has panels that are not composited yet, the panel takes a suffix (`fig-step2-nback-classic.png`).
-- **Sizing.** Target eLife column widths: 88 mm (single column) for inline figures, 180 mm (full width) for multi-panel composites. Figures are rasterized to fill a 180 × 240 mm box at 600 dpi (scale clamped to 3×–8× of the diagram's own pixel size), so every one clears 300 dpi at print width with headroom.
+- **Sizing.** One print scale: 1 diagram unit prints at 0.175 mm, so the canvas's 11–12 unit labels print at 5.5–6 pt in every figure, and a diagram up to about 1030 units wide fits the 180 mm column. Each PNG carries that size in its `pHYs` chunk (a 4× raster, 580 dpi), so a figure placed at its natural size keeps the common text size. Two figures fill a page instead and set their own scale: `fig-combined` (0.154 mm/unit, 180 mm wide) and `fig-elements` (0.115 mm/unit). The composites and the screenshot are sized to 180 mm wide. A new figure is laid out to fit, not scaled down.
 - **Captions.** Drafted in `paper-v3.qmd` next to each figure reference. Keep captions self-contained: a reader skimming figures should understand the claim without reading the body.
 
 ### Regenerating a figure
 
-There is no `figures:render` script yet — regeneration is the by-hand path
-below. (A script would mirror the modeler's `examples:render`: open each
-figure, export SVG, rasterize at the figure's current pixel width, and write
-the `studyflow` and `mxfile` chunks back on, so a re-render keeps print
-resolution and the authored layout.)
+Every figure regenerates from [`src/`](src/); see its README. In short, with the modeler checkout in `$MODELER`:
 
-By hand: re-export **PNG** from the modeler with both embed toggles on (Export dialog → Image → PNG → *Embed Studyflow source* + *Embed draw.io diagram*), accepting the 1× raster; `src/modeler/models/exporters/pngEmbedding.ts` has `embedStudyflowIntoPng` / `embedDrawioIntoPng` if you rasterize yourself.
+- a diagram: `MODELER=$MODELER src/render.sh fig-step1-design` (rasterizes the modeler's own SVG export at 4×, stamps the print size, and embeds the studyflow);
+- a hand-drawn panel: `src/panel.py src/fig-consort-reference.svg fig-consort-reference.png`;
+- `fig-views`: `src/views.mjs` captures the Gantt, Checklist and Provenance dialogs, and `src/compose_views.py` composes them with the battery cropped from `fig-combined` and with `fig-consort`;
+- `fig-s2-modeler`: `src/modeler.mjs`.
 
 To read a figure back: open the `.png` directly in the modeler (`Open File…`), or in draw.io. `fig-overview.png` is draw.io-authored and carries only the draw.io payload; the two `fig1_gap_panel*.png` sketches are hand-written SVG with no diagram source and carry neither.
 
@@ -25,36 +24,37 @@ To read a figure back: open the `.png` directly in the modeler (`Open File…`),
 
 ## Files on disk (2026-09-15, redrawn)
 
-Figure files for the example study are named by results step (`fig-step1-design`, `fig-step2-run`, ...) to match the Step 1 to Step 4 structure of `paper-v3.qmd`. All `fig-*.studyflow.png` files and `figS1` were redrawn from the hand-written `.studyflow.yaml` sources in [`src/`](src/) against the modeler's 26.9.22 schemas (skill vocabularies: `behaverse:Task`, `studyflow:Actor`, `agentic:Prompt`, `behaverse:BDMDataset`) and rendered with `src/render.sh`; `fig-elements` is the modeler's current kitchen sink; `fig-views` is a composite (Study, Gantt, Checklist, Provenance, Figure views) whose embedded studyflow is the combined study.
+Figure files for the example study are named by results step (`fig-step1-design`, `fig-step2-run`, ...) to match the Step 1 to Step 4 structure of `paper-v3.qmd`. All `fig-*.studyflow.png` files and `figS1` were laid out again for one print scale and redrawn from the hand-written `.studyflow.yaml` sources in [`src/`](src/) against the modeler's 26.9.22 schemas (skill vocabularies: `behaverse:Task`, `studyflow:Actor`, `agentic:Prompt`, `behaverse:BDMDataset`) and rendered with `src/render.sh`; `fig-elements` is the modeler's current kitchen sink; `fig-views` is a composite (Study, Gantt, Checklist, Provenance, Figure views) whose embedded studyflow is the combined study. `fig-step3-pipeline` was merged into `fig-step3-analyze`.
 
 One file per cross-reference: the filename **is** the `@fig-…` label the manuscript cites. The embedded diagram's own name is quoted below because it is what identifies the figure — not the filename, which is derived from it.
 
-| File | Cited as | Embedded diagram | Pixels | `studyflow` | `mxfile` | Size |
-|---|---|---|---|---|---|---|
-| `fig-overview.png` | `@fig-overview` | *(draw.io, 3 panels: Problem / Gap / Solution)* | 4419x3753 | — | yes | 478 KB |
-| `fig-elements.studyflow.png` | `@fig-elements` (cited in text as `@fig-elements-full`) | Studyflow element catalog (kitchen sink) | 5232x8008 | yes | - | 754 KB |
-| `fig-consort.studyflow.png` | `@fig-consort` | CONSORT participant flow | 4032x5352 | yes | - | 499 KB |
-| `fig-step1-design.studyflow.png` | `@fig-step1-design` | Step 1 — Design | 4032x3072 | yes | - | 282 KB |
-| `fig-step2-nback.studyflow.png` | `@fig-step2-nback` (panel b) | N-back trial | 4672x2432 | yes | - | 381 KB |
-| `fig-step2-nback-classic.png` | `@fig-step2-nback` (panel a) | *(raster slide, no source)* | 584x220 | — | — | 13 KB |
-| `fig-step2-run.studyflow.png` | `@fig-step2-run` | Step 2 — Run | 5712x2752 | yes | - | 436 KB |
-| `fig-step3-pipeline.studyflow.png` | `@fig-step3-pipeline` | Analysis pipeline | 6568x1436 | yes | - | 316 KB |
-| `fig-step3-analyze.studyflow.png` | `@fig-step3-analyze` | Step 3 — Analyze | 6848x1900 | yes | - | 381 KB |
-| `fig-step4-report.studyflow.png` | `@fig-step4-report` | Step 4 — Report | 2384x1544 | yes | - | 104 KB |
-| `fig-views.studyflow.png` | `@fig-views` | Example study (human and artificial cohorts) | 5833x3138 | yes | - | 1786 KB |
-| `fig-combined.studyflow.png` | `@fig-combined` | Example study (human and artificial cohorts) | 4032x8592 | yes | - | 1022 KB |
+| File | Cited as | Embedded diagram | Pixels | Prints at | `studyflow` | `mxfile` | Size |
+|---|---|---|---|---|---|---|---|
+| `fig-overview.png` | `@fig-overview` | *(draw.io, 3 panels: Problem / Gap / Solution)* | 4419x3753 | — | — | yes | 478 KB |
+| `fig-elements.studyflow.png` | `@fig-elements` | Studyflow element catalog (kitchen sink) | 5232x8008 | 150 × 230 mm | yes | — | 598 KB |
+| `fig-consort-reference.png` | `@fig-consort` (panel a) | *(CONSORT 2025 template, redrawn: `src/fig-consort-reference.svg`)* | 1520x2376 | 67 × 104 mm | — | — | 236 KB |
+| `fig-consort.studyflow.png` | `@fig-consort` (panel b) | CONSORT participant flow | 2512x4072 | 110 × 178 mm | yes | — | 383 KB |
+| `fig-step1-design.studyflow.png` | `@fig-step1-design` | Step 1 — Design | 4032x3072 | 176 × 134 mm | yes | — | 241 KB |
+| `fig-step2-nback-classic.png` | `@fig-step2-nback` (panel a) | *(slide-style figure, redrawn: `src/fig-step2-nback-classic.svg`)* | 2080x784 | 91 × 34 mm | — | — | 46 KB |
+| `fig-step2-nback.studyflow.png` | `@fig-step2-nback` (panel b) | N-back trial | 4112x2432 | 180 × 106 mm | yes | — | 323 KB |
+| `fig-step2-run.studyflow.png` | `@fig-step2-run` | Step 2 — Run | 4112x3232 | 180 × 141 mm | yes | — | 384 KB |
+| `fig-step3-analyze.studyflow.png` | `@fig-step3-analyze` | Step 3 — Analyze (with the pipeline's typed tables) | 3512x3216 | 154 × 141 mm | yes | — | 335 KB |
+| `fig-step4-report.studyflow.png` | `@fig-step4-report` | Step 4 — Report | 2384x1544 | 104 × 68 mm | yes | — | 90 KB |
+| `fig-views.studyflow.png` | `@fig-views` | Example study (human and artificial cohorts) | 5400x6010 | 180 × 200 mm | yes | — | 2696 KB |
+| `fig-combined.studyflow.png` | `@fig-combined` | Example study (human and artificial cohorts) | 4672x4752 | 180 × 183 mm | yes | — | 818 KB |
+| `fig-s2-modeler.png` | `@fig-s2-modeler` | *(annotated modeler screenshot: `src/modeler.mjs`)* | 2880x1800 | 180 × 112 mm | — | — | 339 KB |
+| `figS1-multimodal.studyflow.png` | `@fig-s1-multimodal` | Multimodal preprocessing and training | 4008x2052 | 175 × 90 mm | yes | — | 165 KB |
 
 **Not yet cited by the caption list**, left under their old names rather than given invented labels:
 
 | File | Embedded diagram | Pixels | `studyflow` | `mxfile` |
 |---|---|---|---|---|
-| `figS1-multimodal.studyflow.png` | Multimodal preprocessing and training | 4008×2052 | yes | - |
 | `figS3-runner.studyflow.png` | Runner walkthrough | 1936×6224 | yes | yes |
 | `rt_analysis.studyflow.png` | RT Analysis | 4252×2227 | yes | yes |
 | `fig1_gap_panelA.png`, `fig1_gap_panelB.png` | *(hand-written SVG sketches, superseded by `fig-overview.png`)* | — | — | — |
 | `todo_fig_extensions.png` | *(raster, no source)* | 2400×1080 | — | — |
 
-**Panels still to composite.** `@fig-consort` panel a is the published CONSORT 2025 reference flow, which is not in this folder; `fig-consort.studyflow.png` is panel b only. `@fig-step2-nback` is split across `fig-step2-nback-classic.png` (a) and `fig-step2-nback.studyflow.png` (b); Quarto composes them.
+**Panels.** `@fig-consort` and `@fig-step2-nback` are two panels each, composed by Quarto; their panel (a) is a hand-drawn SVG in `src/`, rasterized by `src/panel.py` at the same print scale as the diagrams.
 
 `elife_figures.drawio` stays as the draw.io master, now three pages:
 
