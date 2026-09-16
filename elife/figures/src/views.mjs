@@ -22,6 +22,8 @@ await page.getByTestId('modeler-ready').waitFor({state:'attached',timeout:60000}
 await page.getByTestId('open-file-input').setInputFiles({name:'figure.studyflow.yaml',mimeType:'text/yaml',buffer:readFileSync(input)});
 await page.locator('.sf-shape').first().waitFor({timeout:30000});
 await page.waitForTimeout(1500);
+// A kept notice (reader warnings) would sit over the toolbar and swallow the clicks below.
+for (const b of await page.getByRole('button', { name: 'Dismiss' }).all()) await b.click().catch(() => {});
 
 async function open(command, width) {
   await page.setViewportSize({ width, height: 1400 });

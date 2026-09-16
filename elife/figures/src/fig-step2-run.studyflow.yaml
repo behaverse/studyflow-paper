@@ -52,6 +52,7 @@ Run_Collaboration:
       isHorizontal: true
   messageFlows:
     Msg_Obs_Human:
+      stroke: "#5c8a55"
       name: trial
       sourceRef: Battery
       targetRef: Participant_Human
@@ -59,6 +60,7 @@ Run_Collaboration:
       waypoint: 245,560 245,640
       label: 200 606 40 14
     Msg_Resp_Human:
+      stroke: "#5c8a55"
       name: response, latency
       sourceRef: Participant_Human
       targetRef: Battery
@@ -66,31 +68,37 @@ Run_Collaboration:
       waypoint: 305,640 305,560
       label: 312 604 100 27
     Msg_Obs_Random:
+      stroke: "#5c8a55"
       sourceRef: Battery
       targetRef: Participant_Random
       messageRef: Trial
       waypoint: 435,560 435,640
     Msg_Resp_Random:
+      stroke: "#5c8a55"
       sourceRef: Participant_Random
       targetRef: Battery
       messageRef: Response
       waypoint: 495,640 495,560
     Msg_Obs_LLM:
+      stroke: "#5c8a55"
       sourceRef: Battery
       targetRef: Participant_LLM
       messageRef: Trial
       waypoint: 625,560 625,640
     Msg_Resp_LLM:
+      stroke: "#5c8a55"
       sourceRef: Participant_LLM
       targetRef: Battery
       messageRef: Response
       waypoint: 685,640 685,560
     Msg_Obs_VLM:
+      stroke: "#5c8a55"
       sourceRef: Battery
       targetRef: Participant_VLM
       messageRef: Trial
       waypoint: 815,560 815,640
     Msg_Resp_VLM:
+      stroke: "#5c8a55"
       sourceRef: Participant_VLM
       targetRef: Battery
       messageRef: Response
@@ -127,6 +135,7 @@ Run:
       label: 190 294 60 27
     Battery:
       type: SubProcess
+      font: "#5c8a55"
       fill: "#f0f6ee"
       stroke: "#5c8a55"
       name: Cognitive battery (one trial at a time)
@@ -151,21 +160,25 @@ Run:
           bounds: 270 222 36 36
         Task_NBack:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Working memory (N-Back)
           extensionElements:
             - type: behaverse:Task
-              scene: NB
+              instrument: NB
           onset: T0+6min
           duration: 5min
           dataInputAssociations:
             In_Params_NBack:
+              stroke: "#5c8a55"
               sourceRef: [Params_NBack]
               waypoint: 390,110 390,200
           bounds: 320 200 140 80
         Failed_NBack:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           name: "> 20% failed"
           eventDefinitions:
             Err_NBack: { type: ErrorEventDefinition }
@@ -174,97 +187,113 @@ Run:
           label: 462 290 80 14
         Task_DigitSpan:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Verbal span (Digit Span)
           extensionElements:
             - type: behaverse:Task
-              scene: DS
+              instrument: DS
           onset: T0+11min
           duration: 4min
           bounds: 475 200 140 80
         Failed_DigitSpan:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_DS: { type: ErrorEventDefinition }
           attachedToRef: Task_DigitSpan
           bounds: 577 262 36 36
         Task_SART:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Sustained attention (SART)
           extensionElements:
             - type: behaverse:Task
-              scene: SART
+              instrument: SART
           onset: T0+15min
           duration: 4min
           bounds: 630 200 140 80
         Failed_SART:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_SART: { type: ErrorEventDefinition }
           attachedToRef: Task_SART
           bounds: 732 262 36 36
         Task_SRT:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Processing speed (Serial RT)
           extensionElements:
             - type: behaverse:Task
-              scene: SRT
+              instrument: SRT
           onset: T0+19min
           duration: 4min
           bounds: 785 200 140 80
         Failed_SRT:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_SRT: { type: ErrorEventDefinition }
           attachedToRef: Task_SRT
           bounds: 887 262 36 36
         Task_Matrices:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Reasoning (Belval Matrices)
           extensionElements:
             - type: behaverse:Task
-              scene: BM
+              instrument: BM
           onset: T0+23min
           duration: 5min
           bounds: 785 360 140 80
         Failed_Matrices:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_BM: { type: ErrorEventDefinition }
           attachedToRef: Task_Matrices
           bounds: 887 422 36 36
         Task_CardSorting:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Set-shifting (Belval Card Sorting)
           extensionElements:
             - type: behaverse:Task
-              scene: BCS
+              instrument: BCS
           onset: T0+28min
           duration: 4min
           bounds: 630 360 140 80
         Failed_CardSorting:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_BCS: { type: ErrorEventDefinition }
           attachedToRef: Task_CardSorting
           bounds: 732 422 36 36
         Task_Flanker:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Attention (Flanker, jsPsych)
           extensionElements:
             - type: cognitive:CognitiveTask
-              instrument: jspsych
+              platform: jspsych
               construct: selective attention
               implementation: https://github.com/jspsych/jspsych-contrib@v0.4.0#flanker
           onset: T0+32min
@@ -272,6 +301,8 @@ Run:
           bounds: 475 360 140 80
         Failed_Flanker:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_Flanker: { type: ErrorEventDefinition }
           attachedToRef: Task_Flanker
@@ -292,17 +323,39 @@ Run:
           fill: "#f1d0cd"
           stroke: "#ac5a54"
           label: 236 522 108 27
-        F_Start_NBack: Sub_Start -> Task_NBack
-        F_1: Task_NBack -> Task_DigitSpan
-        F_2: Task_DigitSpan -> Task_SART
-        F_3: Task_SART -> Task_SRT
+        F_Start_NBack:
+          sourceRef: Sub_Start
+          targetRef: Task_NBack
+          stroke: "#5c8a55"
+        F_1:
+          sourceRef: Task_NBack
+          targetRef: Task_DigitSpan
+          stroke: "#5c8a55"
+        F_2:
+          sourceRef: Task_DigitSpan
+          targetRef: Task_SART
+          stroke: "#5c8a55"
+        F_3:
+          sourceRef: Task_SART
+          targetRef: Task_SRT
+          stroke: "#5c8a55"
         F_4:
+          stroke: "#5c8a55"
           sourceRef: Task_SRT
           targetRef: Task_Matrices
           waypoint: 855,280 855,360
-        F_5: Task_Matrices -> Task_CardSorting
-        F_6: Task_CardSorting -> Task_Flanker
-        F_End: Task_Flanker -> Sub_End
+        F_5:
+          sourceRef: Task_Matrices
+          targetRef: Task_CardSorting
+          stroke: "#5c8a55"
+        F_6:
+          sourceRef: Task_CardSorting
+          targetRef: Task_Flanker
+          stroke: "#5c8a55"
+        F_End:
+          sourceRef: Task_Flanker
+          targetRef: Sub_End
+          stroke: "#5c8a55"
         F_Failed_NBack:
           sourceRef: Failed_NBack
           targetRef: ErrEnd_Failed
@@ -340,14 +393,18 @@ Run:
           stroke: "#ac5a54"
       dataInputAssociations:
         In_Prompt:
+          stroke: "#5c8a55"
           sourceRef: [Prompt_Trait]
           waypoint: 578,110 578,140
       dataOutputAssociations:
         Out_Trials:
+          stroke: "#5c8a55"
           targetRef: Dataset_Trials
           waypoint: 825,140 825,110
     Params_NBack:
       type: DataObjectReference
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: N-back parameters (N=2, 40 trials, ISI 1.5 s)
       extensionElements:
         - type: studyflow:Parameters
@@ -371,6 +428,8 @@ Run:
       label: 414 62 120 40
     Prompt_Trait:
       type: DataObjectReference
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: Trait prompt (cautious or impulsive)
       extensionElements:
         - type: agentic:Prompt
@@ -383,6 +442,8 @@ Run:
       label: 602 66 110 27
     Battery_Error:
       type: BoundaryEvent
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: battery error
       eventDefinitions:
         Err_BatteryExit: { type: ErrorEventDefinition }
@@ -410,6 +471,8 @@ Run:
       label: 958 376 80 27
     Dataset_Trials:
       type: DataStoreReference
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: Trials (BDM)
       extensionElements:
         - type: behaverse:BDMDataset
@@ -419,6 +482,8 @@ Run:
       label: 716 72 76 27
     Schema_Trials:
       type: DataObjectReference
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: Trial schema (CSVW)
       extensionElements:
         - type: studyflow:Schema
@@ -437,8 +502,12 @@ Run:
               - name: failure_mode
       bounds: 920 60 36 50
       label: 962 66 76 27
-    Flow_Start_Battery: Battery_Start -> Battery
+    Flow_Start_Battery:
+      sourceRef: Battery_Start
+      targetRef: Battery
+      stroke: "#5c8a55"
     Flow_Battery_End:
+      stroke: "#5c8a55"
       sourceRef: Battery
       targetRef: Run_End
       waypoint: 940,350 980,350
@@ -449,6 +518,7 @@ Run:
       waypoint: 931,560 980,560
   artifacts:
     Assoc_Schema_Trials:
+      stroke: "#5c8a55"
       associationDirection: One
       sourceRef: Schema_Trials
       targetRef: Dataset_Trials

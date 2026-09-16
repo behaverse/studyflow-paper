@@ -36,6 +36,7 @@ Example_Study:
       label: 426 66 140 27
     Screening:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Screening
@@ -92,6 +93,7 @@ Example_Study:
       label: 338 378 124 14
     Allocate_Cautious:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to cautious disposition (n={reached})
@@ -104,6 +106,8 @@ Example_Study:
       bounds: 220 405 170 80
     DidNotStart_Cautious:
       type: BoundaryEvent
+      fill: "#eef3f8"
+      stroke: "#4e6f95"
       name: Did not receive allocated intervention
       eventDefinitions:
         Err_DNS_Cautious: { type: ErrorEventDefinition }
@@ -112,6 +116,7 @@ Example_Study:
       label: 160 507 84 40
     Allocate_Impulsive:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to impulsive disposition (n={reached})
@@ -124,6 +129,8 @@ Example_Study:
       bounds: 410 405 170 80
     DidNotStart_Impulsive:
       type: BoundaryEvent
+      fill: "#eef3f8"
+      stroke: "#4e6f95"
       name: Did not receive allocated intervention
       eventDefinitions:
         Err_DNS_Impulsive: { type: ErrorEventDefinition }
@@ -148,6 +155,7 @@ Example_Study:
       label: 632 552 108 54
     Battery:
       type: SubProcess
+      font: "#5c8a55"
       fill: "#dcebd6"
       stroke: "#5c8a55"
       name: Cognitive battery (n={reached})
@@ -159,6 +167,8 @@ Example_Study:
       isExpanded: false
     Battery_Error:
       type: BoundaryEvent
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: failed-trial rate above 20%
       eventDefinitions:
         Err_BatteryExit: { type: ErrorEventDefinition }
@@ -178,6 +188,24 @@ Example_Study:
       label: 632 692 108 27
     Analysis:
       type: SubProcess
+      font: "#7a67a6"
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-01T14:58:00Z"
+          run: 2026-09-01/example_study
+          seed: 42
+        - type: prov:Activity
+          action: invalidated
+          when: "2026-09-03T09:30:00Z"
+          who: Morteza Ansarinia
+          with: studyflow-modeler/26.9.24
+          what: "2026-09-01T14:58:00Z"
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-03T09:52:00Z"
+          run: 2026-09-03/example_study
+          seed: 42
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Analysis pipeline, preregistered (n={reached})
@@ -187,6 +215,8 @@ Example_Study:
       isExpanded: false
     Analysis_Error:
       type: BoundaryEvent
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: fewer than 50% valid trials
       eventDefinitions:
         Err_AnalysisExit: { type: ErrorEventDefinition }
@@ -206,6 +236,7 @@ Example_Study:
       label: 632 827 108 40
     Render:
       type: ServiceTask
+      font: "#a2803c"
       fill: "#f6e8c9"
       stroke: "#a2803c"
       name: Render reporting artifacts
@@ -215,6 +246,7 @@ Example_Study:
       bounds: 330 900 150 70
     Debrief:
       type: Task
+      font: "#a2803c"
       fill: "#f6e8c9"
       stroke: "#a2803c"
       name: Debrief
@@ -232,9 +264,16 @@ Example_Study:
       redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
       completionCodeType: dynamic
       bounds: 630 917 36 36
-    Flow_Enroll_Screening: Enroll -> Screening
-    Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
+    Flow_Enroll_Screening:
+      sourceRef: Enroll
+      targetRef: Screening
+      stroke: "#4e6f95"
+    Flow_Screening_Eligibility:
+      sourceRef: Screening
+      targetRef: Eligibility_Gateway
+      stroke: "#4e6f95"
     Flow_Eligible:
+      stroke: "#4e6f95"
       name: eligible
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Gateway
@@ -248,22 +287,26 @@ Example_Study:
       waypoint: 425,240 590,240
       label: 466 222 84 14
     Flow_Allocate_Cautious:
+      stroke: "#4e6f95"
       name: cautious
       sourceRef: Randomize_Gateway
       targetRef: Allocate_Cautious
       waypoint: 375,355 305,355 305,405
       label: 246 337 60 14
     Flow_Allocate_Impulsive:
+      stroke: "#4e6f95"
       name: impulsive
       sourceRef: Randomize_Gateway
       targetRef: Allocate_Impulsive
       waypoint: 425,355 495,355 495,405
       label: 430 337 66 14
     Flow_Cautious_Merge:
+      stroke: "#4e6f95"
       sourceRef: Allocate_Cautious
       targetRef: Merge_Allocation
       waypoint: 305,485 305,535 375,535
     Flow_Impulsive_Merge:
+      stroke: "#4e6f95"
       sourceRef: Allocate_Impulsive
       targetRef: Merge_Allocation
       waypoint: 495,485 495,535 425,535
@@ -278,6 +321,7 @@ Example_Study:
       waypoint: 560,503 560,570 590,570
       stroke: "#ac5a54"
     Flow_Merge_Battery:
+      stroke: "#4e6f95"
       sourceRef: Merge_Allocation
       targetRef: Battery
       waypoint: 400,560 400,640
@@ -287,6 +331,7 @@ Example_Study:
       waypoint: 488,710 590,710
       stroke: "#ac5a54"
     Flow_Battery_Analysis:
+      stroke: "#5c8a55"
       sourceRef: Battery
       targetRef: Analysis
       waypoint: 400,710 400,770
@@ -296,14 +341,17 @@ Example_Study:
       waypoint: 488,840 590,840
       stroke: "#ac5a54"
     Flow_Analysis_Render:
+      stroke: "#7a67a6"
       sourceRef: Analysis
       targetRef: Render
       waypoint: 400,840 400,900
     Flow_Render_Debrief:
+      stroke: "#a2803c"
       sourceRef: Render
       targetRef: Debrief
       waypoint: 480,935 500,935
     Flow_Debrief_Completed:
+      stroke: "#a2803c"
       sourceRef: Debrief
       targetRef: Completed
       waypoint: 600,935 630,935
@@ -361,10 +409,20 @@ state:
         who: Morteza Ansarinia
         with: studyflow-modeler/26.9.5
       - action: executed
+        when: "2026-08-20T10:05:00Z"
+        with: studyflow-cli/26.9.18
+        seed: 7
+        run: 2026-08-20/pilot_random
+      - action: executed
         when: "2026-09-01T14:20:00Z"
         with: studyflow-cli/26.9.24
         seed: 42
         run: 2026-09-01/example_study
+      - action: executed
+        when: "2026-09-03T09:41:00Z"
+        with: studyflow-cli/26.9.24
+        seed: 42
+        run: 2026-09-03/example_study
     reached:
       Enroll: 96
       Eligibility_Gateway: 96

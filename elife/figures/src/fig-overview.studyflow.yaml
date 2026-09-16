@@ -1,0 +1,350 @@
+id: example_study_overview
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Example_Study:
+  type: Process
+  name: Example study (overview)
+  documentation: >-
+    The example study compacted to one row for the overview figure (@fig-overview): the same file as
+    `example_study.studyflow`, with the battery and the analysis collapsed and the two "did not receive
+    allocated intervention" exits omitted, laid out left to right under the four lifecycle stages. Every
+    other count is the run-state value the runner wrote as the cohort ran. Its Gantt, Checklist and
+    Provenance views are the modeler's own renderings of this file.
+  extensionElements:
+    - type: studyflow:Study
+      seed: 42
+      runtime: browser
+      version: "1.0"
+      authors:
+        - Morteza Ansarinia
+        - Hoorieh Afkari Roshan
+        - Pedro Cardoso-Leite
+      dependencies:
+        - behaverse-analysis==1.0
+        - scikit-learn>=1.5
+  properties:
+    P_arm:
+      name: arm
+  flowElements:
+    Enroll:
+      type: StartEvent
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Enrolled and consented (n={reached})
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+      onset: T0
+      bounds: 20 84 32 32
+      label: 0 122 76 40
+    Screening:
+      type: Task
+      font: "#4e6f95"
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Screening
+      extensionElements:
+        - type: cognitive:Questionnaire
+          instrument: screening
+      checklist: |-
+        - [x] Informed consent recorded
+        - [x] Demographic intake
+        - [x] Inclusion criteria checked
+        - [x] Exclusion criteria checked
+      onset: T0
+      duration: 5min
+      bounds: 70 72 96 56
+    Eligibility_Gateway:
+      type: ExclusiveGateway
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Assessed for eligibility (n={reached})
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+          inclusionCriteria:
+            - Aged 18 to 65 years, normal or corrected-to-normal vision (human cohort)
+            - Registered agent family with a pinned model version (artificial cohort)
+          exclusionCriteria:
+            - Prior exposure to the battery
+            - Failed comprehension check at screening
+      bounds: 184 80 40 40
+      isMarkerVisible: true
+      label: 150 40 108 27
+    Excluded_Pre:
+      type: EndEvent
+      name: Excluded (n={count})
+      properties:
+        P_count_pre: { name: count, value: "0" }
+      eventDefinitions:
+        Err_ExcludedPre: { type: ErrorEventDefinition }
+      bounds: 190 172 28 28
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+      label: 224 179 90 14
+    Randomize_Gateway:
+      type: ExclusiveGateway
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Randomized (n={reached})
+      extensionElements:
+        - type: cognitive:RandomGateway
+          algorithm: block
+          allocationRatio: "1:1"
+          blockSize: 4
+      bounds: 242 80 40 40
+      isMarkerVisible: true
+      label: 222 124 80 27
+    Allocate_Cautious:
+      type: Task
+      font: "#4e6f95"
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Allocated to cautious disposition (n={reached})
+      extensionElements:
+        - type: cognitive:Instruction
+          content: >-
+            Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
+      onset: T0+5min
+      duration: 1min
+      bounds: 296 14 128 60
+    Allocate_Impulsive:
+      type: Task
+      font: "#4e6f95"
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Allocated to impulsive disposition (n={reached})
+      extensionElements:
+        - type: cognitive:Instruction
+          content: >-
+            Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+      onset: T0+5min
+      duration: 1min
+      bounds: 296 126 128 60
+    Battery:
+      type: SubProcess
+      font: "#5c8a55"
+      fill: "#dcebd6"
+      stroke: "#5c8a55"
+      name: Cognitive battery
+      properties:
+        P_failed_trials: { name: failed_trials, value: "0" }
+      onset: T0+6min
+      duration: 30min
+      bounds: 466 72 128 56
+      isExpanded: false
+      dataInputAssociations:
+        In_Params:
+          stroke: "#5c8a55"
+          sourceRef: [Params_NBack]
+          waypoint: 530,48 530,72
+    Params_NBack:
+      type: DataObjectReference
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
+      name: N-back parameters (N=2, 40 trials, ISI 1.5 s)
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            Blocks:
+              NBack_2:
+                Name: NBack_2
+                Inherits: Default
+                Parameters:
+                  NValue: 2
+                  StreamSize: 40
+                  StimulusDisplayDuration: 0.5
+                  MaxResponseTime: 3
+                  InterStimulusInterval: 1.5
+      bounds: 514 4 32 44
+      label: 552 12 150 28
+    Battery_Error:
+      type: BoundaryEvent
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
+      name: failed-trial rate above 20%
+      eventDefinitions:
+        Err_BatteryExit: { type: ErrorEventDefinition }
+      attachedToRef: Battery
+      bounds: 566 114 28 28
+      label: 598 132 96 27
+    Discontinued:
+      type: EndEvent
+      name: Discontinued intervention (n={count})
+      properties:
+        P_count_disc: { name: count, value: "0" }
+      eventDefinitions:
+        Err_Discontinued: { type: ErrorEventDefinition }
+      bounds: 566 172 28 28
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+      label: 600 178 100 28
+    Analysis:
+      type: SubProcess
+      font: "#7a67a6"
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-01T14:58:00Z"
+          run: 2026-09-01/example_study
+          seed: 42
+        - type: prov:Activity
+          action: invalidated
+          when: "2026-09-03T09:30:00Z"
+          who: Morteza Ansarinia
+          with: studyflow-modeler/26.9.24
+          what: "2026-09-01T14:58:00Z"
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-03T09:52:00Z"
+          run: 2026-09-03/example_study
+          seed: 42
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      name: Analysis pipeline
+      checklist: |-
+        - [x] Trials with a response time below 100 ms dropped
+        - [x] Trials with missing data dropped
+        - [x] Trials flagged in Step 2 dropped
+        - [x] Subjects with fewer than 50% valid trials excluded
+      onset: T0+40min
+      duration: 10min
+      bounds: 621 72 128 56
+      isExpanded: false
+    Analysis_Error:
+      type: BoundaryEvent
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
+      name: fewer than 50% valid trials
+      eventDefinitions:
+        Err_AnalysisExit: { type: ErrorEventDefinition }
+      attachedToRef: Analysis
+      bounds: 721 114 28 28
+      label: 753 132 96 27
+    Excluded_Analysis:
+      type: EndEvent
+      name: Excluded from analysis (n={count})
+      properties:
+        P_count_excl: { name: count, value: "0" }
+      eventDefinitions:
+        Err_ExcludedAnalysis: { type: ErrorEventDefinition }
+      bounds: 721 172 28 28
+      fill: "#f1d0cd"
+      stroke: "#ac5a54"
+      label: 755 178 100 28
+    Render:
+      type: ServiceTask
+      font: "#a2803c"
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
+      name: Render reporting artifacts
+      implementation: python://behaverse_report.render@1.0
+      checklist: |-
+        - [x] CONSORT participant flow exported from the Figure view
+        - [x] SPIRIT schedule exported from the Gantt view
+        - [x] CHART items recorded from the run provenance
+      onset: T0+50min
+      duration: 2min
+      bounds: 764 68 130 64
+    Completed:
+      type: EndEvent
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
+      name: Completed
+      redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
+      completionCodeType: dynamic
+      bounds: 906 84 32 32
+      label: 886 122 72 14
+    Flow_Enroll_Screening:
+      sourceRef: Enroll
+      targetRef: Screening
+      stroke: "#4e6f95"
+    Flow_Screening_Eligibility:
+      sourceRef: Screening
+      targetRef: Eligibility_Gateway
+      stroke: "#4e6f95"
+    Flow_Eligible:
+      stroke: "#4e6f95"
+      sourceRef: Eligibility_Gateway
+      targetRef: Randomize_Gateway
+      waypoint: 224,100 242,100
+    Flow_Excluded_Pre:
+      name: not eligible
+      sourceRef: Eligibility_Gateway
+      targetRef: Excluded_Pre
+      stroke: "#ac5a54"
+      waypoint: 204,120 204,172
+      label: 140 150 60 14
+    Flow_Allocate_Cautious:
+      stroke: "#4e6f95"
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_Cautious
+      waypoint: 262,80 262,44 296,44
+    Flow_Allocate_Impulsive:
+      stroke: "#4e6f95"
+      sourceRef: Randomize_Gateway
+      targetRef: Allocate_Impulsive
+      waypoint: 262,120 262,156 296,156
+    Flow_Cautious_Battery:
+      stroke: "#4e6f95"
+      sourceRef: Allocate_Cautious
+      targetRef: Battery
+      waypoint: 424,44 440,44 440,100 466,100
+    Flow_Impulsive_Battery:
+      stroke: "#4e6f95"
+      sourceRef: Allocate_Impulsive
+      targetRef: Battery
+      waypoint: 424,156 440,156 440,100 466,100
+    Flow_Battery_Discontinued:
+      sourceRef: Battery_Error
+      targetRef: Discontinued
+      waypoint: 580,142 580,172
+      stroke: "#ac5a54"
+    Flow_Battery_Analysis:
+      sourceRef: Battery
+      targetRef: Analysis
+      stroke: "#5c8a55"
+    Flow_Analysis_Excluded:
+      sourceRef: Analysis_Error
+      targetRef: Excluded_Analysis
+      waypoint: 735,142 735,172
+      stroke: "#ac5a54"
+    Flow_Analysis_Render:
+      sourceRef: Analysis
+      targetRef: Render
+      stroke: "#7a67a6"
+    Flow_Render_Completed:
+      sourceRef: Render
+      targetRef: Completed
+      stroke: "#a2803c"
+state:
+  _meta:
+    prov:
+      - action: created
+        when: "2026-08-01T09:00:00Z"
+        who: Morteza Ansarinia
+        with: studyflow-modeler/26.9.5
+      - action: executed
+        when: "2026-08-20T10:05:00Z"
+        with: studyflow-cli/26.9.18
+        seed: 7
+        run: 2026-08-20/pilot_random
+      - action: executed
+        when: "2026-09-01T14:20:00Z"
+        with: studyflow-cli/26.9.24
+        seed: 42
+        run: 2026-09-01/example_study
+      - action: executed
+        when: "2026-09-03T09:41:00Z"
+        with: studyflow-cli/26.9.24
+        seed: 42
+        run: 2026-09-03/example_study
+    reached:
+      Enroll: 96
+      Eligibility_Gateway: 96
+      Randomize_Gateway: 90
+      Allocate_Cautious: 45
+      Allocate_Impulsive: 45
+      Battery: 88
+      Analysis: 79
+      Completed: 76
+  Excluded_Pre: { count: 6 }
+  Discontinued: { count: 9 }
+  Excluded_Analysis: { count: 3 }

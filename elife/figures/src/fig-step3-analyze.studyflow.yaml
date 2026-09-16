@@ -30,6 +30,7 @@ Analyze:
       bounds: 180 222 36 36
     Read:
       type: ServiceTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Read trials
@@ -37,15 +38,18 @@ Analyze:
       onset: T0+40min
       dataInputAssociations:
         In_Read:
+          stroke: "#7a67a6"
           sourceRef: [Dataset_Trials]
           waypoint: 275,110 275,200
       dataOutputAssociations:
         Out_Read:
+          stroke: "#7a67a6"
           targetRef: T_Raw
           waypoint: 350,200 350,95 397,95
       bounds: 240 200 130 80
     Filter:
       type: ServiceTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Filter invalid trials
@@ -60,18 +64,23 @@ Analyze:
         - [ ] Subjects with fewer than 50% valid trials excluded
       dataInputAssociations:
         In_Filter:
+          stroke: "#7a67a6"
           sourceRef: [T_Raw]
           waypoint: 433,95 460,95 460,200
         In_Filter_Params:
+          stroke: "#7a67a6"
           sourceRef: [Params_Exclusion]
           waypoint: 515,120 515,200
       dataOutputAssociations:
         Out_Filter:
+          stroke: "#7a67a6"
           targetRef: T_Valid
           waypoint: 540,200 540,95 597,95
       bounds: 430 200 130 80
     Filter_Excluded:
       type: BoundaryEvent
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: fewer than 50% valid trials
       eventDefinitions:
         Err_Filter: { type: ErrorEventDefinition }
@@ -93,16 +102,19 @@ Analyze:
       stroke: "#ac5a54"
     Map:
       type: ServiceTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Map to derived measures
       implementation: python://behaverse_analysis.derive_measures@1.0
       dataInputAssociations:
         In_Map:
+          stroke: "#7a67a6"
           sourceRef: [T_Valid]
           waypoint: 633,95 650,95 650,200
       dataOutputAssociations:
         Out_Map:
+          stroke: "#7a67a6"
           targetRef: T_Derived
           waypoint: 730,200 730,150 1045,150 1045,200
       bounds: 620 200 130 80
@@ -115,6 +127,7 @@ Analyze:
       label: 690 292 100 27
     Congruency:
       type: ServiceTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Congruency effect (Flanker RT and accuracy)
@@ -122,6 +135,7 @@ Analyze:
       bounds: 555 400 150 95
     Agreement:
       type: ServiceTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Agreement (equivalence of accuracy)
@@ -129,6 +143,7 @@ Analyze:
       bounds: 715 400 150 95
     Divergence:
       type: ServiceTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Divergence (classifier vs random baseline)
@@ -144,49 +159,59 @@ Analyze:
       bounds: 765 520 50 50
     Reduce_Run:
       type: ServiceTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Reduce to per-run summaries
       implementation: python://behaverse_analysis.summarize_runs@1.0
       dataInputAssociations:
         In_ReduceRun:
+          stroke: "#7a67a6"
           sourceRef: [T_Derived]
           waypoint: 1045,250 1045,660 855,660
       dataOutputAssociations:
         Out_ReduceRun:
+          stroke: "#7a67a6"
           targetRef: T_Runs
           waypoint: 740,700 740,765 716,765
       bounds: 725 620 130 80
     Reduce_Group:
       type: ServiceTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Reduce to group statistics
       implementation: python://behaverse_analysis.group_stats@1.0
       dataInputAssociations:
         In_ReduceGroup:
+          stroke: "#7a67a6"
           sourceRef: [T_Runs]
           waypoint: 680,765 650,765 650,700
         In_Rules:
+          stroke: "#7a67a6"
           sourceRef: [Params_Rules]
           waypoint: 605,590 605,620
       dataOutputAssociations:
         Out_ReduceGroup:
+          stroke: "#7a67a6"
           targetRef: T_Group
           waypoint: 560,700 560,765 533,765
       bounds: 540 620 130 80
     Review:
       type: ManualTask
+      font: "#7a67a6"
       fill: "#e6dff1"
       stroke: "#7a67a6"
       name: Manual outlier review
       documentation: The human analyst inspects the group statistics before anything is reported.
       dataInputAssociations:
         In_Review:
+          stroke: "#7a67a6"
           sourceRef: [T_Group]
           waypoint: 497,765 470,765 470,700
       dataOutputAssociations:
         Out_Review:
+          stroke: "#7a67a6"
           targetRef: Dataset_Results
           waypoint: 380,700 380,765 350,765
       bounds: 360 620 130 80
@@ -198,6 +223,8 @@ Analyze:
       bounds: 280 642 36 36
     Dataset_Trials:
       type: DataStoreReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Trials (BDM)
       extensionElements:
         - type: behaverse:BDMDataset
@@ -207,6 +234,8 @@ Analyze:
       label: 230 42 90 14
     Schema_Trials:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Trial schema (CSVW)
       extensionElements:
         - type: studyflow:Schema
@@ -226,6 +255,8 @@ Analyze:
       label: 158 28 80 27
     T_Raw:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Raw trials
       extensionElements:
         - type: studyflow:Table
@@ -234,6 +265,8 @@ Analyze:
       label: 370 52 90 14
     T_Valid:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Valid trials
       extensionElements:
         - type: studyflow:Table
@@ -242,6 +275,8 @@ Analyze:
       label: 570 52 90 14
     T_Derived:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Derived measures
       extensionElements:
         - type: studyflow:Table
@@ -250,6 +285,8 @@ Analyze:
       label: 930 214 90 27
     T_Runs:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Per-run summaries
       extensionElements:
         - type: studyflow:Table
@@ -258,6 +295,8 @@ Analyze:
       label: 646 795 104 14
     T_Group:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Group statistics
       extensionElements:
         - type: studyflow:Table
@@ -266,6 +305,8 @@ Analyze:
       label: 465 795 100 14
     Params_Exclusion:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Exclusion criteria
       extensionElements:
         - type: studyflow:Parameters
@@ -278,6 +319,8 @@ Analyze:
       label: 470 34 90 14
     Params_Rules:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Decision rules
       extensionElements:
         - type: studyflow:Parameters
@@ -289,6 +332,8 @@ Analyze:
       label: 496 552 86 14
     Dataset_Results:
       type: DataStoreReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Results (Psych-DS)
       extensionElements:
         - type: studyflow:Dataset
@@ -296,47 +341,80 @@ Analyze:
           uri: results/
       bounds: 300 740 50 50
       label: 275 795 100 14
-    F_0: A_Start -> Read
-    F_1: Read -> Filter
-    F_2: Filter -> Map
-    F_3: Map -> Which
+    F_0:
+      sourceRef: A_Start
+      targetRef: Read
+      stroke: "#7a67a6"
+    F_1:
+      sourceRef: Read
+      targetRef: Filter
+      stroke: "#7a67a6"
+    F_2:
+      sourceRef: Filter
+      targetRef: Map
+      stroke: "#7a67a6"
+    F_3:
+      sourceRef: Map
+      targetRef: Which
+      stroke: "#7a67a6"
     F_Congruency:
+      stroke: "#7a67a6"
       name: congruency
       sourceRef: Which
       targetRef: Congruency
       waypoint: 825,265 825,360 630,360 630,400
       label: 636 377 70 14
     F_Agreement:
+      stroke: "#7a67a6"
       name: agreement
       sourceRef: Which
       targetRef: Agreement
       waypoint: 825,265 825,360 790,360 790,400
       label: 796 377 62 14
     F_Divergence:
+      stroke: "#7a67a6"
       name: divergence
       sourceRef: Which
       targetRef: Divergence
       waypoint: 825,265 825,360 950,360 950,400
       label: 956 377 72 14
     F_Congruency_Join:
+      stroke: "#7a67a6"
       sourceRef: Congruency
       targetRef: Join
       waypoint: 630,495 630,545 765,545
-    F_Agreement_Join: Agreement -> Join
+    F_Agreement_Join:
+      sourceRef: Agreement
+      targetRef: Join
+      stroke: "#7a67a6"
     F_Divergence_Join:
+      stroke: "#7a67a6"
       sourceRef: Divergence
       targetRef: Join
       waypoint: 950,495 950,545 815,545
-    F_4: Join -> Reduce_Run
-    F_5: Reduce_Run -> Reduce_Group
-    F_6: Reduce_Group -> Review
-    F_7: Review -> A_End
+    F_4:
+      sourceRef: Join
+      targetRef: Reduce_Run
+      stroke: "#7a67a6"
+    F_5:
+      sourceRef: Reduce_Run
+      targetRef: Reduce_Group
+      stroke: "#7a67a6"
+    F_6:
+      sourceRef: Reduce_Group
+      targetRef: Review
+      stroke: "#7a67a6"
+    F_7:
+      sourceRef: Review
+      targetRef: A_End
+      stroke: "#7a67a6"
     F_Excluded:
       sourceRef: Filter_Excluded
       targetRef: Excluded_Analysis
       stroke: "#ac5a54"
   artifacts:
     Assoc_Schema_Trials:
+      stroke: "#7a67a6"
       associationDirection: One
       sourceRef: Schema_Trials
       targetRef: Dataset_Trials

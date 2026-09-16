@@ -37,6 +37,7 @@ Example_Study:
       label: 168 152 100 27
     Screening:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Screening
@@ -92,6 +93,7 @@ Example_Study:
       label: 1086 123 110 14
     Allocate_Cautious:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to cautious disposition (n={reached})
@@ -104,6 +106,8 @@ Example_Study:
       bounds: 850 215 170 80
     DidNotStart_Cautious:
       type: BoundaryEvent
+      fill: "#eef3f8"
+      stroke: "#4e6f95"
       name: Did not receive allocated intervention
       eventDefinitions:
         Err_DNS_Cautious: { type: ErrorEventDefinition }
@@ -112,6 +116,7 @@ Example_Study:
       label: 800 318 80 54
     Allocate_Impulsive:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to impulsive disposition (n={reached})
@@ -124,6 +129,8 @@ Example_Study:
       bounds: 1090 215 170 80
     DidNotStart_Impulsive:
       type: BoundaryEvent
+      fill: "#eef3f8"
+      stroke: "#4e6f95"
       name: Did not receive allocated intervention
       eventDefinitions:
         Err_DNS_Impulsive: { type: ErrorEventDefinition }
@@ -148,6 +155,7 @@ Example_Study:
       label: 1106 398 150 27
     Battery:
       type: SubProcess
+      font: "#5c8a55"
       fill: "#f0f6ee"
       stroke: "#5c8a55"
       name: Cognitive battery (n={reached})
@@ -169,21 +177,25 @@ Example_Study:
           bounds: 196 627 36 36
         Task_NBack:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Working memory (N-Back)
           extensionElements:
             - type: behaverse:Task
-              scene: NB
+              instrument: NB
           onset: T0+6min
           duration: 5min
           dataInputAssociations:
             In_Params_NBack:
+              stroke: "#5c8a55"
               sourceRef: [Params_NBack]
               waypoint: 306,520 306,600
           bounds: 248 600 115 90
         Failed_NBack:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           name: "> 20% failed"
           eventDefinitions:
             Err_NBack: { type: ErrorEventDefinition }
@@ -192,97 +204,113 @@ Example_Study:
           label: 372 712 80 14
         Task_DigitSpan:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Verbal span (Digit Span)
           extensionElements:
             - type: behaverse:Task
-              scene: DS
+              instrument: DS
           onset: T0+11min
           duration: 4min
           bounds: 381 600 115 90
         Failed_DigitSpan:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_DS: { type: ErrorEventDefinition }
           attachedToRef: Task_DigitSpan
           bounds: 466 672 36 36
         Task_SART:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Sustained attention (SART)
           extensionElements:
             - type: behaverse:Task
-              scene: SART
+              instrument: SART
           onset: T0+15min
           duration: 4min
           bounds: 514 600 115 90
         Failed_SART:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_SART: { type: ErrorEventDefinition }
           attachedToRef: Task_SART
           bounds: 599 672 36 36
         Task_SRT:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Processing speed (Serial RT)
           extensionElements:
             - type: behaverse:Task
-              scene: SRT
+              instrument: SRT
           onset: T0+19min
           duration: 4min
           bounds: 647 600 115 90
         Failed_SRT:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_SRT: { type: ErrorEventDefinition }
           attachedToRef: Task_SRT
           bounds: 732 672 36 36
         Task_Matrices:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Reasoning (Belval Matrices)
           extensionElements:
             - type: behaverse:Task
-              scene: BM
+              instrument: BM
           onset: T0+23min
           duration: 5min
           bounds: 647 780 115 90
         Failed_Matrices:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_BM: { type: ErrorEventDefinition }
           attachedToRef: Task_Matrices
           bounds: 732 852 36 36
         Task_CardSorting:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Set-shifting (Belval Card Sorting)
           extensionElements:
             - type: behaverse:Task
-              scene: BCS
+              instrument: BCS
           onset: T0+28min
           duration: 4min
           bounds: 514 780 115 90
         Failed_CardSorting:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_BCS: { type: ErrorEventDefinition }
           attachedToRef: Task_CardSorting
           bounds: 599 852 36 36
         Task_Flanker:
           type: ChoreographyTask
+          font: "#5c8a55"
           fill: "#dcebd6"
           stroke: "#5c8a55"
           name: Attention (Flanker, jsPsych)
           extensionElements:
             - type: cognitive:CognitiveTask
-              instrument: jspsych
+              platform: jspsych
               construct: selective attention
               implementation: https://github.com/jspsych/jspsych-contrib@v0.4.0#flanker
           onset: T0+32min
@@ -290,6 +318,8 @@ Example_Study:
           bounds: 381 780 115 90
         Failed_Flanker:
           type: BoundaryEvent
+          fill: "#f0f6ee"
+          stroke: "#5c8a55"
           eventDefinitions:
             Err_Flanker: { type: ErrorEventDefinition }
           attachedToRef: Task_Flanker
@@ -310,17 +340,39 @@ Example_Study:
           fill: "#f1d0cd"
           stroke: "#ac5a54"
           label: 180 952 100 27
-        BF_0: Sub_Start -> Task_NBack
-        BF_1: Task_NBack -> Task_DigitSpan
-        BF_2: Task_DigitSpan -> Task_SART
-        BF_3: Task_SART -> Task_SRT
+        BF_0:
+          sourceRef: Sub_Start
+          targetRef: Task_NBack
+          stroke: "#5c8a55"
+        BF_1:
+          sourceRef: Task_NBack
+          targetRef: Task_DigitSpan
+          stroke: "#5c8a55"
+        BF_2:
+          sourceRef: Task_DigitSpan
+          targetRef: Task_SART
+          stroke: "#5c8a55"
+        BF_3:
+          sourceRef: Task_SART
+          targetRef: Task_SRT
+          stroke: "#5c8a55"
         BF_4:
+          stroke: "#5c8a55"
           sourceRef: Task_SRT
           targetRef: Task_Matrices
           waypoint: 704.5,690 704.5,780
-        BF_5: Task_Matrices -> Task_CardSorting
-        BF_6: Task_CardSorting -> Task_Flanker
-        BF_7: Task_Flanker -> Sub_End
+        BF_5:
+          sourceRef: Task_Matrices
+          targetRef: Task_CardSorting
+          stroke: "#5c8a55"
+        BF_6:
+          sourceRef: Task_CardSorting
+          targetRef: Task_Flanker
+          stroke: "#5c8a55"
+        BF_7:
+          sourceRef: Task_Flanker
+          targetRef: Sub_End
+          stroke: "#5c8a55"
         BF_Failed_NBack:
           sourceRef: Failed_NBack
           targetRef: ErrEnd_Failed
@@ -358,10 +410,13 @@ Example_Study:
           stroke: "#ac5a54"
       dataOutputAssociations:
         Out_Trials:
+          stroke: "#5c8a55"
           targetRef: Dataset_Trials
           waypoint: 750,540 750,495 830,495
     Params_NBack:
       type: DataObjectReference
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: N-back parameters
       extensionElements:
         - type: studyflow:Parameters
@@ -383,6 +438,8 @@ Example_Study:
       label: 330 482 100 27
     Battery_Error:
       type: BoundaryEvent
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: battery error
       eventDefinitions:
         Err_BatteryExit: { type: ErrorEventDefinition }
@@ -402,6 +459,8 @@ Example_Study:
       label: 442 1016 140 27
     Dataset_Trials:
       type: DataStoreReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Trials (BDM)
       extensionElements:
         - type: behaverse:BDMDataset
@@ -411,6 +470,8 @@ Example_Study:
       label: 890 470 84 14
     Schema_Trials:
       type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Trial schema (CSVW)
       extensionElements:
         - type: studyflow:Schema
@@ -419,6 +480,24 @@ Example_Study:
       label: 1142 480 110 27
     Analysis:
       type: SubProcess
+      font: "#7a67a6"
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-01T14:58:00Z"
+          run: 2026-09-01/example_study
+          seed: 42
+        - type: prov:Activity
+          action: invalidated
+          when: "2026-09-03T09:30:00Z"
+          who: Morteza Ansarinia
+          with: studyflow-modeler/26.9.24
+          what: "2026-09-01T14:58:00Z"
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-03T09:52:00Z"
+          run: 2026-09-03/example_study
+          seed: 42
       fill: "#f4f1f8"
       stroke: "#7a67a6"
       name: Analysis pipeline, preregistered (n={reached})
@@ -438,6 +517,7 @@ Example_Study:
           bounds: 824 612 36 36
         Read:
           type: ServiceTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Read trials
@@ -445,6 +525,7 @@ Example_Study:
           bounds: 874 590 110 80
         Filter:
           type: ServiceTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Filter invalid trials
@@ -457,6 +538,8 @@ Example_Study:
           bounds: 1002 590 110 80
         Filter_Excluded:
           type: BoundaryEvent
+          fill: "#f4f1f8"
+          stroke: "#7a67a6"
           name: "< 50% valid trials"
           eventDefinitions:
             Err_Filter: { type: ErrorEventDefinition }
@@ -474,6 +557,7 @@ Example_Study:
           label: 916 722 94 27
         Map:
           type: ServiceTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Map to derived measures
@@ -488,6 +572,7 @@ Example_Study:
           label: 1080 716 76 27
         Congruency:
           type: ServiceTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Congruency effect (Flanker RT and accuracy)
@@ -495,6 +580,7 @@ Example_Study:
           bounds: 818 790 138 90
         Agreement:
           type: ServiceTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Agreement (equivalence of accuracy)
@@ -502,6 +588,7 @@ Example_Study:
           bounds: 966 790 138 90
         Divergence:
           type: ServiceTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Divergence (classifier vs random baseline)
@@ -514,6 +601,7 @@ Example_Study:
           bounds: 1160 900 50 50
         Reduce_Run:
           type: ServiceTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Reduce to per-run summaries
@@ -521,6 +609,7 @@ Example_Study:
           bounds: 1130 970 110 80
         Reduce_Group:
           type: ServiceTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Reduce to group statistics
@@ -528,6 +617,7 @@ Example_Study:
           bounds: 1002 970 110 80
         Review:
           type: ManualTask
+          font: "#7a67a6"
           fill: "#e6dff1"
           stroke: "#7a67a6"
           name: Manual outlier review
@@ -538,10 +628,20 @@ Example_Study:
           stroke: "#7a67a6"
           name: Analyzed
           bounds: 824 992 36 36
-        AF_0: An_Start -> Read
-        AF_1: Read -> Filter
-        AF_2: Filter -> Map
+        AF_0:
+          sourceRef: An_Start
+          targetRef: Read
+          stroke: "#7a67a6"
+        AF_1:
+          sourceRef: Read
+          targetRef: Filter
+          stroke: "#7a67a6"
+        AF_2:
+          sourceRef: Filter
+          targetRef: Map
+          stroke: "#7a67a6"
         AF_3:
+          stroke: "#7a67a6"
           sourceRef: Map
           targetRef: Which
           waypoint: 1185,670 1185,700
@@ -551,52 +651,72 @@ Example_Study:
           waypoint: 1032,688 1032,712
           stroke: "#ac5a54"
         AF_Congruency:
+          stroke: "#7a67a6"
           name: congruency
           sourceRef: Which
           targetRef: Congruency
           waypoint: 1185,750 1185,765 887,765 887,790
           label: 893 768 70 14
         AF_Agreement:
+          stroke: "#7a67a6"
           name: agreement
           sourceRef: Which
           targetRef: Agreement
           waypoint: 1185,750 1185,765 1035,765 1035,790
           label: 1041 768 62 14
         AF_Divergence:
+          stroke: "#7a67a6"
           name: divergence
           sourceRef: Which
           targetRef: Divergence
           waypoint: 1185,750 1185,790
           label: 1191 768 66 14
         AF_Congruency_Join:
+          stroke: "#7a67a6"
           sourceRef: Congruency
           targetRef: Join
           waypoint: 887,880 887,925 1160,925
         AF_Agreement_Join:
+          stroke: "#7a67a6"
           sourceRef: Agreement
           targetRef: Join
           waypoint: 1035,880 1035,925 1160,925
         AF_Divergence_Join:
+          stroke: "#7a67a6"
           sourceRef: Divergence
           targetRef: Join
           waypoint: 1185,880 1185,900
         AF_4:
+          stroke: "#7a67a6"
           sourceRef: Join
           targetRef: Reduce_Run
           waypoint: 1185,950 1185,970
-        AF_5: Reduce_Run -> Reduce_Group
-        AF_6: Reduce_Group -> Review
-        AF_7: Review -> An_End
+        AF_5:
+          sourceRef: Reduce_Run
+          targetRef: Reduce_Group
+          stroke: "#7a67a6"
+        AF_6:
+          sourceRef: Reduce_Group
+          targetRef: Review
+          stroke: "#7a67a6"
+        AF_7:
+          sourceRef: Review
+          targetRef: An_End
+          stroke: "#7a67a6"
       dataInputAssociations:
         In_Trials:
+          stroke: "#7a67a6"
           sourceRef: [Dataset_Trials]
           waypoint: 855,520 855,540
       dataOutputAssociations:
         Out_Results:
+          stroke: "#7a67a6"
           targetRef: Dataset_Results
           waypoint: 1050,1060 1050,1110
     Analysis_Error:
       type: BoundaryEvent
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: analysis error
       eventDefinitions:
         Err_AnalysisExit: { type: ErrorEventDefinition }
@@ -616,6 +736,8 @@ Example_Study:
       label: 1150 1116 110 40
     Dataset_Results:
       type: DataStoreReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Results (Psych-DS)
       extensionElements:
         - type: studyflow:Dataset
@@ -624,6 +746,7 @@ Example_Study:
       bounds: 1025 1110 50 50
     Render:
       type: ServiceTask
+      font: "#a2803c"
       fill: "#f6e8c9"
       stroke: "#a2803c"
       name: Render reporting artifacts
@@ -637,6 +760,7 @@ Example_Study:
       bounds: 600 1120 150 70
     Debrief:
       type: Task
+      font: "#a2803c"
       fill: "#f6e8c9"
       stroke: "#a2803c"
       name: Debrief
@@ -655,14 +779,17 @@ Example_Study:
       completionCodeType: dynamic
       bounds: 300 1137 36 36
     Flow_Enroll_Screening:
+      stroke: "#4e6f95"
       sourceRef: Enroll
       targetRef: Screening
       waypoint: 236,130 290,130
     Flow_Screening_Eligibility:
+      stroke: "#4e6f95"
       sourceRef: Screening
       targetRef: Eligibility_Gateway
       waypoint: 440,130 510,130
     Flow_Eligible:
+      stroke: "#4e6f95"
       name: eligible
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Gateway
@@ -676,22 +803,26 @@ Example_Study:
       waypoint: 535,155 535,250
       label: 541 195 70 14
     Flow_Allocate_Cautious:
+      stroke: "#4e6f95"
       name: cautious
       sourceRef: Randomize_Gateway
       targetRef: Allocate_Cautious
       waypoint: 1055,155 1055,185 935,185 935,215
       label: 941 167 60 14
     Flow_Allocate_Impulsive:
+      stroke: "#4e6f95"
       name: impulsive
       sourceRef: Randomize_Gateway
       targetRef: Allocate_Impulsive
       waypoint: 1055,155 1055,185 1175,185 1175,215
       label: 1109 167 66 14
     Flow_Cautious_Merge:
+      stroke: "#4e6f95"
       sourceRef: Allocate_Cautious
       targetRef: Merge_Allocation
       waypoint: 935,295 935,325 1030,325
     Flow_Impulsive_Merge:
+      stroke: "#4e6f95"
       sourceRef: Allocate_Impulsive
       targetRef: Merge_Allocation
       waypoint: 1175,295 1175,325 1080,325
@@ -706,6 +837,7 @@ Example_Study:
       waypoint: 1230,313 1230,390 1262,390
       stroke: "#ac5a54"
     Flow_Merge_Battery:
+      stroke: "#4e6f95"
       sourceRef: Merge_Allocation
       targetRef: Battery
       waypoint: 1055,350 1055,450 720,450 720,540
@@ -715,6 +847,7 @@ Example_Study:
       stroke: "#ac5a54"
       waypoint: 318,1003 318,1030 400,1030
     Flow_Battery_Analysis:
+      stroke: "#5c8a55"
       sourceRef: Battery
       targetRef: Analysis
       waypoint: 770,760 810,760
@@ -724,14 +857,17 @@ Example_Study:
       stroke: "#ac5a54"
       waypoint: 1282,1078 1282,1110
     Flow_Analysis_Render:
+      stroke: "#7a67a6"
       sourceRef: Analysis
       targetRef: Render
       waypoint: 840,1060 840,1155 750,1155
     Flow_Render_Debrief:
+      stroke: "#a2803c"
       sourceRef: Render
       targetRef: Debrief
       waypoint: 600,1155 550,1155
     Flow_Debrief_Completed:
+      stroke: "#a2803c"
       sourceRef: Debrief
       targetRef: Completed
       waypoint: 400,1155 336,1155
@@ -757,6 +893,7 @@ Example_Study:
       categoryValueRef: CV_Report
       bounds: 160 1080 610 140
     Assoc_Schema_Trials:
+      stroke: "#7a67a6"
       associationDirection: One
       sourceRef: Schema_Trials
       targetRef: Dataset_Trials
@@ -794,10 +931,20 @@ state:
         who: Morteza Ansarinia
         with: studyflow-modeler/26.9.5
       - action: executed
+        when: "2026-08-20T10:05:00Z"
+        with: studyflow-cli/26.9.18
+        seed: 7
+        run: 2026-08-20/pilot_random
+      - action: executed
         when: "2026-09-01T14:20:00Z"
         with: studyflow-cli/26.9.24
         seed: 42
         run: 2026-09-01/example_study
+      - action: executed
+        when: "2026-09-03T09:41:00Z"
+        with: studyflow-cli/26.9.24
+        seed: 42
+        run: 2026-09-03/example_study
     reached:
       Enroll: 96
       Eligibility_Gateway: 96

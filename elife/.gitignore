@@ -10,3 +10,5 @@ paper_files/
 # Copied at render time by the elife extension's format-resources
 /elife.cls
 /vancouver-elife.bst
+# fig-overview build intermediates (modeler renders embedded into the draw.io figure)
+figures/src/build/

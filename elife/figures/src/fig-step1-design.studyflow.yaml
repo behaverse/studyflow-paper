@@ -56,6 +56,7 @@ Design:
       label: 586 81 150 14
     Screening:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Screening
@@ -116,6 +117,7 @@ Design:
       label: 520 448 80 14
     Allocate_Cautious:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to cautious disposition (n={reached})
@@ -128,6 +130,8 @@ Design:
       bounds: 300 490 160 80
     DidNotStart_Cautious:
       type: BoundaryEvent
+      fill: "#eef3f8"
+      stroke: "#4e6f95"
       name: Did not receive allocated intervention
       eventDefinitions:
         ErrorDef_DidNotStart_Cautious: { type: ErrorEventDefinition }
@@ -136,6 +140,7 @@ Design:
       label: 210 592 120 40
     Allocate_Impulsive:
       type: Task
+      font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to impulsive disposition (n={reached})
@@ -148,6 +153,8 @@ Design:
       bounds: 660 490 160 80
     DidNotStart_Impulsive:
       type: BoundaryEvent
+      fill: "#eef3f8"
+      stroke: "#4e6f95"
       name: Did not receive allocated intervention
       eventDefinitions:
         ErrorDef_DidNotStart_Impulsive: { type: ErrorEventDefinition }
@@ -179,9 +186,16 @@ Design:
       bounds: 862 672 36 36
       fill: "#f1d0cd"
       stroke: "#ac5a54"
-    Flow_Enroll_Screening: Enroll -> Screening
-    Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
+    Flow_Enroll_Screening:
+      sourceRef: Enroll
+      targetRef: Screening
+      stroke: "#4e6f95"
+    Flow_Screening_Eligibility:
+      sourceRef: Screening
+      targetRef: Eligibility_Gateway
+      stroke: "#4e6f95"
     Flow_Eligible:
+      stroke: "#4e6f95"
       name: eligible
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Gateway
@@ -192,26 +206,33 @@ Design:
       targetRef: Excluded_Pre
       stroke: "#ac5a54"
     Flow_Allocate_Cautious:
+      stroke: "#4e6f95"
       name: cautious
       sourceRef: Randomize_Gateway
       targetRef: Allocate_Cautious
       waypoint: 535,415 380,415 380,490
       label: 400 397 60 14
     Flow_Allocate_Impulsive:
+      stroke: "#4e6f95"
       name: impulsive
       sourceRef: Randomize_Gateway
       targetRef: Allocate_Impulsive
       waypoint: 585,415 740,415 740,490
       label: 640 397 66 14
     Flow_Cautious_Merge:
+      stroke: "#4e6f95"
       sourceRef: Allocate_Cautious
       targetRef: Merge_Allocation
       waypoint: 380,570 380,645 535,645
     Flow_Impulsive_Merge:
+      stroke: "#4e6f95"
       sourceRef: Allocate_Impulsive
       targetRef: Merge_Allocation
       waypoint: 740,570 740,645 585,645
-    Flow_Merge_Designed: Merge_Allocation -> Designed
+    Flow_Merge_Designed:
+      sourceRef: Merge_Allocation
+      targetRef: Designed
+      stroke: "#4e6f95"
     Flow_DidNotStart_Cautious:
       sourceRef: DidNotStart_Cautious
       targetRef: DidNotStart

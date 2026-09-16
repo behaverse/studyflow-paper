@@ -22,6 +22,7 @@ Report:
       bounds: 182 182 36 36
     Render:
       type: ServiceTask
+      font: "#a2803c"
       fill: "#f6e8c9"
       stroke: "#a2803c"
       name: Render reporting artifacts
@@ -34,15 +35,18 @@ Report:
       duration: 2min
       dataInputAssociations:
         In_Results:
+          stroke: "#a2803c"
           sourceRef: [Dataset_Results]
           waypoint: 355,110 355,160
       dataOutputAssociations:
         Out_Report:
+          stroke: "#a2803c"
           targetRef: Report_Artifacts
           waypoint: 355,240 355,300
       bounds: 280 160 150 80
     Debrief:
       type: Task
+      font: "#a2803c"
       fill: "#f6e8c9"
       stroke: "#a2803c"
       name: Debrief
@@ -65,6 +69,8 @@ Report:
       label: 678 224 120 27
     Dataset_Results:
       type: DataStoreReference
+      fill: "#faf4e6"
+      stroke: "#a2803c"
       name: Results (Psych-DS)
       extensionElements:
         - type: studyflow:Dataset
@@ -74,9 +80,20 @@ Report:
       label: 290 30 130 27
     Report_Artifacts:
       type: DataObjectReference
+      fill: "#faf4e6"
+      stroke: "#a2803c"
       name: Reporting artifacts (figures, tables, checklist)
       uri: report/
       bounds: 337 300 36 50
-    F_0: R_Start -> Render
-    F_1: Render -> Debrief
-    F_2: Debrief -> R_End
+    F_0:
+      sourceRef: R_Start
+      targetRef: Render
+      stroke: "#a2803c"
+    F_1:
+      sourceRef: Render
+      targetRef: Debrief
+      stroke: "#a2803c"
+    F_2:
+      sourceRef: Debrief
+      targetRef: R_End
+      stroke: "#a2803c"
