@@ -247,7 +247,7 @@ The second direction is to standardize experimental science. Experimental scienc
 
 <!-- TODO (fig-consort), from the doc: to make our version equivalent to the CONSORT image requires (1) a count not only of the excluded but also those kept in each branch; (2) branch-specific counts (CONSORT) vs grouped counts (ours), solvable if counts are on the arrows too; (3) CONSORT texts of different natures (checklist-like "give reason", grouping of conditions); mention the interactivity/nesting of Studyflow where clicking an element gives further details (multiple rejection paths out of analysis). -->
 
-::: {#fig-consort layout="[[37.5,62.5]]"}
+::: {#fig-consort layout="[[38,62]]"}
 
 ![CONSORT 2025 reference flow](figures/fig-consort-reference.png){#fig-consort-a}
 
@@ -273,7 +273,7 @@ The second direction is to standardize experimental science. Experimental scienc
 
 ![**Step 4 (Report): the report as a runnable fragment.** One service task renders the reporting artifacts from the results dataset (its checklist lists the exports an audit ticks off), a debrief instruction closes the session, and a completion end event redirects to the recruitment platform with the completion code. Everything else about reporting is a projection of the same file.](figures/fig-step4-report.studyflow.png){#fig-step4-report}
 
-![**Step 4 (Report): one file, five views.** (a) The Study view: the battery of the executed example study (@fig-combined). (b) The Gantt view, from each activity's onset and duration. (c) The Checklist view, from the declared checklists. (d) The Provenance view, from the run records the runner appended (`created`, `executed` with its seed and run repository). (e) The Figure view: the CONSORT participant flow after execution, with the subprocesses collapsed and the counts the runner wrote onto the exits (@fig-consort). Panels b to d are the reference modeler's own renderings. Because projections only discard and never rewrite, editing the file updates every view.](figures/fig-views.studyflow.png){#fig-views}
+![**Step 4 (Report): one file, five views.** The Study view of the executed example study is @fig-combined and its Figure view, the CONSORT participant flow, is @fig-consort; the other three views are the reference modeler's own renderings of the same file. (a) The Gantt view, from each activity's onset and duration, on a time axis from the consent event. (b) The Provenance view, from the run records the runner appended (`created`, `executed` with its seed and run repository). (c) The Checklist view, from the declared checklists: the screening checklist, the analysis exclusion criteria, and the reporting exports. Because projections only discard and never rewrite, editing the file updates every view.](figures/fig-views.studyflow.png){#fig-views}
 
 ![**The complete example study as a single Studyflow file (`example_study.studyflow.yaml`), after execution.** Read row by row, left to right, it is Steps 1 to 4 in order (enrollment and allocation, then follow-up and analysis, then the report), each in a group named for its CONSORT phase, with the cognitive battery and the analysis pipeline as expanded subprocesses. Every `n` is a run-state value: the `count` properties on the exits and the `reached` counts on the nodes, which the runner wrote as the cohort ran (96 enrolled, 6 excluded, 90 randomized, 2 did not receive the allocated intervention, 9 discontinued, 3 excluded from analysis, 76 completed). The protocol, battery, analysis, and report all live in this one artifact; the views, guideline audits, and deviation report are projections of it.](figures/fig-combined.studyflow.png){#fig-combined}
 
@@ -341,13 +341,13 @@ Randomize_Gateway:
     - type: cognitive:RandomGateway
       algorithm: probabilistic
       probabilityFunction: uniform
-Allocate_Speeded:
+Allocate_Cautious:
   type: bpmn:Task
-  name: Allocated to speeded path (n=...)
-DidNotStart_Speeded:
+  name: Allocated to cautious disposition (n=...)
+DidNotStart_Cautious:
   type: bpmn:BoundaryEvent
   name: Did not receive allocated intervention (n=...)
-  attachedToRef: Allocate_Speeded
+  attachedToRef: Allocate_Cautious
   eventDefinitions:
     err: { type: bpmn:ErrorEventDefinition }
 ```

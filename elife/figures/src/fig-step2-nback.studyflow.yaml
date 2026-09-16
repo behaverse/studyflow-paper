@@ -5,10 +5,11 @@ NBack:
   type: Process
   name: The N-back, drawn out and collapsed
   documentation: >-
-    (a) One N-back trial as an explicit subprocess repeated 40 times: a stimulus activity reading its parameters
+    One N-back trial as an explicit subprocess repeated 40 times: a stimulus activity reading its parameters
     from a Parameters element, a boundary timer that closes the response window, labelled target and
-    non-target branches, and a timer for the inter-stimulus interval. (b) The same block collapsed into a
-    single Behaverse task configured by the same parameters, wired into it as a Parameters element; the runner expands them into trials.
+    non-target branches, and a timer for the inter-stimulus interval. Below it, the same block collapsed into a
+    single Behaverse task configured by the same parameters, wired into it as a Parameters element; the runner
+    expands them into trials.
   extensionElements:
     - type: studyflow:Study
       seed: 42
@@ -16,29 +17,37 @@ NBack:
   flowElements:
     A_Start:
       type: StartEvent
+      fill: "#dcebd6"
+      stroke: "#5c8a55"
       name: Begin block
-      bounds: 180 195 36 36
+      bounds: 178 187 36 36
     Trial:
       type: SubProcess
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
       name: Trial (repeated 40 times)
       loopCharacteristics:
         type: StandardLoopCharacteristics
         loopCondition: state._meta.reached.Trial < 40
         loopMaximum: 40
-      bounds: 240 80 790 250
+      bounds: 240 80 720 240
       isExpanded: true
       flowElements:
         T_Start:
           type: StartEvent
-          bounds: 260 195 36 36
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
+          bounds: 258 187 36 36
         Present:
           type: Task
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Present letter (500 ms)
           dataInputAssociations:
             In_Params:
               sourceRef: [Params_NBack]
-              waypoint: 385,145 385,173
-          bounds: 320 173 130 80
+              waypoint: 390,145 390,165
+          bounds: 320 165 130 80
         Response_Window:
           type: BoundaryEvent
           name: Response window (3 s)
@@ -47,76 +56,89 @@ NBack:
               type: TimerEventDefinition
               timeDuration: PT3S
           attachedToRef: Present
-          bounds: 420 235 36 36
-          label: 308 262 108 27
+          bounds: 422 227 36 36
+          label: 300 254 116 27
         Match:
           type: ExclusiveGateway
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: n-back match?
-          bounds: 490 188 50 50
-          label: 472 245 86 27
+          bounds: 485 180 50 50
+          label: 462 236 96 14
         Target:
           type: Task
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: "Target: record hit or miss"
-          bounds: 612 100 150 60
+          bounds: 610 100 150 55
         NonTarget:
           type: Task
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: "Non-target: record correct rejection or false alarm"
-          bounds: 612 183 150 60
+          bounds: 610 175 150 60
         Timeout:
           type: Task
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Record timeout
-          bounds: 612 262 150 46
+          bounds: 610 254 150 46
         Merge:
           type: ExclusiveGateway
-          bounds: 800 188 50 50
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
+          bounds: 790 180 50 50
         ISI:
           type: IntermediateCatchEvent
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Inter-stimulus interval (1.5 s)
           eventDefinitions:
             Timer_ISI:
               type: TimerEventDefinition
               timeDuration: PT1.5S
-          bounds: 885 195 36 36
+          bounds: 860 187 36 36
+          label: 820 228 116 27
         T_End:
           type: EndEvent
-          bounds: 960 195 36 36
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
+          bounds: 915 187 36 36
         TF_1: T_Start -> Present
         TF_2: Present -> Match
         TF_Target:
           name: target
           sourceRef: Match
           targetRef: Target
-          waypoint: 515,188 515,130 612,130
-          label: 520 112 50 14
+          waypoint: 510,180 510,127 610,127
+          label: 518 110 44 14
         TF_NonTarget:
           name: non-target
           sourceRef: Match
           targetRef: NonTarget
-          waypoint: 540,213 612,213
-          label: 543 196 66 14
+          waypoint: 535,205 610,205
+          label: 538 188 70 14
         TF_Timeout:
           sourceRef: Response_Window
           targetRef: Timeout
-          waypoint: 438,271 438,285 612,285
+          waypoint: 440,263 440,277 610,277
         TF_Target_Merge:
           sourceRef: Target
           targetRef: Merge
-          waypoint: 762,130 825,130 825,188
+          waypoint: 760,127 815,127 815,180
         TF_NonTarget_Merge: NonTarget -> Merge
         TF_Timeout_Merge:
           sourceRef: Timeout
           targetRef: Merge
-          waypoint: 762,285 825,285 825,238
+          waypoint: 760,277 815,277 815,230
         TF_Merge_ISI: Merge -> ISI
         TF_ISI_End: ISI -> T_End
-      dataOutputAssociations:
-        Out_Trials:
-          targetRef: Dataset_Trials
-          waypoint: 1030,125 1115,125
     A_End:
       type: EndEvent
+      fill: "#dcebd6"
+      stroke: "#5c8a55"
       name: Block complete
-      bounds: 1070 195 36 36
+      bounds: 990 187 36 36
     Params_NBack:
       type: DataObjectReference
       name: N-back parameters
@@ -128,23 +150,20 @@ NBack:
             StimulusDisplayDuration: 0.5
             MaxResponseTime: 3
             InterStimulusInterval: 1.5
-      bounds: 367 95 36 50
-      label: 408 108 120 27
-    Dataset_Trials:
-      type: DataStoreReference
-      name: Trials (BDM)
-      extensionElements:
-        - type: behaverse:BDMDataset
-          dataLevel: trials
-      bounds: 1115 100 50 50
+      bounds: 372 95 36 50
+      label: 414 108 110 27
     AF_1: A_Start -> Trial
     AF_2: Trial -> A_End
     B_Start:
       type: StartEvent
+      fill: "#dcebd6"
+      stroke: "#5c8a55"
       name: Begin block
-      bounds: 180 455 36 36
+      bounds: 178 432 36 36
     Task_NBack:
       type: ChoreographyTask
+      fill: "#dcebd6"
+      stroke: "#5c8a55"
       name: Working memory (N-Back)
       extensionElements:
         - type: behaverse:Task
@@ -152,12 +171,12 @@ NBack:
       dataInputAssociations:
         In_Params_B:
           sourceRef: [Params_NBack_B]
-          waypoint: 282,550 282,513
+          waypoint: 276,515 276,490
       dataOutputAssociations:
         Out_Trials_B:
           targetRef: Dataset_Trials_B
-          waypoint: 340,513 340,550
-      bounds: 260 433 160 80
+          waypoint: 355,490 355,515
+      bounds: 240 410 150 80
     Params_NBack_B:
       type: DataObjectReference
       name: N-back parameters
@@ -180,45 +199,39 @@ NBack:
                 Name: NBack_2
                 blocks:
                   - name: NBack_2
-      bounds: 264 550 36 50
-      label: 168 562 90 27
+      bounds: 258 515 36 50
+      label: 165 527 88 27
     Dataset_Trials_B:
       type: DataStoreReference
       name: Trials (BDM)
       extensionElements:
         - type: behaverse:BDMDataset
           dataLevel: trials
-      bounds: 315 550 50 50
+      bounds: 330 515 50 50
     B_End:
       type: EndEvent
+      fill: "#dcebd6"
+      stroke: "#5c8a55"
       name: Block complete
-      bounds: 500 455 36 36
+      bounds: 440 432 36 36
     BF_1: B_Start -> Task_NBack
     BF_2: Task_NBack -> B_End
   artifacts:
     Group_A:
       type: Group
       categoryValueRef: CV_A
-      bounds: 160 40 1020 330
+      bounds: 160 40 890 310
     Group_B:
       type: Group
       categoryValueRef: CV_B
-      bounds: 160 400 1020 240
-    Note_B:
-      type: TextAnnotation
-      text: The same block as one task. The Parameters wired into it are those of (a); the runner expands them into trials.
-      bounds: 600 430 300 60
-    Assoc_Note_B:
-      sourceRef: Note_B
-      targetRef: Task_NBack
-      waypoint: 600,445 420,445
+      bounds: 160 370 890 220
 Category_A:
   type: Category
   categoryValue:
     CV_A:
-      value: (a) One trial, drawn out
+      value: One trial, drawn out
 Category_B:
   type: Category
   categoryValue:
     CV_B:
-      value: (b) The same block as one task
+      value: The same block, collapsed into one task

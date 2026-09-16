@@ -24,10 +24,14 @@ Analyze:
   flowElements:
     A_Start:
       type: StartEvent
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Battery complete
       bounds: 180 222 36 36
     Read:
       type: ServiceTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Read trials
       implementation: python://behaverse_analysis.read_trials@1.0
       onset: T0+40min
@@ -38,35 +42,42 @@ Analyze:
       dataOutputAssociations:
         Out_Read:
           targetRef: T_Raw
-          waypoint: 360,200 360,95 397,95
-      bounds: 250 200 130 80
+          waypoint: 350,200 350,95 397,95
+      bounds: 240 200 130 80
     Filter:
       type: ServiceTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Filter invalid trials
       implementation: python://behaverse_analysis.filter_invalid@1.0
       documentation: >-
         Drops trials with a response time below 100 ms, missing data, or a failure flag from Step 2. A subject
         left with fewer than half of its trials is excluded from analysis through the boundary error.
+      checklist: |-
+        - [ ] Trials with a response time below 100 ms dropped
+        - [ ] Trials with missing data dropped
+        - [ ] Trials flagged in Step 2 dropped
+        - [ ] Subjects with fewer than 50% valid trials excluded
       dataInputAssociations:
         In_Filter:
           sourceRef: [T_Raw]
-          waypoint: 433,95 470,95 470,200
+          waypoint: 433,95 460,95 460,200
         In_Filter_Params:
           sourceRef: [Params_Exclusion]
           waypoint: 515,120 515,200
       dataOutputAssociations:
         Out_Filter:
           targetRef: T_Valid
-          waypoint: 560,200 560,95 597,95
-      bounds: 450 200 130 80
+          waypoint: 540,200 540,95 597,95
+      bounds: 430 200 130 80
     Filter_Excluded:
       type: BoundaryEvent
       name: fewer than 50% valid trials
       eventDefinitions:
         Err_Filter: { type: ErrorEventDefinition }
       attachedToRef: Filter
-      bounds: 462 262 36 36
-      label: 364 304 100 27
+      bounds: 442 262 36 36
+      label: 344 304 100 27
     Excluded_Analysis:
       type: EndEvent
       name: Excluded from analysis (n={count})
@@ -76,36 +87,50 @@ Analyze:
           value: "0"
       eventDefinitions:
         Err_ExcludedAnalysis: { type: ErrorEventDefinition }
-      bounds: 462 380 36 36
-      label: 354 384 104 40
+      bounds: 442 380 36 36
+      label: 334 384 104 40
       fill: "#f1d0cd"
       stroke: "#ac5a54"
     Map:
       type: ServiceTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Map to derived measures
       implementation: python://behaverse_analysis.derive_measures@1.0
       dataInputAssociations:
         In_Map:
           sourceRef: [T_Valid]
-          waypoint: 633,95 670,95 670,200
-      bounds: 650 200 130 80
+          waypoint: 633,95 650,95 650,200
+      dataOutputAssociations:
+        Out_Map:
+          targetRef: T_Derived
+          waypoint: 730,200 730,150 1045,150 1045,200
+      bounds: 620 200 130 80
     Which:
       type: ExclusiveGateway
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Which comparison?
-      bounds: 830 215 50 50
-      label: 886 233 110 14
+      bounds: 800 215 50 50
+      label: 690 292 100 27
     Congruency:
       type: ServiceTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Congruency effect (Flanker RT and accuracy)
       implementation: python://behaverse_analysis.congruency_effect@1.0
       bounds: 555 400 150 95
     Agreement:
       type: ServiceTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Agreement (equivalence of accuracy)
       implementation: python://behaverse_analysis.equivalence_test@1.0
       bounds: 715 400 150 95
     Divergence:
       type: ServiceTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Divergence (classifier vs random baseline)
       implementation: python://behaverse_analysis.train_classifier@1.0
       additionalArguments:
@@ -114,11 +139,19 @@ Analyze:
       bounds: 875 400 150 95
     Join:
       type: ExclusiveGateway
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       bounds: 765 520 50 50
     Reduce_Run:
       type: ServiceTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Reduce to per-run summaries
       implementation: python://behaverse_analysis.summarize_runs@1.0
+      dataInputAssociations:
+        In_ReduceRun:
+          sourceRef: [T_Derived]
+          waypoint: 1045,250 1045,660 855,660
       dataOutputAssociations:
         Out_ReduceRun:
           targetRef: T_Runs
@@ -126,6 +159,8 @@ Analyze:
       bounds: 725 620 130 80
     Reduce_Group:
       type: ServiceTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Reduce to group statistics
       implementation: python://behaverse_analysis.group_stats@1.0
       dataInputAssociations:
@@ -142,6 +177,8 @@ Analyze:
       bounds: 540 620 130 80
     Review:
       type: ManualTask
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Manual outlier review
       documentation: The human analyst inspects the group statistics before anything is reported.
       dataInputAssociations:
@@ -155,6 +192,8 @@ Analyze:
       bounds: 360 620 130 80
     A_End:
       type: EndEvent
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
       name: Analyzed (n={reached})
       bounds: 280 642 36 36
     Dataset_Trials:
@@ -201,6 +240,14 @@ Analyze:
           format: parquet
       bounds: 597 70 36 50
       label: 570 52 90 14
+    T_Derived:
+      type: DataObjectReference
+      name: Derived measures
+      extensionElements:
+        - type: studyflow:Table
+          format: parquet
+      bounds: 1027 200 36 50
+      label: 930 214 90 27
     T_Runs:
       type: DataObjectReference
       name: Per-run summaries
@@ -257,19 +304,19 @@ Analyze:
       name: congruency
       sourceRef: Which
       targetRef: Congruency
-      waypoint: 855,265 855,360 630,360 630,400
-      label: 636 343 70 14
+      waypoint: 825,265 825,360 630,360 630,400
+      label: 636 377 70 14
     F_Agreement:
       name: agreement
       sourceRef: Which
       targetRef: Agreement
-      waypoint: 855,265 855,360 790,360 790,400
+      waypoint: 825,265 825,360 790,360 790,400
       label: 796 377 62 14
     F_Divergence:
       name: divergence
       sourceRef: Which
       targetRef: Divergence
-      waypoint: 855,265 855,360 950,360 950,400
+      waypoint: 825,265 825,360 950,360 950,400
       label: 956 377 72 14
     F_Congruency_Join:
       sourceRef: Congruency

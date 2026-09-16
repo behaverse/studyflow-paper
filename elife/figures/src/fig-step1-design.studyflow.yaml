@@ -8,7 +8,7 @@ Design_Collaboration:
     Participant_Design:
       name: Example study, Step 1 (Design)
       processRef: Design
-      bounds: 160 40 1000 760
+      bounds: 160 40 900 740
       isHorizontal: true
 Design:
   type: Process
@@ -17,16 +17,17 @@ Design:
     Step 1 of the example study: the enrolment and allocation phases of the CONSORT participant flow as a
     complete, runnable fragment. The two lanes are the CONSORT phases. Every early exit is a boundary error
     event terminating at an error end event that declares a `count` property; the runner increments it as
-    subjects leave, and the label cites it as `n={count}`.
+    subjects leave, and the label cites it as `n={count}`. The random gateway allocates each subject to one of
+    the two disposition conditions of Step 2 (cautious or impulsive), which the arm's instruction states.
   extensionElements:
     - type: studyflow:Study
       seed: 42
       runtime: browser
       version: "1.0"
-      registration: OSF-XXXXX
-      ethicsApproval: ERP-2026-042
       authors:
-        - Example Study Authors
+        - Morteza Ansarinia
+        - Hoorieh Afkari Roshan
+        - Pedro Cardoso-Leite
   properties:
     P_arm:
       name: arm
@@ -36,23 +37,27 @@ Design:
         Lane_Enrolment:
           name: Enrolment
           flowNodeRef: [Enroll, Screening, Eligibility_Gateway, Excluded_Pre]
-          bounds: 190 40 970 330
+          bounds: 190 40 870 310
           isHorizontal: true
         Lane_Allocation:
           name: Allocation
-          flowNodeRef: [Randomize_Gateway, Allocate_Speeded, DidNotStart_Speeded, Allocate_SelfPaced, DidNotStart_SelfPaced, Merge_Allocation, Designed, DidNotStart]
-          bounds: 190 370 970 430
+          flowNodeRef: [Randomize_Gateway, Allocate_Cautious, DidNotStart_Cautious, Allocate_Impulsive, DidNotStart_Impulsive, Merge_Allocation, Designed, DidNotStart]
+          bounds: 190 350 870 430
           isHorizontal: true
   flowElements:
     Enroll:
       type: StartEvent
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Enrolled and consented
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
       onset: T0
-      bounds: 542 82 36 36
-      label: 586 93 150 14
+      bounds: 542 70 36 36
+      label: 586 81 150 14
     Screening:
       type: Task
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Screening
       extensionElements:
         - type: cognitive:Questionnaire
@@ -64,9 +69,11 @@ Design:
         - [ ] Exclusion criteria checked
       onset: T0
       duration: 5min
-      bounds: 480 160 160 80
+      bounds: 480 140 160 80
     Eligibility_Gateway:
       type: ExclusiveGateway
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Assessed for eligibility
       extensionElements:
         - type: cognitive:EligibilityGateway
@@ -76,9 +83,9 @@ Design:
           exclusionCriteria:
             - Prior exposure to the battery
             - Failed comprehension check at screening
-      bounds: 535 280 50 50
+      bounds: 535 260 50 50
       isMarkerVisible: true
-      label: 380 298 140 14
+      label: 380 271 140 27
     Excluded_Pre:
       type: EndEvent
       name: Excluded (n={count})
@@ -88,11 +95,13 @@ Design:
           value: "0"
       eventDefinitions:
         ErrorDef_ExcludedPre: { type: ErrorEventDefinition }
-      bounds: 942 287 36 36
+      bounds: 862 267 36 36
       fill: "#f1d0cd"
       stroke: "#ac5a54"
     Randomize_Gateway:
       type: ExclusiveGateway
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Randomized
       extensionElements:
         - type: cognitive:RandomGateway
@@ -102,52 +111,62 @@ Design:
       documentation: >-
         Allocation is concealed: the draw comes from the study seed and the subject identifier, so it cannot be
         predicted by whoever enrols the subject.
-      bounds: 535 420 50 50
+      bounds: 535 390 50 50
       isMarkerVisible: true
-      label: 520 478 80 14
-    Allocate_Speeded:
+      label: 520 448 80 14
+    Allocate_Cautious:
       type: Task
-      name: Allocated to speeded path (n={reached})
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Allocated to cautious disposition (n={reached})
       extensionElements:
         - type: cognitive:Instruction
-          content: You will have 3 seconds to answer each trial.
+          content: >-
+            Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
       onset: T0+5min
       duration: 1min
-      bounds: 300 520 160 80
-    DidNotStart_Speeded:
+      bounds: 300 490 160 80
+    DidNotStart_Cautious:
       type: BoundaryEvent
       name: Did not receive allocated intervention
       eventDefinitions:
-        ErrorDef_DidNotStart_Speeded: { type: ErrorEventDefinition }
-      attachedToRef: Allocate_Speeded
-      bounds: 322 582 36 36
-      label: 220 622 130 27
-    Allocate_SelfPaced:
+        ErrorDef_DidNotStart_Cautious: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_Cautious
+      bounds: 322 552 36 36
+      label: 210 592 120 40
+    Allocate_Impulsive:
       type: Task
-      name: Allocated to self-paced path (n={reached})
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Allocated to impulsive disposition (n={reached})
       extensionElements:
         - type: cognitive:Instruction
-          content: Take as long as you need to answer each trial.
+          content: >-
+            Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
       onset: T0+5min
       duration: 1min
-      bounds: 660 520 160 80
-    DidNotStart_SelfPaced:
+      bounds: 660 490 160 80
+    DidNotStart_Impulsive:
       type: BoundaryEvent
       name: Did not receive allocated intervention
       eventDefinitions:
-        ErrorDef_DidNotStart_SelfPaced: { type: ErrorEventDefinition }
-      attachedToRef: Allocate_SelfPaced
-      bounds: 762 582 36 36
-      label: 770 622 130 27
+        ErrorDef_DidNotStart_Impulsive: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_Impulsive
+      bounds: 762 552 36 36
+      label: 790 592 120 40
     Merge_Allocation:
       type: ExclusiveGateway
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Begin battery
-      bounds: 535 650 50 50
-      label: 592 690 90 14
+      bounds: 535 620 50 50
+      label: 592 660 90 14
     Designed:
       type: EndEvent
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Ready to run
-      bounds: 542 740 36 36
+      bounds: 542 710 36 36
     DidNotStart:
       type: EndEvent
       name: Did not receive allocated intervention (n={count})
@@ -157,7 +176,7 @@ Design:
           value: "0"
       eventDefinitions:
         ErrorDef_DidNotStart: { type: ErrorEventDefinition }
-      bounds: 942 702 36 36
+      bounds: 862 672 36 36
       fill: "#f1d0cd"
       stroke: "#ac5a54"
     Flow_Enroll_Screening: Enroll -> Screening
@@ -166,43 +185,45 @@ Design:
       name: eligible
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Gateway
-      label: 568 386 50 14
+      label: 568 318 60 14
     Flow_Excluded_Pre:
       name: not eligible
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
       stroke: "#ac5a54"
-    Flow_Allocate_Speeded:
-      name: speeded
+    Flow_Allocate_Cautious:
+      name: cautious
       sourceRef: Randomize_Gateway
-      targetRef: Allocate_Speeded
-      waypoint: 535,445 380,445 380,520
-    Flow_Allocate_SelfPaced:
-      name: self-paced
+      targetRef: Allocate_Cautious
+      waypoint: 535,415 380,415 380,490
+      label: 400 397 60 14
+    Flow_Allocate_Impulsive:
+      name: impulsive
       sourceRef: Randomize_Gateway
-      targetRef: Allocate_SelfPaced
-      waypoint: 585,445 740,445 740,520
-    Flow_Speeded_Merge:
-      sourceRef: Allocate_Speeded
+      targetRef: Allocate_Impulsive
+      waypoint: 585,415 740,415 740,490
+      label: 640 397 66 14
+    Flow_Cautious_Merge:
+      sourceRef: Allocate_Cautious
       targetRef: Merge_Allocation
-      waypoint: 380,600 380,675 535,675
-    Flow_SelfPaced_Merge:
-      sourceRef: Allocate_SelfPaced
+      waypoint: 380,570 380,645 535,645
+    Flow_Impulsive_Merge:
+      sourceRef: Allocate_Impulsive
       targetRef: Merge_Allocation
-      waypoint: 740,600 740,675 585,675
+      waypoint: 740,570 740,645 585,645
     Flow_Merge_Designed: Merge_Allocation -> Designed
-    Flow_DidNotStart_Speeded:
-      sourceRef: DidNotStart_Speeded
+    Flow_DidNotStart_Cautious:
+      sourceRef: DidNotStart_Cautious
       targetRef: DidNotStart
-      waypoint: 340,618 340,720 942,720
+      waypoint: 340,588 340,690 862,690
       stroke: "#ac5a54"
-    Flow_DidNotStart_SelfPaced:
-      sourceRef: DidNotStart_SelfPaced
+    Flow_DidNotStart_Impulsive:
+      sourceRef: DidNotStart_Impulsive
       targetRef: DidNotStart
-      waypoint: 780,618 780,720 942,720
+      waypoint: 780,588 780,690 862,690
       stroke: "#ac5a54"
 state:
   _meta:
-    reached: { Allocate_Speeded: 0, Allocate_SelfPaced: 0 }
+    reached: { Allocate_Cautious: 0, Allocate_Impulsive: 0 }
   Excluded_Pre: { count: 0 }
   DidNotStart: { count: 0 }

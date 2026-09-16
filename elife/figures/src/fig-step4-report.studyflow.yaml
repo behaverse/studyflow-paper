@@ -16,10 +16,14 @@ Report:
   flowElements:
     R_Start:
       type: StartEvent
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
       name: Analyzed
       bounds: 182 182 36 36
     Render:
       type: ServiceTask
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
       name: Render reporting artifacts
       implementation: python://behaverse_report.render@1.0
       checklist: |-
@@ -39,6 +43,8 @@ Report:
       bounds: 280 160 150 80
     Debrief:
       type: Task
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
       name: Debrief
       extensionElements:
         - type: cognitive:Instruction
@@ -50,10 +56,13 @@ Report:
       bounds: 500 160 150 80
     R_End:
       type: EndEvent
-      name: Completed
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
+      name: Completed (completion code issued)
       redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
       completionCodeType: dynamic
       bounds: 720 182 36 36
+      label: 678 224 120 27
     Dataset_Results:
       type: DataStoreReference
       name: Results (Psych-DS)

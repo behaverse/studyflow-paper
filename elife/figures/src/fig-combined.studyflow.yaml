@@ -15,10 +15,10 @@ Example_Study:
       seed: 42
       runtime: browser
       version: "1.0"
-      registration: OSF-XXXXX
-      ethicsApproval: ERP-2026-042
       authors:
-        - Example Study Authors
+        - Morteza Ansarinia
+        - Hoorieh Afkari Roshan
+        - Pedro Cardoso-Leite
       dependencies:
         - behaverse-analysis==1.0
         - scikit-learn>=1.5
@@ -28,6 +28,8 @@ Example_Study:
   flowElements:
     Enroll:
       type: StartEvent
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Enrolled and consented (n={reached})
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
       onset: T0
@@ -35,6 +37,8 @@ Example_Study:
       label: 168 152 100 27
     Screening:
       type: Task
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Screening
       extensionElements:
         - type: cognitive:Questionnaire
@@ -49,6 +53,8 @@ Example_Study:
       bounds: 290 95 150 70
     Eligibility_Gateway:
       type: ExclusiveGateway
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Assessed for eligibility (n={reached})
       extensionElements:
         - type: cognitive:EligibilityGateway
@@ -73,6 +79,8 @@ Example_Study:
       stroke: "#ac5a54"
     Randomize_Gateway:
       type: ExclusiveGateway
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       name: Randomized (n={reached})
       extensionElements:
         - type: cognitive:RandomGateway
@@ -82,42 +90,50 @@ Example_Study:
       bounds: 1030 105 50 50
       isMarkerVisible: true
       label: 1086 123 110 14
-    Allocate_Speeded:
+    Allocate_Cautious:
       type: Task
-      name: Allocated to speeded path (n={reached})
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Allocated to cautious disposition (n={reached})
       extensionElements:
         - type: cognitive:Instruction
-          content: You will have 3 seconds to answer each trial.
+          content: >-
+            Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
       onset: T0+5min
       duration: 1min
-      bounds: 850 215 150 70
-    DidNotStart_Speeded:
+      bounds: 850 215 170 80
+    DidNotStart_Cautious:
       type: BoundaryEvent
       name: Did not receive allocated intervention
       eventDefinitions:
-        Err_DNS_Speeded: { type: ErrorEventDefinition }
-      attachedToRef: Allocate_Speeded
-      bounds: 862 267 36 36
-      label: 796 305 80 54
-    Allocate_SelfPaced:
+        Err_DNS_Cautious: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_Cautious
+      bounds: 862 277 36 36
+      label: 800 318 80 54
+    Allocate_Impulsive:
       type: Task
-      name: Allocated to self-paced path (n={reached})
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
+      name: Allocated to impulsive disposition (n={reached})
       extensionElements:
         - type: cognitive:Instruction
-          content: Take as long as you need to answer each trial.
+          content: >-
+            Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
       onset: T0+5min
       duration: 1min
-      bounds: 1110 215 150 70
-    DidNotStart_SelfPaced:
+      bounds: 1090 215 170 80
+    DidNotStart_Impulsive:
       type: BoundaryEvent
       name: Did not receive allocated intervention
       eventDefinitions:
-        Err_DNS_SelfPaced: { type: ErrorEventDefinition }
-      attachedToRef: Allocate_SelfPaced
-      bounds: 1212 267 36 36
-      label: 1236 305 80 54
+        Err_DNS_Impulsive: { type: ErrorEventDefinition }
+      attachedToRef: Allocate_Impulsive
+      bounds: 1212 277 36 36
+      label: 1236 320 84 40
     Merge_Allocation:
       type: ExclusiveGateway
+      fill: "#dbe6f2"
+      stroke: "#4e6f95"
       bounds: 1030 300 50 50
     DidNotStart:
       type: EndEvent
@@ -132,7 +148,9 @@ Example_Study:
       label: 1106 398 150 27
     Battery:
       type: SubProcess
-      name: Cognitive battery, one trial at a time (n={reached})
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
+      name: Cognitive battery (n={reached})
       documentation: >-
         Six Behaverse tasks and the jsPsych Flanker. The subprocess declares a `failed_trials` counter in its
         scope; a task whose failed-trial rate exceeds 20% raises its boundary error, which ends the subprocess,
@@ -146,9 +164,13 @@ Example_Study:
       flowElements:
         Sub_Start:
           type: StartEvent
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           bounds: 196 627 36 36
         Task_NBack:
           type: ChoreographyTask
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Working memory (N-Back)
           extensionElements:
             - type: behaverse:Task
@@ -170,6 +192,8 @@ Example_Study:
           label: 372 712 80 14
         Task_DigitSpan:
           type: ChoreographyTask
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Verbal span (Digit Span)
           extensionElements:
             - type: behaverse:Task
@@ -185,6 +209,8 @@ Example_Study:
           bounds: 466 672 36 36
         Task_SART:
           type: ChoreographyTask
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Sustained attention (SART)
           extensionElements:
             - type: behaverse:Task
@@ -200,6 +226,8 @@ Example_Study:
           bounds: 599 672 36 36
         Task_SRT:
           type: ChoreographyTask
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Processing speed (Serial RT)
           extensionElements:
             - type: behaverse:Task
@@ -215,6 +243,8 @@ Example_Study:
           bounds: 732 672 36 36
         Task_Matrices:
           type: ChoreographyTask
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Reasoning (Belval Matrices)
           extensionElements:
             - type: behaverse:Task
@@ -230,6 +260,8 @@ Example_Study:
           bounds: 732 852 36 36
         Task_CardSorting:
           type: ChoreographyTask
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Set-shifting (Belval Card Sorting)
           extensionElements:
             - type: behaverse:Task
@@ -245,6 +277,8 @@ Example_Study:
           bounds: 599 852 36 36
         Task_Flanker:
           type: ChoreographyTask
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Attention (Flanker, jsPsych)
           extensionElements:
             - type: cognitive:CognitiveTask
@@ -262,6 +296,8 @@ Example_Study:
           bounds: 466 852 36 36
         Sub_End:
           type: EndEvent
+          fill: "#dcebd6"
+          stroke: "#5c8a55"
           name: Battery complete
           bounds: 318 807 36 36
           label: 288 847 70 27
@@ -383,6 +419,8 @@ Example_Study:
       label: 1142 480 110 27
     Analysis:
       type: SubProcess
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
       name: Analysis pipeline, preregistered (n={reached})
       documentation: >-
         Read, filter (the analysis exclusion the CONSORT flow reports), map to derived measures, branch on the
@@ -395,16 +433,27 @@ Example_Study:
       flowElements:
         An_Start:
           type: StartEvent
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           bounds: 824 612 36 36
         Read:
           type: ServiceTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Read trials
           implementation: python://behaverse_analysis.read_trials@1.0
           bounds: 874 590 110 80
         Filter:
           type: ServiceTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Filter invalid trials
           implementation: python://behaverse_analysis.filter_invalid@1.0
+          checklist: |-
+            - [x] Trials with a response time below 100 ms dropped
+            - [x] Trials with missing data dropped
+            - [x] Trials flagged in Step 2 dropped
+            - [x] Subjects with fewer than 50% valid trials excluded
           bounds: 1002 590 110 80
         Filter_Excluded:
           type: BoundaryEvent
@@ -425,48 +474,68 @@ Example_Study:
           label: 916 722 94 27
         Map:
           type: ServiceTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Map to derived measures
           implementation: python://behaverse_analysis.derive_measures@1.0
           bounds: 1130 590 110 80
         Which:
           type: ExclusiveGateway
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Which comparison?
           bounds: 1160 700 50 50
           label: 1080 716 76 27
         Congruency:
           type: ServiceTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Congruency effect (Flanker RT and accuracy)
           implementation: python://behaverse_analysis.congruency_effect@1.0
           bounds: 818 790 138 90
         Agreement:
           type: ServiceTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Agreement (equivalence of accuracy)
           implementation: python://behaverse_analysis.equivalence_test@1.0
           bounds: 966 790 138 90
         Divergence:
           type: ServiceTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Divergence (classifier vs random baseline)
           implementation: python://behaverse_analysis.train_classifier@1.0
           bounds: 1116 790 138 90
         Join:
           type: ExclusiveGateway
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           bounds: 1160 900 50 50
         Reduce_Run:
           type: ServiceTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Reduce to per-run summaries
           implementation: python://behaverse_analysis.summarize_runs@1.0
           bounds: 1130 970 110 80
         Reduce_Group:
           type: ServiceTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Reduce to group statistics
           implementation: python://behaverse_analysis.group_stats@1.0
           bounds: 1002 970 110 80
         Review:
           type: ManualTask
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Manual outlier review
           bounds: 874 970 110 80
         An_End:
           type: EndEvent
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
           name: Analyzed
           bounds: 824 992 36 36
         AF_0: An_Start -> Read
@@ -555,6 +624,8 @@ Example_Study:
       bounds: 1025 1110 50 50
     Render:
       type: ServiceTask
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
       name: Render reporting artifacts
       implementation: python://behaverse_report.render@1.0
       checklist: |-
@@ -566,6 +637,8 @@ Example_Study:
       bounds: 600 1120 150 70
     Debrief:
       type: Task
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
       name: Debrief
       extensionElements:
         - type: cognitive:Instruction
@@ -575,6 +648,8 @@ Example_Study:
       bounds: 400 1120 150 70
     Completed:
       type: EndEvent
+      fill: "#f6e8c9"
+      stroke: "#a2803c"
       name: Completed (n={reached})
       redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
       completionCodeType: dynamic
@@ -600,35 +675,35 @@ Example_Study:
       stroke: "#ac5a54"
       waypoint: 535,155 535,250
       label: 541 195 70 14
-    Flow_Allocate_Speeded:
-      name: speeded
+    Flow_Allocate_Cautious:
+      name: cautious
       sourceRef: Randomize_Gateway
-      targetRef: Allocate_Speeded
-      waypoint: 1055,155 1055,185 925,185 925,215
-      label: 931 167 56 14
-    Flow_Allocate_SelfPaced:
-      name: self-paced
+      targetRef: Allocate_Cautious
+      waypoint: 1055,155 1055,185 935,185 935,215
+      label: 941 167 60 14
+    Flow_Allocate_Impulsive:
+      name: impulsive
       sourceRef: Randomize_Gateway
-      targetRef: Allocate_SelfPaced
-      waypoint: 1055,155 1055,185 1185,185 1185,215
-      label: 1119 167 66 14
-    Flow_Speeded_Merge:
-      sourceRef: Allocate_Speeded
+      targetRef: Allocate_Impulsive
+      waypoint: 1055,155 1055,185 1175,185 1175,215
+      label: 1109 167 66 14
+    Flow_Cautious_Merge:
+      sourceRef: Allocate_Cautious
       targetRef: Merge_Allocation
-      waypoint: 925,285 925,325 1030,325
-    Flow_SelfPaced_Merge:
-      sourceRef: Allocate_SelfPaced
+      waypoint: 935,295 935,325 1030,325
+    Flow_Impulsive_Merge:
+      sourceRef: Allocate_Impulsive
       targetRef: Merge_Allocation
-      waypoint: 1185,285 1185,325 1080,325
-    Flow_DNS_Speeded:
-      sourceRef: DidNotStart_Speeded
+      waypoint: 1175,295 1175,325 1080,325
+    Flow_DNS_Cautious:
+      sourceRef: DidNotStart_Cautious
       targetRef: DidNotStart
-      waypoint: 880,303 880,390 1262,390
+      waypoint: 880,313 880,390 1262,390
       stroke: "#ac5a54"
-    Flow_DNS_SelfPaced:
-      sourceRef: DidNotStart_SelfPaced
+    Flow_DNS_Impulsive:
+      sourceRef: DidNotStart_Impulsive
       targetRef: DidNotStart
-      waypoint: 1230,303 1230,390 1262,390
+      waypoint: 1230,313 1230,390 1262,390
       stroke: "#ac5a54"
     Flow_Merge_Battery:
       sourceRef: Merge_Allocation
@@ -716,19 +791,19 @@ state:
     prov:
       - action: created
         when: "2026-08-01T09:00:00Z"
-        who: Example Study Authors
+        who: Morteza Ansarinia
         with: studyflow-modeler/26.9.5
       - action: executed
         when: "2026-09-01T14:20:00Z"
-        with: studyflow-cli/26.9.5
+        with: studyflow-cli/26.9.24
         seed: 42
-        run: runs/2026-09-01/example_study
+        run: 2026-09-01/example_study
     reached:
       Enroll: 96
       Eligibility_Gateway: 96
       Randomize_Gateway: 90
-      Allocate_Speeded: 45
-      Allocate_SelfPaced: 45
+      Allocate_Cautious: 45
+      Allocate_Impulsive: 45
       Battery: 88
       Analysis: 79
       Completed: 76
