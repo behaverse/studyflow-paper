@@ -5,421 +5,458 @@ Analyze:
   type: Process
   name: Step 3 - Analyze
   documentation: >-
-    Step 3 of the example study: the analysis phase of the CONSORT flow, drawn in the same notation as the study
-    it analyzes. Each operation is a service task whose `implementation` names the pinned external code that
-    runs it; the typed tables between operations are what flows from one to the next, and the thresholds live
-    in Parameters elements, so a change of rule is a data edit, not a redraw. The filter step is the analysis
-    exclusion the CONSORT flow reports, counted on its error exit. An exclusive gateway branches on the
-    comparison of interest: the Flanker congruency effect, an agreement (equivalence) test between agents, and a
-    divergence test that trains a classifier against the random baseline. Each branch is fixed before the first
-    run, so the registered and the executed analysis are the same object.
+    Step 3 of the example study (`../study/example_study.studyflow`): its `Analysis` sub-process, unwrapped into a
+    diagram of its own and otherwise unchanged — the same element ids, the same order, the same arguments. Eight
+    preregistered operations read left to right and then wrap: read the recorded trials, drop the ones nobody
+    answered, per-subject accuracy and latency, group statistics, the congruency effect, the agreement between the
+    two dispositions, the divergence from a random baseline, and the figure. Five of them are one call to a library
+    function named in full; the other three are collapsed sub-processes holding the two to four calls one operation
+    takes, so nothing here is code written for this study and the registered and the executed analysis are the same
+    object. Every trial carries `context.subject`, the instance index the runtime stamps it with, so the per-subject
+    tables group by it. The trials dataset is the input; the operations write the run's `results/`.
   extensionElements:
     - type: studyflow:Study
       seed: 42
       runtime: local
       dependencies:
-        - behaverse-analysis==1.0
-        - pandas>=2.0
-        - scikit-learn>=1.5
+        - pandas==2.3.3
+        - scipy==1.16.2
+        - scikit-learn==1.7.2
+        - matplotlib==3.10.7
+  properties:
+    derived: { name: derived }
+    answered: { name: answered }
+    kept: { name: kept }
+    trials: { name: trials }
+    per_subject_indexed: { name: per_subject_indexed }
+    per_subject: { name: per_subject }
+    accuracy_by_arm: { name: accuracy_by_arm }
+    cautious_accuracy: { name: cautious_accuracy }
+    impulsive_accuracy: { name: impulsive_accuracy }
+    features: { name: features }
+    labels: { name: labels }
   flowElements:
-    A_Start:
-      type: StartEvent
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Battery complete
-      bounds: 180 222 36 36
-    Read:
-      type: ServiceTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Read trials
-      implementation: python://behaverse_analysis.read_trials@1.0
-      onset: T0+40min
-      dataInputAssociations:
-        In_Read:
-          stroke: "#7a67a6"
-          sourceRef: [Dataset_Trials]
-          waypoint: 275,110 275,200
-      dataOutputAssociations:
-        Out_Read:
-          stroke: "#7a67a6"
-          targetRef: T_Raw
-          waypoint: 350,200 350,95 397,95
-      bounds: 240 200 130 80
-    Filter:
-      type: ServiceTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Filter invalid trials
-      implementation: python://behaverse_analysis.filter_invalid@1.0
-      documentation: >-
-        Drops trials with a response time below 100 ms, missing data, or a failure flag from Step 2. A subject
-        left with fewer than half of its trials is excluded from analysis through the boundary error.
-      checklist: |-
-        - [ ] Trials with a response time below 100 ms dropped
-        - [ ] Trials with missing data dropped
-        - [ ] Trials flagged in Step 2 dropped
-        - [ ] Subjects with fewer than 50% valid trials excluded
-      dataInputAssociations:
-        In_Filter:
-          stroke: "#7a67a6"
-          sourceRef: [T_Raw]
-          waypoint: 433,95 460,95 460,200
-        In_Filter_Params:
-          stroke: "#7a67a6"
-          sourceRef: [Params_Exclusion]
-          waypoint: 515,120 515,200
-      dataOutputAssociations:
-        Out_Filter:
-          stroke: "#7a67a6"
-          targetRef: T_Valid
-          waypoint: 540,200 540,95 597,95
-      bounds: 430 200 130 80
-    Filter_Excluded:
-      type: BoundaryEvent
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
-      name: fewer than 50% valid trials
-      eventDefinitions:
-        Err_Filter: { type: ErrorEventDefinition }
-      attachedToRef: Filter
-      bounds: 442 262 36 36
-      label: 344 304 100 27
-    Excluded_Analysis:
-      type: EndEvent
-      name: Excluded from analysis (n={count})
-      properties:
-        P_count_excl:
-          name: count
-          value: "0"
-      eventDefinitions:
-        Err_ExcludedAnalysis: { type: ErrorEventDefinition }
-      bounds: 442 380 36 36
-      label: 334 384 104 40
-      fill: "#f1d0cd"
-      stroke: "#ac5a54"
-    Map:
-      type: ServiceTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Map to derived measures
-      implementation: python://behaverse_analysis.derive_measures@1.0
-      dataInputAssociations:
-        In_Map:
-          stroke: "#7a67a6"
-          sourceRef: [T_Valid]
-          waypoint: 633,95 650,95 650,200
-      dataOutputAssociations:
-        Out_Map:
-          stroke: "#7a67a6"
-          targetRef: T_Derived
-          waypoint: 730,200 730,150 1045,150 1045,200
-      bounds: 620 200 130 80
-    Which:
-      type: ExclusiveGateway
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Which comparison?
-      bounds: 800 215 50 50
-      label: 690 292 100 27
-    Congruency:
-      type: ServiceTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Congruency effect (Flanker RT and accuracy)
-      implementation: python://behaverse_analysis.congruency_effect@1.0
-      bounds: 555 400 150 95
-    Agreement:
-      type: ServiceTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Agreement (equivalence of accuracy)
-      implementation: python://behaverse_analysis.equivalence_test@1.0
-      bounds: 715 400 150 95
-    Divergence:
-      type: ServiceTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Divergence (classifier vs random baseline)
-      implementation: python://behaverse_analysis.train_classifier@1.0
-      additionalArguments:
-        model: logistic_regression
-        cv_folds: 5
-      bounds: 875 400 150 95
-    Join:
-      type: ExclusiveGateway
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 765 520 50 50
-    Reduce_Run:
-      type: ServiceTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Reduce to per-run summaries
-      implementation: python://behaverse_analysis.summarize_runs@1.0
-      dataInputAssociations:
-        In_ReduceRun:
-          stroke: "#7a67a6"
-          sourceRef: [T_Derived]
-          waypoint: 1045,250 1045,660 855,660
-      dataOutputAssociations:
-        Out_ReduceRun:
-          stroke: "#7a67a6"
-          targetRef: T_Runs
-          waypoint: 740,700 740,765 716,765
-      bounds: 725 620 130 80
-    Reduce_Group:
-      type: ServiceTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Reduce to group statistics
-      implementation: python://behaverse_analysis.group_stats@1.0
-      dataInputAssociations:
-        In_ReduceGroup:
-          stroke: "#7a67a6"
-          sourceRef: [T_Runs]
-          waypoint: 680,765 650,765 650,700
-        In_Rules:
-          stroke: "#7a67a6"
-          sourceRef: [Params_Rules]
-          waypoint: 605,590 605,620
-      dataOutputAssociations:
-        Out_ReduceGroup:
-          stroke: "#7a67a6"
-          targetRef: T_Group
-          waypoint: 560,700 560,765 533,765
-      bounds: 540 620 130 80
-    Review:
-      type: ManualTask
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Manual outlier review
-      documentation: The human analyst inspects the group statistics before anything is reported.
-      dataInputAssociations:
-        In_Review:
-          stroke: "#7a67a6"
-          sourceRef: [T_Group]
-          waypoint: 497,765 470,765 470,700
-      dataOutputAssociations:
-        Out_Review:
-          stroke: "#7a67a6"
-          targetRef: Dataset_Results
-          waypoint: 380,700 380,765 350,765
-      bounds: 360 620 130 80
-    A_End:
-      type: EndEvent
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      name: Analyzed (n={reached})
-      bounds: 280 642 36 36
     Dataset_Trials:
       type: DataStoreReference
       fill: "#f4f1f8"
       stroke: "#7a67a6"
-      name: Trials (BDM)
+      name: Trials
+      documentation: >-
+        One line per recorded event, appended by every task of every subject: the build's own frame
+        (`trialContext`) plus the subject and the properties of the scope that played the trial (`context`).
+      uri: data/trials.jsonl
       extensionElements:
         - type: behaverse:BDMDataset
           dataLevel: trials
-          uri: data/trials/
-      bounds: 250 60 50 50
-      label: 230 42 90 14
-    Schema_Trials:
-      type: DataObjectReference
-      fill: "#f4f1f8"
+      bounds: 60 20 50 50
+      label: 116 32 60 14
+    An_Start:
+      type: StartEvent
+      fill: "#e6dff1"
       stroke: "#7a67a6"
-      name: Trial schema (CSVW)
-      extensionElements:
-        - type: studyflow:Schema
-          format: csvw
-          body: |
-            columns:
-              - name: subject_id
-              - name: task
-              - name: trial_index
-              - name: response
-              - name: response_time
-                datatype: number
-              - name: correct
-                datatype: boolean
-              - name: failure_mode
-      bounds: 180 60 36 50
-      label: 158 28 80 27
-    T_Raw:
-      type: DataObjectReference
-      fill: "#f4f1f8"
+      bounds: 60 147 36 36
+    Read_Trials:
+      type: SubProcess
+      name: Read the recorded trials
+      documentation: >-
+        The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the
+        two calls inside reduce them to one row per trial — the congruency the task drew, whether the answer
+        was correct, and the latency — with the trial keys as columns.
+      flowElements:
+        RT_Start:
+          type: StartEvent
+        Derive:
+          type: ServiceTask
+          name: One row per trial
+          implementation: python://pandas.DataFrame.pivot_table
+          additionalArguments:
+            index: ["context.subject", "context.state.arm", "trialContext.task.id", "trialContext.block.name", "trialContext.trial.id"]
+            values: ["trialContext.congruency", "result.isCorrect", "trialContext.trial.timeInTrial"]
+            aggfunc:
+              trialContext.congruency: first
+              result.isCorrect: first
+              trialContext.trial.timeInTrial: max
+          dataInputAssociations:
+            In_Trials:
+              sourceRef: [Dataset_Trials]
+              transformation: self
+          dataOutputAssociations:
+            Out_Derived: { targetRef: derived }
+        Flatten_Index:
+          type: ServiceTask
+          name: Trial keys into columns
+          implementation: python://pandas.DataFrame.reset_index
+          dataInputAssociations:
+            In_Derived: { sourceRef: [derived], transformation: self }
+          dataOutputAssociations:
+            Out_Answered: { targetRef: answered }
+        RT_End:
+          type: EndEvent
+        RTF_0: RT_Start -> Derive
+        RTF_1: Derive -> Flatten_Index
+        RTF_2: Flatten_Index -> RT_End
+      font: "#7a67a6"
+      fill: "#e6dff1"
       stroke: "#7a67a6"
-      name: Raw trials
-      extensionElements:
-        - type: studyflow:Table
-          format: parquet
-      bounds: 397 70 36 50
-      label: 370 52 90 14
-    T_Valid:
-      type: DataObjectReference
-      fill: "#f4f1f8"
+      dataInputAssociations:
+        In_Trials_Fig:
+          stroke: "#7a67a6"
+          sourceRef: [Dataset_Trials]
+          waypoint: 110,45 195,45 195,130
+      bounds: 120 130 150 70
+      isExpanded: false
+    Filter:
+      type: SubProcess
+      name: Drop unanswered trials
+      documentation: >-
+        The trials the actor did not answer within the response window leave the table, and the two measures
+        the rest of the analysis works on become numbers.
+      checklist: |-
+        - [ ] Trials the actor did not answer within the response window dropped
+        - [ ] Every remaining trial carries a congruency and a latency
+      flowElements:
+        F_Start:
+          type: StartEvent
+        Filter_Rows:
+          type: ServiceTask
+          name: Drop unanswered trials
+          implementation: python://pandas.DataFrame.dropna
+          additionalArguments:
+            subset: ["result.isCorrect"]
+          dataInputAssociations:
+            In_Answered: { sourceRef: [answered], transformation: self }
+          dataOutputAssociations:
+            Out_Kept: { targetRef: kept }
+        Measures:
+          type: ServiceTask
+          name: Measures as numbers
+          implementation: python://pandas.DataFrame.astype
+          additionalArguments:
+            dtype:
+              result.isCorrect: float
+              trialContext.trial.timeInTrial: float
+          dataInputAssociations:
+            In_Kept: { sourceRef: [kept], transformation: self }
+          dataOutputAssociations:
+            Out_Trials_Typed: { targetRef: trials }
+        F_End:
+          type: EndEvent
+        FF_0: F_Start -> Filter_Rows
+        FF_1: Filter_Rows -> Measures
+        FF_2: Measures -> F_End
+      font: "#7a67a6"
+      fill: "#e6dff1"
       stroke: "#7a67a6"
-      name: Valid trials
-      extensionElements:
-        - type: studyflow:Table
-          format: parquet
-      bounds: 597 70 36 50
-      label: 570 52 90 14
-    T_Derived:
-      type: DataObjectReference
-      fill: "#f4f1f8"
+      bounds: 300 130 150 70
+      isExpanded: false
+    Per_Subject:
+      type: SubProcess
+      name: Per-subject accuracy and latency
+      documentation: >-
+        One row per subject: the mean accuracy and the mean latency of that subject's trials, with the
+        subject and its arm as columns, written out as the per-subject table of the results dataset.
+      flowElements:
+        PS_Start:
+          type: StartEvent
+        Per_Subject_Table:
+          type: ServiceTask
+          name: Per-subject summary
+          implementation: python://pandas.DataFrame.pivot_table
+          additionalArguments:
+            index: ["context.subject", "context.state.arm"]
+            values: ["result.isCorrect", "trialContext.trial.timeInTrial"]
+            aggfunc: mean
+          dataInputAssociations:
+            In_Trials_PS: { sourceRef: [trials], transformation: self }
+          dataOutputAssociations:
+            Out_PS: { targetRef: per_subject_indexed }
+        Per_Subject_Flat:
+          type: ServiceTask
+          name: Subject keys into columns
+          implementation: python://pandas.DataFrame.reset_index
+          dataInputAssociations:
+            In_PS: { sourceRef: [per_subject_indexed], transformation: self }
+          dataOutputAssociations:
+            Out_PS_Flat: { targetRef: per_subject }
+            Out_PS_File: { targetRef: File_PerSubject }
+        File_PerSubject:
+          type: DataObjectReference
+          name: Per-subject table
+          uri: results/per_subject.csv
+        PS_End:
+          type: EndEvent
+        PSF_0: PS_Start -> Per_Subject_Table
+        PSF_1: Per_Subject_Table -> Per_Subject_Flat
+        PSF_2: Per_Subject_Flat -> PS_End
+      font: "#7a67a6"
+      fill: "#e6dff1"
       stroke: "#7a67a6"
-      name: Derived measures
-      extensionElements:
-        - type: studyflow:Table
-          format: parquet
-      bounds: 1027 200 36 50
-      label: 930 214 90 27
-    T_Runs:
-      type: DataObjectReference
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
-      name: Per-run summaries
-      extensionElements:
-        - type: studyflow:Table
-          format: parquet
-      bounds: 680 740 36 50
-      label: 646 795 104 14
-    T_Group:
-      type: DataObjectReference
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
+      bounds: 480 130 150 70
+      isExpanded: false
+    Group:
+      type: ServiceTask
       name: Group statistics
-      extensionElements:
-        - type: studyflow:Table
-          format: parquet
-      bounds: 497 740 36 50
-      label: 465 795 100 14
-    Params_Exclusion:
+      documentation: Mean and standard deviation of accuracy and latency, by disposition.
+      implementation: python://pandas.DataFrame.pivot_table
+      additionalArguments:
+        index: "context.state.arm"
+        values: ["result.isCorrect", "trialContext.trial.timeInTrial"]
+        aggfunc: [mean, std]
+      dataInputAssociations:
+        In_PS_G: { sourceRef: [per_subject], transformation: self }
+      dataOutputAssociations:
+        Out_Group:
+          targetRef: File_Group
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 660 130 150 70
+    Congruency:
+      type: ServiceTask
+      name: Congruency effect
+      documentation: Accuracy and latency by disposition and by the congruency the Simon task drew.
+      implementation: python://pandas.DataFrame.pivot_table
+      additionalArguments:
+        index: ["context.state.arm", "trialContext.congruency"]
+        values: ["result.isCorrect", "trialContext.trial.timeInTrial"]
+        aggfunc: mean
+      dataInputAssociations:
+        In_Trials_C: { sourceRef: [trials], transformation: self }
+      dataOutputAssociations:
+        Out_Congruency:
+          targetRef: File_Congruency
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 120 290 150 70
+    Agreement:
+      type: SubProcess
+      name: Agreement between dispositions
+      documentation: >-
+        Welch's t test on the per-subject accuracies of the two arms: the smallest library call that answers
+        whether the two dispositions performed alike. The three calls before it are what it takes to hand the
+        test one column per arm.
+      flowElements:
+        A_Start:
+          type: StartEvent
+        By_Arm:
+          type: ServiceTask
+          name: Accuracy, one column per arm
+          implementation: python://pandas.DataFrame.pivot_table
+          additionalArguments:
+            index: "context.subject"
+            columns: "context.state.arm"
+            values: "result.isCorrect"
+          dataInputAssociations:
+            In_PS_Wide: { sourceRef: [per_subject], transformation: self }
+          dataOutputAssociations:
+            Out_By_Arm: { targetRef: accuracy_by_arm }
+        Accuracy_Cautious:
+          type: ServiceTask
+          name: Cautious accuracies
+          documentation: >-
+            The column of the wide table whose name is the cautious disposition: the arm is its own
+            instruction, so the instruction is what names the column.
+          implementation: python://pandas.DataFrame.get
+          additionalArguments:
+            key: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
+          dataInputAssociations:
+            In_ByArm_C: { sourceRef: [accuracy_by_arm], transformation: self }
+          dataOutputAssociations:
+            Out_Cautious: { targetRef: cautious_accuracy }
+        Accuracy_Impulsive:
+          type: ServiceTask
+          name: Impulsive accuracies
+          implementation: python://pandas.DataFrame.get
+          additionalArguments:
+            key: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+          dataInputAssociations:
+            In_ByArm_I: { sourceRef: [accuracy_by_arm], transformation: self }
+          dataOutputAssociations:
+            Out_Impulsive: { targetRef: impulsive_accuracy }
+        Agreement_Test:
+          type: ServiceTask
+          name: Welch's t test
+          implementation: python://scipy.stats.ttest_ind
+          additionalArguments:
+            nan_policy: omit
+            equal_var: false
+          dataInputAssociations:
+            In_A: { sourceRef: [cautious_accuracy], transformation: a }
+            In_B: { sourceRef: [impulsive_accuracy], transformation: b }
+          dataOutputAssociations:
+            Out_Agreement:
+              targetRef: File_Agreement
+              transformation: "{'statistic': result.statistic, 'pvalue': result.pvalue}"
+        File_Agreement:
+          type: DataObjectReference
+          name: Agreement
+          uri: results/agreement.json
+        A_End:
+          type: EndEvent
+        AGF_0: A_Start -> By_Arm
+        AGF_1: By_Arm -> Accuracy_Cautious
+        AGF_2: Accuracy_Cautious -> Accuracy_Impulsive
+        AGF_3: Accuracy_Impulsive -> Agreement_Test
+        AGF_4: Agreement_Test -> A_End
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 300 290 150 70
+      isExpanded: false
+    Divergence:
+      type: SubProcess
+      name: Divergence from a random baseline
+      documentation: >-
+        Can a classifier tell the two dispositions apart from a single trial, and does it beat chance? The
+        random baseline of the paper lives here, as a uniform dummy classifier over the same folds, not as a
+        bot in the cohort.
+      flowElements:
+        D_Start:
+          type: StartEvent
+        Features:
+          type: ServiceTask
+          name: Trial-level features
+          implementation: python://pandas.DataFrame.get
+          additionalArguments:
+            key: ["result.isCorrect", "trialContext.trial.timeInTrial"]
+          dataInputAssociations:
+            In_Trials_F: { sourceRef: [trials], transformation: self }
+          dataOutputAssociations:
+            Out_Features: { targetRef: features }
+        Labels:
+          type: ServiceTask
+          name: Trial-level labels
+          implementation: python://pandas.DataFrame.get
+          additionalArguments:
+            key: "context.state.arm"
+          dataInputAssociations:
+            In_Trials_L: { sourceRef: [trials], transformation: self }
+          dataOutputAssociations:
+            Out_Labels: { targetRef: labels }
+        Classifier:
+          type: ServiceTask
+          name: Classifier
+          implementation: python://sklearn.model_selection.cross_val_score
+          additionalArguments:
+            estimator:
+              implementation: python://sklearn.linear_model.LogisticRegression
+              arguments:
+                max_iter: 1000
+            cv: 4
+            scoring: accuracy
+          dataInputAssociations:
+            In_Features: { sourceRef: [features], transformation: X }
+            In_Labels: { sourceRef: [labels], transformation: "y" }
+          dataOutputAssociations:
+            Out_Divergence:
+              targetRef: File_Divergence
+              transformation: "{'classifier': result.mean()}"
+        Baseline:
+          type: ServiceTask
+          name: Random baseline
+          implementation: python://sklearn.model_selection.cross_val_score
+          additionalArguments:
+            estimator:
+              implementation: python://sklearn.dummy.DummyClassifier
+              arguments:
+                strategy: uniform
+                random_state: 42
+            cv: 4
+            scoring: accuracy
+          dataInputAssociations:
+            In_Features_B: { sourceRef: [features], transformation: X }
+            In_Labels_B: { sourceRef: [labels], transformation: "y" }
+          dataOutputAssociations:
+            Out_Baseline:
+              targetRef: File_Baseline
+              transformation: "{'baseline': result.mean()}"
+        File_Divergence:
+          type: DataObjectReference
+          name: Divergence
+          uri: results/divergence.json
+        File_Baseline:
+          type: DataObjectReference
+          name: Baseline
+          uri: results/baseline.json
+        D_End:
+          type: EndEvent
+        DF_0: D_Start -> Features
+        DF_1: Features -> Labels
+        DF_2: Labels -> Classifier
+        DF_3: Classifier -> Baseline
+        DF_4: Baseline -> D_End
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 480 290 150 70
+      isExpanded: false
+    Plot:
+      type: ServiceTask
+      name: Figure
+      documentation: Accuracy by disposition and congruency, as a box plot.
+      implementation: python://pandas.DataFrame.boxplot
+      additionalArguments:
+        column: ["result.isCorrect"]
+        by: ["context.state.arm", "trialContext.congruency"]
+        grid: false
+        rot: 30
+      dataInputAssociations:
+        In_Trials_P: { sourceRef: [trials], transformation: self }
+      dataOutputAssociations:
+        Out_Plot:
+          targetRef: File_Accuracy
+          transformation: result.figure
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 660 290 150 70
+    An_End:
+      type: EndEvent
+      name: Analyzed
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 860 307 36 36
+      label: 846 349 64 14
+    File_Group:
       type: DataObjectReference
+      name: Group table
+      uri: results/group.csv
       fill: "#f4f1f8"
       stroke: "#7a67a6"
-      name: Exclusion criteria
-      extensionElements:
-        - type: studyflow:Parameters
-          values:
-            min_response_time: 0.1
-            drop_missing: true
-            drop_flagged: true
-            min_valid_fraction: 0.5
-      bounds: 497 70 36 50
-      label: 470 34 90 14
-    Params_Rules:
+      bounds: 842 140 36 50
+      label: 812 196 96 14
+    File_Congruency:
       type: DataObjectReference
+      name: Congruency table
+      uri: results/congruency.csv
       fill: "#f4f1f8"
       stroke: "#7a67a6"
-      name: Decision rules
-      extensionElements:
-        - type: studyflow:Parameters
-          values:
-            congruency_threshold_ms: 20
-            equivalence_margin: 0.05
-            classifier_auc_criterion: 0.6
-      bounds: 587 540 36 50
-      label: 496 552 86 14
-    Dataset_Results:
-      type: DataStoreReference
+      bounds: 177 400 36 50
+      label: 219 412 110 14
+    File_Accuracy:
+      type: DataObjectReference
+      name: Accuracy figure
+      uri: results/accuracy.png
       fill: "#f4f1f8"
       stroke: "#7a67a6"
-      name: Results (Psych-DS)
-      extensionElements:
-        - type: studyflow:Dataset
-          format: psych-ds
-          uri: results/
-      bounds: 300 740 50 50
-      label: 275 795 100 14
-    F_0:
-      sourceRef: A_Start
-      targetRef: Read
-      stroke: "#7a67a6"
-    F_1:
-      sourceRef: Read
-      targetRef: Filter
-      stroke: "#7a67a6"
-    F_2:
-      sourceRef: Filter
-      targetRef: Map
-      stroke: "#7a67a6"
-    F_3:
-      sourceRef: Map
-      targetRef: Which
-      stroke: "#7a67a6"
-    F_Congruency:
-      stroke: "#7a67a6"
-      name: congruency
-      sourceRef: Which
+      bounds: 717 400 36 50
+      label: 759 412 96 14
+    AF_0: An_Start -> Read_Trials
+    AF_1: Read_Trials -> Filter
+    AF_2: Filter -> Per_Subject
+    AF_3: Per_Subject -> Group
+    AF_4:
+      sourceRef: Group
       targetRef: Congruency
-      waypoint: 825,265 825,360 630,360 630,400
-      label: 636 377 70 14
-    F_Agreement:
       stroke: "#7a67a6"
-      name: agreement
-      sourceRef: Which
-      targetRef: Agreement
-      waypoint: 825,265 825,360 790,360 790,400
-      label: 796 377 62 14
-    F_Divergence:
-      stroke: "#7a67a6"
-      name: divergence
-      sourceRef: Which
-      targetRef: Divergence
-      waypoint: 825,265 825,360 950,360 950,400
-      label: 956 377 72 14
-    F_Congruency_Join:
-      stroke: "#7a67a6"
-      sourceRef: Congruency
-      targetRef: Join
-      waypoint: 630,495 630,545 765,545
-    F_Agreement_Join:
-      sourceRef: Agreement
-      targetRef: Join
-      stroke: "#7a67a6"
-    F_Divergence_Join:
-      stroke: "#7a67a6"
-      sourceRef: Divergence
-      targetRef: Join
-      waypoint: 950,495 950,545 815,545
-    F_4:
-      sourceRef: Join
-      targetRef: Reduce_Run
-      stroke: "#7a67a6"
-    F_5:
-      sourceRef: Reduce_Run
-      targetRef: Reduce_Group
-      stroke: "#7a67a6"
-    F_6:
-      sourceRef: Reduce_Group
-      targetRef: Review
-      stroke: "#7a67a6"
-    F_7:
-      sourceRef: Review
-      targetRef: A_End
-      stroke: "#7a67a6"
-    F_Excluded:
-      sourceRef: Filter_Excluded
-      targetRef: Excluded_Analysis
-      stroke: "#ac5a54"
-  artifacts:
-    Assoc_Schema_Trials:
-      stroke: "#7a67a6"
-      associationDirection: One
-      sourceRef: Schema_Trials
-      targetRef: Dataset_Trials
-      waypoint: 216,85 250,85
+      waypoint: 735,200 735,245 195,245 195,290
+    AF_5: Congruency -> Agreement
+    AF_6: Agreement -> Divergence
+    AF_7: Divergence -> Plot
+    AF_8: Plot -> An_End
 state:
   _meta:
-    reached: { A_End: 0 }
-  Excluded_Analysis: { count: 0 }
+    reached:
+      An_Start: 0
+      An_End: 0

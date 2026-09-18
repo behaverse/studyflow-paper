@@ -118,8 +118,8 @@ STRIP = BUILD / 'strip.studyflow.png'
 sw_px, sh_px = png_size(STRIP)
 S = (W - 4) / (sw_px / SCALE)                    # strip units -> canvas units (fits the container)
 STRIP_H = sh_px / SCALE * S
-# stage boundaries in strip units: after the allocation join, after the battery, after the analysis
-BOUNDS = [0, 452, 607, 760, sw_px / SCALE]
+# stage boundaries in strip units: after the allocation, after the battery, after the analysis
+BOUNDS = [0, 460, 756, 920, sw_px / SCALE]
 COLS = ['design', 'run', 'analyze', 'report']
 NAMES = ['Design', 'Run', 'Analyze', 'Report']
 cx = lambda i: X0 + 2 + BOUNDS[i] * S
@@ -195,7 +195,7 @@ text('Study view', X0 + W - 176, FY + 5, 80, 16, size=12, bold=True, align='righ
 icon('account-details-outline', X0 + W - 90, FY + 6, 13, MUTED)
 text('researcher', X0 + W - 74, FY + 5, 66, 16, size=11, color=MUTED)
 # existing tools plug into the file rather than being replaced
-pill(cx(1) + cw(1) / 2, FY + 4, 'jsPsych / Behaverse tasks')
+pill(cx(1) + cw(1) / 2, FY + 4, 'Behaverse task build')
 pill(cx(2) + cw(2) / 2 + 10, FY + 4, 'python:// analysis code')
 image(STRIP, X0 + 2, FY + 30, W - 4)
 

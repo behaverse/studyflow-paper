@@ -21,7 +21,7 @@ await page.getByTestId('modeler-ready').waitFor({state:'attached',timeout:60000}
 await page.getByTestId('open-file-input').setInputFiles({name:'study.studyflow.yaml',mimeType:'text/yaml',buffer:readFileSync(input)});
 await page.locator('.sf-shape').first().waitFor({timeout:30000});
 await page.waitForTimeout(800);
-await page.locator('[data-element-id="Task_NBack"]').first().click();
+await page.locator('[data-element-id="Task_WorkingMemory"]').first().click();
 await page.getByTestId('inspector-shell').getByText('Execution', { exact: true }).click();
 await page.getByTestId('palette-root').getByRole('button', { name: /^Behaverse elements/ }).hover();
 await page.waitForTimeout(600);
@@ -36,7 +36,7 @@ await page.evaluate(() => {
   const regions = [
     ['a', 'Palette, from the schemas', heading && { right: heading.right + 150, top: heading.top - 12 }, 'right'],
     ['b', 'Inspector, from the schemas', outputs && { left: outputs.left, top: outputs.bottom + 28 }, 'at'],
-    ['c', 'Canvas', box('[data-element-id="Task_SART"]'), 'above'],
+    ['c', 'Canvas', box('[data-element-id="Task_Interference"]'), 'above'],
   ];
   for (const [letter, text, r, side] of regions) {
     if (!r) continue;

@@ -4,7 +4,8 @@ import { spawn } from 'node:child_process';
 // usage: node views.mjs <in.studyflow.yaml> <outDir>
 // Captures the reference modeler's own renderings of the study's Gantt, Checklist and Provenance views, each
 // cropped to its content (no dialog chrome), at 6x: view-gantt.png (the chart), view-checklist-<n>.png (one
-// per element carrying a checklist) and view-provenance.png (the log). compose_views.py lays them out.
+// per element carrying a checklist) and view-provenance.png (the log, or the dialog's own empty-state line
+// when the file carries no run records). compose_views.py lays out whatever is written here.
 const origin = 'http://127.0.0.1:4175';
 const [input, outDir] = process.argv.slice(2);
 async function up(){ try { return (await fetch(origin+'/app')).ok } catch { return false } }
@@ -54,7 +55,12 @@ for (let i = 0; i < n; i++) await cards.nth(i).screenshot({ path: `${outDir}/vie
 console.log('checklist cards', n);
 await close();
 
+// The log only exists once the file carries run records; the deposited plan has none and the dialog shows its
+// empty-state line instead. Capture whichever is there, and leave the panel out if neither is.
 await open('View Provenance...', 1000);
-await page.getByTestId('provenance-log').screenshot({ path: `${outDir}/view-provenance.png` });
+const log = page.getByTestId('provenance-log');
+const shown = (await log.count()) ? log : page.locator('[role=dialog] p').last();
+await shown.screenshot({ path: `${outDir}/view-provenance.png`, timeout: 10000 })
+  .catch((e) => console.log('provenance: no panel —', e.message.split('\n')[0]));
 await close();
 await browser.close(); child?.kill(); process.exit(0);

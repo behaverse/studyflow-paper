@@ -5,253 +5,244 @@ Example_Study:
   type: Process
   name: Example study (overview)
   documentation: >-
-    The example study compacted to one row for the overview figure (@fig-overview): the same file as
-    `example_study.studyflow`, with the battery and the analysis collapsed and the two "did not receive
-    allocated intervention" exits omitted, laid out left to right under the four lifecycle stages. Every
-    other count is the run-state value the runner wrote as the cohort ran. Its Gantt, Checklist and
-    Provenance views are the modeler's own renderings of this file.
+    The example study (`../study/example_study.studyflow`) compacted to one row for the overview figure
+    (@fig-overview): the same element ids, the pool of four parallel subjects flattened to the one subject it
+    repeats, the analysis collapsed to one box, and the three pools, the message flows and the per-subject
+    debrief dropped for width. What is left is laid out left to right under the four lifecycle stages. Every `n` is a
+    run-state value the runner writes as the cohort runs; they all read zero here because this figure is drawn
+    from the deposited plan. Its Gantt, Checklist and Provenance views are the modeler's own renderings of it.
   extensionElements:
     - type: studyflow:Study
       seed: 42
-      runtime: browser
+      runtime: local
       version: "1.0"
       authors:
         - Morteza Ansarinia
         - Hoorieh Afkari Roshan
         - Pedro Cardoso-Leite
       dependencies:
-        - behaverse-analysis==1.0
-        - scikit-learn>=1.5
+        - pandas==2.3.3
+        - scipy==1.16.2
+        - scikit-learn==1.7.2
+        - matplotlib==3.10.7
   properties:
-    P_arm:
+    P_Arm:
       name: arm
+      value: none
   flowElements:
     Enroll:
       type: StartEvent
       fill: "#dbe6f2"
       stroke: "#4e6f95"
-      name: Enrolled and consented (n={reached})
+      name: Enrolled and consented
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
       onset: T0
       bounds: 20 84 32 32
-      label: 0 122 76 40
+      label: 0 120 76 28
     Screening:
       type: Task
       font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
-      name: Screening
+      name: Assessed for eligibility (n={reached})
       extensionElements:
         - type: cognitive:Questionnaire
-          instrument: screening
+          instrument: comprehension-check
       checklist: |-
-        - [x] Informed consent recorded
-        - [x] Demographic intake
-        - [x] Inclusion criteria checked
-        - [x] Exclusion criteria checked
+        - [x] Consent recorded
+        - [x] Executor configuration pinned (model id, sampling parameters)
+        - [x] Comprehension check passed
       onset: T0
-      duration: 5min
-      bounds: 70 72 96 56
+      duration: 10s
+      bounds: 66 66 108 68
     Eligibility_Gateway:
       type: ExclusiveGateway
       fill: "#dbe6f2"
       stroke: "#4e6f95"
-      name: Assessed for eligibility (n={reached})
+      name: Understood the instructions?
       extensionElements:
         - type: cognitive:EligibilityGateway
           inclusionCriteria:
-            - Aged 18 to 65 years, normal or corrected-to-normal vision (human cohort)
-            - Registered agent family with a pinned model version (artificial cohort)
+            - Registered artificial actor family with a pinned model tag
+            - Comprehension check answered as instructed
           exclusionCriteria:
-            - Prior exposure to the battery
-            - Failed comprehension check at screening
-      bounds: 184 80 40 40
+            - No answer, or an answer that does not follow the instruction
+      default: Flow_Excluded_Pre
+      bounds: 192 80 40 40
       isMarkerVisible: true
-      label: 150 40 108 27
+      label: 140 26 128 28
     Excluded_Pre:
       type: EndEvent
-      name: Excluded (n={count})
-      properties:
-        P_count_pre: { name: count, value: "0" }
-      eventDefinitions:
-        Err_ExcludedPre: { type: ErrorEventDefinition }
-      bounds: 190 172 28 28
+      name: "Excluded: did not understand the task (n={reached})"
+      bounds: 198 172 28 28
       fill: "#f1d0cd"
       stroke: "#ac5a54"
-      label: 224 179 90 14
-    Randomize_Gateway:
+      label: 120 204 190 28
+    Randomize_Disposition:
       type: ExclusiveGateway
       fill: "#dbe6f2"
       stroke: "#4e6f95"
-      name: Randomized (n={reached})
+      name: Which disposition? (n={reached})
       extensionElements:
         - type: cognitive:RandomGateway
-          algorithm: block
+          algorithm: simple
           allocationRatio: "1:1"
-          blockSize: 4
-      bounds: 242 80 40 40
+      default: Flow_Allocate_Impulsive
+      bounds: 250 80 40 40
       isMarkerVisible: true
-      label: 222 124 80 27
+      label: 190 120 96 40
     Allocate_Cautious:
-      type: Task
+      type: ServiceTask
       font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
-      name: Allocated to cautious disposition (n={reached})
-      extensionElements:
-        - type: cognitive:Instruction
-          content: >-
-            Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
-      onset: T0+5min
-      duration: 1min
-      bounds: 296 14 128 60
+      name: Allocated to cautious (n={reached})
+      implementation: python://builtins.str
+      additionalArguments:
+        args:
+          - Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
+      onset: T0
+      duration: 1s
+      bounds: 304 6 140 62
     Allocate_Impulsive:
-      type: Task
+      type: ServiceTask
       font: "#4e6f95"
       fill: "#dbe6f2"
       stroke: "#4e6f95"
-      name: Allocated to impulsive disposition (n={reached})
-      extensionElements:
-        - type: cognitive:Instruction
-          content: >-
-            Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
-      onset: T0+5min
-      duration: 1min
-      bounds: 296 126 128 60
-    Battery:
-      type: SubProcess
-      font: "#5c8a55"
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
-      name: Cognitive battery
-      properties:
-        P_failed_trials: { name: failed_trials, value: "0" }
-      onset: T0+6min
-      duration: 30min
-      bounds: 466 72 128 56
-      isExpanded: false
-      dataInputAssociations:
-        In_Params:
-          stroke: "#5c8a55"
-          sourceRef: [Params_NBack]
-          waypoint: 530,48 530,72
-    Params_NBack:
+      name: Allocated to impulsive (n={reached})
+      implementation: python://builtins.str
+      additionalArguments:
+        args:
+          - Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+      onset: T0
+      duration: 1s
+      bounds: 304 132 140 62
+    Prompt_Battery:
       type: DataObjectReference
       fill: "#f0f6ee"
       stroke: "#5c8a55"
-      name: N-back parameters (N=2, 40 trials, ISI 1.5 s)
+      name: Disposition prompt
       extensionElements:
-        - type: studyflow:Parameters
-          values:
-            Blocks:
-              NBack_2:
-                Name: NBack_2
-                Inherits: Default
-                Parameters:
-                  NValue: 2
-                  StreamSize: 40
-                  StimulusDisplayDuration: 0.5
-                  MaxResponseTime: 3
-                  InterStimulusInterval: 1.5
-      bounds: 514 4 32 44
-      label: 552 12 150 28
-    Battery_Error:
+        - type: agentic:Prompt
+          template: |
+            {arm}
+
+            You are taking a computerised cognitive test one trial at a time. Each message is one trial, as
+            JSON. Your answer is one of the strings in that trial's own ResponseOptions, copied exactly and
+            with nothing else.
+      bounds: 500 4 32 44
+      label: 538 10 128 27
+    Task_Interference:
+      type: ChoreographyTask
+      font: "#5c8a55"
+      fill: "#dcebd6"
+      stroke: "#5c8a55"
+      name: Interference control (Simon)
+      extensionElements:
+        - type: behaverse:Task
+          instrument: WO
+          timeline: SimonTask
+      dataInputAssociations:
+        In_Prompt_Interference:
+          stroke: "#5c8a55"
+          sourceRef: [Prompt_Battery]
+          waypoint: 516,48 516,64
+      onset: T0+20s
+      duration: 30s
+      bounds: 476 64 124 72
+    Failed_Interference:
       type: BoundaryEvent
       fill: "#f0f6ee"
       stroke: "#5c8a55"
-      name: failed-trial rate above 20%
+      name: "> 20% unanswered"
       eventDefinitions:
-        Err_BatteryExit: { type: ErrorEventDefinition }
-      attachedToRef: Battery
-      bounds: 566 114 28 28
-      label: 598 132 96 27
+        Cond_Interference:
+          type: ConditionalEventDefinition
+          condition: "{Task_Interference.failedTrialRate} > 0.2"
+      attachedToRef: Task_Interference
+      bounds: 572 122 28 28
+    Task_WorkingMemory:
+      type: ChoreographyTask
+      font: "#5c8a55"
+      fill: "#dcebd6"
+      stroke: "#5c8a55"
+      name: Working memory (1-back)
+      extensionElements:
+        - type: behaverse:Task
+          instrument: NB
+          timeline: Debug
+      dataOutputAssociations:
+        Out_Trials_WorkingMemory:
+          stroke: "#5c8a55"
+          targetRef: Dataset_Trials
+          waypoint: 680,64 680,44
+      onset: T0+50s
+      duration: 30s
+      bounds: 620 64 124 72
+    Failed_WorkingMemory:
+      type: BoundaryEvent
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
+      name: "> 20% unanswered"
+      eventDefinitions:
+        Cond_WorkingMemory:
+          type: ConditionalEventDefinition
+          condition: "{Task_WorkingMemory.failedTrialRate} > 0.2"
+      attachedToRef: Task_WorkingMemory
+      bounds: 716 122 28 28
+    Dataset_Trials:
+      type: DataStoreReference
+      fill: "#f0f6ee"
+      stroke: "#5c8a55"
+      name: Trials
+      uri: data/trials.jsonl
+      extensionElements:
+        - type: behaverse:BDMDataset
+          dataLevel: trials
+      bounds: 655 0 50 44
+      label: 709 8 76 14
     Discontinued:
       type: EndEvent
-      name: Discontinued intervention (n={count})
-      properties:
-        P_count_disc: { name: count, value: "0" }
-      eventDefinitions:
-        Err_Discontinued: { type: ErrorEventDefinition }
-      bounds: 566 172 28 28
+      name: "Discontinued: more than 20% of trials unanswered (n={reached})"
+      bounds: 572 172 28 28
       fill: "#f1d0cd"
       stroke: "#ac5a54"
-      label: 600 178 100 28
+      label: 490 208 240 28
     Analysis:
       type: SubProcess
       font: "#7a67a6"
-      extensionElements:
-        - type: prov:Activity
-          action: executed
-          when: "2026-09-01T14:58:00Z"
-          run: 2026-09-01/example_study
-          seed: 42
-        - type: prov:Activity
-          action: invalidated
-          when: "2026-09-03T09:30:00Z"
-          who: Morteza Ansarinia
-          with: studyflow-modeler/26.9.24
-          what: "2026-09-01T14:58:00Z"
-        - type: prov:Activity
-          action: executed
-          when: "2026-09-03T09:52:00Z"
-          run: 2026-09-03/example_study
-          seed: 42
       fill: "#e6dff1"
       stroke: "#7a67a6"
-      name: Analysis pipeline
+      name: Analysis
+      documentation: >-
+        Eight preregistered operations, collapsed here; @fig-step3-analyze draws them.
       checklist: |-
-        - [x] Trials with a response time below 100 ms dropped
-        - [x] Trials with missing data dropped
-        - [x] Trials flagged in Step 2 dropped
-        - [x] Subjects with fewer than 50% valid trials excluded
-      onset: T0+40min
-      duration: 10min
-      bounds: 621 72 128 56
+        - [x] Trials the actor did not answer within the response window dropped
+        - [x] Every remaining trial carries a congruency and a latency
+      onset: T0+6min
+      duration: 30s
+      bounds: 768 68 140 64
       isExpanded: false
-    Analysis_Error:
-      type: BoundaryEvent
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
-      name: fewer than 50% valid trials
-      eventDefinitions:
-        Err_AnalysisExit: { type: ErrorEventDefinition }
-      attachedToRef: Analysis
-      bounds: 721 114 28 28
-      label: 753 132 96 27
-    Excluded_Analysis:
-      type: EndEvent
-      name: Excluded from analysis (n={count})
-      properties:
-        P_count_excl: { name: count, value: "0" }
-      eventDefinitions:
-        Err_ExcludedAnalysis: { type: ErrorEventDefinition }
-      bounds: 721 172 28 28
-      fill: "#f1d0cd"
-      stroke: "#ac5a54"
-      label: 755 178 100 28
     Render:
-      type: ServiceTask
+      type: ManualTask
       font: "#a2803c"
       fill: "#f6e8c9"
       stroke: "#a2803c"
-      name: Render reporting artifacts
-      implementation: python://behaverse_report.render@1.0
+      name: Render the report
       checklist: |-
         - [x] CONSORT participant flow exported from the Figure view
         - [x] SPIRIT schedule exported from the Gantt view
         - [x] CHART items recorded from the run provenance
-      onset: T0+50min
+      onset: T0+7min
       duration: 2min
-      bounds: 764 68 130 64
+      bounds: 932 66 128 68
     Completed:
       type: EndEvent
       fill: "#f6e8c9"
       stroke: "#a2803c"
-      name: Completed
-      redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
-      completionCodeType: dynamic
-      bounds: 906 84 32 32
-      label: 886 122 72 14
+      name: Study complete
+      bounds: 1086 84 32 32
+      label: 1060 120 96 28
     Flow_Enroll_Screening:
       sourceRef: Enroll
       targetRef: Screening
@@ -263,88 +254,66 @@ Example_Study:
     Flow_Eligible:
       stroke: "#4e6f95"
       sourceRef: Eligibility_Gateway
-      targetRef: Randomize_Gateway
-      waypoint: 224,100 242,100
+      targetRef: Randomize_Disposition
+      waypoint: 232,100 250,100
     Flow_Excluded_Pre:
-      name: not eligible
+      name: "no"
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
       stroke: "#ac5a54"
-      waypoint: 204,120 204,172
-      label: 140 150 60 14
+      waypoint: 212,120 212,172
+      label: 176 140 32 14
     Flow_Allocate_Cautious:
       stroke: "#4e6f95"
-      sourceRef: Randomize_Gateway
+      name: cautious
+      sourceRef: Randomize_Disposition
       targetRef: Allocate_Cautious
-      waypoint: 262,80 262,44 296,44
+      waypoint: 290,100 296,100 296,37 304,37
+      label: 236 20 56 14
     Flow_Allocate_Impulsive:
       stroke: "#4e6f95"
-      sourceRef: Randomize_Gateway
+      name: impulsive
+      sourceRef: Randomize_Disposition
       targetRef: Allocate_Impulsive
-      waypoint: 262,120 262,156 296,156
-    Flow_Cautious_Battery:
-      stroke: "#4e6f95"
-      sourceRef: Allocate_Cautious
-      targetRef: Battery
-      waypoint: 424,44 440,44 440,100 466,100
-    Flow_Impulsive_Battery:
-      stroke: "#4e6f95"
-      sourceRef: Allocate_Impulsive
-      targetRef: Battery
-      waypoint: 424,156 440,156 440,100 466,100
-    Flow_Battery_Discontinued:
-      sourceRef: Battery_Error
-      targetRef: Discontinued
-      waypoint: 580,142 580,172
-      stroke: "#ac5a54"
-    Flow_Battery_Analysis:
-      sourceRef: Battery
-      targetRef: Analysis
+      waypoint: 290,100 296,100 296,163 304,163
+      label: 228 168 62 14
+    Flow_Cautious_Interference:
       stroke: "#5c8a55"
-    Flow_Analysis_Excluded:
-      sourceRef: Analysis_Error
-      targetRef: Excluded_Analysis
-      waypoint: 735,142 735,172
+      sourceRef: Allocate_Cautious
+      targetRef: Task_Interference
+      waypoint: 444,37 460,37 460,100 476,100
+    Flow_Impulsive_Interference:
+      stroke: "#5c8a55"
+      sourceRef: Allocate_Impulsive
+      targetRef: Task_Interference
+      waypoint: 444,163 460,163 460,100 476,100
+    Flow_Interference_WorkingMemory:
+      stroke: "#5c8a55"
+      sourceRef: Task_Interference
+      targetRef: Task_WorkingMemory
+      waypoint: 600,100 620,100
+    Flow_Failed_Interference:
+      sourceRef: Failed_Interference
+      targetRef: Discontinued
       stroke: "#ac5a54"
+      waypoint: 586,150 586,172
+    Flow_Failed_WorkingMemory:
+      sourceRef: Failed_WorkingMemory
+      targetRef: Discontinued
+      stroke: "#ac5a54"
+      waypoint: 730,150 730,186 600,186
+    Flow_WorkingMemory_Analysis:
+      sourceRef: Task_WorkingMemory
+      targetRef: Analysis
+      stroke: "#7a67a6"
+      waypoint: 744,100 768,100
     Flow_Analysis_Render:
       sourceRef: Analysis
       targetRef: Render
-      stroke: "#7a67a6"
+      stroke: "#a2803c"
+      waypoint: 908,100 932,100
     Flow_Render_Completed:
       sourceRef: Render
       targetRef: Completed
       stroke: "#a2803c"
-state:
-  _meta:
-    prov:
-      - action: created
-        when: "2026-08-01T09:00:00Z"
-        who: Morteza Ansarinia
-        with: studyflow-modeler/26.9.5
-      - action: executed
-        when: "2026-08-20T10:05:00Z"
-        with: studyflow-cli/26.9.18
-        seed: 7
-        run: 2026-08-20/pilot_random
-      - action: executed
-        when: "2026-09-01T14:20:00Z"
-        with: studyflow-cli/26.9.24
-        seed: 42
-        run: 2026-09-01/example_study
-      - action: executed
-        when: "2026-09-03T09:41:00Z"
-        with: studyflow-cli/26.9.24
-        seed: 42
-        run: 2026-09-03/example_study
-    reached:
-      Enroll: 96
-      Eligibility_Gateway: 96
-      Randomize_Gateway: 90
-      Allocate_Cautious: 45
-      Allocate_Impulsive: 45
-      Battery: 88
-      Analysis: 79
-      Completed: 76
-  Excluded_Pre: { count: 6 }
-  Discontinued: { count: 9 }
-  Excluded_Analysis: { count: 3 }
+      waypoint: 1060,100 1086,100
