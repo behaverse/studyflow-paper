@@ -11,7 +11,7 @@
 set -e
 SRC=$(cd "$(dirname "$0")" && pwd); OUT=$SRC/..; TMP=/tmp/studyflow-figs; mkdir -p "$TMP"
 export MODELER=${MODELER:?set MODELER to the studyflow-modeler checkout}
-ALL="fig-step1-design fig-step2-run fig-step2-nback fig-step3-analyze fig-step4-report fig-combined fig-consort figS1-multimodal
+ALL="fig-step1-design fig-step2-run fig-step2-nback fig-step3-analyze fig-step3-decision fig-step4-report fig-combined fig-consort figS1-multimodal
      fig-consort-reference fig-step2-nback-classic fig-elements fig-views fig-s2-modeler fig-overview"
 trap 'rm -f "$MODELER/render.mjs" "$MODELER/views.mjs" "$MODELER/modeler.mjs"' EXIT
 # the scripts run from the modeler checkout, to import its playwright; each is copied there just before it runs

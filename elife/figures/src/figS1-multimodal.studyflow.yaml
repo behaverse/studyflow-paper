@@ -5,12 +5,16 @@ Multimodal_Pipeline:
   type: Process
   documentation: >-
     Figure S1: a use-case pipeline harmonizing EEG, fMRI, and behavioral recordings. Three source datasets feed
-    modality-specific preprocessing (EEGPrep, fMRIPrep, BDM conversion); a compose/expansion step produces a harmonized
-    corpus, then a training chain.
+    modality-specific preprocessing (EEGPrep, fMRIPrep, BDM conversion), one after another since a pool walks one
+    path; a compose/expansion step produces a harmonized corpus, then a model is trained on its training split and
+    evaluated on its test split. The implementations are illustrative references, not packages a run installs.
   extensionElements:
     - type: studyflow:Study
   name: Multimodal preprocessing and training
   flowElements:
+    Start:
+      type: StartEvent
+      bounds: 322 -40 36 36
     eeg_raw:
       type: DataStoreReference
       extensionElements:
@@ -77,20 +81,14 @@ Multimodal_Pipeline:
           dataLevel: models
       name: Harmonized corpus
       bounds: 535 400 50 50
-    Split:
-      type: ExclusiveGateway
-      name: Split train/test
-      bounds: 700 275 50 50
-      label: 612 330 108 14
-      isMarkerVisible: true
     Train:
       type: ServiceTask
-      name: Train model
+      name: Train on the training split
       implementation: python://models.train@1.0
       bounds: 820 180 120 80
     Evaluate:
       type: ServiceTask
-      name: Evaluate
+      name: Evaluate on the test split
       implementation: python://models.evaluate@1.0
       bounds: 820 340 120 80
     Done:
@@ -98,32 +96,30 @@ Multimodal_Pipeline:
       name: Done
       bounds: 1030 282 36 36
       label: 1072 293 30 14
+    m0:
+      sourceRef: Start
+      targetRef: EEGPrep
+      waypoint: 340,-4 340,40
     m1:
       sourceRef: EEGPrep
-      targetRef: Compose
-      route: h
-    m2: fMRIPrep -> Compose
+      targetRef: fMRIPrep
+      waypoint: 340,120 340,260
+    m2:
+      sourceRef: fMRIPrep
+      targetRef: BehConv
+      waypoint: 340,340 340,460
     m3:
       sourceRef: BehConv
       targetRef: Compose
-      route: h
-    m4: Compose -> Split
-    m5:
-      name: train
-      sourceRef: Split
+      waypoint: 400,500 460,500 460,300 500,300
+    m4:
+      sourceRef: Compose
       targetRef: Train
-      waypoint: 725,275 725,220 820,220
-      label: 731 240 40 14
-    m6:
-      name: test
-      sourceRef: Split
-      targetRef: Evaluate
-      waypoint: 725,325 725,380 820,380
-      label: 731 346 30 14
+      waypoint: 620,300 720,300 720,220 820,220
     m7:
       sourceRef: Train
-      targetRef: Done
-      waypoint: 940,220 1048,220 1048,282
+      targetRef: Evaluate
+      waypoint: 880,260 880,340
     m8:
       sourceRef: Evaluate
       targetRef: Done

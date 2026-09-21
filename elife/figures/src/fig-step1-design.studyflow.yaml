@@ -189,7 +189,8 @@ Design:
         be predicted by whoever enrols the subject.
       extensionElements:
         - type: cognitive:RandomGateway
-          algorithm: simple
+          algorithm: block
+          blockSize: 4
           allocationRatio: "1:1"
       default: Flow_Allocate_Impulsive
       bounds: 535 500 50 50

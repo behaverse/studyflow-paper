@@ -24,6 +24,7 @@ Example_Study:
         - pandas==2.3.3
         - scipy==1.16.2
         - scikit-learn==1.7.2
+        - statsmodels==0.15.0
         - matplotlib==3.10.7
   properties:
     P_Arm:
@@ -85,7 +86,8 @@ Example_Study:
       name: Which disposition? (n={reached})
       extensionElements:
         - type: cognitive:RandomGateway
-          algorithm: simple
+          algorithm: block
+          blockSize: 4
           allocationRatio: "1:1"
       default: Flow_Allocate_Impulsive
       bounds: 250 80 40 40
@@ -317,3 +319,136 @@ Example_Study:
       targetRef: Completed
       stroke: "#a2803c"
       waypoint: 1060,100 1086,100
+state:
+  _meta:
+    prov:
+      - action: executed
+        when: "2026-09-21T08:43:55.172+02:00"
+        who: morteza
+        with: studyflow-cli/26.9.28
+        run: run
+        seed: 42
+        plan: sha256:daeefe00a260ef679e395a9f72939b9eedb40f1e816c994900c80f8efeb96bf4
+    instance:
+      Participant_Subject: 4
+    reached:
+      Enroll: 4
+      All_Complete: 1
+      SF_Start_Screening: 4
+      Screening: 4
+      SF_Screening_Eligibility: 4
+      Eligibility_Gateway: 4
+      Flow_Eligible: 4
+      Randomize_Disposition: 4
+      Flow_Allocate_Impulsive: 2
+      Allocate_Impulsive: 2
+      SF_Impulsive_Merge: 2
+      Merge_Allocation: 4
+      SF_Merge_Interference: 4
+      Task_Interference: 4
+      SF_Interference_WorkingMemory: 4
+      Task_WorkingMemory: 4
+      SF_WorkingMemory_Debrief: 4
+      Debrief: 4
+      SF_Debrief_End: 4
+      Sub_End: 4
+      Flow_Allocate_Cautious: 2
+      Allocate_Cautious: 2
+      SF_Cautious_Merge: 2
+      Flow_Start_Analysis: 1
+      Analysis: 1
+      An_Start: 1
+      AF_0: 1
+      Read_Trials: 1
+      RT_Start: 1
+      RTF_0: 1
+      Derive: 1
+      RTF_1: 1
+      Flatten_Index: 1
+      RTF_2: 1
+      RT_End: 1
+      AF_1: 1
+      Filter: 1
+      F_Start: 1
+      FF_0: 1
+      Filter_Rows: 1
+      FF_1: 1
+      Measures: 1
+      FF_2: 1
+      F_End: 1
+      AF_2: 1
+      Per_Subject: 1
+      PS_Start: 1
+      PSF_0: 1
+      Per_Subject_Table: 1
+      PSF_1: 1
+      Per_Subject_Flat: 1
+      PSF_2: 1
+      Arm_Sizes: 1
+      PSF_3: 1
+      PS_End: 1
+      AF_3: 1
+      Group: 1
+      AF_4: 1
+      Congruency: 1
+      C_Start: 1
+      CF_0: 1
+      Cost_Per_Subject: 1
+      CP_Start: 1
+      CPF_0: 1
+      Congruency_Table: 1
+      CPF_1: 1
+      By_Congruency: 1
+      CPF_2: 1
+      Latency_Incongruent: 1
+      CPF_3: 1
+      Latency_Congruent: 1
+      CPF_4: 1
+      Cost: 1
+      CPF_5: 1
+      CP_End: 1
+      CF_1: 1
+      Enough_Subjects: 1
+      C_Enough: 1
+      Cost_Test: 1
+      CF_2: 1
+      Congruency_Decision: 1
+      C_No: 1
+      C_Not_Supported: 1
+      AF_5: 1
+      Agreement: 1
+      A_Start: 1
+      AGF_0: 1
+      Enough_Per_Arm_A: 1
+      A_Too_Few: 1
+      A_Not_Testable: 1
+      AF_6: 1
+      Divergence: 1
+      D_Start: 1
+      DF_0: 1
+      Enough_Per_Arm_D: 1
+      D_Too_Few: 1
+      D_Not_Testable: 1
+      AF_7: 1
+      Plot: 1
+      AF_8: 1
+      An_End: 1
+      Flow_Analysis_Render: 1
+      Render: 1
+      Flow_Render_Completed: 1
+      Completed: 1
+  Example_Study:
+    arm: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+  Analysis:
+    alpha: 0.05
+    min_subjects: 3
+    min_per_arm: 4
+    margin_low: -0.1
+    margin_high: 0.1
+    n_permutations: 1000
+    smallest_arm: 2
+  Congruency:
+    congruency_n: 4
+    congruency_test:
+      statistic: -3.3943472161453743
+      pvalue: 0.9786808981792949

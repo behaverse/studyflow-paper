@@ -16,8 +16,8 @@ The cohort is artificial — four subjects, four instances of the subjects' pool
 `participantMultiplicity`, drawn as the three-bar parallel marker at the foot of the pool's title band with
 `×4` under it, which is where the pool's name used to say it; the subjects do not depend on one another, so
 this is a multiplicity and not a loop), all played by Gemma 4 on a local
-Ollama (`gemma4:e2b-mlx`). Each subject is screened with a comprehension check, allocated at random to a
-cautious or an impulsive disposition, and takes two tasks
+Ollama (`gemma4:e2b-mlx`). Each subject is screened with a comprehension check, allocated to a
+cautious or an impulsive disposition in permuted blocks of four (so four subjects split two and two), and takes two tasks
 from the Behaverse build (`WO` / `SimonTask`, a Simon task whose congruency is drawn per trial, stopped
 at 15 trials by the bot settings; `NB` / `Debug`, two blocks of 16, all 32 run). Every trial goes to the
 model as one message and comes back as one response; at the study's grain that exchange is one pair of
@@ -25,11 +25,18 @@ message flows drawn on the subjects' pool, which every task inside inherits, and
 per task. A third message, `all subjects complete`, leaves the subjects' pool once, after its last
 instance ends, and starts the analysis pool; the `Trials` dataset sits between the two lab pools, written
 by both tasks and read by the analysis. The analysis is
-eight preregistered operations — read the recorded trials, drop the ones nobody answered, per-subject
-accuracy and latency, group statistics, the congruency effect, the agreement between the two
-dispositions, the divergence from a random baseline, and the figure. Three are one call to a library
-function; the other five are collapsed sub-processes holding the two to four calls that operation takes.
-Nothing in the file is code written for this study.
+eight preregistered operations: read the recorded trials, drop the ones nobody answered, per-subject
+accuracy and latency (and the size of the smaller arm), group statistics, the three questions, and the figure.
+Each question is a collapsed sub-process that ends in a decision, at an end event named for its claim state:
+**Not testable** when the cohort is below the minimum the decision rules set, else **Supported** or **Not
+supported** by its test against their alpha. The congruency effect is a one-sided one-sample t test on each
+subject's latency cost (incongruent minus congruent); the agreement between the dispositions is an equivalence
+test (TOST, statsmodels) on per-subject accuracy; the divergence between them is a logistic regression on
+per-subject features, scored leave-one-subject-out against a permutation of the arm labels across subjects,
+which replaces the dummy-classifier baseline. Every threshold sits once in the **Decision rules** Parameters
+object wired into the analysis, and the trials dataset is bound to the CSVW **Trial schema** that
+`studyflow validate` checks the columns of the first operation against. Nothing in the file is code written
+for this study.
 
 ## Running it
 
@@ -58,15 +65,26 @@ provenance record), so keep it out of any commit of `elife/study/`.
 - `data/trials.jsonl` — one line per recorded event, from every task of every subject: the build's
   own frame under `trialContext`, and under `context` the subject and the properties in scope,
   including the allocated `arm`.
-- `results/` — `per_subject.csv`, `group.csv`, `congruency.csv`, `agreement.json`,
-  `divergence.json`, `baseline.json`, `accuracy.png`.
+- `results/` — `per_subject.csv`, `group.csv`, `congruency.csv`, `congruency_test.json`, `accuracy.png`,
+  and, when the cohort is large enough to test them, `agreement.json` and `divergence.json`. Which claim state
+  each question reached is in the executed copy's `_meta.reached` (`C_Supported`, `A_Not_Testable`, …).
 - `studyflow.log` — the walk, message by message.
 
 ## The figure
 
 `figures/src/render.sh fig-combined` draws @fig-combined from the executed copy when
-`run/example_study.studyflow.yaml` exists, and from the deposited file otherwise.
-**There is no `run/` right now**: the run made before the study became a three-pool collaboration
-no longer matches this file, so every figure currently renders the deposited plan and every `(n=…)`
-label prints `n=0`. A fresh run refills them; re-render `fig-combined`, `fig-consort`, `fig-overview`
-and `fig-views` afterwards.
+`run/example_study.studyflow.yaml` exists, and from the deposited file otherwise. The run in `run/` is the one the
+paper reports: four subjects, allocated two and two, all four completing the protocol; the congruency question at
+Not supported, and the two between-arm questions at Not testable. `studyflow validate run/example_study.studyflow.yaml`
+confirms that its protocol is the deposited one (`protocol matches run run`) and that its counts balance. After a new
+run, copy the `state:` block of the executed copy into `figures/src/fig-consort.studyflow.yaml` and
+`figures/src/fig-overview.studyflow.yaml`, and re-render `fig-combined`, `fig-consort`, `fig-overview` and
+`fig-views`.
+
+## Why the file is spelled the way the tools write it
+
+The deposited file is kept in the spelling `studyflow convert` writes (`studyflow convert example_study.studyflow.yaml
+example_study.studyflow.yaml` rewrites it in place), because the runner writes the executed copy in that spelling.
+Deposited that way, the diff between the file and its executed copy holds only additions, the run's records and
+state, which is the deviation report the paper shows; a hand-spelled file would differ from its executed copy on every
+line the writer orders or wraps differently, although its protocol digest would not change.
