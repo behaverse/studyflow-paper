@@ -11,7 +11,7 @@ Run_Collaboration:
     run in the study's system, the model is another, and the only thing crossing the boundary is the exchange
     drawn here — one `behaverse:Trial` out per trial and one `behaverse:Response` back, per task. @fig-combined
     folds the same four flows into one pair at the pool level, which every task inside inherits. The shared `agentic:Prompt` carries the
-    task rules and cites the subject's allocated disposition as `{arm}`, so the same battery, unchanged, is
+    task rules and cites the instruction of the subject's allocated disposition as `{instruction}`, so the same battery, unchanged, is
     administered to whichever arm the subject was drawn into. The two pacing elements are not the protocol: they
     are how the build plays for an actor that is not a person, and each task needs its own, since a Parameters
     object only reaches a step it is wired into. The attrition rule is a conditional boundary event reading the
@@ -89,6 +89,9 @@ Run:
     P_Arm:
       name: arm
       value: none
+    P_Instruction:
+      name: instruction
+      value: none
   flowElements:
     Battery_Start:
       type: StartEvent
@@ -104,8 +107,8 @@ Run:
       name: Task settings (Simon)
       documentation: >-
         Not the protocol: how the build plays for an actor that is not a person. It skips the instruction
-        screens nobody is there to click, runs the engine clock faster, and stops the block after fifteen
-        trials. It defines no block and no timeline; the protocol is the instrument and the timeline alone.
+        screens nobody is there to click and runs the engine clock faster. It defines no block and no timeline
+        and stops nothing early; the protocol is the instrument and the timeline alone.
       extensionElements:
         - type: studyflow:Parameters
           values:
@@ -114,8 +117,6 @@ Run:
               SkipInstructions: true
               AutoClickInstructions: true
               SkipFocusArea: true
-              EndBlockAfter: true
-              EndBlockAfterTrialCount: 15
       bounds: 300 220 36 50
       label: 186 232 108 27
     Prompt_Battery:
@@ -126,7 +127,7 @@ Run:
       extensionElements:
         - type: agentic:Prompt
           template: |
-            {arm}
+            {instruction}
 
             You are taking a computerised cognitive test one trial at a time. Each message is one trial, as
             JSON. Your answer is one of the strings in that trial's own ResponseOptions, copied exactly and
@@ -176,7 +177,7 @@ Run:
       name: Interference control (Simon)
       documentation: >-
         The Simon task the Behaverse build ships as WO / SimonTask, congruency (congruent, incongruent, neutral)
-        drawn per trial, so the congruency contrast is inside one block; the bot settings stop it at 15 trials.
+        drawn per trial, so the congruency contrast is inside one block of 30 trials.
       extensionElements:
         - type: behaverse:Task
           instrument: WO
@@ -196,7 +197,7 @@ Run:
           targetRef: Dataset_Trials
           waypoint: 330,466 330,700 800,700 800,530
       onset: T0+20s
-      duration: 30s
+      duration: 40s
       bounds: 300 370 170 96
     Failed_Interference:
       type: BoundaryEvent
@@ -217,11 +218,12 @@ Run:
       stroke: "#5c8a55"
       name: Working memory (1-back)
       documentation: >-
-        The n-back the build ships as NB / Debug: two blocks of 16 trials over a fixed digit stream, all 32 run.
+        The 1-back the build ships as NB / XCIT_NB_01, the timeline its human studies run: three tutorial blocks and
+        a practice block, then two test blocks of 28 digits. Every block runs; the analysis keeps the test blocks.
       extensionElements:
         - type: behaverse:Task
           instrument: NB
-          timeline: Debug
+          timeline: XCIT_NB_01
       dataInputAssociations:
         In_Prompt_WorkingMemory:
           stroke: "#5c8a55"
@@ -236,8 +238,8 @@ Run:
           stroke: "#5c8a55"
           targetRef: Dataset_Trials
           waypoint: 570,466 570,670 815,670 815,530
-      onset: T0+50s
-      duration: 30s
+      onset: T0+60s
+      duration: 3min
       bounds: 560 370 170 96
     Failed_WorkingMemory:
       type: BoundaryEvent

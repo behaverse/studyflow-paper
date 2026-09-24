@@ -80,6 +80,9 @@ Design:
     P_Arm:
       name: arm
       value: none
+    P_Instruction:
+      name: instruction
+      value: none
   laneSets:
     LaneSet_Subject:
       lanes:
@@ -203,16 +206,21 @@ Design:
       stroke: "#4e6f95"
       name: Allocated to cautious disposition (n={reached})
       documentation: >-
-        The allocation writes the disposition into the subject's `arm` property, and the battery's prompt
-        cites it as `{arm}`. The implementation is the identity, so the value a reader sees in the file is
-        the value the subject gets.
-      implementation: python://builtins.str
+        The allocation writes the arm's label into the subject's `arm` property and the instruction that arm
+        receives into `instruction`; the battery's prompt cites the instruction as `{instruction}`, and the label
+        is what the recorded trials and the analysis carry. The implementation is `dict`, so the values a reader
+        sees in the file are the values the subject gets.
+      implementation: python://builtins.dict
       additionalArguments:
-        args:
-          - Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
+        arm: cautious
+        instruction: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
       dataOutputAssociations:
         Out_Arm_Cautious:
           targetRef: P_Arm
+          transformation: result['arm']
+        Out_Instruction_Cautious:
+          targetRef: P_Instruction
+          transformation: result['instruction']
       onset: T0
       duration: 1s
       bounds: 265 585 190 72
@@ -222,13 +230,17 @@ Design:
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to impulsive disposition (n={reached})
-      implementation: python://builtins.str
+      implementation: python://builtins.dict
       additionalArguments:
-        args:
-          - Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+        arm: impulsive
+        instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
       dataOutputAssociations:
         Out_Arm_Impulsive:
           targetRef: P_Arm
+          transformation: result['arm']
+        Out_Instruction_Impulsive:
+          targetRef: P_Instruction
+          transformation: result['instruction']
       onset: T0
       duration: 1s
       bounds: 645 585 190 72

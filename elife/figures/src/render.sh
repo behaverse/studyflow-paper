@@ -26,7 +26,6 @@ for f in ${@:-$ALL}; do
   case $f in
     fig-combined)             mm=0.19 ;;    # 948 units + the one-row key; 11-unit labels at 5.9 pt
     fig-elements)             mm=0.115 ;;
-    fig-step3-coordinator)    mm=0.19 ;;    # 1070 units tall, the three questions expanded: fig-combined's scale
     *-reference|*-classic)    mm=0.185 ;;   # hand-drawn panels sharing a row with a diagram
     *)                        mm=0.2 ;;     # the common scale: 11-12 unit labels print at 6.2-6.8 pt
   esac

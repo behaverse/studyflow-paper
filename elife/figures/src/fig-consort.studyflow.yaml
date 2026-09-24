@@ -27,7 +27,6 @@ Consort_Collaboration:
         - pandas==2.3.3
         - scipy==1.16.2
         - scikit-learn==1.7.2
-        - statsmodels==0.15.0
         - matplotlib==3.10.7
   participants:
     Participant_Subject:
@@ -64,6 +63,9 @@ Example_Study:
   properties:
     P_Arm:
       name: arm
+      value: none
+    P_Instruction:
+      name: instruction
       value: none
   laneSets:
     LaneSet_Subject:
@@ -173,10 +175,10 @@ Example_Study:
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to cautious disposition (n={reached})
-      implementation: python://builtins.str
+      implementation: python://builtins.dict
       additionalArguments:
-        args:
-          - Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
+        arm: cautious
+        instruction: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
       onset: T0
       duration: 1s
       bounds: 300 338 160 62
@@ -186,10 +188,10 @@ Example_Study:
       fill: "#dbe6f2"
       stroke: "#4e6f95"
       name: Allocated to impulsive disposition (n={reached})
-      implementation: python://builtins.str
+      implementation: python://builtins.dict
       additionalArguments:
-        args:
-          - Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+        arm: impulsive
+        instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
       onset: T0
       duration: 1s
       bounds: 500 338 160 62
@@ -209,7 +211,7 @@ Example_Study:
           instrument: WO
           timeline: SimonTask
       onset: T0+20s
-      duration: 30s
+      duration: 40s
       bounds: 244 506 160 80
     Failed_Interference:
       type: BoundaryEvent
@@ -232,9 +234,9 @@ Example_Study:
       extensionElements:
         - type: behaverse:Task
           instrument: NB
-          timeline: Debug
-      onset: T0+50s
-      duration: 30s
+          timeline: XCIT_NB_01
+      onset: T0+60s
+      duration: 3min
       bounds: 428 506 160 80
     Failed_WorkingMemory:
       type: BoundaryEvent
@@ -265,7 +267,7 @@ Example_Study:
         - type: cognitive:Instruction
           content: >-
             The session is over. Thank you for taking part; nothing further is asked of you.
-      onset: T0+80s
+      onset: T0+4min
       duration: 1s
       bounds: 640 506 140 80
     Sub_End:
@@ -435,9 +437,9 @@ state:
       CPF_1: 1
       By_Congruency: 1
       CPF_2: 1
-      Latency_Incongruent: 1
+      Accuracy_Incongruent: 1
       CPF_3: 1
-      Latency_Congruent: 1
+      Accuracy_Congruent: 1
       CPF_4: 1
       Cost: 1
       CPF_5: 1
@@ -451,13 +453,6 @@ state:
       C_No: 1
       C_Not_Supported: 1
       AF_5: 1
-      Agreement: 1
-      A_Start: 1
-      AGF_0: 1
-      Enough_Per_Arm_A: 1
-      A_Too_Few: 1
-      A_Not_Testable: 1
-      AF_6: 1
       Divergence: 1
       D_Start: 1
       DF_0: 1
@@ -473,13 +468,12 @@ state:
       Flow_Render_Completed: 1
       Completed: 1
   Example_Study:
-    arm: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+    arm: impulsive
+    instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
   Analysis:
     alpha: 0.05
     min_subjects: 3
     min_per_arm: 4
-    margin_low: -0.1
-    margin_high: 0.1
     n_permutations: 1000
     smallest_arm: 2
   Congruency:

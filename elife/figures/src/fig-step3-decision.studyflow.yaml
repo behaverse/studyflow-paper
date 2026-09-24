@@ -5,7 +5,7 @@ Decide:
   type: Process
   name: Step 3 - A question decided
   documentation: >-
-    One of the three questions of the example study's analysis (`../study/example_study.studyflow`), its
+    One of the two questions of the example study's analysis (`../study/example_study.studyflow`), its
     `Congruency` sub-process expanded and otherwise unchanged: the same element ids and arguments. The data shaping
     stays collapsed; what is drawn is the decision. A feasibility gateway sends a cohort too small for the test to
     the Not testable end; otherwise the one-sided t test runs and the decision gateway compares its p value with
@@ -18,7 +18,6 @@ Decide:
       dependencies:
         - pandas==2.3.3
         - scipy==1.16.2
-        - statsmodels==0.15.0
   properties:
     trials: { name: trials }
   flowElements:
@@ -31,15 +30,13 @@ Decide:
         The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of
         every test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm
         test needs, four being the smallest arms for which shuffling labels across subjects can reach p < .05;
-        the equivalence margin on accuracy; the permutations the divergence test draws.
+        the permutations the divergence test draws.
       extensionElements:
         - type: studyflow:Parameters
           values:
             alpha: 0.05
             min_subjects: 3
             min_per_arm: 4
-            margin_low: -0.1
-            margin_high: 0.1
             n_permutations: 1000
       bounds: 60 20 36 50
       label: 102 32 90 14
@@ -51,8 +48,8 @@ Decide:
       stroke: "#7a67a6"
       properties:
         by_congruency: { name: by_congruency }
-        latency_congruent: { name: latency_congruent }
-        latency_incongruent: { name: latency_incongruent }
+        accuracy_congruent: { name: accuracy_congruent }
+        accuracy_incongruent: { name: accuracy_incongruent }
         congruency_costs: { name: congruency_costs }
         congruency_n: { name: congruency_n }
         congruency_test: { name: congruency_test }
@@ -70,10 +67,10 @@ Decide:
           bounds: 70 197 36 36
         Cost_Per_Subject:
           type: SubProcess
-          name: Latency cost per subject
+          name: Accuracy cost per subject
           documentation: >-
             The descriptive table by disposition and congruency, written out as it stands; then, per subject,
-            the mean latency on incongruent trials minus the mean on congruent ones, and how many subjects have
+            the mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have
             both.
           flowElements:
             CP_Start:
@@ -92,44 +89,44 @@ Decide:
                 Out_Congruency: { targetRef: File_Congruency }
             By_Congruency:
               type: ServiceTask
-              name: Latency, one column per congruency
+              name: Accuracy, one column per congruency
               implementation: python://pandas.DataFrame.pivot_table
               additionalArguments:
                 index: "context.subject"
                 columns: "trialContext.congruency"
-                values: "trialContext.trial.timeInTrial"
+                values: "result.isCorrect"
                 aggfunc: mean
               dataInputAssociations:
                 In_Trials_BC: { sourceRef: [trials], transformation: self }
               dataOutputAssociations:
                 Out_BC: { targetRef: by_congruency }
-            Latency_Incongruent:
+            Accuracy_Incongruent:
               type: ServiceTask
-              name: Incongruent latencies
+              name: Incongruent accuracies
               implementation: python://pandas.DataFrame.get
               additionalArguments:
                 key: Incongruent
               dataInputAssociations:
                 In_BC_I: { sourceRef: [by_congruency], transformation: self }
               dataOutputAssociations:
-                Out_Incongruent: { targetRef: latency_incongruent }
-            Latency_Congruent:
+                Out_Incongruent: { targetRef: accuracy_incongruent }
+            Accuracy_Congruent:
               type: ServiceTask
-              name: Congruent latencies
+              name: Congruent accuracies
               implementation: python://pandas.DataFrame.get
               additionalArguments:
                 key: Congruent
               dataInputAssociations:
                 In_BC_C: { sourceRef: [by_congruency], transformation: self }
               dataOutputAssociations:
-                Out_Congruent: { targetRef: latency_congruent }
+                Out_Congruent: { targetRef: accuracy_congruent }
             Cost:
               type: ServiceTask
               name: Congruency cost per subject
               implementation: python://pandas.Series.sub
               dataInputAssociations:
-                In_Cost_I: { sourceRef: [latency_incongruent], transformation: self }
-                In_Cost_C: { sourceRef: [latency_congruent], transformation: other }
+                In_Cost_C: { sourceRef: [accuracy_congruent], transformation: self }
+                In_Cost_I: { sourceRef: [accuracy_incongruent], transformation: other }
               dataOutputAssociations:
                 Out_Costs: { targetRef: congruency_costs }
                 Out_Cost_N:
@@ -143,9 +140,9 @@ Decide:
               type: EndEvent
             CPF_0: CP_Start -> Congruency_Table
             CPF_1: Congruency_Table -> By_Congruency
-            CPF_2: By_Congruency -> Latency_Incongruent
-            CPF_3: Latency_Incongruent -> Latency_Congruent
-            CPF_4: Latency_Congruent -> Cost
+            CPF_2: By_Congruency -> Accuracy_Congruent
+            CPF_3: Accuracy_Congruent -> Accuracy_Incongruent
+            CPF_4: Accuracy_Incongruent -> Cost
             CPF_5: Cost -> CP_End
           font: "#7a67a6"
           fill: "#e6dff1"
@@ -181,13 +178,13 @@ Decide:
           bounds: 440 180 150 70
         Congruency_Decision:
           type: ExclusiveGateway
-          name: Slower when incongruent?
+          name: Less accurate when incongruent?
           default: C_No
           fill: "#e6dff1"
           stroke: "#7a67a6"
           bounds: 640 190 50 50
           isMarkerVisible: true
-          label: 600 160 130 14
+          label: 580 160 170 14
         C_Supported:
           type: EndEvent
           name: Supported

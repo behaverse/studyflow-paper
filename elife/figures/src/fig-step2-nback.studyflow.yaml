@@ -6,10 +6,11 @@ NBack:
   name: The n-back, drawn out and collapsed
   documentation: >-
     The example study's second task at two grains. Above, one trial as an explicit sub-process repeated
-    thirty-two times: a stimulus activity reading its timings from a Parameters element, a boundary timer that
+    fifty-six times: a stimulus activity reading its timings from a Parameters element, a boundary timer that
     closes the response window, labelled match and non-match branches, and a timer for the inter-stimulus
-    interval. Below, the same two blocks collapsed into the single Behaverse task the study actually wires
-    (`NB` / `Debug`, two blocks of sixteen digits), configured by the same Parameters element — the `Bot:`
+    interval. Below, the same two test blocks collapsed into the single Behaverse task the study actually wires
+    (`NB` / `XCIT_NB_01`, two test blocks of twenty-eight digits, after three tutorial blocks and a practice block
+    the drawing omits), configured by the same Parameters element — the `Bot:`
     block, which is how the build plays for an actor that is not a person and where every timing above comes
     from. The runner expands the collapsed task into the trials drawn above. The durations in that block are
     engine-scaled seconds: the bot runs the engine clock twenty times faster, so the twenty-second response
@@ -32,11 +33,11 @@ NBack:
       font: "#5c8a55"
       fill: "#f0f6ee"
       stroke: "#5c8a55"
-      name: "Trial (repeated 32 times: two blocks of 16)"
+      name: "Trial (repeated 56 times: two test blocks of 28)"
       loopCharacteristics:
         type: StandardLoopCharacteristics
-        loopCondition: state._meta.reached.Trial < 32
-        loopMaximum: 32
+        loopCondition: state._meta.reached.Trial < 56
+        loopMaximum: 56
       bounds: 240 80 720 240
       isExpanded: true
       flowElements:
@@ -219,7 +220,7 @@ NBack:
       extensionElements:
         - type: behaverse:Task
           instrument: NB
-          timeline: Debug
+          timeline: XCIT_NB_01
       dataInputAssociations:
         In_Pace_WorkingMemory:
           stroke: "#5c8a55"
@@ -301,4 +302,4 @@ Category_B:
   type: Category
   categoryValue:
     CV_B:
-      value: The same two blocks, collapsed into the task the study wires
+      value: The same two test blocks, collapsed into the task the study wires
