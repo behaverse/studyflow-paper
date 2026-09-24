@@ -1,0 +1,554 @@
+id: step3_coordinator
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Coordinate:
+  type: Process
+  name: Step 3 - Analyze, drawn as coordination
+  documentation: >-
+    An alternative drawing of Step 3 of the example study, not the one the paper prints (`fig-step3-analyze`). There,
+    every dataframe call is a box, so nothing is code written for the study and the analysis is twenty-four library
+    calls under collapsed sub-processes. Here the diagram is the coordination language the Introduction names it
+    (Gelernter and Carriero) and nothing else: it keeps the order of the steps, the hand-offs between them, the data
+    contract, the feasibility gate and the decision gate of every question, the decision rules those gates read, and
+    the claim state each question ends in; the computation inside each step is one call to `analysis.py`, five short
+    functions deposited beside the study, each itself one call to a library the study pins. Because the shaping is no
+    longer drawn, each question fits in one row and all three can be expanded at once, so a reader sees every gate
+    and every claim state on one page. What the drawing gives up is the validator's reach: a column named inside a
+    function is checked only when the step runs, so the first step names the columns it reads in its arguments, where
+    the data contract still checks them against the trials schema before any data moves.
+  extensionElements:
+    - type: studyflow:Study
+      seed: 42
+      runtime: local
+      dependencies:
+        - pandas==2.3.3
+        - scipy==1.16.2
+        - scikit-learn==1.7.2
+        - statsmodels==0.15.0
+        - matplotlib==3.10.7
+  properties:
+    trials: { name: trials }
+    per_subject: { name: per_subject }
+    n_subjects: { name: n_subjects }
+    smallest_arm: { name: smallest_arm }
+    congruency_test: { name: congruency_test }
+    agreement_test: { name: agreement_test }
+    divergence_test: { name: divergence_test }
+  flowElements:
+    Dataset_Trials:
+      type: DataStoreReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
+      name: Trials
+      documentation: >-
+        One line per recorded event, appended by every task of every subject: the build's own frame
+        (`trialContext`) plus the subject and the properties of the scope that played the trial (`context`).
+      uri: data/trials.jsonl
+      extensionElements:
+        - type: behaverse:BDMDataset
+          dataLevel: trials
+          schema: Trial_Schema
+      bounds: 190 20 50 50
+      label: 246 32 60 14
+    Trial_Schema:
+      type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
+      name: Trial schema
+      documentation: >-
+        The columns the analysis reads from the trials dataset, as a CSVW table schema. The first step names the
+        columns it reads in its arguments, so `studyflow validate` checks them against this list before any data
+        moves, as it does for the drawing the paper prints.
+      extensionElements:
+        - type: studyflow:Schema
+          format: csvw
+          body: >-
+            {"@context": "http://www.w3.org/ns/csvw", "tableSchema": {"columns": [
+            {"name": "context.subject", "datatype": "string"},
+            {"name": "context.state.arm", "datatype": "string"},
+            {"name": "trialContext.task.id", "datatype": "string"},
+            {"name": "trialContext.block.name", "datatype": "string"},
+            {"name": "trialContext.trial.id", "datatype": "string"},
+            {"name": "trialContext.congruency", "datatype": "string"},
+            {"name": "result.isCorrect", "datatype": "boolean"},
+            {"name": "trialContext.trial.timeInTrial", "datatype": "number"}]}}
+      bounds: 330 20 36 50
+      label: 372 32 80 14
+    Decision_Rules:
+      type: DataObjectReference
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
+      name: Decision rules
+      documentation: >-
+        The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of
+        every test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm
+        test needs; the equivalence margin on accuracy; the permutations the divergence test draws. Wired into
+        the three questions, so every gate reads the same numbers.
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            alpha: 0.05
+            min_subjects: 3
+            min_per_arm: 4
+            margin_low: -0.1
+            margin_high: 0.1
+            n_permutations: 1000
+      bounds: 30 515 36 50
+      label: 8 571 80 28
+    An_Start:
+      type: StartEvent
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 60 117 36 36
+    Prepare:
+      type: ServiceTask
+      name: |-
+        One row per trial
+        analysis.trials_table
+      documentation: >-
+        The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the
+        function reduces them to one row per answered trial with the trial keys as columns. The columns it reads
+        are named here, in the diagram, so the data contract checks them against the trials schema.
+      implementation: python://analysis.trials_table
+      additionalArguments:
+        columns: ["context.subject", "context.state.arm", "trialContext.task.id", "trialContext.block.name", "trialContext.trial.id", "trialContext.congruency", "result.isCorrect", "trialContext.trial.timeInTrial"]
+      dataInputAssociations:
+        In_Events:
+          sourceRef: [Dataset_Trials]
+          transformation: events
+          waypoint: 215,70 215,100
+      dataOutputAssociations:
+        Out_Trials: { targetRef: trials }
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 130 100 170 70
+    Summarize:
+      type: ServiceTask
+      name: |-
+        Per-subject summary
+        analysis.per_subject
+      documentation: >-
+        One row per subject, with its arm; the two counts the feasibility gates read, the number of subjects and
+        the size of the smaller arm, are taken from that table on the way out.
+      implementation: python://analysis.per_subject
+      dataInputAssociations:
+        In_Trials_PS: { sourceRef: [trials], transformation: trials }
+      dataOutputAssociations:
+        Out_PS: { targetRef: per_subject }
+        Out_N: { targetRef: n_subjects, transformation: len(result) }
+        Out_Smallest_Arm:
+          targetRef: smallest_arm
+          transformation: "result['context.state.arm'].value_counts().min().item() if result['context.state.arm'].nunique() == 2 else 0"
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 350 100 170 70
+    Congruency:
+      type: SubProcess
+      name: Congruency effect
+      documentation: >-
+        Is a subject slower on incongruent than on congruent Simon trials? A feasibility gate first, a one-sided
+        one-sample t test on each subject's latency cost, then the decision against alpha; three claim states.
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      dataInputAssociations:
+        In_Rules_C:
+          sourceRef: [Decision_Rules]
+          waypoint: 66,525 80,525 80,315 110,315
+      bounds: 110 210 780 210
+      isExpanded: true
+      flowElements:
+        C_Start:
+          type: StartEvent
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 140 282 36 36
+        C_Enough:
+          type: ExclusiveGateway
+          name: Enough subjects?
+          default: C_Enough_Flow
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 210 275 50 50
+          isMarkerVisible: true
+          label: 175 247 120 14
+        C_Test:
+          type: ServiceTask
+          name: |-
+            One-sided t test on latency cost
+            analysis.congruency_test
+          implementation: python://analysis.congruency_test
+          dataInputAssociations:
+            In_Trials_C: { sourceRef: [trials], transformation: trials }
+          dataOutputAssociations:
+            Out_C: { targetRef: congruency_test }
+          font: "#7a67a6"
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 305 265 205 70
+        C_Decision:
+          type: ExclusiveGateway
+          name: Slower when incongruent?
+          default: C_No
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 550 275 50 50
+          isMarkerVisible: true
+          label: 500 247 150 14
+        C_Supported:
+          type: EndEvent
+          name: Supported
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 282 36 36
+          label: 712 293 70 14
+        C_Not_Supported:
+          type: EndEvent
+          name: Not supported
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 328 36 36
+          label: 712 339 90 14
+        C_Not_Testable:
+          type: EndEvent
+          name: Not testable
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 370 36 36
+          label: 712 381 80 14
+        CF_0:
+          sourceRef: C_Start
+          targetRef: C_Enough
+          waypoint: 176,300 210,300
+        C_Too_Few:
+          name: too few
+          conditionExpression: n_subjects < min_subjects
+          sourceRef: C_Enough
+          targetRef: C_Not_Testable
+          waypoint: 235,325 235,388 670,388
+          label: 240 370 56 14
+        C_Enough_Flow:
+          name: enough
+          sourceRef: C_Enough
+          targetRef: C_Test
+          waypoint: 260,300 310,300
+          label: 262 281 42 14
+        CF_2:
+          sourceRef: C_Test
+          targetRef: C_Decision
+          waypoint: 510,300 550,300
+        C_Yes:
+          name: "yes"
+          conditionExpression: congruency_test['pvalue'] < alpha
+          sourceRef: C_Decision
+          targetRef: C_Supported
+          waypoint: 600,300 670,300
+          label: 612 281 24 14
+        C_No:
+          name: "no"
+          sourceRef: C_Decision
+          targetRef: C_Not_Supported
+          waypoint: 575,325 575,346 670,346
+          label: 580 328 20 14
+    Agreement:
+      type: SubProcess
+      name: Agreement between dispositions
+      documentation: >-
+        Do the two dispositions reach the same accuracy? A question of equivalence, so the test is two one-sided
+        tests against the margin of the decision rules; a difference test that finds nothing would not show
+        agreement.
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      dataInputAssociations:
+        In_Rules_A:
+          sourceRef: [Decision_Rules]
+          waypoint: 66,540 110,540
+      bounds: 110 440 780 210
+      isExpanded: true
+      flowElements:
+        A_Start:
+          type: StartEvent
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 140 512 36 36
+        A_Enough:
+          type: ExclusiveGateway
+          name: Enough subjects per arm?
+          default: A_Enough_Flow
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 210 505 50 50
+          isMarkerVisible: true
+          label: 165 477 140 14
+        A_Test:
+          type: ServiceTask
+          name: |-
+            Two one-sided tests on accuracy
+            analysis.agreement_test
+          implementation: python://analysis.agreement_test
+          additionalArguments:
+            margin_low: "{margin_low}"
+            margin_high: "{margin_high}"
+          dataInputAssociations:
+            In_PS_A: { sourceRef: [per_subject], transformation: per_subject }
+          dataOutputAssociations:
+            Out_A: { targetRef: agreement_test }
+          font: "#7a67a6"
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 305 495 205 70
+        A_Decision:
+          type: ExclusiveGateway
+          name: Equivalent within the margin?
+          default: A_No
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 550 505 50 50
+          isMarkerVisible: true
+          label: 495 477 160 14
+        A_Supported:
+          type: EndEvent
+          name: Supported
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 512 36 36
+          label: 712 523 70 14
+        A_Not_Supported:
+          type: EndEvent
+          name: Not supported
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 558 36 36
+          label: 712 569 90 14
+        A_Not_Testable:
+          type: EndEvent
+          name: Not testable
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 600 36 36
+          label: 712 611 80 14
+        AGF_0:
+          sourceRef: A_Start
+          targetRef: A_Enough
+          waypoint: 176,530 210,530
+        A_Too_Few:
+          name: too few
+          conditionExpression: smallest_arm < min_per_arm
+          sourceRef: A_Enough
+          targetRef: A_Not_Testable
+          waypoint: 235,555 235,618 670,618
+          label: 240 600 56 14
+        A_Enough_Flow:
+          name: enough
+          sourceRef: A_Enough
+          targetRef: A_Test
+          waypoint: 260,530 310,530
+          label: 262 511 42 14
+        AGF_2:
+          sourceRef: A_Test
+          targetRef: A_Decision
+          waypoint: 510,530 550,530
+        A_Yes:
+          name: "yes"
+          conditionExpression: agreement_test['pvalue'] < alpha
+          sourceRef: A_Decision
+          targetRef: A_Supported
+          waypoint: 600,530 670,530
+          label: 612 511 24 14
+        A_No:
+          name: "no"
+          sourceRef: A_Decision
+          targetRef: A_Not_Supported
+          waypoint: 575,555 575,576 670,576
+          label: 580 558 20 14
+    Divergence:
+      type: SubProcess
+      name: Divergence between dispositions
+      documentation: >-
+        Can a classifier tell the two dispositions apart better than chance? Logistic regression on per-subject
+        accuracy and latency, scored leave-one-subject-out, against the arm labels shuffled across subjects, the
+        unit that was randomized.
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      dataInputAssociations:
+        In_Rules_D:
+          sourceRef: [Decision_Rules]
+          waypoint: 66,555 80,555 80,775 110,775
+      bounds: 110 670 780 210
+      isExpanded: true
+      flowElements:
+        D_Start:
+          type: StartEvent
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 140 742 36 36
+        D_Enough:
+          type: ExclusiveGateway
+          name: Enough subjects per arm?
+          default: D_Enough_Flow
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 210 735 50 50
+          isMarkerVisible: true
+          label: 165 707 140 14
+        D_Test:
+          type: ServiceTask
+          name: |-
+            Classifier against shuffled labels
+            analysis.divergence_test
+          implementation: python://analysis.divergence_test
+          additionalArguments:
+            n_permutations: "{n_permutations}"
+          dataInputAssociations:
+            In_PS_D: { sourceRef: [per_subject], transformation: per_subject }
+          dataOutputAssociations:
+            Out_D: { targetRef: divergence_test }
+          font: "#7a67a6"
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 305 725 205 70
+        D_Decision:
+          type: ExclusiveGateway
+          name: Told apart above chance?
+          default: D_No
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 550 735 50 50
+          isMarkerVisible: true
+          label: 500 707 150 14
+        D_Supported:
+          type: EndEvent
+          name: Supported
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 742 36 36
+          label: 712 753 70 14
+        D_Not_Supported:
+          type: EndEvent
+          name: Not supported
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 788 36 36
+          label: 712 799 90 14
+        D_Not_Testable:
+          type: EndEvent
+          name: Not testable
+          fill: "#e6dff1"
+          stroke: "#7a67a6"
+          bounds: 670 830 36 36
+          label: 712 841 80 14
+        DF_0:
+          sourceRef: D_Start
+          targetRef: D_Enough
+          waypoint: 176,760 210,760
+        D_Too_Few:
+          name: too few
+          conditionExpression: smallest_arm < min_per_arm
+          sourceRef: D_Enough
+          targetRef: D_Not_Testable
+          waypoint: 235,785 235,848 670,848
+          label: 240 830 56 14
+        D_Enough_Flow:
+          name: enough
+          sourceRef: D_Enough
+          targetRef: D_Test
+          waypoint: 260,760 310,760
+          label: 262 741 42 14
+        DF_2:
+          sourceRef: D_Test
+          targetRef: D_Decision
+          waypoint: 510,760 550,760
+        D_Yes:
+          name: "yes"
+          conditionExpression: divergence_test['pvalue'] < alpha
+          sourceRef: D_Decision
+          targetRef: D_Supported
+          waypoint: 600,760 670,760
+          label: 612 741 24 14
+        D_No:
+          name: "no"
+          sourceRef: D_Decision
+          targetRef: D_Not_Supported
+          waypoint: 575,785 575,806 670,806
+          label: 580 788 20 14
+    Report:
+      type: ServiceTask
+      name: |-
+        Results and figure
+        analysis.write_results
+      documentation: >-
+        The results dataset: the per-subject and group tables, one JSON per question that was tested, and the
+        accuracy figure by disposition and congruency, laid out as a Psych-DS dataset.
+      implementation: python://analysis.write_results
+      additionalArguments:
+        directory: results/
+      dataInputAssociations:
+        In_Trials_R: { sourceRef: [trials], transformation: trials }
+        In_PS_R: { sourceRef: [per_subject], transformation: per_subject }
+        In_C_R: { sourceRef: [congruency_test], transformation: congruency }
+        In_A_R: { sourceRef: [agreement_test], transformation: agreement }
+        In_D_R: { sourceRef: [divergence_test], transformation: divergence }
+      dataOutputAssociations:
+        Out_Results:
+          targetRef: Dataset_Results
+          waypoint: 395,980 395,1010
+      font: "#7a67a6"
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 310 910 170 70
+    Dataset_Results:
+      type: DataStoreReference
+      documentation: The run's results, laid out as a Psych-DS dataset.
+      extensionElements:
+        - type: studyflow:Dataset
+          format: psych-ds
+      uri: results/
+      name: Results
+      fill: "#f4f1f8"
+      stroke: "#7a67a6"
+      bounds: 370 1010 50 50
+      label: 426 1028 60 14
+    An_End:
+      type: EndEvent
+      name: Analyzed
+      fill: "#e6dff1"
+      stroke: "#7a67a6"
+      bounds: 720 927 36 36
+      label: 704 969 64 14
+    AF_0:
+      sourceRef: An_Start
+      targetRef: Prepare
+      waypoint: 96,135 130,135
+    AF_1:
+      sourceRef: Prepare
+      targetRef: Summarize
+      waypoint: 300,135 350,135
+    AF_2:
+      sourceRef: Summarize
+      targetRef: Congruency
+      waypoint: 435,170 435,210
+    AF_3:
+      sourceRef: Congruency
+      targetRef: Agreement
+      waypoint: 500,420 500,440
+    AF_4:
+      sourceRef: Agreement
+      targetRef: Divergence
+      waypoint: 500,650 500,670
+    AF_5:
+      sourceRef: Divergence
+      targetRef: Report
+      waypoint: 395,880 395,910
+    AF_6:
+      sourceRef: Report
+      targetRef: An_End
+      waypoint: 480,945 720,945
+state:
+  _meta:
+    reached:
+      An_Start: 0
+      An_End: 0

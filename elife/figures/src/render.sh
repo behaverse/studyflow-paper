@@ -11,7 +11,7 @@
 set -e
 SRC=$(cd "$(dirname "$0")" && pwd); OUT=$SRC/..; TMP=/tmp/studyflow-figs; mkdir -p "$TMP"
 export MODELER=${MODELER:?set MODELER to the studyflow-modeler checkout}
-ALL="fig-step1-design fig-step2-run fig-step2-nback fig-step3-analyze fig-step3-decision fig-step4-report fig-combined fig-consort figS1-multimodal
+ALL="fig-step1-design fig-step2-run fig-step2-nback fig-step3-analyze fig-step3-decision fig-step3-coordinator fig-step4-report fig-combined fig-consort figS1-multimodal
      fig-consort-reference fig-step2-nback-classic fig-elements fig-views fig-s2-modeler fig-overview"
 trap 'rm -f "$MODELER/render.mjs" "$MODELER/views.mjs" "$MODELER/modeler.mjs"' EXIT
 # the scripts run from the modeler checkout, to import its playwright; each is copied there just before it runs
@@ -26,6 +26,7 @@ for f in ${@:-$ALL}; do
   case $f in
     fig-combined)             mm=0.19 ;;    # 948 units + the one-row key; 11-unit labels at 5.9 pt
     fig-elements)             mm=0.115 ;;
+    fig-step3-coordinator)    mm=0.19 ;;    # 1070 units tall, the three questions expanded: fig-combined's scale
     *-reference|*-classic)    mm=0.185 ;;   # hand-drawn panels sharing a row with a diagram
     *)                        mm=0.2 ;;     # the common scale: 11-12 unit labels print at 6.2-6.8 pt
   esac
