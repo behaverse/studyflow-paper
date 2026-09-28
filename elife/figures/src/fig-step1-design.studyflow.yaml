@@ -9,8 +9,8 @@ Design_Collaboration:
     CONSORT participant flow as a complete, runnable fragment, with the study's own element ids and the two
     phases as the lanes the subjects' pool is divided into. The cohort is one artificial actor family, and it is
     a system of its own, so it is a black-box pool and the comprehension check crosses the boundary as a message
-    out and a message back. The subjects' pool carries a participant multiplicity of four, drawn as the
-    three-bar parallel marker at its bottom: the four subjects are four independent instances of this one
+    out and a message back. The subjects' pool carries a participant multiplicity of eight, drawn as the
+    three-bar parallel marker at its bottom: the eight subjects are eight independent instances of this one
     process, each drawing its own allocation, and an exit inside an instance (Excluded_Pre) ends that instance
     without ending the study. The counts are zero because nothing has run: this is the deposited plan.
   participants:
@@ -27,8 +27,8 @@ Design_Collaboration:
       name: Each subject
       processRef: Design
       participantMultiplicity:
-        minimum: 4
-        maximum: 4
+        minimum: 8
+        maximum: 8
       bounds: 160 170 900 600
       isHorizontal: true
   messageFlows:

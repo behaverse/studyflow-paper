@@ -9,7 +9,7 @@ Consort_Collaboration:
     element ids, the battery's prompts and pacing dropped, the analysis and the report collapsed to a black-box
     pool. The subject is a pool, divided into one lane per CONSORT phase, so the flow runs down through
     Enrolment, Allocation and Follow-up and each exit leaves from the phase it belongs to. The pool carries
-    BPMN's parallel marker at its bottom: a participant multiplicity of four, so the four subjects are four
+    BPMN's parallel marker at its bottom: a participant multiplicity of eight, so the eight subjects are eight
     independent instances of the pool's process, each with its own exits. The actor pool and the trial exchange
     are dropped: a CONSORT flow is a participant flow, and the three pools of the study do not fit a column this
     narrow — @fig-combined shows them. Every `n` is a run-state value the runner writes as the cohort runs; they
@@ -33,8 +33,8 @@ Consort_Collaboration:
       name: Each subject
       processRef: Example_Study
       participantMultiplicity:
-        minimum: 4
-        maximum: 4
+        minimum: 8
+        maximum: 8
       bounds: 148 0 672 750
       isHorizontal: true
     Participant_Analysis:

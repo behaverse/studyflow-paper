@@ -23,18 +23,39 @@ await page.locator('.sf-shape').first().waitFor({timeout:30000});
 await page.waitForTimeout(800);
 await page.locator('[data-element-id="Task_WorkingMemory"]').first().click();
 await page.getByTestId('inspector-shell').getByText('Execution', { exact: true }).click();
-await page.getByTestId('palette-root').getByRole('button', { name: /^Behaverse elements/ }).hover();
-await page.waitForTimeout(600);
+// Pin the flyout open (a click pins it; a hover would close on the next mouse move), then fit the diagram clear
+// of it: the fit keeps clear of every box marked `data-covers`, and the flyout carries no such mark, so a
+// transparent stand-in the flyout's width takes the mark, and Reset Zoom fits again.
+await page.getByTestId('palette-root').getByRole('button', { name: /^Behaverse elements/ }).click();
+await page.waitForTimeout(400);
+await page.evaluate(() => {
+  const byText = (re) => [...document.querySelectorAll('body *')].filter((el) => re.test(el.textContent ?? ''))
+    .sort((x, y) => x.getBoundingClientRect().width * x.getBoundingClientRect().height - y.getBoundingClientRect().width * y.getBoundingClientRect().height)[0];
+  const heading = byText(/^\s*Behaverse\s*$/i);
+  let box = heading; for (let e = heading; e && e !== document.body; e = e.parentElement) { const r = e.getBoundingClientRect(); if (r.width > 200 && r.height > 200) { box = e; break; } }
+  const r = box?.getBoundingClientRect(); if (!r) return;
+  const d = document.createElement('div'); d.dataset.covers = 'left'; d.dataset.flyoutStandin = '1';
+  d.style.cssText = `position:fixed;left:0;top:0;width:${r.right}px;height:100vh;pointer-events:none;background:transparent;z-index:1`;
+  document.body.append(d);
+});
+// Reset Zoom through the command palette (`/` opens it); the bare `0` shortcut is only a label.
+await page.keyboard.press('/');
+await page.waitForTimeout(300);
+await page.keyboard.type('Reset Zoom');
+await page.waitForTimeout(300);
+await page.keyboard.press('Enter');
+await page.waitForTimeout(800);
 // Lettered callouts beside the three regions the caption names.
 await page.evaluate(() => {
   const box = (sel) => document.querySelector(sel)?.getBoundingClientRect();
   // The smallest box holding the text: the flyout's heading, the inspector's last section.
   const byText = (re) => [...document.querySelectorAll('body *')].filter((el) => re.test(el.textContent ?? ''))
     .sort((x, y) => x.getBoundingClientRect().width * x.getBoundingClientRect().height - y.getBoundingClientRect().width * y.getBoundingClientRect().height)[0]?.getBoundingClientRect();
-  const heading = byText(/^\s*Behaverse\s*$/i);
+  const byTextEl = (re) => [...document.querySelectorAll('body *')].filter((el) => re.test(el.textContent ?? ''))
+    .sort((x, y) => x.getBoundingClientRect().width * x.getBoundingClientRect().height - y.getBoundingClientRect().width * y.getBoundingClientRect().height)[0];
   const outputs = byText(/^\s*Outputs\s*$/);
   const regions = [
-    ['a', 'Palette, from the schemas', heading && { right: heading.right + 150, top: heading.top - 12 }, 'right'],
+    ['a', 'Palette, from the schemas', (() => { let e = byTextEl(/^\s*Behaverse\s*$/i); for (; e && e !== document.body; e = e.parentElement) { const r = e.getBoundingClientRect(); if (r.width > 200 && r.height > 200) break; } const f = e?.getBoundingClientRect(); return f && { left: f.left + 8, top: f.bottom + 10 }; })(), 'at'],
     ['b', 'Inspector, from the schemas', outputs && { left: outputs.left, top: outputs.bottom + 28 }, 'at'],
     ['c', 'Canvas', box('[data-element-id="Task_Interference"]'), 'above'],
   ];

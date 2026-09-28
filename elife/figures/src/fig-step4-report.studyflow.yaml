@@ -8,7 +8,7 @@ Report_Collaboration:
     Step 4 of the example study (`../study/example_study.studyflow`): everything the study does for reporting,
     with the study's own element ids, and in the two pools the study itself uses, because the two halves run on
     different beats. In the subjects' pool, once per subject, a debrief closes the session and the instance ends
-    at `Completed the protocol`; the pool carries the parallel marker for its four instances. In the analysis and
+    at `Completed the protocol`; the pool carries the parallel marker for its eight instances. In the analysis and
     report pool, once, after the analysis, a manual activity renders the reporting artifacts from the results
     dataset and the study ends at `Completed`. The render is manual on purpose — a person reads the figures
     before they go into the manuscript — and nothing else is added for reporting: the CONSORT flow (@fig-consort),
@@ -24,8 +24,8 @@ Report_Collaboration:
       processRef: Subject_Report
       fill: "#faf4e6"
       participantMultiplicity:
-        minimum: 4
-        maximum: 4
+        minimum: 8
+        maximum: 8
       bounds: 160 40 560 180
       isHorizontal: true
     Participant_Analysis:

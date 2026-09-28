@@ -12,12 +12,12 @@ figure reads down the phases the way a CONSORT participant flow does, each exit 
 edge of the phase it belongs to. The lanes carry the tint and the pool none, and the multiplicity marker sits in the pool's
 title band, which no lane reaches, so no lane has to give way to it.
 
-The cohort is artificial — four subjects, four instances of the subjects' pool (BPMN's
+The cohort is artificial — eight subjects, eight instances of the subjects' pool (BPMN's
 `participantMultiplicity`, drawn as the three-bar parallel marker at the foot of the pool's title band with
-`×4` under it, which is where the pool's name used to say it; the subjects do not depend on one another, so
+`×8` under it, which is where the pool's name used to say it; the subjects do not depend on one another, so
 this is a multiplicity and not a loop), all played by Gemma 4 on a local
 Ollama (`gemma4:e2b-mlx`). Each subject is screened with a comprehension check, allocated to a
-cautious or an impulsive disposition in permuted blocks of four (so four subjects split two and two), and takes two tasks
+cautious or an impulsive disposition in permuted blocks of four (so eight subjects split four and four), and takes two tasks
 from the Behaverse build (`WO` / `SimonTask`, one block of 30 trials whose congruency is drawn per
 trial; `NB` / `XCIT_NB_01`, the 1-back the build's human studies run: three tutorial blocks and a practice block,
 then two test blocks of 28 digits, all of which run and of which the analysis keeps the test blocks). Every trial goes to the
@@ -49,8 +49,16 @@ UNITY_BUILD_PATH=~/workspace/behaverse/assessment-unity/Build/WebGL \
   studyflow run --runtime local elife/study/example_study.studyflow.yaml --repo elife/study/run
 ```
 
-`studyflow` is `node <studyflow-modeler>/packages/cli/dist/studyflow.mjs`. It needs `uv` and a
-local Ollama serving `gemma4:e2b-mlx`. A subject who misses more than 20 % of a task's trials leaves at
+`studyflow` is `node <studyflow-modeler>/packages/cli/dist/studyflow.mjs`, built from the paper's pinned tag. It needs `uv` and a
+local Ollama serving `gemma4:e2b-mlx` (manifest digest `sha256:c4e49a77…`, the id `ollama list` prints). The second sealed file,
+`example_study-gemma4-12b.studyflow.yaml`, differs from this one in one line, the actor's `implementation`
+(`ollama://gemma4:12b-it-qat`, digest `sha256:38044be4…`); run it with `--repo elife/study/run-gemma4-12b`. Each task carries
+`implementation: behaverse://assessment-unity@26.08`, the `productVersion` the WebGL build reports in its `index.html`
+(`WebGL.wasm.unityweb` sha256 `f1b767dc…`, `WebGL.data.unityweb` sha256 `9a64bb96…`); the runner does not check that line, it
+records the build's `releaseTag` with every event, but the line sits inside the protocol digest, so the seal covers it. The
+model's sampling parameters cannot be set from the file: the executor sends none, the Modelfile defaults apply, and every
+exchange records them with the model digest in the run repository's commits. A `random` actor is not a one-line swap here,
+because the tasks answer the pool's message flows, which only the language-model runner plays. A subject who misses more than 20 % of a task's trials leaves at
 that task's **conditional boundary event** — `{Task_Interference.failedTrialRate} > 0.2`, a BPMN
 condition on the task's own result rather than an attribute of the task — and is counted at
 `Discontinued`. A browser window opens for each task of each subject and closes itself when the task
@@ -80,7 +88,9 @@ paper reports: four subjects, allocated two and two, all four completing the pro
 Not supported, and the two between-arm questions at Not testable. That run walked the previous protocol (latency
 tested, both tasks pooled, the `Debug` 1-back, the Simon block stopped at 15 trials, arms named by their whole
 prompt); run the study again before re-rendering. `studyflow validate run/example_study.studyflow.yaml`
-confirms that its protocol is the deposited one (`protocol matches run run`) and that its counts balance. After a new
+confirms that its protocol is the deposited one (`protocol matches run run`) and that its counts balance;
+`studyflow info <file>` prints the full protocol digest of any copy, deposited or executed. The digest ignores the drawing,
+the state and the run records, and drops values equal to schema defaults, so quote it together with the pinned tag. After a new
 run, copy the `state:` block of the executed copy into `figures/src/fig-consort.studyflow.yaml` and
 `figures/src/fig-overview.studyflow.yaml`, and re-render `fig-combined`, `fig-consort`, `fig-overview` and
 `fig-views`.

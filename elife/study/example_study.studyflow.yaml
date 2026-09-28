@@ -10,7 +10,7 @@ Example_Study_Collaboration:
     Enrolment, Allocation, Follow-up, each a band the flow crosses on its way down, with the exits at the right edge of
     the band they leave from. Labels are the study's own words rather than BPMN's: a gateway asks a question and its
     flows are the answers, an exit says why the subject left, and @fig-key names each symbol. The subjects' pool carries
-    a participant multiplicity of four, so the cohort is four instances of that pool's process, one per subject; BPMN
+    a participant multiplicity of eight, so the cohort is eight instances of that pool's process, one per subject; BPMN
     draws the parallel marker at the pool's bottom. The cohort is a single artificial actor family (Gemma 4 on a local
     Ollama), and the whole exchange with it crosses the pool boundary as one pair of message flows at pool level: one
     `behaverse:Trial` out per trial and one `behaverse:Response` back, inherited by whichever task is playing.
@@ -43,8 +43,8 @@ Example_Study_Collaboration:
     Participant_Subject:
       name: Each subject
       participantMultiplicity:
-        minimum: 4
-        maximum: 4
+        minimum: 8
+        maximum: 8
       processRef: Example_Study
       bounds: 8 216 932 694
       isHorizontal: true
@@ -96,7 +96,7 @@ Example_Study:
   type: Process
   documentation: >-
     One subject, from consent to debriefing, and the pool is the boundary of that system. The participant multiplicity
-    of four on the pool makes four instances of this process, one per subject in the cohort; they do not depend on one
+    of eight on the pool makes eight instances of this process, one per subject in the cohort; they do not depend on one
     another, which is why this is a multiplicity and not a loop. `arm` is a property of this process, so each instance
     draws and carries its own disposition, and the runtime stamps every recorded trial with the pool's instance index as
     `context.subject`, so nothing in the diagram has to number subjects. An exit inside an instance (Excluded_Pre,
@@ -313,10 +313,10 @@ Example_Study:
       type: DataObjectReference
       documentation: >-
         Not the protocol: how the build plays for an actor that is not a person. It skips the instruction screens nobody
-        is there to click and runs the engine clock faster. It defines no block and no timeline and stops nothing
-        early; the protocol is the instrument and the timeline alone, and the trials are the timeline's own, in order.
-        The n-back needs different values, and a Parameters object only reaches a step it is wired into, so the two
-        tasks carry one each rather than sharing one.
+        is there to click and runs the engine clock faster. It defines no block and no timeline and stops nothing early;
+        the protocol is the instrument and the timeline alone, and the trials are the timeline's own, in order. The
+        n-back needs different values, and a Parameters object only reaches a step it is wired into, so the two tasks
+        carry one each rather than sharing one.
       extensionElements:
         - type: studyflow:Parameters
           values:
@@ -338,6 +338,7 @@ Example_Study:
         the trial and response exchange is the pool's, which every task inside inherits.
       extensionElements:
         - type: behaverse:Task
+          implementation: behaverse://assessment-unity@26.08
           instrument: WO
           timeline: SimonTask
       name: Interference control (Simon)
@@ -386,6 +387,7 @@ Example_Study:
         practice block, then two test blocks of 28 digits. Every block runs; the analysis keeps the test blocks.
       extensionElements:
         - type: behaverse:Task
+          implementation: behaverse://assessment-unity@26.08
           instrument: NB
           timeline: XCIT_NB_01
       name: Working memory (1-back)
@@ -561,7 +563,7 @@ Analysis_Report:
   documentation: >-
     The same lab system as the pool above, in a second pool because it runs on a different beat: the protocol runs once
     per subject, the analysis once over the whole cohort. A multi-instance pool sends its outgoing message once, after
-    its last instance ends, so the message start event here waits for all four subjects and the analysis reads a
+    its last instance ends, so the message start event here waits for all eight subjects and the analysis reads a
     complete trials dataset. Nothing here is divided further: four steps in a row need no lanes.
   name: Analysis and report
   flowElements:
@@ -1102,11 +1104,11 @@ Analysis_Report:
           type: SubProcess
           documentation: >-
             Can a classifier tell the two dispositions apart better than chance? One row per subject, its accuracy in
-            each of the two tasks as features and its arm as the label, scored by leave-one-subject-out cross-validation; the
-            permutation test shuffles the arm labels across subjects, the unit that was randomized, so chance is what
-            the same classifier scores when the labels carry nothing. Fixed before the first run: not testable when an
-            arm holds fewer subjects than the decision rules' minimum, supported when the permutation p is below their
-            alpha, not supported otherwise.
+            each of the two tasks as features and its arm as the label, scored by leave-one-subject-out
+            cross-validation; the permutation test shuffles the arm labels across subjects, the unit that was
+            randomized, so chance is what the same classifier scores when the labels carry nothing. Fixed before the
+            first run: not testable when an arm holds fewer subjects than the decision rules' minimum, supported when
+            the permutation p is below their alpha, not supported otherwise.
           name: Divergence between dispositions
           properties:
             subject_features:
@@ -1124,8 +1126,8 @@ Analysis_Report:
               default: D_Enough
             Features:
               type: ServiceTask
-              name: Accuracy in each task
               documentation: The per-subject table without its key columns, one column per task, so the features are the tasks.
+              name: Accuracy in each task
               dataInputAssociations:
                 In_PS_F:
                   sourceRef:

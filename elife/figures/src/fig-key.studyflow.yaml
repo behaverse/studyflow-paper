@@ -9,8 +9,8 @@ Key:
     here executes; it is a legend, not a fragment of the study. `render.sh` draws it at the same scale as
     @fig-combined and `compose_key.py` pastes it under the diagram, so the names print at the size of the figure's
     own labels. The last symbol is the three-bar parallel marker a pool carries when it runs several instances of its
-    process, which is how the cohort of four subjects is written; on the pool itself it sits at the foot of the
-    title band with the instance count, `×4`, under it, and here it rides a plain box, because a pool draws its
+    process, which is how the cohort of eight subjects is written; on the pool itself it sits at the foot of the
+    title band with the instance count, `×8`, under it, and here it rides a plain box, because a pool draws its
     name up its band and so could not carry this caption. The caption carries the
     two symbols left out for width: `+` marks a sub-process expanded in another figure, and dashed arrows crossing
     the pool boundary are messages to the model.
