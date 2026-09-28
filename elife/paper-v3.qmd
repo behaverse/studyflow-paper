@@ -66,7 +66,7 @@ Following that, this paper makes three contributions. The first contribution is 
 
 # The Studyflow notation
 
-Studyflow is one formal object, and projections map it to the views each audience reads. This section defines that object, relates it to the BPMN standard, describes how it is stored on disk, and gives its execution semantics.
+Studyflow is one formal object, and projections map it to the views each audience reads. This section defines that object, relates it to the BPMN standard, describes how it is stored on disk, and gives its execution semantics; @tbl-glossary defines the terms from software engineering it relies on.
 
 ## The formal object
 
@@ -74,13 +74,19 @@ A Studyflow diagram represents a study workflow as a typed directed multigraph $
 
 More precisely, $N$ is a finite set of nodes and $E$ a finite set of edges, with $\mathrm{src}, \mathrm{tgt}: E \to N$ mapping each edge to its source and target. The schema fixes a type hierarchy $T$, split into node types $T_N$ (events, activities, gateways, and data elements) and edge types $T_E$, so $T = T_N \cup T_E$. The typing $\tau: N \cup E \to T$ assigns each node a type in $T_N$ and each edge a type in $T_E$. The attribution $\lambda$ gives each element the attributes its type allows under $\Sigma$: the instrument name of a cognitive task, the allocation rule of a random gateway, or the onset and duration of an activity node.
 
+### Data and state
+
 Because data elements are themselves nodes of $S$, the data specification and the control flow live in one object, and edge type separates them. The sequence flow edges $E_{\mathrm{seq}}$ (those $e$ whose type $\tau(e)$ is a BPMN sequence flow) induce the control-flow graph $G_{\mathrm{ctrl}} = (N, E_{\mathrm{seq}})$, and the data association edges $E_{\mathrm{assoc}}$ induce the data-flow graph $G_{\mathrm{data}} = (N, E_{\mathrm{assoc}})$. The two graphs share the node set but no edges. Executing $S$ is then a walk over $G_{\mathrm{ctrl}}$, and an analysis pipeline is a path through $G_{\mathrm{data}}$.
 
 Data elements come in two kinds, and Studyflow takes the distinction from BPMN as given [@bpmnspec]. Datasets appear on the diagram as data objects and stores, such as the recorded trials or a table of results. *Properties* never appear on the diagram: a process, an activity, or an event declares them, and together they hold the study's *state*, the values a run accumulates and later reads, such as an allocated condition, a running count of failed trials, or a fitted model. A container declares each data element and fixes its scope: state declared on the study lives for one run of one subject, and state declared on a subprocess (a cognitive battery, an analysis pipeline) lives for one instance of that subprocess.
 
+### Control flow and well-formedness
+
 $G_{\mathrm{ctrl}}$ is directed but not acyclic. Experimental procedures often contain interrupts, loops, and multi-agent exchanges, which cannot be expressed by plain directed acyclic graphs (DAG). Where a custom DAG pushes that control logic elsewhere, BPMN's boundary events, message flows, and choreography express these constructs natively, in the same diagram.
 
 Not every diagram is well-formed. A diagram is well-formed when four conditions hold. First, $\tau$ and $\lambda$ validate against the $\Sigma$ type hierarchy and against the context-free grammar relating the types in $\Sigma$ (@lst-grammar in the Supplementary materials). Second, edge endpoints respect type and scope: every control-flow edge runs between flow nodes (events, activities, gateways), every data-flow edge connects a data element to a flow node, and a node reads or writes a property only where a containing scope declares it. Third, $G_{\mathrm{ctrl}}$ is sound: it has at least one start event and at least one end event, and every flow node lies on some path from a start event to an end event. Soundness rules out dead branches and unreachable activities. Fourth, the export of $S$ to BPMN 2.0 is a valid XML document, the format in which BPMN tools exchange diagrams. In summary, the first condition states the syntactic and semantic constraints; the second and third state domain-specific constraints that a generic BPMN validator cannot express; and the fourth states the compatibility and extensibility constraint. The reference implementation checks the first and the third before any run and refuses to start a study that fails them with an error (an unknown key only warns); the second is enforced while drawing, since the modeler offers only the connections a type allows (Materials and methods).
+
+### Projections
 
 The same graph supports many projections; these are simply a mapping from $S$ to a specific visual representation. Given a predicate $p$ over elements, the view $\pi_p(S)$ is the subset $\{x \in N \cup E : p(x)\}$, carrying each selected element's attributes $\lambda(x)$ unchanged and discarding the rest. Importantly, a projection only discards (or equivalently selects) information; it never adds or rewrites $S$. Every view is therefore consistent with the single source of truth by construction.
 
@@ -146,7 +152,7 @@ Not every trial succeeds, and failures take the exits that Step 1 already descri
 
 ## Step 3) Analyze: the pipeline is the preregistration
 
-The third step is the analysis, and it is drawn in the same notation as the study it analyzes rather than kept as a separate script (@fig-step3-analyze). It asks two questions of the agents, both about accuracy, because a language model's latency is the time its server took to generate the reply rather than a response time (Limitations). 1) Does an agent show the congruency effect of the Simon task, more errors when the stimulus appears on the side opposite the response it calls for [@simon1969reactions]? 2) Can the two dispositions be told apart, that is, does a classifier separate them from their accuracy in the two tasks better than chance? Each question has a test and a decision rule fixed in the diagram before the first run (@tbl-analyses), so the registered analysis and the executed analysis are the same object.
+The third step is the analysis, and it is drawn in the same notation as the study it analyzes rather than kept as a separate script (@fig-step3-analyze). It asks two questions of the agents, both about accuracy, because a language model's latency is the time its server took to generate the reply rather than a response time (Limitations). 1) Does an agent show the congruency effect of the Simon task, more errors when the stimulus appears on the side opposite the response it calls for [@simon1969reactions]? 2) Can the two dispositions be told apart, that is, does a classifier separate them from their accuracy in the two tasks better than chance? Each question has a test and a decision rule fixed in the diagram before the first run (Materials and methods), so the registered analysis and the executed analysis are the same object.
 
 The pipeline that answers them is a chain of data operations, using the vocabulary of dataframe pipelines (read, filter, map, reduce). It reads the raw trials, filters out the unanswered ones and the 1-back's tutorial and practice blocks, reduces in two stages, first to one accuracy per participant and task and then to group-level statistics, and hands each question the table it needs. The filter operation is the analysis exclusion that the CONSORT flow reports.
 
@@ -156,8 +162,8 @@ Each operation activity shows its inputs and outputs, while the code that perfor
 
 The diagram also fixes what flows between the operation activities. Datasets and schemas are nodes in the diagram, connected to activities by data associations (the dashed edges of the BPMN 2.0 standard), so the data specification and the control flow live in one artifact (@lst-step3-analyze). Every dataset declares its format (BDM, BIDS, or Psych-DS, or a custom schema in CSVW format [@csvw; @hoytO3GuidelinesOpen2024]), and non-tabular data documents its properties in human-readable text (e.g., dimensions, dtypes, and units). The trials dataset of the example study is bound to a CSVW schema of the columns the analysis reads, so an operation that names a column the schema lacks fails validation before any data moves (Step 4).
 
-<!-- TODO: re-run the study (eight subjects per model from one sealed copy per model; accuracy-based analysis, per-task features, XCIT_NB_01, the full Simon block, labelled arms) and fill the decisions here and in tbl-analyses, tbl-agents and lst-diff from that run. The counts below are from the run of 2026-09-21 of the previous protocol. -->
-Running the pipeline on the cohort of Step 2 gives @tbl-agents and a decision for each question (@tbl-analyses). [TODO: from the re-run: how many of the eight subjects of each model completed the protocol, and the split across arms.] The congruency question ended at [TODO: decision, with $t$ and the one-sided $p$ of the re-run]; its rule reads the sign of the cost, so a cost in the wrong direction ends at *Not supported* however small its two-sided $p$. The divergence question ended at [TODO: decision, with the permutation $p$ of the re-run; four subjects per arm meet its rule's minimum]. We read these estimates as outputs of the demonstrated pipeline, not as claims about agent cognition; what a congruency effect would mean in an artificial cohort is a question we return to in @sec-discussion.
+<!-- TODO: re-run the study (eight subjects per model from one sealed copy per model; accuracy-based analysis, per-task features, XCIT_NB_01, the full Simon block, labelled arms) and fill the decisions here and in tbl-agents and lst-diff from that run. The counts below are from the run of 2026-09-21 of the previous protocol. -->
+Running the pipeline on the cohort of Step 2 gives @tbl-agents and a decision for each question. [TODO: from the re-run: how many of the eight subjects of each model completed the protocol, and the split across arms.] The congruency question ended at [TODO: decision, with $t$ and the one-sided $p$ of the re-run]; its rule reads the sign of the cost, so a cost in the wrong direction ends at *Not supported* however small its two-sided $p$. The divergence question ended at [TODO: decision, with the permutation $p$ of the re-run; four subjects per arm meet its rule's minimum]. We read these estimates as outputs of the demonstrated pipeline, not as claims about agent cognition; what a congruency effect would mean in an artificial cohort is a question we return to in @sec-discussion.
 
 ## Step 4) Report
 
@@ -173,18 +179,16 @@ Adherence to guidelines is checked from the same file. Guideline items map onto 
 
 ## Step 5) Conclusion: one file for everything
 
-<!-- Doc outline for this section: studyflow works; supports full lifecycle; can replace current practices (CONSORT); avoids the problems of current practices (one document); opens up new opportunities (orchestrating artificial agents and automating the analysis with the modeler alone, no code). -->
+The demonstration makes five points. First, the notation works: each of the four steps exercised one property, and each held in the run. The design ran as written (Step 1), the same file drove execution and data collection (Step 2), the registered pipeline produced the reported estimates and decided each question by its rule (Step 3), and the reporting artifacts were exported from the file and checked against it (Step 4). Second, one file covers the whole lifecycle: each step is a complete working example on its own, and the full study is their composition, the end events of one diagram meeting the start events of the next. The result is the single file of @fig-combined, laid out to match the CONSORT structure, at once the protocol as registered, the study as executed, and the provenance record of what happened. Third, the artifacts that current practice draws by hand come out of that file: the CONSORT flow, the SPIRIT schedule, the checklist, and the deviation report are views of it, and the counts the CONSORT flow reports are the counts the runner wrote.
 
-Each of the four steps exercised one property, and each held in the run: the design ran as written (Step 1), the same file drove execution and data collection (Step 2), the registered pipeline produced the reported estimates and decided each question by its rule (Step 3), and the reporting artifacts were exported from the file rather than redrawn, and checked against it (Step 4). The study needed no code beyond the task implementations it names: a cohort of artificial agents was enrolled, administered two tasks, and analyzed from the diagram alone.
-
-Each step described above is a complete working example on its own, but the full study is their composition: the end events of one diagram meet the start events of the next. The result is the single Studyflow file shown in @fig-combined, laid out to match the CONSORT structure. It is at once the protocol as registered, the study as executed, and the provenance record of what happened. The CONSORT flow, the SPIRIT schedule, the checklist, and the deviation report are views of it.
-
-The 1-back's inter-stimulus interval shows what that provides. It exists in the file exactly once (`InterStimulusInterval: 0.3` in the task settings of @lst-step2-run). The Study view displays it, the runner uses it to configure and execute the 1-back, the analysis receives data stamped with it, and the exported figure renders it. A protocol, a script, a methods paragraph, and a figure cannot disagree about its value, because there is no second copy. Changing it to half a second is one edit whose entire footprint under version control is:
+Fourth, there is no second copy. The 1-back's inter-stimulus interval shows what that provides. It exists in the file exactly once (`InterStimulusInterval: 0.3` in the task settings of @lst-step2-run). The Study view displays it, the runner uses it to configure and execute the 1-back, the analysis receives data stamped with it, and the exported figure renders it. A protocol, a script, a methods paragraph, and a figure cannot disagree about its value, because there is no second copy. Changing it to half a second is one edit whose entire footprint under version control is:
 
 ```diff
 -              InterStimulusInterval: 0.3
 +              InterStimulusInterval: 0.5
 ```
+
+Fifth, the file reaches a use that current practice does not: the study needed no code beyond the task implementations it names, so a cohort of artificial agents was enrolled, administered two tasks, and analyzed from the modeler alone, on the protocol a human cohort would take through the same interface.
 
 # Discussion {#sec-discussion}
 
@@ -249,7 +253,7 @@ The second direction is to standardize experimental science. Experimental scienc
 
 ![Studyflow Figure view](figures/fig-consort.studyflow.png){#fig-consort-b}
 
-**The CONSORT flow.** The example study's participant flow is the protocol itself, not a picture drawn for publication. (a) The CONSORT 2025 reference flow, redrawn from the template [@hopewell2025consort]. (b) The executed example study projected as its Figure view: the three CONSORT phases as lanes of the subjects' pool, the analysis and the report as a pool of their own, attrition drawn as the paths that end at the Excluded and Discontinued exits, and every `n` a count the runner wrote (`{reached}` on each element the subjects passed). The counts differ in kind: the template asks, at each step, for those who left and those who continued, whereas here every element carries the number that reached it, so a branch's continuing count is the count on the element it leads to, and in the modeler each element opens onto its details, including its exit paths.
+**The CONSORT flow.** The example study's participant flow is the protocol itself, not a picture drawn for publication. (a) The CONSORT 2025 reference flow, redrawn from the template [@hopewell2025consort]. (b) The executed example study projected as its Figure view: the three CONSORT phases as lanes of the subjects' pool, the analysis and the report as a pool of their own, attrition drawn as the paths that end at the Excluded and Discontinued exits, and every `n` a count the runner wrote (`{reached}` on each element the subjects passed). The counts differ in kind: the template asks, at each step, for those who left and those who continued, whereas here every element carries the number that reached it and each answer of a gateway the number that took it, so a branch's continuing count is the count on the element it leads to; in the modeler each element opens onto its details, including its exit paths.
 :::
 
 ![**Step 1 (Design): the enrollment and allocation phases** as a complete, runnable fragment, laid out in Enrolment and Allocation lanes. The consented start event binds the consent form; the screening questionnaire carries the audit checklist and asks the language model the comprehension check along message flows; the eligibility gateway lists its criteria and its "yes" flow tests the answer; the randomization gateway carries its allocation rule (permuted blocks of four, 1:1); the allocation tasks write each arm's label into the subject's `arm` and its instruction into `instruction`. Every exit counts the subjects that reach it, cited by its label as `n={reached}`, and the file is deposited with every count at zero.](figures/fig-step1-design.studyflow.png){#fig-step1-design}
@@ -276,9 +280,9 @@ The second direction is to standardize experimental science. Experimental scienc
 
 ![**Step 4 (Report): the report as a runnable fragment.** In each subject's pool a debrief instruction closes the session and a completion end event ends it; for a human cohort, that end event would carry the recruitment platform's completion code. In the analysis pool one manual task, a person's step, renders the reporting artifacts from the results dataset and reads them before they go into the manuscript (its checklist lists the exports an audit ticks off). Everything else about reporting is a view of the same file.](figures/fig-step4-report.studyflow.png){#fig-step4-report}
 
-![**Step 4 (Report): one file, five views.** The Study view of the executed example study is @fig-combined and its Figure view, the CONSORT participant flow, is @fig-consort; the other three views are the reference modeler's own renderings of the same file. (a) The Gantt view, from each activity's onset and duration, on a time axis from the consent event. (b) The Provenance view, from the records the runner appended: the run that executed the study, named by its seed (42), its tool (`studyflow-cli/26.9.28`), and its run repository, with a record for every step it ran; the digest of the protocol it walked is kept in the same run record. (c) The Checklist view, from the declared checklists: the screening checklist, the analysis exclusion criteria, and the reporting exports. Because projections only discard and never rewrite, editing the file updates every view.](figures/fig-views.studyflow.png){#fig-views}
+![**Step 4 (Report): one file, five views.** The Study view of the executed example study is @fig-combined and its Figure view, the CONSORT participant flow, is @fig-consort; the other three views are the reference modeler's own renderings of the same file. (a) The Gantt view, from each activity's onset and duration, on a time axis from the consent event. (b) The Provenance view, from the records the runner appended: the run that executed the study, named by its seed (42), its tool (`studyflow-cli/26.9.28`), and its run repository, with a record for every step it ran; the digest of the protocol it walked is kept in the same run record. (c) The Checklist view, from the declared checklists: the screening checklist, the analysis exclusion criteria, and the reporting exports. Because projections only discard and never rewrite, editing the file updates every view.](figures/fig-views.studyflow.png){#fig-views height=85%}
 
-![**The complete example study as a single Studyflow file (`example_study.studyflow.yaml`), after execution.** Three pools, top to bottom: the language model the subjects answer through, the subjects (one process with a participant multiplicity of four, the parallel marker in its title band, its three CONSORT phases as lanes), and the analysis and report, which the subjects' pool starts once its last instance has ended. Every `n` is a count the runner wrote as the cohort ran: 4 assessed for eligibility, none excluded, 4 randomized, 2 allocated to each disposition, none discontinued, and 4 completed the protocol. Beside the trials dataset sits the CSVW schema it is bound to, and beside the collapsed analysis the Decision rules it reads. The protocol, tasks, analysis, and report all live in this one artifact; the views, the guideline audits, and the deviation report are derived from it.](figures/fig-combined.studyflow.png){#fig-combined}
+![**The complete example study as a single Studyflow file (`example_study.studyflow.yaml`), after execution.** Three pools, top to bottom: the language model the subjects answer through, the subjects (one process with a participant multiplicity of four, the parallel marker in its title band, its three CONSORT phases as lanes), and the analysis and report, which the subjects' pool starts once its last instance has ended. Every `n` is a count the runner wrote as the cohort ran: 4 assessed for eligibility, none excluded, 4 randomized, 2 allocated to each disposition, none discontinued, and 4 completed the protocol. Beside the trials dataset sits the CSVW schema it is bound to, and beside the collapsed analysis the Decision rules it reads. The protocol, tasks, analysis, and report all live in this one artifact; the views, the guideline audits, and the deviation report are derived from it.](figures/fig-combined.studyflow.png){#fig-combined height=82%}
 
 ![**The catalog of Studyflow elements, as the modeler draws it.**](figures/fig-elements.studyflow.png){#fig-elements}
 
@@ -487,6 +491,20 @@ C_Yes:
 
 # Tables
 
+| Term | Meaning in this paper |
+|:----|:----|
+| BPMN 2.0 | Business Process Model and Notation, the ISO/IEC 19510 standard for drawing processes: shapes with defined meanings and an XML file format |
+| YAML, XML | Two text formats for structured data; a Studyflow file is written in YAML and exports to BPMN's XML, both readable by machines and by people |
+| Schema | The document that fixes which elements and attributes a file may carry; the modeler's palette and inspector are generated from it |
+| Scheme | The prefix of a reference before `://`, such as `python://` or `ollama://`, naming the runtime that resolves it |
+| Git, diff | A version-control system for text files, and the line-by-line difference it shows between two versions of one |
+| Projection, view | A projection is the mapping from the diagram to what one audience reads; the view is what it renders |
+| Protocol digest | A hash of the protocol's content, ignoring the drawing and the run records, that identifies a sealed plan |
+| Claim state | The end event a question reaches once decided: Supported, Not supported, or Not testable |
+| Actor | The party that takes the study, a person or a model, drawn as a pool the study exchanges messages with |
+
+: Terms from software engineering and from this paper, in the sense used here. {#tbl-glossary}
+
 | Requirement | How Studyflow meets it | Precedent |
 |:----|:----|:----|
 | **R1** Single source of truth | One shared `.studyflow.yaml` file is at once the protocol, the runnable study, the analysis, and the figure | Config-as-code and GitOps: one versioned declaration, everything else derived from it |
@@ -511,20 +529,13 @@ C_Yes:
 
 : Representative Studyflow elements, each subclassing a standard BPMN type. @fig-elements draws the catalog and @tbl-elements-catalog lists it. {#tbl-elements}
 
-<!-- TODO: merge tbl-analyses into the text and remove the table. -->
-
-| Question | Test | Decision rule, fixed before the first run | Decision reached |
-|:----|:----|:----|:----|
-| Is an agent less accurate on incongruent than on congruent Simon trials? | One-sided one-sample *t* test on each subject's accuracy cost (congruent minus incongruent) | Not testable with fewer than 3 subjects; supported if *p* < .05; not supported otherwise | [TODO: from the re-run] |
-| Can the two dispositions be told apart? | Logistic regression on each subject's accuracy in the two tasks, scored leave-one-subject-out, against 1,000 permutations of the arm labels across subjects | Not testable with fewer than 4 subjects per arm; supported if *p* < .05; not supported otherwise | [TODO: from the re-run] |
-
-: The example study's two analysis questions, their tests, their decision rules, and the decision each reached in the run. Every threshold is read from the Decision rules element of the diagram. {#tbl-analyses}
-
 | Model | Disposition | Subjects | Simon accuracy, mean (SD) | 1-back accuracy, mean (SD) |
 |:----|:----|:---:|:---:|:---:|
 | Gemma 4 (`gemma4:e2b-mlx`) | Cautious | 4 | [TODO] | [TODO] |
 | | Impulsive | 4 | [TODO] | [TODO] |
 | Gemma 4 (`gemma4:12b-it-qat`) | Cautious | 4 | [TODO] | [TODO] |
+| | Impulsive | 4 | [TODO] | [TODO] |
+| Llama 3.1 (`llama3.1:8b`) | Cautious | 4 | [TODO] | [TODO] |
 | | Impulsive | 4 | [TODO] | [TODO] |
 
 : Accuracy in each task for each model and disposition, from each model's run (`results/group.csv`): means over subjects, with their standard deviations. The cautious prompt reads "Take your time on every trial" and the impulsive one "Go with your first impression". Latency is not tabulated: for a language model it is the time its server took to generate the reply, recorded with every trial but not a response time. {#tbl-agents}
@@ -557,7 +568,7 @@ Real runs are interrupted: a participant closes the browser, a provider errors, 
 
 ## The example study
 
-Each model's cohort is eight instances of that model, the Gemma 4 tags @tbl-agents names, served by a local Ollama (version 0.34.1) with the model's default sampling parameters (for `gemma4:e2b-mlx`, temperature 1, top-k 64, top-p 0.95), which every exchange records (Reproducibility). Both tasks run from the Behaverse WebGL build: the Simon task, one block of 30 trials, and the 1-back on `XCIT_NB_01`, the timeline the battery's human studies run, three tutorial blocks and a practice block followed by two test blocks of 28 digits, of which the analysis keeps the test blocks. Allocation is in permuted blocks of four at 1:1, so a cohort of eight splits four and four.
+Each model's cohort is eight instances of that model, the Ollama tags @tbl-agents names (two sizes of Gemma 4 and Llama 3.1 8B), served by a local Ollama (version [TODO: from the re-run]) with the model's default sampling parameters (for `gemma4:e2b-mlx`, temperature 1, top-k 64, top-p 0.95), which every exchange records (Reproducibility). Both tasks run from the Behaverse WebGL build: the Simon task, one block of 30 trials, and the 1-back on `XCIT_NB_01`, the timeline the battery's human studies run, three tutorial blocks and a practice block followed by two test blocks of 28 digits, of which the analysis keeps the test blocks. Allocation is in permuted blocks of four at 1:1, so a cohort of eight splits four and four.
 
 Each test fits its question, and both test accuracy: a language model's latency is the time its server took to generate the reply, so it is recorded with every trial and reported, not tested. The congruency effect is tested within subjects, as the one-sided one-sample *t* test of each subject's accuracy cost (congruent minus incongruent) against zero. The divergence classifier, a logistic regression, works on one row per subject, the unit that was randomized, with the subject's accuracy in each task as its features; it is scored by leave-one-subject-out cross-validation and tested against 1,000 permutations of the arm labels across subjects, so the trials of one subject never sit on both sides of a split [@kapoor2023leakage]. The minimum of four subjects per arm is the smallest for which a permutation across subjects can reach $p < .05$ (with three per arm, the 20 relabelings leave $p \geq .05$). Every step names a library function, and the study's `dependencies` pin the packages; a version written into an implementation reference, `python://pkg.fn@1.2`, is checked against the installed package before the step runs.
 
@@ -628,13 +639,13 @@ Every exchange with a model records the executor configuration with it: the mode
 
 ## Availability and use
 
-The reference implementation is one repository, released under the MIT license and archived at each tag (Data availability); the figures and the runs reported here come from the tag [TODO: pinned tag]. The modeler runs in the browser at <https://behaverse.org/studyflow-modeler/app>. The command-line tool installs with Homebrew from the repository's tap (its README gives the three commands) or from a clone with `npm install`, and the example study uses three of its commands: `studyflow validate` on the deposited and on the executed file, `studyflow run --runtime local` for the run, and `studyflow convert` to move a study between YAML, BPMN XML, and PNG. The local runtime needs `uv` for its Python steps, and the example study needs an Ollama server with the model tags of @tbl-agents and the Behaverse WebGL build (Data availability). The runs reported here were made on one laptop (Apple M4 Pro, 24 GB, macOS 27.0), which also served the models.
+The reference implementation is one repository, released under the MIT license and archived at each tag (Data availability); the figures and the runs reported here come from the tag `v26.9.29` (2026-09-28). The modeler runs in the browser at <https://behaverse.org/studyflow-modeler/app>. The command-line tool installs with Homebrew from the repository's tap (its README gives the three commands) or from a clone with `npm install`, and the example study uses three of its commands: `studyflow validate` on the deposited and on the executed file, `studyflow run --runtime local` for the run, and `studyflow convert` to move a study between YAML, BPMN XML, and PNG. The local runtime needs `uv` for its Python steps, and the example study needs an Ollama server with the model tags of @tbl-agents and the Behaverse WebGL build (Data availability). The runs reported here were made on one laptop (Apple M4 Pro, 24 GB, macOS 27.0), which also served the models.
 
 <!-- TODO: AI-use statement (eLife policy): which AI tools were used for writing, coding or analysis, and how. -->
 
 # Data availability
 
-The modeler, runner, and command-line tool are open source under the MIT license, and the schema under the Creative Commons Attribution 4.0 license; the modeler and runner run in the browser without installation, and the command-line tool installs with Homebrew or npm (Materials and methods). The modeler, runner, and documentation are hosted at <https://behaverse.org/studyflow-modeler/app>, and the source code is available at <https://github.com/behaverse/studyflow-modeler>. The Studyflow schema is versioned separately at <https://github.com/behaverse/schemas>. Archived releases of the modeler, runner, and schemas, tagged by version, are deposited with DOIs <!-- TODO: Zenodo DOIs of the modeler and the schemas, the deposit DOI of the sealed study files and of the executed runs (elife/study/run is not in git), and how readers obtain the Behaverse WebGL build the example study runs (assessment-unity is a private repository without a license) --> and in the GitHub repositories.
+The modeler, runner, and command-line tool are open source under the MIT license, and the schema under the Creative Commons Attribution 4.0 license; the modeler and runner run in the browser without installation, and the command-line tool installs with Homebrew or npm (Materials and methods). The modeler, runner, and documentation are hosted at <https://behaverse.org/studyflow-modeler/app>, and the source code is available at <https://github.com/behaverse/studyflow-modeler>. The Studyflow schema is versioned separately at <https://github.com/behaverse/schemas>. Archived releases of the modeler, runner, and schemas, tagged by version, are deposited with DOIs <!-- TODO: Zenodo DOIs of the modeler and the schemas, and the deposit DOI of the sealed study files and of the executed runs (elife/study/run is not in git) --> and in the GitHub repositories. The Behaverse WebGL build the example study runs is distributed as a binary from the Studyflow website <!-- TODO: URL of the build -->, which anyone may run without a license; it covers the Behaverse tasks only, and the battery's source is not published.
 
 # Author contributions
 
@@ -704,6 +715,8 @@ The drive toward machine-readable protocols is not unique to cognitive and behav
 ![**A multimodal preprocessing and training pipeline in the same notation.** Specification of a pipeline harmonizing EEG, fMRI, and behavioral recordings across heterogeneous datasets: modality-specific preprocessing, a harmonized corpus, then a model trained on its training split and evaluated on its test split. The implementations it names are illustrative references rather than packages a run installs.](figures/figS1-multimodal.studyflow.png){#fig-s1-multimodal}
 
 ![**The Studyflow modeler.** The reference modeler with Step 2 (@fig-step2-run) open and its N-back task selected. (a) The palette's Behaverse flyout, the elements and templates the Behaverse schema declares. (b) The inspector, whose Execution tab shows the task's `instrument` and `timeline`, fields of `behaverse:Task`, and the prompt and Parameters wired into it. (c) The canvas. The palette's entries and the inspector's fields are compiled from the skills' schemas; the Execution tab adds the drawn inputs and outputs.](figures/fig-s2-modeler.png){#fig-s2-modeler}
+
+{{< pagebreak >}}
 
 ## Supplementary Table S1. The Studyflow element catalog
 

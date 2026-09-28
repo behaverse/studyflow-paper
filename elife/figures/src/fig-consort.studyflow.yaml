@@ -289,33 +289,33 @@ Example_Study:
       waypoint: 440,136 440,170
     Flow_Eligible:
       stroke: "#4e6f95"
-      name: "yes"
+      name: "yes (n={reached})"
       conditionExpression: "'READY' in (Screening or '').upper()"
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Disposition
       waypoint: 440,220 440,262
-      label: 448 226 40 14
+      label: 448 224 70 14
     Flow_Excluded_Pre:
-      name: "no"
+      name: "no (n={reached})"
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
       stroke: "#ac5a54"
       waypoint: 465,195 632,195
-      label: 520 170 40 14
+      label: 520 170 66 14
     Flow_Allocate_Cautious:
       stroke: "#4e6f95"
-      name: cautious
+      name: cautious (n={reached})
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Cautious
       waypoint: 415,287 380,287 380,338
-      label: 330 294 60 14
+      label: 286 294 90 14
     Flow_Allocate_Impulsive:
       stroke: "#4e6f95"
-      name: impulsive
+      name: impulsive (n={reached})
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Impulsive
       waypoint: 465,287 580,287 580,338
-      label: 500 294 66 14
+      label: 486 294 90 14
     SF_Cautious_Merge:
       stroke: "#4e6f95"
       sourceRef: Allocate_Cautious

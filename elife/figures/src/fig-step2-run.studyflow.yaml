@@ -7,7 +7,7 @@ Run_Collaboration:
   documentation: >-
     Step 2 of the example study (`../study/example_study.studyflow`): the follow-up phase, two cognitive tasks
     from the Behaverse build administered one trial at a time, with the study's own element ids. The cohort is
-    one artificial actor family, a local Ollama serving Gemma 4. A pool is the boundary of a system: the tasks
+    one artificial actor family, a language model served by a local Ollama. A pool is the boundary of a system: the tasks
     run in the study's system, the model is another, and the only thing crossing the boundary is the exchange
     drawn here — one `behaverse:Trial` out per trial and one `behaverse:Response` back, per task. @fig-combined
     folds the same four flows into one pair at the pool level, which every task inside inherits. The shared `agentic:Prompt` carries the
@@ -19,7 +19,7 @@ Run_Collaboration:
     Discontinued. The counts are zero because nothing has run: this is the deposited plan.
   participants:
     Participant_Model:
-      name: Gemma 4 (language model)
+      name: Language model
       fill: "#f5f5f4"
       extensionElements:
         - type: studyflow:Actor

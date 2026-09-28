@@ -11,11 +11,12 @@ Example_Study_Collaboration:
     the band they leave from. Labels are the study's own words rather than BPMN's: a gateway asks a question and its
     flows are the answers, an exit says why the subject left, and @fig-key names each symbol. The subjects' pool carries
     a participant multiplicity of eight, so the cohort is eight instances of that pool's process, one per subject; BPMN
-    draws the parallel marker at the pool's bottom. The cohort is a single artificial actor family (Gemma 4 on a local
-    Ollama), and the whole exchange with it crosses the pool boundary as one pair of message flows at pool level: one
-    `behaverse:Trial` out per trial and one `behaverse:Response` back, inherited by whichever task is playing.
-    @fig-step2-run draws the same exchange per task. Labels cite `{reached}`, which the runner fills in as the cohort
-    runs, so the executed copy of this file is the CONSORT participant flow of the study as executed.
+    draws the parallel marker at the pool's bottom. The cohort is a single artificial actor family (a language model
+    served by a local Ollama, named by the pool's `implementation`), and the whole exchange with it crosses the pool
+    boundary as one pair of message flows at pool level: one `behaverse:Trial` out per trial and one
+    `behaverse:Response` back, inherited by whichever task is playing. @fig-step2-run draws the same exchange per task.
+    Labels cite `{reached}`, which the runner fills in as the cohort runs, so the executed copy of this file is the
+    CONSORT participant flow of the study as executed.
   extensionElements:
     - type: studyflow:Study
       seed: 42
@@ -36,7 +37,7 @@ Example_Study_Collaboration:
         - type: studyflow:Actor
           actorType: llm
           implementation: ollama://gemma4:e2b-mlx
-      name: Gemma 4 (language model)
+      name: Language model
       bounds: 8 0 932 168
       isHorizontal: true
       fill: "#f5f5f4"
@@ -490,7 +491,7 @@ Example_Study:
       waypoint: 320,278 360,278
       stroke: "#4e6f95"
     Flow_Eligible:
-      name: "yes"
+      name: yes (n={reached})
       conditionExpression: "'READY' in (Screening or '').upper()"
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Disposition
@@ -498,21 +499,21 @@ Example_Study:
       label: 392 316 30 14
       stroke: "#4e6f95"
     Flow_Excluded_Pre:
-      name: "no"
+      name: no (n={reached})
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
       waypoint: 410,278 840,278
       label: 420 256 30 14
       stroke: "#ac5a54"
     Flow_Allocate_Cautious:
-      name: cautious
+      name: cautious (n={reached})
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Cautious
       waypoint: 360,413 285,413 285,452
       label: 288 394 58 14
       stroke: "#4e6f95"
     Flow_Allocate_Impulsive:
-      name: impulsive
+      name: impulsive (n={reached})
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Impulsive
       waypoint: 410,413 565,413 565,452

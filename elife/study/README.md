@@ -3,7 +3,7 @@
 `example_study.studyflow.yaml` is the paper's example study as a study you can run: one Studyflow
 file carrying the protocol, the cohort, the battery and the analysis. It is one collaboration of three
 pools, because a pool is the boundary of a system, and nothing is nested deeper than one level inside
-one: **Gemma 4 (language model)** is a system of its own, so it is a black box the study exchanges
+one: **Language model** is a system of its own, so it is a black box the study exchanges
 messages with; **Each subject** is the protocol one subject walks; **Analysis and report**
 is the same lab system as the subjects' pool but on a different beat, once over the whole cohort rather
 than once per subject, which is why it is a pool of its own. The subjects' pool is divided into the three
@@ -15,8 +15,8 @@ title band, which no lane reaches, so no lane has to give way to it.
 The cohort is artificial — eight subjects, eight instances of the subjects' pool (BPMN's
 `participantMultiplicity`, drawn as the three-bar parallel marker at the foot of the pool's title band with
 `×8` under it, which is where the pool's name used to say it; the subjects do not depend on one another, so
-this is a multiplicity and not a loop), all played by Gemma 4 on a local
-Ollama (`gemma4:e2b-mlx`). Each subject is screened with a comprehension check, allocated to a
+this is a multiplicity and not a loop), all played by one language model on a local
+Ollama (`gemma4:e2b-mlx` in this file; the two other sealed copies name `gemma4:12b-it-qat` and `llama3.1:8b`). Each subject is screened with a comprehension check, allocated to a
 cautious or an impulsive disposition in permuted blocks of four (so eight subjects split four and four), and takes two tasks
 from the Behaverse build (`WO` / `SimonTask`, one block of 30 trials whose congruency is drawn per
 trial; `NB` / `XCIT_NB_01`, the 1-back the build's human studies run: three tutorial blocks and a practice block,
@@ -50,9 +50,11 @@ UNITY_BUILD_PATH=~/workspace/behaverse/assessment-unity/Build/WebGL \
 ```
 
 `studyflow` is `node <studyflow-modeler>/packages/cli/dist/studyflow.mjs`, built from the paper's pinned tag. It needs `uv` and a
-local Ollama serving `gemma4:e2b-mlx` (manifest digest `sha256:c4e49a77…`, the id `ollama list` prints). The second sealed file,
-`example_study-gemma4-12b.studyflow.yaml`, differs from this one in one line, the actor's `implementation`
-(`ollama://gemma4:12b-it-qat`, digest `sha256:38044be4…`); run it with `--repo elife/study/run-gemma4-12b`. Each task carries
+local Ollama serving `gemma4:e2b-mlx` (manifest digest `sha256:c4e49a77…`, the id `ollama list` prints). The two other sealed files,
+`example_study-gemma4-12b.studyflow.yaml` (`ollama://gemma4:12b-it-qat`, digest `sha256:38044be4…`) and
+`example_study-llama3.1-8b.studyflow.yaml` (`ollama://llama3.1:8b`, Meta's Llama 3.1 8B, digest `sha256:46e0c10c…`), differ from
+this one in that one line, the actor's `implementation`; run them with `--repo elife/study/run-gemma4-12b` and
+`--repo elife/study/run-llama3.1-8b`. Each task carries
 `implementation: behaverse://assessment-unity@26.08`, the `productVersion` the WebGL build reports in its `index.html`
 (`WebGL.wasm.unityweb` sha256 `f1b767dc…`, `WebGL.data.unityweb` sha256 `9a64bb96…`); the runner does not check that line, it
 records the build's `releaseTag` with every event, but the line sits inside the protocol digest, so the seal covers it. The

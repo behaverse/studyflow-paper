@@ -15,7 +15,7 @@ Design_Collaboration:
     without ending the study. The counts are zero because nothing has run: this is the deposited plan.
   participants:
     Participant_Model:
-      name: Gemma 4 (language model)
+      name: Language model
       fill: "#f5f5f4"
       extensionElements:
         - type: studyflow:Actor
@@ -268,33 +268,33 @@ Design:
       waypoint: 560,336 560,380
     Flow_Eligible:
       stroke: "#4e6f95"
-      name: "yes"
+      name: "yes (n={reached})"
       conditionExpression: "'READY' in (Screening or '').upper()"
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Disposition
       waypoint: 560,430 560,500
-      label: 566 450 40 14
+      label: 566 450 70 14
     Flow_Excluded_Pre:
-      name: "no"
+      name: "no (n={reached})"
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
       stroke: "#ac5a54"
       waypoint: 585,405 800,405
-      label: 660 384 40 14
+      label: 660 384 66 14
     Flow_Allocate_Cautious:
       stroke: "#4e6f95"
-      name: cautious
+      name: cautious (n={reached})
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Cautious
       waypoint: 535,525 360,525 360,585
-      label: 400 506 60 14
+      label: 390 506 90 14
     Flow_Allocate_Impulsive:
       stroke: "#4e6f95"
-      name: impulsive
+      name: impulsive (n={reached})
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Impulsive
       waypoint: 585,525 740,525 740,585
-      label: 640 506 66 14
+      label: 630 506 90 14
     SF_Cautious_Merge:
       stroke: "#4e6f95"
       sourceRef: Allocate_Cautious
