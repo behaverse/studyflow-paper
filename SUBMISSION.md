@@ -78,7 +78,7 @@ Done today, all uncommitted in `elife/`:
 
 eLife requirements not yet met (source: the eLife-RP author instructions, reviewer.elifesciences.org/author-guide redirects there):
 
-- Abstract 150–200 words (now 235); title up to 120 characters (now 121); a proposal for both is below.
+- Abstract 150–200 words (now 235); a proposal is below. Title done (110 characters).
 - Funding, Acknowledgements, CRediT roles, AI-use statement: author input.
 - Data availability needs persistent identifiers (Zenodo DOIs, the deposit of the sealed files and the runs) and the URL of the WebGL build binary on the Studyflow website.
 - Preprint: bioRxiv's scope excludes work not premised on biology; the guide accepts any versioned preprint server, so PsyArXiv (versioned DOIs) around Oct 13, posted by us.
@@ -95,7 +95,7 @@ Decisions needed from you:
 
 Proposed, not applied:
 
-- Title (116 characters): "Studyflow, an executable visual notation for experimental workflows in cognitive science, from design to publication".
+- Title: decided 2026-09-28 in the Doc and applied to the qmd and the cover letter: "Studyflow, a visual notation for coordinating experiments in the cognitive sciences, from design to publication" (111 characters).
 - Abstract (200 words):
 
   > A cognitive science study is spread across several artifacts (protocol, experiment script, data, analysis pipeline, reports, figures), and no single one of them fully records what was done. Data have standards such as BIDS; the process that produced them still lives in scattered text, slides, and custom code, so reproducing a study means reconstructing that process from all of those artifacts at once. We present Studyflow, a visual notation that gives the experimental process one representation that is machine-readable, human-understandable, and executable. One diagram serves as the protocol, the runnable study, the analysis specification, and the publication figure, each a view for a different audience, so there is no second copy to drift. Studyflow formulates a study as a typed directed graph, realized as a BPMN 2.0 extension with the elements experimental research needs. We demonstrate it on an example study whose single file enrolls, screens, administers, and analyzes a cohort of artificial agents, each analysis question ending in a registered claim state; a human cohort would take the same protocol through the same interface. A validator caught ten of twelve faults seeded into a study. The schema and an open-source modeler, validator, and runner are released under permissive licenses.

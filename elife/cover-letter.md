@@ -4,7 +4,7 @@
 
 Dear Editors,
 
-We submit "Studyflow, an executable visual notation for experimental workflows in the cognitive sciences, from design to publication" as a Tools and Resources article.
+We submit "Studyflow, a visual notation for coordinating experiments in the cognitive sciences, from design to publication" as a Tools and Resources article.
 
 A cognitive science study's data have shared standards such as BIDS; its process has no shared machine-readable form. The process is spread across a protocol, scripts, analysis code and figures; each keeps its own copy of the study's parameters, free to drift, and none fully records what was done.
 
