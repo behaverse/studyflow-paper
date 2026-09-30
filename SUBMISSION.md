@@ -130,6 +130,10 @@ From today's audits:
 - The Google Doc still mirrors v3 as of 2026-09-21, and the merge rewrote most of the main text, so Checkpoint 1 is close to a full re-sync (answer or archive Pedro's threads first).
 - eLife's clause accepting any versioned preprint server is written for Review Articles; confirm with eLife before posting to PsyArXiv.
 
+## Status 2026-09-30, evening
+
+The one-pass merge was reverted (`ebbf55e` restores the pre-merge text). `paper-v3.qmd` was then improved section by section, each change approved by the author on a review page and committed per section: `9669390` Abstract, `6ec3866` Introduction, `174d79b` Notation, `e8f5678` Results, `b158d36` Discussion and Limitations, `0a6ff3c` the author's abstract (174 words), `0e328aa` back matter (Appendix 3 holds the encoded studies and the blind calibration; the pipeline check with a planted truth is in Methods). Decisions: the final run uses the Behaverse battery tasks with the language-model cohorts, with a harder n-back; the files are deposited before submission; tools and schema are MIT. Left for the final run: every `[TODO]` (tbl-agents, Step 3, fig-combined counts, lst-diff, three "confirm from the language-model runs" markers), the study files, figures and listings. Left for the author: AI-use statement, CRediT, funding, acknowledgements, DOIs, how the blind seeding was done, reviewers.
+
 ## At the modeler release
 
 When the design-review follow-ups are finished and a release is tagged after them, in this order:
