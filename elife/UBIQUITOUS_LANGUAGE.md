@@ -1,16 +1,17 @@
 # Ubiquitous Language
 
-Working vocabulary for the Studyflow paper (`elife/paper-v4.qmd`). This is guidance, not law: write naturally, and reach for these terms when precision matters or when one of the collisions at the end is in play.
+Working vocabulary for the Studyflow paper (`elife/paper-v3.qmd`). This is guidance, not law: write naturally, and reach for these terms when precision matters or when one of the collisions at the end is in play.
 
 ## Core terms
 
 | Term | Meaning |
 | --- | --- |
-| Studyflow | The notation, a BPMN 2.0 profile for experimental cognitive research. Capitalized everywhere except the `studyflow:` namespace prefix and the `.studyflow` file extension. |
-| Study (S) | The formal object, a typed attributed directed multigraph. A Studyflow diagram is a study; the `.studyflow` YAML file is its serialization; the `.bpmn` XML is its interoperability projection. |
+| Studyflow | The notation, a BPMN 2.0 profile for experimental cognitive research. Capitalized everywhere except the `studyflow:` namespace prefix and the `.studyflow.yaml` file extension. |
+| Study (S) | The formal object, a typed attributed directed multigraph. A Studyflow diagram is a study as drawn; the `.studyflow.yaml` file is its serialization and what is sealed, deposited, diffed, validated and run; BPMN 2.0 XML is its export, not a projection. |
 | Element | Any typed node or edge; each specializes a BPMN base type. |
 | Language schema (Sigma) | The versioned LinkML schema defining element types, attributes, and validation rules, independent of any tool. |
 | Coordination language | What Studyflow is in Gelernter and Carriero's terms. The notation carries the coordination (ordering, dependencies, data passing between stages) while the computations stay in the tools built for them. |
+| FEEL | The expression language of DMN, BPMN's sibling OMG standard. Every condition and data selection a file writes is FEEL; the validator rejects one that is not, and both reference runtimes evaluate the same subset. |
 
 ## Graphs and execution
 
@@ -18,10 +19,12 @@ Working vocabulary for the Studyflow paper (`elife/paper-v4.qmd`). This is guida
 | --- | --- |
 | Sequence flow, G_ctrl | Control-flow edges and the directed (deliberately not acyclic) graph they induce; execution walks it. |
 | Data association, G_data | Data-flow edges and the graph they induce; an analysis pipeline is a path through it. |
-| Well-formed | Passing the four validity conditions (language schema, typed endpoints, sound control flow, valid BPMN XML). |
+| Well-formed | Passing the four validity conditions (language schema and FEEL, typed endpoints, connected control flow, valid BPMN XML export). |
 | Run | One administration of the whole protocol to one subject. |
-| Study seed (s) | Combined with a subject identifier i, fixes the path, task order, stimulus order, and every branch draw. |
-| Prospective and retrospective provenance | W3C PROV's names for the plan versus the executed record. A Studyflow file is prospective provenance at deposit and accumulates retrospective provenance (execution environment, seeds, attrition counts) as it runs; the deviation report is the diff between the two states. |
+| Study seed (sigma) | Fixes every random draw: a gateway's from the seed, the gateway and its visit count; a timeline's from the seed and the step; a simulated participant's from the seed and each message's identity. A language model's responses are sampled, not seeded. |
+| Prospective and retrospective provenance | W3C PROV's names for the plan versus the executed record. A Studyflow file is prospective provenance at deposit and accumulates retrospective provenance (the tool, the seed, the protocol digest, attrition counts) as it runs; the deviation report is the diff between the two states. |
+| Sealed, deposited | Sealed: the file's protocol digest is recorded, so any later change to the protocol shows. Deposited: archived where a timestamp proves when it was registered. The example study was sealed and run, not deposited first. |
+| Claim state | The end event a registered question reaches: Supported, Not supported, or Not testable, decided by a rule drawn in the file before any run. |
 
 ## Actors
 
@@ -29,26 +32,30 @@ Working vocabulary for the Studyflow paper (`elife/paper-v4.qmd`). This is guida
 | --- | --- |
 | Actor | Anything implementing the observation-to-response exchange; the umbrella over humans and machines. |
 | Participant | A human enrollee, in the CONSORT sense. |
-| Subject | One enrolled instance walking the protocol (the i in the execution semantics), human or artificial. |
-| Artificial agent | A non-human actor (a language model, a vision-language model, or a random baseline). |
-| Runner, Modeler | The reference apps that execute and author diagrams, respectively. Any conforming engine is an executor; the runner is one executor among possible others. |
-| Executor configuration | The pinned setup of an artificial actor (model id, digest, sampling parameters, trait prompt). |
+| Subject | One enrolled instance walking the protocol (one instance of the subjects' pool), human or artificial. |
+| Simulated participant | A runner-only actor of the `simulate` skill (`simulate://planted`, `simulate://null`) that answers each trial correctly with a set probability; the example study's cohort, not a participant in the CONSORT sense. |
+| Planted truth | An effect built into simulated participants, so the correct outcome of each registered question is known before the run; the null twin plants nothing. |
+| Artificial agent | A non-human actor (a simulated participant or a language model); the umbrella term. |
+| Modeler, reference runtimes | The modeler authors diagrams. The two reference runtimes execute them: the local runtime (`studyflow run --runtime local`) walks the whole study and writes its record into the executed copy; the browser runner walks one process, one screen at a time, and keeps its record in the session. |
+| Executor configuration | What a language model's runner records with every exchange (model digest and quantization, sampling parameters, server version, request and reply); the file names the model but cannot set its sampling. |
 
 ## Views
 
 | Term | Meaning |
 | --- | --- |
-| Projection | The operation pi_p(S). It discards elements, never adds or rewrites. |
-| View | The result of a projection (Study, Gantt, Checklist, Figure). |
+| Projection | The mapping pi_p(S) from the study to what one audience reads. It discards elements, never adds or rewrites. |
+| View | What a projection renders (Study, Gantt, Checklist, Figure). |
 
 ## Collisions worth avoiding
 
 Only a few words genuinely bite when left bare; qualify them and move on.
 
 - "schema": say language schema (validates diagrams) or data schema (validates datasets).
-- "agent": say artificial agent for the umbrella term; bare `agent` is the specific actorType enum value.
-- "marker": say marker analysis (the Flanker congruency anchor) or operation marker (the icon on a data operation).
-- "runner" vs "executor": the runner is the reference app; an executor is any conforming engine.
-- "view" vs "projection": the projection is the operation, the view is its result.
+- "agent": say artificial agent for the umbrella term; `actorType` names an actor's kind (`human`, `software`, `hardware`, `llm`).
+- "marker": say loop or multi-instance marker (BPMN's) or operation marker (the icon on a data operation).
+- "runner" vs "runtime": the local runtime and the browser runner are the reference runtimes; a skill's runner executes the elements that skill claims; any conforming engine is an executor.
+- "view" vs "projection": the projection is the mapping, the view is what it renders.
+- "sound": the third validity condition is *connected* (every flow node on a path from a start to an end event), weaker than the soundness of workflow nets.
+- "draw": depicting on the diagram; sampling is a random draw.
 
 Everything beyond this (the long alias ban-lists and worked dialogues of earlier versions) proved more constraint than help. Trust context; consult the collision list when in doubt.
