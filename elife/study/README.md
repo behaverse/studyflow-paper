@@ -7,9 +7,11 @@ protocol one subject walks, eight instances (`participantMultiplicity`), its lan
 **Analysis and report** runs once, after the last subject.
 
 Each task is a sub-process drawn to the trial: a timeline step (`simulate://simon`, 30 trials; `simulate://nback`,
-two test blocks of 28 digits), a multi-instance sub-process whose one task sends each trial and the subject's
-instruction to the Actor pool, and a record step (`simulate://record`) that scores the answers and appends one row
-per trial to `data/trials.jsonl`. The analysis is unchanged in structure from this file's previous version (commit
+two test blocks of 28 digits) that makes the trials as a subject sees them and, apart, their key (each trial's right
+answer and condition), a multi-instance sub-process whose one task sends each trial and the subject's instruction to
+the Actor pool, and a record step (`simulate://record`) that scores the answers by the key and appends one row per
+trial to `data/trials.jsonl`. No subject is sent the key: the simulated participant tells the right answer from the
+stimulus and the rule, as a language model has to. The analysis is unchanged in structure from this file's previous version (commit
 `e24e0fb`) except that latency is gone (a pool asked one message at a time has no response time the study controls)
 and the divergence classifier standardizes its features (the planted run showed that without it the classifier
 scores 0% under leave-one-out).
@@ -20,16 +22,20 @@ The files differ from `example_study.studyflow.yaml` in one line, the Actor's `i
 
 | File | Actor | Protocol digest |
 | --- | --- | --- |
-| `example_study.studyflow.yaml` | `simulate://planted` | `sha256:b31e928d7a1bafb89fba8b5b1972b4f2018b02dc638628ad9845a292aea1f38e` |
-| `example_study-null.studyflow.yaml` | `simulate://null` | `sha256:db032e27880987c48ddd02a160bf24f985e249922b73c3639849d74599c04eaf` |
-| `example_study-gemma4-e2b.studyflow.yaml` | `ollama://gemma4:e2b-mlx` | `sha256:d30e3dc6a9666ff2881b903fd33df71fc2d633a0fd1e31034fccd83ed9e49b10` |
-| `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:ce307725e508313c49ecd63047e339fdad96919599ec185f6b18a5c843fd1aa4` |
-| `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:57344d7f94e4ebac26ff6164e18f87dda91f1b87e93ed8e1999def1c5f77b97f` |
+| `example_study.studyflow.yaml` | `simulate://planted` | `sha256:cf618897260557f1a870df96cdf53823b367791fae0e04e10f6f34715fbfaf19` |
+| `example_study-null.studyflow.yaml` | `simulate://null` | `sha256:22a631fde3feccb698c2ee5eaa3999156c07c3d87902d36ea596ba36f9587afe` |
+| `example_study-gemma4-e2b.studyflow.yaml` | `ollama://gemma4:e2b-mlx` | `sha256:c2866cfabc2b52f64af0b8e8e30a04bf8822d14b5e8eb03a6b07f50af62d1e5d` |
+| `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:f33d6c97592950c93027571df83f8538d612fc5724973959ebfbf9d4fca5133f` |
+| `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:dc6515c392a3f4902673c5df770f51b3ad6b02cbac208d7cd43e4bdea5b26b4c` |
 
-Digests computed with a build of the modeler at commit `bfbea295` (on the modeler's `main`, not yet pushed to GitHub).
-Any edit to a sealed file changes them, and they will change when the files are re-spelled at the modeler release the
-paper cites. The planted and null files were run on 2026-09-29; the three language-model twins are run by the author,
-and their results are pending.
+Digests computed on 2026-09-30 with a build of the modeler's `main` after the answer key was kept from the subject
+(the modeler's `simulate` fix, "a subject is never sent a trial's answer"). Any edit to a sealed file changes them,
+and they will change again when the files are re-spelled at the modeler release the paper cites. The planted and null
+files were run on 2026-09-29, before the key was split off: those runs sent each trial with its answer to the
+simulated participant, which read its answer from it. Told the answer by the stimulus and the rule instead, it gives
+the same answers, so the file run with the key kept apart gives the same trials and results byte for byte; the runs
+are re-made at the release. The three language-model twins are run by the
+author, after the release, and their results are pending.
 
 ## Running it
 

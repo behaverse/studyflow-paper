@@ -326,17 +326,26 @@ Example_Study:
           type: StartEvent
         Simon_Timeline:
           type: ServiceTask
-          documentation: The task's trials, one list every subject meets in the same order.
+          documentation: >-
+            The task's trials, one list every subject meets in the same order, and their key: each trial's right
+            answer and condition, which no subject is sent and only the record step reads.
           name: Simon timeline
           dataOutputAssociations:
             Out_Simon_Timeline:
               targetRef: Simon_Trials
+              transformation: result.trials
+            Out_Simon_Key:
+              targetRef: Simon_Key
+              transformation: result.key
           additionalArguments:
             trials: 30
           implementation: simulate://simon
         Simon_Trials:
           type: DataObjectReference
           name: Simon trials
+        Simon_Key:
+          type: DataObjectReference
+          name: Simon key
         Simon_Block:
           type: SubProcess
           documentation: >-
@@ -388,13 +397,16 @@ Example_Study:
         Simon_Record:
           type: ServiceTask
           documentation: >-
-            Scores each answer against its trial and appends one row per trial to the trials dataset, keyed by the
+            Scores each answer by the timeline's key and appends one row per trial to the trials dataset, keyed by the
             subject and its arm; its result carries the share of trials left unanswered, which the boundary event reads.
           name: Record the trials
           dataInputAssociations:
             In_Simon_Record_Trials:
               sourceRef:
                 - Simon_Trials
+            In_Simon_Record_Key:
+              sourceRef:
+                - Simon_Key
             In_Simon_Record_Answers:
               sourceRef:
                 - Simon_Answers
@@ -456,11 +468,17 @@ Example_Study:
           type: StartEvent
         NBack_Timeline:
           type: ServiceTask
-          documentation: The task's trials, one list every subject meets in the same order.
+          documentation: >-
+            The task's trials, one list every subject meets in the same order, and their key: each trial's right
+            answer and condition, which no subject is sent and only the record step reads.
           name: 1-back timeline
           dataOutputAssociations:
             Out_NBack_Timeline:
               targetRef: NBack_Trials
+              transformation: result.trials
+            Out_NBack_Key:
+              targetRef: NBack_Key
+              transformation: result.key
           additionalArguments:
             "n": 1
             trials: 28
@@ -471,6 +489,9 @@ Example_Study:
         NBack_Trials:
           type: DataObjectReference
           name: 1-back trials
+        NBack_Key:
+          type: DataObjectReference
+          name: 1-back key
         NBack_Block:
           type: SubProcess
           documentation: >-
@@ -522,13 +543,16 @@ Example_Study:
         NBack_Record:
           type: ServiceTask
           documentation: >-
-            Scores each answer against its trial and appends one row per trial to the trials dataset, keyed by the
+            Scores each answer by the timeline's key and appends one row per trial to the trials dataset, keyed by the
             subject and its arm; its result carries the share of trials left unanswered, which the boundary event reads.
           name: Record the trials
           dataInputAssociations:
             In_NBack_Record_Trials:
               sourceRef:
                 - NBack_Trials
+            In_NBack_Record_Key:
+              sourceRef:
+                - NBack_Key
             In_NBack_Record_Answers:
               sourceRef:
                 - NBack_Answers
