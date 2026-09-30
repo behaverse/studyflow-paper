@@ -1,0 +1,117 @@
+id: hedge2018_flanker
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Hedge2018:
+  type: Process
+  documentation: >-
+    Hedge, Powell and Sumner (2018), The reliability paradox, Study 1, the flanker task only, encoded from its Methods
+    section. Every value is quoted from that section; a value the section does not state is written `unstated`, so the
+    encoding counts what a replicator would have to ask for.
+  extensionElements:
+    - type: studyflow:Study
+      authors:
+        - Hedge C
+        - Powell G
+        - Sumner P
+  name: Flanker test-retest (Hedge et al. 2018, Study 1)
+  properties:
+    P_Session:
+      name: session
+      value: 1
+  flowElements:
+    Enroll:
+      type: StartEvent
+      name: Recruited (50)
+    Session:
+      type: SubProcess
+      name: One session
+      documentation: Two sessions three weeks apart at the same time of day, the tasks in the same order in both.
+      flowElements:
+        S_Start:
+          type: StartEvent
+        Flanker:
+          type: Task
+          extensionElements:
+            - type: cognitive:CognitiveTask
+              construct: response inhibition
+          name: Flanker task
+          dataInputAssociations:
+            In_Flanker_Settings:
+              sourceRef:
+                - Flanker_Settings
+        Flanker_Settings:
+          type: DataObjectReference
+          extensionElements:
+            - type: studyflow:Parameters
+              values:
+                conditions: [congruent, neutral, incongruent]
+                trialsPerCondition: 240
+                blocks: 5
+                interStimulusInterval: 0.75
+                stimulusDuration: until response
+                responseKeys: [backslash, forward slash]
+                arrowSize: 1 cm
+                flankerSpacing: 0.75 cm
+                blockFeedback: mean RT and error rate
+                trialOrder: unstated
+                randomSeed: unstated
+                practiceTrials: unstated
+                responseDeadline: unstated
+                missedResponse: unstated
+                trialFeedback: unstated
+                trialsPerBlock: unstated
+                viewingDistance: unstated
+                displayRefreshRate: unstated
+          name: Flanker settings
+        S_End:
+          type: EndEvent
+        SF_0: S_Start -> Flanker
+        SF_1: Flanker -> S_End
+    Retest_Gap:
+      type: IntermediateCatchEvent
+      name: Three weeks
+      eventDefinitions:
+        Gap_Timer:
+          type: TimerEventDefinition
+          timeDuration: P21D
+    Retest:
+      type: ExclusiveGateway
+      name: Second session done?
+      default: Flow_Again
+    Accurate:
+      type: ExclusiveGateway
+      name: At least 60% correct in both sessions?
+      default: Flow_Excluded
+    Excluded:
+      type: EndEvent
+      name: Excluded (3)
+    Trim:
+      type: ServiceTask
+      name: Drop RTs below 100 ms or above 3 MAD over the median
+      implementation: unstated://rt-trimming
+    Reliability:
+      type: ServiceTask
+      name: ICC(2,1) of the RT cost and the error cost across sessions
+      implementation: python://pingouin.intraclass_corr
+    Analysed:
+      type: EndEvent
+      name: Analysed (47)
+    F_0: Enroll -> Session
+    F_1: Session -> Retest
+    Flow_Done:
+      sourceRef: Retest
+      targetRef: Accurate
+      conditionExpression: state._meta.reached.Session >= 2
+    Flow_Again:
+      sourceRef: Retest
+      targetRef: Retest_Gap
+    F_2: Retest_Gap -> Session
+    Flow_Kept:
+      sourceRef: Accurate
+      targetRef: Trim
+      conditionExpression: accuracy_session_1 >= 0.6 and accuracy_session_2 >= 0.6
+    Flow_Excluded:
+      sourceRef: Accurate
+      targetRef: Excluded
+    F_3: Trim -> Reliability
+    F_4: Reliability -> Analysed

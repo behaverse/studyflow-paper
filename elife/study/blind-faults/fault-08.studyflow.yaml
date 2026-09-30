@@ -1,0 +1,101 @@
+id: fault_library
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Study:
+  type: Process
+  name: Fault library
+  extensionElements:
+    - type: studyflow:Study
+      seed: 7
+  flowElements:
+    Start:
+      type: StartEvent
+      name: Enrolled
+    Eligible:
+      type: ExclusiveGateway
+      name: Eligible?
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+      default: F_No
+    Excluded:
+      type: EndEvent
+      name: Excluded (n={reached})
+    Settings:
+      type: DataObjectReference
+      name: Task settings
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            trials: 30
+    Play:
+      type: Task
+      name: Play the task
+      dataInputAssociations:
+        In_Settings: { sourceRef: [Settings] }
+      dataOutputAssociations:
+        Out_Trials: { targetRef: Trials }
+    Failed:
+      type: BoundaryEvent
+      name: Task failed
+      attachedToRef: Play
+      eventDefinitions:
+        Error: { type: ErrorEventDefinition }
+    Discontinued:
+      type: EndEvent
+      name: Discontinued (n={reached})
+    Trials:
+      type: DataStoreReference
+      name: Trials
+      extensionElements:
+        - type: studyflow:Dataset
+          schema: Trial_Schema
+    Trial_Schema:
+      type: DataObjectReference
+      name: Trial schema
+      extensionElements:
+        - type: studyflow:Schema
+          body:
+            tableSchema:
+              columns:
+                - { name: subject, datatype: string }
+                - { name: response_time, datatype: number }
+                - { name: correct, datatype: boolean }
+    Accurate:
+      type: ExclusiveGateway
+      name: Accurate enough?
+    Below:
+      type: EndEvent
+      name: Below criterion (n={reached})
+    Compare:
+      type: ServiceTask
+      name: Equivalent across arms?
+      implementation: python://statsmodels.stats.weightstats.ttost_ind
+      additionalArguments:
+        low: -0.1
+        upp: 0.1
+    Done:
+      type: EndEvent
+      name: Completed (n={reached})
+    F_Start: Start -> Eligible
+    F_Yes:
+      name: "yes"
+      sourceRef: Eligible
+      targetRef: Play
+      conditionExpression: consented
+    F_No:
+      name: "no"
+      sourceRef: Eligible
+      targetRef: Excluded
+    F_Played: Play -> Accurate
+    F_Failed: Failed -> Discontinued
+    F_Pass:
+      name: "yes"
+      sourceRef: Accurate
+      targetRef: Compare
+      conditionExpression: accuracy >= 0.8
+    F_Below:
+      name: "no"
+      sourceRef: Accurate
+      targetRef: Below
+      conditionExpression: accuracy < 0.8
+    F_Compared: Compare -> Done

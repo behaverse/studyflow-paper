@@ -1,0 +1,197 @@
+id: kucina2023_simon
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Kucina2023:
+  type: Process
+  documentation: >-
+    Kucina et al. (2023), Calibration of cognitive tests to address the reliability paradox for decision-conflict
+    tasks, final experiment, the double-shot Simon condition only, encoded from its Methods section. Every value is
+    quoted from that section; a value the section does not state is written `unstated`.
+  extensionElements:
+    - type: studyflow:Study
+      authors:
+        - Kucina T
+        - Wells L
+        - Lewis I
+        - de Salas K
+        - Kohl A
+        - Palmer MA
+        - Sauer JD
+        - Matzke D
+        - Aidman E
+        - Heathcote A
+  name: Double-shot Simon (Kucina et al. 2023, final experiment)
+  flowElements:
+    Enroll:
+      type: StartEvent
+      name: Attempted (256, all conditions)
+      consentFormUri: unstated
+    Eligibility:
+      type: Task
+      extensionElements:
+        - type: cognitive:Questionnaire
+          instrument: normal vision checkbox and two English proficiency items
+      name: Vision and English check
+    Eligible:
+      type: ExclusiveGateway
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+          inclusionCriteria:
+            - Normal or corrected-to-normal vision
+            - Both English proficiency items correct
+      name: Eligible?
+      default: Flow_Ineligible
+    Ineligible:
+      type: EndEvent
+      name: Not eligible (count unstated)
+    Assign:
+      type: ExclusiveGateway
+      extensionElements:
+        - type: cognitive:RandomGateway
+          algorithm: simple
+          allocationRatio: unstated
+      name: Which condition? (six; Simon2 drawn)
+      default: Flow_Simon2
+    Tutorial:
+      type: Task
+      extensionElements:
+        - type: cognitive:Instruction
+          content: Prompted then unprompted blocks of four trials per component; errors must be corrected to continue.
+      name: Tutorial
+    Qualify:
+      type: SubProcess
+      name: Four unprompted trials without error
+      loopCharacteristics:
+        type: StandardLoopCharacteristics
+        loopMaximum: 8
+        loopCondition: not(passed)
+      flowElements:
+        Q_Start:
+          type: StartEvent
+        Q_Trials:
+          type: Task
+          name: Four unprompted trials
+        Q_End:
+          type: EndEvent
+        QF_0: Q_Start -> Q_Trials
+        QF_1: Q_Trials -> Q_End
+    Qualified:
+      type: ExclusiveGateway
+      name: Passed within eight chances?
+      default: Flow_Failed
+    Failed_Tutorial:
+      type: EndEvent
+      name: Failed the tutorial (61, all conditions)
+    Session_1:
+      type: Task
+      extensionElements:
+        - type: cognitive:CognitiveTask
+          construct: interference control
+      name: Double-shot Simon, session 1
+      dataInputAssociations:
+        In_Simon_Settings:
+          sourceRef:
+            - Simon_Settings
+    Simon_Settings:
+      type: DataObjectReference
+      extensionElements:
+        - type: studyflow:Parameters
+          values:
+            stimulus: blue or orange rectangle on the left or right
+            conditions: [congruent, incongruent]
+            responseKeys: Z and /, counterbalanced across participants
+            trials: 432
+            trialsPerBlock: 12
+            secondResponseRate: 1/3, cued by a yellow shield, by stimulus location
+            responseDeadline: none; "Hurry up!!" after 2 s
+            trialFeedback: auditory, accuracy and speed; points
+            blockFeedback: accuracy
+            congruentProportion: unstated
+            trialOrder: unstated
+            randomSeed: unstated
+            interTrialInterval: unstated
+            stimulusDuration: unstated
+            trialsPerSession: unstated
+      name: Simon settings
+    Gap:
+      type: IntermediateCatchEvent
+      name: Between sessions (interval unstated)
+      eventDefinitions:
+        Gap_Timer:
+          type: TimerEventDefinition
+    Session_2:
+      type: Task
+      extensionElements:
+        - type: cognitive:CognitiveTask
+          construct: interference control
+      name: Double-shot Simon, session 2
+      dataInputAssociations:
+        In_Simon_Settings_2:
+          sourceRef:
+            - Simon_Settings
+    Complete:
+      type: ExclusiveGateway
+      name: Complete data?
+      default: Flow_Incomplete
+    Incomplete:
+      type: EndEvent
+      name: Incomplete data (9, all conditions)
+    Quality:
+      type: ExclusiveGateway
+      extensionElements:
+        - type: cognitive:EligibilityGateway
+          exclusionCriteria:
+            - Accuracy below 60% overall
+            - More than 10% of trials with RT below 0.1 s
+            - More than 10% of trials not completed within 4 s
+      name: Performance criteria met?
+      default: Flow_Excluded
+    Excluded:
+      type: EndEvent
+      name: Excluded for performance (5, all conditions)
+    Reliability:
+      type: ServiceTask
+      name: Effect and reliability estimates
+      implementation: unstated://reliability
+    Analysed:
+      type: EndEvent
+      name: Analysed (30 in Simon2)
+    F_0: Enroll -> Eligibility
+    F_1: Eligibility -> Eligible
+    Flow_Eligible:
+      sourceRef: Eligible
+      targetRef: Assign
+      conditionExpression: vision and english_items = 2
+    Flow_Ineligible:
+      sourceRef: Eligible
+      targetRef: Ineligible
+    Flow_Simon2:
+      sourceRef: Assign
+      targetRef: Tutorial
+    F_2: Tutorial -> Qualify
+    F_3: Qualify -> Qualified
+    Flow_Passed:
+      sourceRef: Qualified
+      targetRef: Session_1
+      conditionExpression: passed
+    Flow_Failed:
+      sourceRef: Qualified
+      targetRef: Failed_Tutorial
+    F_4: Session_1 -> Gap
+    F_5: Gap -> Session_2
+    F_6: Session_2 -> Complete
+    Flow_Complete:
+      sourceRef: Complete
+      targetRef: Quality
+      conditionExpression: sessions_completed = 2
+    Flow_Incomplete:
+      sourceRef: Complete
+      targetRef: Incomplete
+    Flow_Kept:
+      sourceRef: Quality
+      targetRef: Reliability
+      conditionExpression: accuracy >= 0.6 and anticipatory_rate <= 0.1 and timeout_rate <= 0.1
+    Flow_Excluded:
+      sourceRef: Quality
+      targetRef: Excluded
+    F_7: Reliability -> Analysed
