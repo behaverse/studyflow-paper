@@ -122,7 +122,7 @@ From today's audits:
 
 - The authors' own fault library catches 10 of 12 seeded faults; of 12 faults seeded blind (`elife/study/blind-faults/`), `studyflow validate` errors on 1 and the protocol digest differs on all 12. Nothing on disk records how the blind seeding was done.
 - The two published studies encoded from their Methods sections leave about ten run-critical parameters unstated each (10 and 9).
-- Licences: tools MIT, schema CC BY 4.0.
+- Licences: tools and schema MIT (author, 2026-09-30: the CC BY 4.0 wording was old).
 - 8 of the 15 figure files still show the previous protocol, and none was rendered from the current study; seven figure sources must be rebuilt from it.
 - Nothing on disk records the planted run with the unstandardized classifier that the paper reports; the fault reproduces on the planted data (0 of 8 correct under leave-one-out).
 - The runs of 2026-09-29 were made from an uncommitted modeler working tree; `bfbea295`, committed minutes later (unpushed, untagged), reproduces their digests, trials and results. The run record names only `studyflow-cli/26.9.29`.
