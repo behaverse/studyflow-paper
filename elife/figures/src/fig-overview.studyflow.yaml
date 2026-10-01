@@ -2,29 +2,26 @@ id: example_study_overview
 definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
 Example_Study:
-  type: Process
+  type: studyflow:Study
   name: Example study (overview)
   documentation: >-
-    The example study (`../study/example_study.studyflow`) compacted to one row for the overview figure
-    (@fig-overview): the same element ids, the pool of four parallel subjects flattened to the one subject it
-    repeats, the analysis collapsed to one box, and the three pools, the message flows and the per-subject
-    debrief dropped for width. What is left is laid out left to right under the four lifecycle stages. Every `n` is a
-    run-state value the runner writes as the cohort runs; they all read zero here because this figure is drawn
-    from the deposited plan. Its Gantt, Checklist and Provenance views are the modeler's own renderings of it.
-  extensionElements:
-    - type: studyflow:Study
-      seed: 42
-      runtime: local
-      version: "1.0"
-      authors:
-        - Morteza Ansarinia
-        - Hoorieh Afkari Roshan
-        - Pedro Cardoso-Leite
-      dependencies:
-        - pandas==2.3.3
-        - scipy==1.16.2
-        - scikit-learn==1.7.2
-        - matplotlib==3.10.7
+    The example study (`../study/example_study.studyflow`) compacted to one row for the overview figure (@fig-overview):
+    the same element ids, the pool of four parallel subjects flattened to the one subject it repeats, the analysis
+    collapsed to one box, and the three pools, the message flows and the per-subject debrief dropped for width. What is
+    left is laid out left to right under the four lifecycle stages. Every `n` is a run-state value the runner writes as
+    the cohort runs; they all read zero here because this figure is drawn from the deposited plan. Its Gantt, Checklist
+    and Provenance views are the modeler's own renderings of it.
+  seed: 42
+  dependencies:
+    - pandas==2.3.3
+    - scipy==1.16.2
+    - scikit-learn==1.7.2
+    - matplotlib==3.10.7
+  authors:
+    - Morteza Ansarinia
+    - Hoorieh Afkari Roshan
+    - Pedro Cardoso-Leite
+  version: "1.0"
   properties:
     P_Arm:
       name: arm
@@ -35,204 +32,121 @@ Example_Study:
   flowElements:
     Enroll:
       type: StartEvent
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: Enrolled and consented
-      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
       onset: T0
-      bounds: 20 84 32 32
-      label: 0 120 76 28
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
     Screening:
-      type: Task
-      font: "#4e6f95"
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
+      type: cognitive:Questionnaire
       name: Assessed for eligibility (n={reached})
-      extensionElements:
-        - type: cognitive:Questionnaire
-          instrument: comprehension-check
+      instrument: comprehension-check
       checklist: |-
         - [x] Consent recorded
         - [x] Executor configuration pinned (model id, sampling parameters)
         - [x] Comprehension check passed
       onset: T0
       duration: 10s
-      bounds: 66 66 108 68
     Eligibility_Gateway:
-      type: ExclusiveGateway
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
+      type: cognitive:EligibilityGateway
       name: Understood the instructions?
-      extensionElements:
-        - type: cognitive:EligibilityGateway
-          inclusionCriteria:
-            - Registered artificial actor family with a pinned model tag
-            - Comprehension check answered as instructed
-          exclusionCriteria:
-            - No answer, or an answer that does not follow the instruction
+      inclusionCriteria:
+        - Registered artificial actor family with a pinned model tag
+        - Comprehension check answered as instructed
+      exclusionCriteria:
+        - No answer, or an answer that does not follow the instruction
       default: Flow_Excluded_Pre
-      bounds: 192 80 40 40
-      isMarkerVisible: true
-      label: 140 26 128 28
     Excluded_Pre:
       type: EndEvent
       name: "Excluded: did not understand the task (n={reached})"
-      bounds: 198 172 28 28
-      fill: "#f1d0cd"
-      stroke: "#ac5a54"
-      label: 120 204 190 28
     Randomize_Disposition:
-      type: ExclusiveGateway
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
+      type: cognitive:RandomGateway
       name: Which disposition? (n={reached})
-      extensionElements:
-        - type: cognitive:RandomGateway
-          algorithm: block
-          blockSize: 4
-          allocationRatio: "1:1"
+      algorithm: block
+      allocationRatio: "1:1"
       default: Flow_Allocate_Impulsive
-      bounds: 250 80 40 40
-      isMarkerVisible: true
-      label: 190 120 96 40
     Allocate_Cautious:
       type: ServiceTask
-      font: "#4e6f95"
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: Allocated to cautious (n={reached})
-      implementation: python://builtins.dict
+      onset: T0
+      duration: 1s
       additionalArguments:
         arm: cautious
         instruction: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
-      onset: T0
-      duration: 1s
-      bounds: 304 6 140 62
+      implementation: python://builtins.dict
     Allocate_Impulsive:
       type: ServiceTask
-      font: "#4e6f95"
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: Allocated to impulsive (n={reached})
-      implementation: python://builtins.dict
+      onset: T0
+      duration: 1s
       additionalArguments:
         arm: impulsive
         instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
-      onset: T0
-      duration: 1s
-      bounds: 304 132 140 62
+      implementation: python://builtins.dict
     Prompt_Battery:
-      type: DataObjectReference
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
+      type: agentic:Prompt
       name: Disposition prompt
-      extensionElements:
-        - type: agentic:Prompt
-          template: |
-            {instruction}
+      template: |
+        {instruction}
 
-            You are taking a computerised cognitive test one trial at a time. Each message is one trial, as
-            JSON. Your answer is one of the strings in that trial's own ResponseOptions, copied exactly and
-            with nothing else.
-      bounds: 500 4 32 44
-      label: 538 10 128 27
+        You are taking a computerised cognitive test one trial at a time. Each message is one trial, as
+        JSON. Your answer is one of the strings in that trial's own ResponseOptions, copied exactly and
+        with nothing else.
     Task_Interference:
-      type: ChoreographyTask
-      font: "#5c8a55"
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
+      type: behaverse:Task
       name: Interference control (Simon)
-      extensionElements:
-        - type: behaverse:Task
-          instrument: WO
-          timeline: SimonTask
-      dataInputAssociations:
-        In_Prompt_Interference:
-          stroke: "#5c8a55"
-          sourceRef: [Prompt_Battery]
-          waypoint: 516,48 516,64
+      instrument: WO
+      timeline: SimonTask
       onset: T0+20s
       duration: 40s
-      bounds: 476 64 124 72
+      dataInputAssociations:
+        In_Prompt_Interference:
+          sourceRef:
+            - Prompt_Battery
     Failed_Interference:
       type: BoundaryEvent
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
       name: "> 20% unanswered"
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
           condition: "{Task_Interference.failedTrialRate} > 0.2"
       attachedToRef: Task_Interference
-      bounds: 572 122 28 28
     Task_WorkingMemory:
-      type: ChoreographyTask
-      font: "#5c8a55"
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
+      type: behaverse:Task
       name: Working memory (1-back)
-      extensionElements:
-        - type: behaverse:Task
-          instrument: NB
-          timeline: XCIT_NB_01
-      dataOutputAssociations:
-        Out_Trials_WorkingMemory:
-          stroke: "#5c8a55"
-          targetRef: Dataset_Trials
-          waypoint: 680,64 680,44
+      instrument: NB
+      timeline: XCIT_NB_01
       onset: T0+60s
       duration: 3min
-      bounds: 620 64 124 72
+      dataOutputAssociations:
+        Out_Trials_WorkingMemory:
+          targetRef: Dataset_Trials
     Failed_WorkingMemory:
       type: BoundaryEvent
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
       name: "> 20% unanswered"
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
           condition: "{Task_WorkingMemory.failedTrialRate} > 0.2"
       attachedToRef: Task_WorkingMemory
-      bounds: 716 122 28 28
     Dataset_Trials:
-      type: DataStoreReference
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
+      type: behaverse:BDMDataset
       name: Trials
+      dataLevel: trials
       uri: data/trials.jsonl
-      extensionElements:
-        - type: behaverse:BDMDataset
-          dataLevel: trials
-      bounds: 655 0 50 44
-      label: 709 8 76 14
     Discontinued:
       type: EndEvent
       name: "Discontinued: more than 20% of trials unanswered (n={reached})"
-      bounds: 572 172 28 28
-      fill: "#f1d0cd"
-      stroke: "#ac5a54"
-      label: 490 208 240 28
     Analysis:
       type: SubProcess
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
       name: Analysis
-      documentation: >-
-        Seven preregistered operations, collapsed here; @fig-step3-analyze draws them.
+      documentation: Seven preregistered operations, collapsed here; @fig-step3-analyze draws them.
       checklist: |-
         - [x] Trials the actor did not answer within the response window dropped
         - [x] The 1-back's tutorial and practice blocks dropped
         - [x] Every remaining trial carries a congruency and a latency
       onset: T0+6min
       duration: 30s
-      bounds: 768 68 140 64
-      isExpanded: false
     Render:
       type: ManualTask
-      font: "#a2803c"
-      fill: "#f6e8c9"
-      stroke: "#a2803c"
       name: Render the report
       checklist: |-
         - [x] CONSORT participant flow exported from the Figure view
@@ -240,88 +154,168 @@ Example_Study:
         - [x] CHART items recorded from the run provenance
       onset: T0+7min
       duration: 2min
-      bounds: 932 66 128 68
     Completed:
       type: EndEvent
-      fill: "#f6e8c9"
-      stroke: "#a2803c"
       name: Study complete
-      bounds: 1086 84 32 32
-      label: 1060 120 96 28
-    Flow_Enroll_Screening:
-      sourceRef: Enroll
-      targetRef: Screening
-      stroke: "#4e6f95"
-    Flow_Screening_Eligibility:
-      sourceRef: Screening
-      targetRef: Eligibility_Gateway
-      stroke: "#4e6f95"
-    Flow_Eligible:
-      stroke: "#4e6f95"
-      sourceRef: Eligibility_Gateway
-      targetRef: Randomize_Disposition
-      waypoint: 232,100 250,100
+    Flow_Enroll_Screening: Enroll -> Screening
+    Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
+    Flow_Eligible: Eligibility_Gateway -> Randomize_Disposition
     Flow_Excluded_Pre:
       name: "no"
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
-      stroke: "#ac5a54"
-      waypoint: 212,120 212,172
-      label: 176 140 32 14
     Flow_Allocate_Cautious:
-      stroke: "#4e6f95"
       name: cautious
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Cautious
-      waypoint: 290,100 296,100 296,37 304,37
-      label: 236 20 56 14
     Flow_Allocate_Impulsive:
-      stroke: "#4e6f95"
       name: impulsive
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Impulsive
-      waypoint: 290,100 296,100 296,163 304,163
-      label: 228 168 62 14
-    Flow_Cautious_Interference:
-      stroke: "#5c8a55"
-      sourceRef: Allocate_Cautious
-      targetRef: Task_Interference
-      waypoint: 444,37 460,37 460,100 476,100
-    Flow_Impulsive_Interference:
-      stroke: "#5c8a55"
-      sourceRef: Allocate_Impulsive
-      targetRef: Task_Interference
-      waypoint: 444,163 460,163 460,100 476,100
-    Flow_Interference_WorkingMemory:
-      stroke: "#5c8a55"
-      sourceRef: Task_Interference
-      targetRef: Task_WorkingMemory
-      waypoint: 600,100 620,100
-    Flow_Failed_Interference:
-      sourceRef: Failed_Interference
-      targetRef: Discontinued
-      stroke: "#ac5a54"
-      waypoint: 586,150 586,172
-    Flow_Failed_WorkingMemory:
-      sourceRef: Failed_WorkingMemory
-      targetRef: Discontinued
-      stroke: "#ac5a54"
-      waypoint: 730,150 730,186 600,186
-    Flow_WorkingMemory_Analysis:
-      sourceRef: Task_WorkingMemory
-      targetRef: Analysis
-      stroke: "#7a67a6"
-      waypoint: 744,100 768,100
-    Flow_Analysis_Render:
-      sourceRef: Analysis
-      targetRef: Render
-      stroke: "#a2803c"
-      waypoint: 908,100 932,100
-    Flow_Render_Completed:
-      sourceRef: Render
-      targetRef: Completed
-      stroke: "#a2803c"
-      waypoint: 1060,100 1086,100
+    Flow_Cautious_Interference: Allocate_Cautious -> Task_Interference
+    Flow_Impulsive_Interference: Allocate_Impulsive -> Task_Interference
+    Flow_Interference_WorkingMemory: Task_Interference -> Task_WorkingMemory
+    Flow_Failed_Interference: Failed_Interference -> Discontinued
+    Flow_Failed_WorkingMemory: Failed_WorkingMemory -> Discontinued
+    Flow_WorkingMemory_Analysis: Task_WorkingMemory -> Analysis
+    Flow_Analysis_Render: Analysis -> Render
+    Flow_Render_Completed: Render -> Completed
+layout:
+  Enroll:
+    bounds: 20 84 32 32
+    label: 0 120 76 28
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Screening:
+    bounds: 66 66 108 68
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Eligibility_Gateway:
+    bounds: 192 80 40 40
+    isMarkerVisible: true
+    label: 140 26 128 28
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Excluded_Pre:
+    bounds: 198 172 28 28
+    label: 120 204 190 28
+    fill: "#f1d0cd"
+    stroke: "#ac5a54"
+  Randomize_Disposition:
+    bounds: 250 80 40 40
+    isMarkerVisible: true
+    label: 190 120 96 40
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Allocate_Cautious:
+    bounds: 304 6 140 62
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Allocate_Impulsive:
+    bounds: 304 132 140 62
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Prompt_Battery:
+    bounds: 500 4 32 44
+    label: 538 10 128 27
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Task_Interference:
+    bounds: 476 64 124 72
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  In_Prompt_Interference:
+    waypoint: 516,48 516,64
+    stroke: "#5c8a55"
+  Failed_Interference:
+    bounds: 572 122 28 28
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Task_WorkingMemory:
+    bounds: 620 64 124 72
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  Out_Trials_WorkingMemory:
+    waypoint: 680,64 680,44
+    stroke: "#5c8a55"
+  Failed_WorkingMemory:
+    bounds: 716 122 28 28
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Dataset_Trials:
+    bounds: 655 0 50 44
+    label: 709 8 76 14
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Discontinued:
+    bounds: 572 172 28 28
+    label: 490 208 240 28
+    fill: "#f1d0cd"
+    stroke: "#ac5a54"
+  Analysis:
+    bounds: 768 68 140 64
+    font: "#7a67a6"
+    isExpanded: false
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Render:
+    bounds: 932 66 128 68
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Completed:
+    bounds: 1086 84 32 32
+    label: 1060 120 96 28
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Flow_Enroll_Screening:
+    stroke: "#4e6f95"
+  Flow_Screening_Eligibility:
+    stroke: "#4e6f95"
+  Flow_Eligible:
+    waypoint: 232,100 250,100
+    stroke: "#4e6f95"
+  Flow_Excluded_Pre:
+    waypoint: 212,120 212,172
+    label: 176 140 32 14
+    stroke: "#ac5a54"
+  Flow_Allocate_Cautious:
+    waypoint: 290,100 296,100 296,37 304,37
+    label: 236 20 56 14
+    stroke: "#4e6f95"
+  Flow_Allocate_Impulsive:
+    waypoint: 290,100 296,100 296,163 304,163
+    label: 228 168 62 14
+    stroke: "#4e6f95"
+  Flow_Cautious_Interference:
+    waypoint: 444,37 460,37 460,100 476,100
+    stroke: "#5c8a55"
+  Flow_Impulsive_Interference:
+    waypoint: 444,163 460,163 460,100 476,100
+    stroke: "#5c8a55"
+  Flow_Interference_WorkingMemory:
+    waypoint: 600,100 620,100
+    stroke: "#5c8a55"
+  Flow_Failed_Interference:
+    waypoint: 586,150 586,172
+    stroke: "#ac5a54"
+  Flow_Failed_WorkingMemory:
+    waypoint: 730,150 730,186 600,186
+    stroke: "#ac5a54"
+  Flow_WorkingMemory_Analysis:
+    waypoint: 744,100 768,100
+    stroke: "#7a67a6"
+  Flow_Analysis_Render:
+    waypoint: 908,100 932,100
+    stroke: "#a2803c"
+  Flow_Render_Completed:
+    waypoint: 1060,100 1086,100
+    stroke: "#a2803c"
 state:
   _meta:
     prov:

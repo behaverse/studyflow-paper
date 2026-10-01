@@ -22,15 +22,19 @@ The files differ from `example_study.studyflow.yaml` in one line, the Actor's `i
 
 | File | Actor | Protocol digest |
 | --- | --- | --- |
-| `example_study.studyflow.yaml` | `simulate://planted` | `sha256:cf618897260557f1a870df96cdf53823b367791fae0e04e10f6f34715fbfaf19` |
-| `example_study-null.studyflow.yaml` | `simulate://null` | `sha256:22a631fde3feccb698c2ee5eaa3999156c07c3d87902d36ea596ba36f9587afe` |
-| `example_study-gemma4-e2b.studyflow.yaml` | `ollama://gemma4:e2b-mlx` | `sha256:c2866cfabc2b52f64af0b8e8e30a04bf8822d14b5e8eb03a6b07f50af62d1e5d` |
-| `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:f33d6c97592950c93027571df83f8538d612fc5724973959ebfbf9d4fca5133f` |
-| `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:dc6515c392a3f4902673c5df770f51b3ad6b02cbac208d7cd43e4bdea5b26b4c` |
+| `example_study.studyflow.yaml` | `simulate://planted` | `sha256:f5a4afc5a2c39fbfdf75c109e76880b923373ae6400b50d6cbc16a755e40ac93` |
+| `example_study-null.studyflow.yaml` | `simulate://null` | `sha256:3510cfc231f69c5bb76d7426fcdb2a11cad295a660f14aa8b1f7ba0644a98be7` |
+| `example_study-gemma4-e2b.studyflow.yaml` | `ollama://gemma4:e2b-mlx` | `sha256:2f3f89d12b6985701a82dd23b6f1c397a9ad9bc56368d299e247f38533632928` |
+| `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:c5e0e242f0c1b6013fc91662687e1a37e7fa066f398b8cda8bcb994bdcce4732` |
+| `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:9e5b947d350538de52fb98ead1a229fade9c1934931dc5e553349311b79b0380` |
 
-Digests computed on 2026-09-30 with a build of the modeler's `main` after the answer key was kept from the subject
-(the modeler's `simulate` fix, "a subject is never sent a trial's answer"). Any edit to a sealed file changes them,
-and they will change again when the files are re-spelled at the modeler release the paper cites. The planted and null
+Digests computed on 2026-10-01 with a build of the modeler's main at `6389edc1`, where the modeler reads and writes a study as the study model its YAML spells (moddle only reads and writes BPMN XML), after the answer key was kept from
+the subject (the modeler's `simulate` fix, "a subject is never sent a trial's answer") and after the scoring of a
+reply moved into the files: each asking step's data output names, in FEEL, which option a reply gives, and the record
+step counts only an answer that is one of the options. Since the same day a random gateway draws for each subject
+from the seed, the gateway and the subject's number, so the release runs deal the arms differently from the runs of
+2026-09-29. Any edit to the protocol of a sealed file changes them; its spelling does not (the files were re-spelled
+as that build writes them, and their digests, read from the YAML or from the BPMN XML it spells, stayed). The planted and null
 files were run on 2026-09-29, before the key was split off: those runs sent each trial with its answer to the
 simulated participant, which read its answer from it. Told the answer by the stimulus and the rule instead, it gives
 the same answers, so the file run with the key kept apart gives the same trials and results byte for byte; the runs

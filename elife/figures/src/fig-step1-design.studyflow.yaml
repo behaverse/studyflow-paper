@@ -5,49 +5,37 @@ Design_Collaboration:
   type: Collaboration
   name: Step 1 - Design
   documentation: >-
-    Step 1 of the example study (`../study/example_study.studyflow`): the enrolment and allocation phases of the
-    CONSORT participant flow as a complete, runnable fragment, with the study's own element ids and the two
-    phases as the lanes the subjects' pool is divided into. The cohort is one artificial actor family, and it is
-    a system of its own, so it is a black-box pool and the comprehension check crosses the boundary as a message
-    out and a message back. The subjects' pool carries a participant multiplicity of eight, drawn as the
-    three-bar parallel marker at its bottom: the eight subjects are eight independent instances of this one
-    process, each drawing its own allocation, and an exit inside an instance (Excluded_Pre) ends that instance
-    without ending the study. The counts are zero because nothing has run: this is the deposited plan.
+    Step 1 of the example study (`../study/example_study.studyflow`): the enrolment and allocation phases of the CONSORT
+    participant flow as a complete, runnable fragment, with the study's own element ids and the two phases as the lanes
+    the subjects' pool is divided into. The cohort is one artificial actor family, and it is a system of its own, so it
+    is a black-box pool and the comprehension check crosses the boundary as a message out and a message back. The
+    subjects' pool carries a participant multiplicity of eight, drawn as the three-bar parallel marker at its bottom:
+    the eight subjects are eight independent instances of this one process, each drawing its own allocation, and an exit
+    inside an instance (Excluded_Pre) ends that instance without ending the study. The counts are zero because nothing
+    has run: this is the deposited plan.
   participants:
     Participant_Model:
+      type: studyflow:Actor
       name: Language model
-      fill: "#f5f5f4"
-      extensionElements:
-        - type: studyflow:Actor
-          actorType: llm
-          implementation: ollama://gemma4:e2b-mlx
-      bounds: 160 -28 900 168
-      isHorizontal: true
+      actorType: llm
+      implementation: ollama://gemma4:e2b-mlx
     Participant_Design:
       name: Each subject
-      processRef: Design
       participantMultiplicity:
         minimum: 8
         maximum: 8
-      bounds: 160 170 900 600
-      isHorizontal: true
+      processRef: Design
   messageFlows:
     Msg_Screening_Ask:
-      stroke: "#4e6f95"
       name: comprehension check
       sourceRef: Screening
       targetRef: Participant_Model
       messageRef: Request
-      waypoint: 490,290 400,290 400,140
-      label: 396 146 150 14
     Msg_Screening_Answer:
-      stroke: "#4e6f95"
       name: answer
       sourceRef: Participant_Model
       targetRef: Screening
       messageRef: Reply
-      waypoint: 450,140 450,320 490,320
-      label: 326 146 56 14
 Request:
   type: Message
   itemRef: Request_Item
@@ -61,21 +49,17 @@ Reply_Item:
   type: ItemDefinition
   structureRef: agentic:Reply
 Design:
-  type: Process
+  type: studyflow:Study
   name: Step 1 - Design
   documentation: >-
-    `arm` is a property of this process, so each instance of the pool draws and carries its own allocated
-    disposition; the instances do not depend on one another, which is why this is a participant multiplicity and
-    not a loop.
-  extensionElements:
-    - type: studyflow:Study
-      seed: 42
-      runtime: local
-      version: "1.0"
-      authors:
-        - Morteza Ansarinia
-        - Hoorieh Afkari Roshan
-        - Pedro Cardoso-Leite
+    `arm` is a property of this process, so each instance of the pool draws and carries its own allocated disposition;
+    the instances do not depend on one another, which is why this is a participant multiplicity and not a loop.
+  seed: 42
+  authors:
+    - Morteza Ansarinia
+    - Hoorieh Afkari Roshan
+    - Pedro Cardoso-Leite
+  version: "1.0"
   properties:
     P_Arm:
       name: arm
@@ -88,132 +72,81 @@ Design:
       lanes:
         Lane_Enrolment:
           name: Enrolment
-          font: "#5c8a55"
-          fill: "#f0f6ee"
-          stroke: "#5c8a55"
           flowNodeRef:
             - Enroll
             - Screening
             - Eligibility_Gateway
             - Excluded_Pre
-          bounds: 190 170 870 300
         Lane_Allocation:
           name: Allocation
-          font: "#5c8a55"
-          fill: "#f0f6ee"
-          stroke: "#5c8a55"
           flowNodeRef:
             - Randomize_Disposition
             - Allocate_Cautious
             - Allocate_Impulsive
             - Merge_Allocation
             - Ready_For_Battery
-          bounds: 190 470 870 300
   flowElements:
     Enroll:
       type: StartEvent
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: Enrolled and consented
-      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
       onset: T0
-      bounds: 542 200 36 36
-      label: 586 204 150 14
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
     Screening:
-      type: Task
-      font: "#4e6f95"
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
+      type: cognitive:Questionnaire
       name: Assessed for eligibility (n={reached})
       documentation: >-
-        Asks the actor the comprehension check wired into it and takes the answer as its result; the
-        eligibility gateway tests that answer. The exchange is drawn on the step because this figure is about
-        it; in the study file the same exchange is one pair of flows on the pool.
-      extensionElements:
-        - type: cognitive:Questionnaire
-          instrument: comprehension-check
+        Asks the actor the comprehension check wired into it and takes the answer as its result; the eligibility gateway
+        tests that answer. The exchange is drawn on the step because this figure is about it; in the study file the same
+        exchange is one pair of flows on the pool.
+      instrument: comprehension-check
       checklist: |-
         - [ ] Consent recorded
         - [ ] Executor configuration pinned (model id, sampling parameters)
         - [ ] Comprehension check passed
       dataInputAssociations:
         In_Check:
-          stroke: "#4e6f95"
-          sourceRef: [Prompt_Check]
-          waypoint: 700,305 630,305
+          sourceRef:
+            - Prompt_Check
       onset: T0
       duration: 10s
-      bounds: 490 270 140 66
     Prompt_Check:
-      type: DataObjectReference
-      fill: "#eef3f8"
-      stroke: "#4e6f95"
+      type: agentic:Prompt
       name: Comprehension check
-      extensionElements:
-        - type: agentic:Prompt
-          template: |
-            You are about to take part in a short cognitive study. Each trial arrives as JSON and lists the
-            answers the task accepts under ResponseOptions; you answer with exactly one of them and nothing
-            else.
+      template: |
+        You are about to take part in a short cognitive study. Each trial arrives as JSON and lists the
+        answers the task accepts under ResponseOptions; you answer with exactly one of them and nothing
+        else.
 
-            To confirm you have understood, reply now with exactly the single word READY.
-      bounds: 700 280 36 50
-      label: 742 292 110 27
+        To confirm you have understood, reply now with exactly the single word READY.
     Eligibility_Gateway:
-      type: ExclusiveGateway
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
+      type: cognitive:EligibilityGateway
       name: Understood the instructions?
-      extensionElements:
-        - type: cognitive:EligibilityGateway
-          inclusionCriteria:
-            - Registered artificial actor family with a pinned model tag
-            - Comprehension check answered as instructed
-          exclusionCriteria:
-            - No answer, or an answer that does not follow the instruction
+      inclusionCriteria:
+        - Registered artificial actor family with a pinned model tag
+        - Comprehension check answered as instructed
+      exclusionCriteria:
+        - No answer, or an answer that does not follow the instruction
       default: Flow_Excluded_Pre
-      bounds: 535 380 50 50
-      isMarkerVisible: true
-      label: 350 391 178 27
     Excluded_Pre:
       type: EndEvent
       name: "Excluded: did not understand the task (n={reached})"
-      bounds: 800 387 36 36
-      fill: "#f1d0cd"
-      stroke: "#ac5a54"
-      label: 806 425 178 30
     Randomize_Disposition:
-      type: ExclusiveGateway
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
+      type: cognitive:RandomGateway
       name: Which disposition? (n={reached})
       documentation: >-
-        Allocation is concealed: the draw comes from the study seed and the subject identifier, so it cannot
-        be predicted by whoever enrols the subject.
-      extensionElements:
-        - type: cognitive:RandomGateway
-          algorithm: block
-          blockSize: 4
-          allocationRatio: "1:1"
+        Allocation is concealed: the draw comes from the study seed and the subject identifier, so it cannot be
+        predicted by whoever enrols the subject.
+      algorithm: block
+      allocationRatio: "1:1"
       default: Flow_Allocate_Impulsive
-      bounds: 535 500 50 50
-      isMarkerVisible: true
-      label: 594 550 148 28
     Allocate_Cautious:
       type: ServiceTask
-      font: "#4e6f95"
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: Allocated to cautious disposition (n={reached})
       documentation: >-
-        The allocation writes the arm's label into the subject's `arm` property and the instruction that arm
-        receives into `instruction`; the battery's prompt cites the instruction as `{instruction}`, and the label
-        is what the recorded trials and the analysis carry. The implementation is `dict`, so the values a reader
-        sees in the file are the values the subject gets.
-      implementation: python://builtins.dict
-      additionalArguments:
-        arm: cautious
-        instruction: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
+        The allocation writes the arm's label into the subject's `arm` property and the instruction that arm receives
+        into `instruction`; the battery's prompt cites the instruction as `{instruction}`, and the label is what the
+        recorded trials and the analysis carry. The implementation is `dict`, so the values a reader sees in the file
+        are the values the subject gets.
       dataOutputAssociations:
         Out_Arm_Cautious:
           targetRef: P_Arm
@@ -223,17 +156,13 @@ Design:
           transformation: result['instruction']
       onset: T0
       duration: 1s
-      bounds: 265 585 190 72
+      additionalArguments:
+        arm: cautious
+        instruction: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
+      implementation: python://builtins.dict
     Allocate_Impulsive:
       type: ServiceTask
-      font: "#4e6f95"
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: Allocated to impulsive disposition (n={reached})
-      implementation: python://builtins.dict
-      additionalArguments:
-        arm: impulsive
-        instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
       dataOutputAssociations:
         Out_Arm_Impulsive:
           targetRef: P_Arm
@@ -243,73 +172,148 @@ Design:
           transformation: result['instruction']
       onset: T0
       duration: 1s
-      bounds: 645 585 190 72
+      additionalArguments:
+        arm: impulsive
+        instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+      implementation: python://builtins.dict
     Merge_Allocation:
       type: ExclusiveGateway
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
-      bounds: 535 600 50 50
     Ready_For_Battery:
       type: EndEvent
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: Ready for the battery
-      bounds: 542 690 36 36
-      label: 586 694 130 27
-    SF_Start_Screening:
-      stroke: "#4e6f95"
-      sourceRef: Enroll
-      targetRef: Screening
-      waypoint: 560,236 560,270
-    SF_Screening_Eligibility:
-      stroke: "#4e6f95"
-      sourceRef: Screening
-      targetRef: Eligibility_Gateway
-      waypoint: 560,336 560,380
+    SF_Start_Screening: Enroll -> Screening
+    SF_Screening_Eligibility: Screening -> Eligibility_Gateway
     Flow_Eligible:
-      stroke: "#4e6f95"
-      name: "yes (n={reached})"
+      name: yes (n={reached})
       conditionExpression: "'READY' in (Screening or '').upper()"
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Disposition
-      waypoint: 560,430 560,500
-      label: 566 450 70 14
     Flow_Excluded_Pre:
-      name: "no (n={reached})"
+      name: no (n={reached})
       sourceRef: Eligibility_Gateway
       targetRef: Excluded_Pre
-      stroke: "#ac5a54"
-      waypoint: 585,405 800,405
-      label: 660 384 66 14
     Flow_Allocate_Cautious:
-      stroke: "#4e6f95"
       name: cautious (n={reached})
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Cautious
-      waypoint: 535,525 360,525 360,585
-      label: 390 506 90 14
     Flow_Allocate_Impulsive:
-      stroke: "#4e6f95"
       name: impulsive (n={reached})
       sourceRef: Randomize_Disposition
       targetRef: Allocate_Impulsive
-      waypoint: 585,525 740,525 740,585
-      label: 630 506 90 14
-    SF_Cautious_Merge:
-      stroke: "#4e6f95"
-      sourceRef: Allocate_Cautious
-      targetRef: Merge_Allocation
-      waypoint: 455,621 535,621
-    SF_Impulsive_Merge:
-      stroke: "#4e6f95"
-      sourceRef: Allocate_Impulsive
-      targetRef: Merge_Allocation
-      waypoint: 645,621 585,621
-    SF_Merge_Ready:
-      stroke: "#4e6f95"
-      sourceRef: Merge_Allocation
-      targetRef: Ready_For_Battery
-      waypoint: 560,650 560,690
+    SF_Cautious_Merge: Allocate_Cautious -> Merge_Allocation
+    SF_Impulsive_Merge: Allocate_Impulsive -> Merge_Allocation
+    SF_Merge_Ready: Merge_Allocation -> Ready_For_Battery
+layout:
+  Participant_Model:
+    bounds: 160 -28 900 168
+    isHorizontal: true
+    fill: "#f5f5f4"
+  Participant_Design:
+    bounds: 160 170 900 600
+    isHorizontal: true
+  Msg_Screening_Ask:
+    waypoint: 490,290 400,290 400,140
+    label: 396 146 150 14
+    stroke: "#4e6f95"
+  Msg_Screening_Answer:
+    waypoint: 450,140 450,320 490,320
+    label: 326 146 56 14
+    stroke: "#4e6f95"
+  Lane_Enrolment:
+    bounds: 190 170 870 300
+    font: "#5c8a55"
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Lane_Allocation:
+    bounds: 190 470 870 300
+    font: "#5c8a55"
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Enroll:
+    bounds: 542 200 36 36
+    label: 586 204 150 14
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Screening:
+    bounds: 490 270 140 66
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  In_Check:
+    waypoint: 700,305 630,305
+    stroke: "#4e6f95"
+  Prompt_Check:
+    bounds: 700 280 36 50
+    label: 742 292 110 27
+    fill: "#eef3f8"
+    stroke: "#4e6f95"
+  Eligibility_Gateway:
+    bounds: 535 380 50 50
+    isMarkerVisible: true
+    label: 350 391 178 27
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Excluded_Pre:
+    bounds: 800 387 36 36
+    label: 806 425 178 30
+    fill: "#f1d0cd"
+    stroke: "#ac5a54"
+  Randomize_Disposition:
+    bounds: 535 500 50 50
+    isMarkerVisible: true
+    label: 594 550 148 28
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Allocate_Cautious:
+    bounds: 265 585 190 72
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Allocate_Impulsive:
+    bounds: 645 585 190 72
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Merge_Allocation:
+    bounds: 535 600 50 50
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Ready_For_Battery:
+    bounds: 542 690 36 36
+    label: 586 694 130 27
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  SF_Start_Screening:
+    waypoint: 560,236 560,270
+    stroke: "#4e6f95"
+  SF_Screening_Eligibility:
+    waypoint: 560,336 560,380
+    stroke: "#4e6f95"
+  Flow_Eligible:
+    waypoint: 560,430 560,500
+    label: 566 450 70 14
+    stroke: "#4e6f95"
+  Flow_Excluded_Pre:
+    waypoint: 585,405 800,405
+    label: 660 384 66 14
+    stroke: "#ac5a54"
+  Flow_Allocate_Cautious:
+    waypoint: 535,525 360,525 360,585
+    label: 390 506 90 14
+    stroke: "#4e6f95"
+  Flow_Allocate_Impulsive:
+    waypoint: 585,525 740,525 740,585
+    label: 630 506 90 14
+    stroke: "#4e6f95"
+  SF_Cautious_Merge:
+    waypoint: 455,621 535,621
+    stroke: "#4e6f95"
+  SF_Impulsive_Merge:
+    waypoint: 645,621 585,621
+    stroke: "#4e6f95"
+  SF_Merge_Ready:
+    waypoint: 560,650 560,690
+    stroke: "#4e6f95"
 state:
   _meta:
     reached:

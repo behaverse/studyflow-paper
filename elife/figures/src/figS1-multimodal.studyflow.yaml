@@ -2,125 +2,123 @@ id: figS1_multimodal
 definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
 Multimodal_Pipeline:
-  type: Process
+  type: studyflow:Study
+  name: Multimodal preprocessing and training
   documentation: >-
     Figure S1: a use-case pipeline harmonizing EEG, fMRI, and behavioral recordings. Three source datasets feed
-    modality-specific preprocessing (EEGPrep, fMRIPrep, BDM conversion), one after another since a pool walks one
-    path; a compose/expansion step produces a harmonized corpus, then a model is trained on its training split and
-    evaluated on its test split. The implementations are illustrative references, not packages a run installs.
-  extensionElements:
-    - type: studyflow:Study
-  name: Multimodal preprocessing and training
+    modality-specific preprocessing (EEGPrep, fMRIPrep, BDM conversion), one after another since a pool walks one path;
+    a compose/expansion step produces a harmonized corpus, then a model is trained on its training split and evaluated
+    on its test split. The implementations are illustrative references, not packages a run installs.
   flowElements:
     Start:
       type: StartEvent
-      bounds: 322 -40 36 36
     eeg_raw:
-      type: DataStoreReference
-      extensionElements:
-        - type: studyflow:Dataset
-          format: bids
-          bidsDataType: eeg
+      type: studyflow:Dataset
       name: EEG (BIDS)
-      bounds: 120 55 50 50
+      format: bids
+      bidsDataType: eeg
     fmri_raw:
-      type: DataStoreReference
-      extensionElements:
-        - type: studyflow:Dataset
-          format: bids
-          bidsDataType: func
+      type: studyflow:Dataset
       name: fMRI (BIDS)
-      bounds: 120 275 50 50
+      format: bids
+      bidsDataType: func
     beh_raw:
-      type: DataStoreReference
-      extensionElements:
-        - type: behaverse:BDMDataset
-          dataLevel: events
+      type: behaverse:BDMDataset
       name: Behavior (BDM)
-      bounds: 120 475 50 50
     EEGPrep:
       type: ServiceTask
       name: EEGPrep
-      icon: iconify ph--wave-sine
       documentation: Filters, cleans, and normalizes BIDS EEG data (EEGLAB clean_rawdata, ASR, ICA + ICLabel).
-      implementation: docker://sccn/eegprep
+      icon: iconify ph--wave-sine
       dataInputAssociations:
         da_eeg:
-          sourceRef: [eeg_raw]
-      bounds: 280 40 120 80
+          sourceRef:
+            - eeg_raw
+      implementation: docker://sccn/eegprep
     fMRIPrep:
       type: ServiceTask
       name: fMRIPrep
-      icon: iconify ph--brain
       documentation: Preprocesses BIDS fMRI data into normalized, denoised images.
-      implementation: docker://nipreps/fmriprep@23.2.0
+      icon: iconify ph--brain
       dataInputAssociations:
         da_fmri:
-          sourceRef: [fmri_raw]
-      bounds: 280 260 120 80
+          sourceRef:
+            - fmri_raw
+      implementation: docker://nipreps/fmriprep@23.2.0
     BehConv:
       type: ServiceTask
       name: BDM conversion
-      implementation: python://behaverse.to_bdm@1.0
       dataInputAssociations:
         da_beh:
-          sourceRef: [beh_raw]
-      bounds: 280 460 120 80
+          sourceRef:
+            - beh_raw
+      implementation: python://behaverse.to_bdm@1.0
     Compose:
       type: ServiceTask
       name: Compose (multiverse)
-      implementation: python://omniprocess.compose@1.0
       dataOutputAssociations:
         da_harm:
           targetRef: harmonized
-      bounds: 500 260 120 80
+      implementation: python://omniprocess.compose@1.0
     harmonized:
-      type: DataStoreReference
-      extensionElements:
-        - type: behaverse:BDMDataset
-          dataLevel: models
+      type: behaverse:BDMDataset
       name: Harmonized corpus
-      bounds: 535 400 50 50
+      dataLevel: models
     Train:
       type: ServiceTask
       name: Train on the training split
       implementation: python://models.train@1.0
-      bounds: 820 180 120 80
     Evaluate:
       type: ServiceTask
       name: Evaluate on the test split
       implementation: python://models.evaluate@1.0
-      bounds: 820 340 120 80
     Done:
       type: EndEvent
       name: Done
-      bounds: 1030 282 36 36
-      label: 1072 293 30 14
-    m0:
-      sourceRef: Start
-      targetRef: EEGPrep
-      waypoint: 340,-4 340,40
-    m1:
-      sourceRef: EEGPrep
-      targetRef: fMRIPrep
-      waypoint: 340,120 340,260
-    m2:
-      sourceRef: fMRIPrep
-      targetRef: BehConv
-      waypoint: 340,340 340,460
-    m3:
-      sourceRef: BehConv
-      targetRef: Compose
-      waypoint: 400,500 460,500 460,300 500,300
-    m4:
-      sourceRef: Compose
-      targetRef: Train
-      waypoint: 620,300 720,300 720,220 820,220
-    m7:
-      sourceRef: Train
-      targetRef: Evaluate
-      waypoint: 880,260 880,340
-    m8:
-      sourceRef: Evaluate
-      targetRef: Done
-      waypoint: 940,380 1048,380 1048,318
+    m0: Start -> EEGPrep
+    m1: EEGPrep -> fMRIPrep
+    m2: fMRIPrep -> BehConv
+    m3: BehConv -> Compose
+    m4: Compose -> Train
+    m7: Train -> Evaluate
+    m8: Evaluate -> Done
+layout:
+  Start:
+    bounds: 322 -40 36 36
+  eeg_raw:
+    bounds: 120 55 50 50
+  fmri_raw:
+    bounds: 120 275 50 50
+  beh_raw:
+    bounds: 120 475 50 50
+  EEGPrep:
+    bounds: 280 40 120 80
+  fMRIPrep:
+    bounds: 280 260 120 80
+  BehConv:
+    bounds: 280 460 120 80
+  Compose:
+    bounds: 500 260 120 80
+  harmonized:
+    bounds: 535 400 50 50
+  Train:
+    bounds: 820 180 120 80
+  Evaluate:
+    bounds: 820 340 120 80
+  Done:
+    bounds: 1030 282 36 36
+    label: 1072 293 30 14
+  m0:
+    waypoint: 340,-4 340,40
+  m1:
+    waypoint: 340,120 340,260
+  m2:
+    waypoint: 340,340 340,460
+  m3:
+    waypoint: 400,500 460,500 460,300 500,300
+  m4:
+    waypoint: 620,300 720,300 720,220 820,220
+  m7:
+    waypoint: 880,260 880,340
+  m8:
+    waypoint: 940,380 1048,380 1048,318

@@ -2,18 +2,16 @@ id: hedge2018_flanker
 definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
 Hedge2018:
-  type: Process
+  type: studyflow:Study
+  name: Flanker test-retest (Hedge et al. 2018, Study 1)
   documentation: >-
     Hedge, Powell and Sumner (2018), The reliability paradox, Study 1, the flanker task only, encoded from its Methods
     section. Every value is quoted from that section; a value the section does not state is written `unstated`, so the
     encoding counts what a replicator would have to ask for.
-  extensionElements:
-    - type: studyflow:Study
-      authors:
-        - Hedge C
-        - Powell G
-        - Sumner P
-  name: Flanker test-retest (Hedge et al. 2018, Study 1)
+  authors:
+    - Hedge C
+    - Powell G
+    - Sumner P
   properties:
     P_Session:
       name: session
@@ -31,38 +29,41 @@ Hedge2018:
           type: StartEvent
         Flanker:
           type: Task
+          name: Flanker task
           extensionElements:
             - type: cognitive:CognitiveTask
               construct: response inhibition
-          name: Flanker task
           dataInputAssociations:
             In_Flanker_Settings:
               sourceRef:
                 - Flanker_Settings
         Flanker_Settings:
-          type: DataObjectReference
-          extensionElements:
-            - type: studyflow:Parameters
-              values:
-                conditions: [congruent, neutral, incongruent]
-                trialsPerCondition: 240
-                blocks: 5
-                interStimulusInterval: 0.75
-                stimulusDuration: until response
-                responseKeys: [backslash, forward slash]
-                arrowSize: 1 cm
-                flankerSpacing: 0.75 cm
-                blockFeedback: mean RT and error rate
-                trialOrder: unstated
-                randomSeed: unstated
-                practiceTrials: unstated
-                responseDeadline: unstated
-                missedResponse: unstated
-                trialFeedback: unstated
-                trialsPerBlock: unstated
-                viewingDistance: unstated
-                displayRefreshRate: unstated
+          type: studyflow:Parameters
           name: Flanker settings
+          values:
+            conditions:
+              - congruent
+              - neutral
+              - incongruent
+            trialsPerCondition: 240
+            blocks: 5
+            interStimulusInterval: 0.75
+            stimulusDuration: until response
+            responseKeys:
+              - backslash
+              - forward slash
+            arrowSize: 1 cm
+            flankerSpacing: 0.75 cm
+            blockFeedback: mean RT and error rate
+            trialOrder: unstated
+            randomSeed: unstated
+            practiceTrials: unstated
+            responseDeadline: unstated
+            missedResponse: unstated
+            trialFeedback: unstated
+            trialsPerBlock: unstated
+            viewingDistance: unstated
+            displayRefreshRate: unstated
         S_End:
           type: EndEvent
         SF_0: S_Start -> Flanker
@@ -99,19 +100,15 @@ Hedge2018:
     F_0: Enroll -> Session
     F_1: Session -> Retest
     Flow_Done:
+      conditionExpression: state._meta.reached.Session >= 2
       sourceRef: Retest
       targetRef: Accurate
-      conditionExpression: state._meta.reached.Session >= 2
-    Flow_Again:
-      sourceRef: Retest
-      targetRef: Retest_Gap
+    Flow_Again: Retest -> Retest_Gap
     F_2: Retest_Gap -> Session
     Flow_Kept:
+      conditionExpression: accuracy_session_1 >= 0.6 and accuracy_session_2 >= 0.6
       sourceRef: Accurate
       targetRef: Trim
-      conditionExpression: accuracy_session_1 >= 0.6 and accuracy_session_2 >= 0.6
-    Flow_Excluded:
-      sourceRef: Accurate
-      targetRef: Excluded
+    Flow_Excluded: Accurate -> Excluded
     F_3: Trim -> Reliability
     F_4: Reliability -> Analysed

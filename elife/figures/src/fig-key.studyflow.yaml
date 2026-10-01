@@ -5,83 +5,92 @@ Key:
   type: Process
   name: Symbols used in the combined study figure
   documentation: >-
-    The one-row symbol key composed under @fig-combined: eight symbols, each with its plain-language name. Nothing
-    here executes; it is a legend, not a fragment of the study. `render.sh` draws it at the same scale as
-    @fig-combined and `compose_key.py` pastes it under the diagram, so the names print at the size of the figure's
-    own labels. The last symbol is the three-bar parallel marker a pool carries when it runs several instances of its
-    process, which is how the cohort of eight subjects is written; on the pool itself it sits at the foot of the
-    title band with the instance count, `×8`, under it, and here it rides a plain box, because a pool draws its
-    name up its band and so could not carry this caption. The caption carries the
-    two symbols left out for width: `+` marks a sub-process expanded in another figure, and dashed arrows crossing
-    the pool boundary are messages to the model.
+    The one-row symbol key composed under @fig-combined: eight symbols, each with its plain-language name. Nothing here
+    executes; it is a legend, not a fragment of the study. `render.sh` draws it at the same scale as @fig-combined and
+    `compose_key.py` pastes it under the diagram, so the names print at the size of the figure's own labels. The last
+    symbol is the three-bar parallel marker a pool carries when it runs several instances of its process, which is how
+    the cohort of eight subjects is written; on the pool itself it sits at the foot of the title band with the instance
+    count, `×8`, under it, and here it rides a plain box, because a pool draws its name up its band and so could not
+    carry this caption. The caption carries the two symbols left out for width: `+` marks a sub-process expanded in
+    another figure, and dashed arrows crossing the pool boundary are messages to the model.
   flowElements:
     K_Start:
       type: StartEvent
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: start
-      bounds: 34 14 32 32
-      label: 10 52 80 14
     K_Task:
       type: Task
-      font: "#4e6f95"
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
       name: a step
-      bounds: 125 12 80 36
     K_Gateway:
       type: ExclusiveGateway
-      fill: "#dbe6f2"
-      stroke: "#4e6f95"
-      isMarkerVisible: true
       name: a decision
-      bounds: 264 14 32 32
-      label: 236 52 88 14
     K_Exit:
       type: EndEvent
-      fill: "#f1d0cd"
-      stroke: "#ac5a54"
       name: an exit
-      bounds: 379 14 32 32
-      label: 355 52 80 14
     K_Data:
       type: DataObjectReference
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
       name: data a step reads or writes
-      bounds: 496 8 28 40
-      label: 450 52 120 28
     K_Store:
       type: DataStoreReference
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
       name: a dataset
-      bounds: 600 12 36 32
-      label: 573 52 90 14
     K_Boundary_Task:
       type: Task
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
-      bounds: 690 12 60 36
     K_Boundary:
       type: BoundaryEvent
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
       name: an exit rule (boundary event)
       eventDefinitions:
         Cond_Key:
           type: ConditionalEventDefinition
           condition: "{K_Boundary_Task.failedTrialRate} > 0.2"
       attachedToRef: K_Boundary_Task
-      bounds: 734 34 28 28
-      label: 668 66 124 28
     K_Parallel:
       type: Task
-      font: "#5c8a55"
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
       name: a pool, run once per subject
       loopCharacteristics:
         type: MultiInstanceLoopCharacteristics
         loopCardinality: "4"
-      bounds: 800 0 130 62
+layout:
+  K_Start:
+    bounds: 34 14 32 32
+    label: 10 52 80 14
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  K_Task:
+    bounds: 125 12 80 36
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  K_Gateway:
+    bounds: 264 14 32 32
+    isMarkerVisible: true
+    label: 236 52 88 14
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  K_Exit:
+    bounds: 379 14 32 32
+    label: 355 52 80 14
+    fill: "#f1d0cd"
+    stroke: "#ac5a54"
+  K_Data:
+    bounds: 496 8 28 40
+    label: 450 52 120 28
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  K_Store:
+    bounds: 600 12 36 32
+    label: 573 52 90 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  K_Boundary_Task:
+    bounds: 690 12 60 36
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  K_Boundary:
+    bounds: 734 34 28 28
+    label: 668 66 124 28
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  K_Parallel:
+    bounds: 800 0 130 62
+    font: "#5c8a55"
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"

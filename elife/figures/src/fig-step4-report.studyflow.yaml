@@ -5,136 +5,138 @@ Report_Collaboration:
   type: Collaboration
   name: Step 4 - Report
   documentation: >-
-    Step 4 of the example study (`../study/example_study.studyflow`): everything the study does for reporting,
-    with the study's own element ids, and in the two pools the study itself uses, because the two halves run on
-    different beats. In the subjects' pool, once per subject, a debrief closes the session and the instance ends
-    at `Completed the protocol`; the pool carries the parallel marker for its eight instances. In the analysis and
-    report pool, once, after the analysis, a manual activity renders the reporting artifacts from the results
-    dataset and the study ends at `Completed`. The render is manual on purpose — a person reads the figures
-    before they go into the manuscript — and nothing else is added for reporting: the CONSORT flow (@fig-consort),
-    the SPIRIT schedule, the checklist and the provenance record (@fig-views) are views of this same file. The
-    counts are zero because nothing has run: this is the deposited plan.
+    Step 4 of the example study (`../study/example_study.studyflow`): everything the study does for reporting, with the
+    study's own element ids, and in the two pools the study itself uses, because the two halves run on different beats.
+    In the subjects' pool, once per subject, a debrief closes the session and the instance ends at `Completed the
+    protocol`; the pool carries the parallel marker for its eight instances. In the analysis and report pool, once,
+    after the analysis, a manual activity renders the reporting artifacts from the results dataset and the study ends at
+    `Completed`. The render is manual on purpose — a person reads the figures before they go into the manuscript — and
+    nothing else is added for reporting: the CONSORT flow (@fig-consort), the SPIRIT schedule, the checklist and the
+    provenance record (@fig-views) are views of this same file. The counts are zero because nothing has run: this is the
+    deposited plan.
   extensionElements:
     - type: studyflow:Study
       seed: 42
-      runtime: local
   participants:
     Participant_Subject:
       name: Each subject
-      processRef: Subject_Report
-      fill: "#faf4e6"
       participantMultiplicity:
         minimum: 8
         maximum: 8
-      bounds: 160 40 560 180
-      isHorizontal: true
+      processRef: Subject_Report
     Participant_Analysis:
       name: Analysis and report
       processRef: Report
-      fill: "#faf4e6"
-      bounds: 160 270 560 200
-      isHorizontal: true
 Subject_Report:
   type: Process
   name: Each subject, at the end of its session
   flowElements:
     Battery_Done:
       type: StartEvent
-      fill: "#f6e8c9"
-      stroke: "#a2803c"
       name: Battery complete
-      bounds: 230 110 36 36
-      label: 202 152 92 27
     Debrief:
-      type: Task
-      font: "#a2803c"
-      fill: "#f6e8c9"
-      stroke: "#a2803c"
+      type: cognitive:Instruction
       name: Debrief
-      extensionElements:
-        - type: cognitive:Instruction
-          content: >-
-            The session is over. Thank you for taking part; nothing further is asked of you.
+      content: The session is over. Thank you for taking part; nothing further is asked of you.
       onset: T0+80s
       duration: 1s
-      bounds: 330 90 160 70
     Sub_End:
       type: EndEvent
-      fill: "#f6e8c9"
-      stroke: "#a2803c"
       name: Completed the protocol (n={reached})
-      bounds: 560 112 36 36
-      label: 506 154 140 28
-    SF_Battery_Debrief:
-      sourceRef: Battery_Done
-      targetRef: Debrief
-      stroke: "#a2803c"
-      waypoint: 266,128 330,128
-    SF_Debrief_End:
-      sourceRef: Debrief
-      targetRef: Sub_End
-      stroke: "#a2803c"
-      waypoint: 490,130 560,130
+    SF_Battery_Debrief: Battery_Done -> Debrief
+    SF_Debrief_End: Debrief -> Sub_End
 Report:
   type: Process
   name: Once, after the analysis
   flowElements:
     R_Start:
       type: StartEvent
-      fill: "#f6e8c9"
-      stroke: "#a2803c"
       name: Analyzed
-      bounds: 230 390 36 36
-      label: 214 432 72 14
     Render:
       type: ManualTask
-      font: "#a2803c"
-      fill: "#f6e8c9"
-      stroke: "#a2803c"
       name: Render the report
       documentation: >-
-        Not automated on purpose: `figures/src/render.sh` in the paper repository draws these from the executed
-        copy of the study file, and a person reads them before they go into the manuscript.
+        Not automated on purpose: `figures/src/render.sh` in the paper repository draws these from the executed copy of
+        the study file, and a person reads them before they go into the manuscript.
       checklist: |-
         - [ ] CONSORT participant flow exported from the Figure view
         - [ ] SPIRIT schedule exported from the Gantt view
         - [ ] CHART items recorded from the run provenance
-      onset: T0+7min
-      duration: 2min
       dataInputAssociations:
         In_Results:
-          stroke: "#a2803c"
-          sourceRef: [Dataset_Results]
-          waypoint: 395,340 395,372
-      bounds: 330 372 170 72
+          sourceRef:
+            - Dataset_Results
+      onset: T0+7min
+      duration: 2min
     Completed:
       type: EndEvent
-      fill: "#f6e8c9"
-      stroke: "#a2803c"
       name: Study complete
-      bounds: 580 392 36 36
-      label: 540 434 116 14
     Dataset_Results:
-      type: DataStoreReference
-      fill: "#faf4e6"
-      stroke: "#a2803c"
+      type: studyflow:Dataset
       name: Results
+      format: psych-ds
       uri: results/
-      extensionElements:
-        - type: studyflow:Dataset
-          format: psych-ds
-      bounds: 370 290 50 50
-      label: 426 306 110 14
-    Flow_Analyzed_Render:
-      sourceRef: R_Start
-      targetRef: Render
-      stroke: "#a2803c"
-      waypoint: 266,408 330,408
-    Flow_Render_Completed:
-      sourceRef: Render
-      targetRef: Completed
-      stroke: "#a2803c"
-      waypoint: 500,408 580,408
+    Flow_Analyzed_Render: R_Start -> Render
+    Flow_Render_Completed: Render -> Completed
+layout:
+  Participant_Subject:
+    bounds: 160 40 560 180
+    isHorizontal: true
+    fill: "#faf4e6"
+  Participant_Analysis:
+    bounds: 160 270 560 200
+    isHorizontal: true
+    fill: "#faf4e6"
+  Battery_Done:
+    bounds: 230 110 36 36
+    label: 202 152 92 27
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Debrief:
+    bounds: 330 90 160 70
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Sub_End:
+    bounds: 560 112 36 36
+    label: 506 154 140 28
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  SF_Battery_Debrief:
+    waypoint: 266,128 330,128
+    stroke: "#a2803c"
+  SF_Debrief_End:
+    waypoint: 490,130 560,130
+    stroke: "#a2803c"
+  R_Start:
+    bounds: 230 390 36 36
+    label: 214 432 72 14
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Render:
+    bounds: 330 372 170 72
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  In_Results:
+    waypoint: 395,340 395,372
+    stroke: "#a2803c"
+  Completed:
+    bounds: 580 392 36 36
+    label: 540 434 116 14
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Dataset_Results:
+    bounds: 370 290 50 50
+    label: 426 306 110 14
+    fill: "#faf4e6"
+    stroke: "#a2803c"
+  Flow_Analyzed_Render:
+    waypoint: 266,408 330,408
+    stroke: "#a2803c"
+  Flow_Render_Completed:
+    waypoint: 500,408 580,408
+    stroke: "#a2803c"
 state:
   _meta:
     reached:

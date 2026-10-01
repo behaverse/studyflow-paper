@@ -2,136 +2,152 @@ id: step3_decision
 definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
 Decide:
-  type: Process
+  type: studyflow:Study
   name: Step 3 - A question decided
   documentation: >-
-    One of the two questions of the example study's analysis (`../study/example_study.studyflow`), its
-    `Congruency` sub-process expanded and otherwise unchanged: the same element ids and arguments. The data shaping
-    stays collapsed; what is drawn is the decision. A feasibility gateway sends a cohort too small for the test to
-    the Not testable end; otherwise the one-sided t test runs and the decision gateway compares its p value with
-    the alpha of the decision rules, ending at Supported or Not supported. Every number the two gateways read sits
-    in the Decision rules object, wired in once; the executed copy records which end was reached.
-  extensionElements:
-    - type: studyflow:Study
-      seed: 42
-      runtime: local
-      dependencies:
-        - pandas==2.3.3
-        - scipy==1.16.2
+    One of the two questions of the example study's analysis (`../study/example_study.studyflow`), its `Congruency`
+    sub-process expanded and otherwise unchanged: the same element ids and arguments. The data shaping stays collapsed;
+    what is drawn is the decision. A feasibility gateway sends a cohort too small for the test to the Not testable end;
+    otherwise the one-sided t test runs and the decision gateway compares its p value with the alpha of the decision
+    rules, ending at Supported or Not supported. Every number the two gateways read sits in the Decision rules object,
+    wired in once; the executed copy records which end was reached.
+  seed: 42
+  dependencies:
+    - pandas==2.3.3
+    - scipy==1.16.2
   properties:
-    trials: { name: trials }
+    trials:
+      name: trials
   flowElements:
     Decision_Rules:
-      type: DataObjectReference
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
+      type: studyflow:Parameters
       name: Decision rules
       documentation: >-
-        The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of
-        every test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm
-        test needs, four being the smallest arms for which shuffling labels across subjects can reach p < .05;
-        the permutations the divergence test draws.
-      extensionElements:
-        - type: studyflow:Parameters
-          values:
-            alpha: 0.05
-            min_subjects: 3
-            min_per_arm: 4
-            n_permutations: 1000
-      bounds: 60 20 36 50
-      label: 102 32 90 14
+        The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of every
+        test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm test needs,
+        four being the smallest arms for which shuffling labels across subjects can reach p < .05; the permutations the
+        divergence test draws.
+      values:
+        alpha: 0.05
+        min_subjects: 3
+        min_per_arm: 4
+        n_permutations: 1000
     Congruency:
       type: SubProcess
       name: Congruency effect
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
       properties:
-        by_congruency: { name: by_congruency }
-        accuracy_congruent: { name: accuracy_congruent }
-        accuracy_incongruent: { name: accuracy_incongruent }
-        congruency_costs: { name: congruency_costs }
-        congruency_n: { name: congruency_n }
-        congruency_test: { name: congruency_test }
+        by_congruency:
+          name: by_congruency
+        accuracy_congruent:
+          name: accuracy_congruent
+        accuracy_incongruent:
+          name: accuracy_incongruent
+        congruency_costs:
+          name: congruency_costs
+        congruency_n:
+          name: congruency_n
+        congruency_test:
+          name: congruency_test
       dataInputAssociations:
         In_Rules_C:
-          sourceRef: [Decision_Rules]
-          waypoint: 78,70 78,100
-      bounds: 40 100 820 260
-      isExpanded: true
+          sourceRef:
+            - Decision_Rules
       flowElements:
         C_Start:
           type: StartEvent
-          fill: "#e6dff1"
-          stroke: "#7a67a6"
-          bounds: 70 197 36 36
         Cost_Per_Subject:
           type: SubProcess
           name: Accuracy cost per subject
           documentation: >-
-            The descriptive table by disposition and congruency, written out as it stands; then, per subject,
-            the mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have
-            both.
+            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the mean
+            accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
           flowElements:
             CP_Start:
               type: StartEvent
             Congruency_Table:
               type: ServiceTask
               name: Accuracy and latency by congruency
-              implementation: python://pandas.DataFrame.pivot_table
-              additionalArguments:
-                index: ["context.state.arm", "trialContext.congruency"]
-                values: ["result.isCorrect", "trialContext.trial.timeInTrial"]
-                aggfunc: mean
               dataInputAssociations:
-                In_Trials_C: { sourceRef: [trials], transformation: self }
+                In_Trials_C:
+                  sourceRef:
+                    - trials
+                  transformation: self
               dataOutputAssociations:
-                Out_Congruency: { targetRef: File_Congruency }
+                Out_Congruency:
+                  targetRef: File_Congruency
+              additionalArguments:
+                index:
+                  - context.state.arm
+                  - trialContext.congruency
+                values:
+                  - result.isCorrect
+                  - trialContext.trial.timeInTrial
+                aggfunc: mean
+              implementation: python://pandas.DataFrame.pivot_table
             By_Congruency:
               type: ServiceTask
               name: Accuracy, one column per congruency
-              implementation: python://pandas.DataFrame.pivot_table
-              additionalArguments:
-                index: "context.subject"
-                columns: "trialContext.congruency"
-                values: "result.isCorrect"
-                aggfunc: mean
               dataInputAssociations:
-                In_Trials_BC: { sourceRef: [trials], transformation: self }
+                In_Trials_BC:
+                  sourceRef:
+                    - trials
+                  transformation: self
               dataOutputAssociations:
-                Out_BC: { targetRef: by_congruency }
+                Out_BC:
+                  targetRef: by_congruency
+              additionalArguments:
+                index: context.subject
+                columns: trialContext.congruency
+                values: result.isCorrect
+                aggfunc: mean
+              implementation: python://pandas.DataFrame.pivot_table
             Accuracy_Incongruent:
               type: ServiceTask
               name: Incongruent accuracies
-              implementation: python://pandas.DataFrame.get
+              dataInputAssociations:
+                In_BC_I:
+                  sourceRef:
+                    - by_congruency
+                  transformation: self
+              dataOutputAssociations:
+                Out_Incongruent:
+                  targetRef: accuracy_incongruent
               additionalArguments:
                 key: Incongruent
-              dataInputAssociations:
-                In_BC_I: { sourceRef: [by_congruency], transformation: self }
-              dataOutputAssociations:
-                Out_Incongruent: { targetRef: accuracy_incongruent }
+              implementation: python://pandas.DataFrame.get
             Accuracy_Congruent:
               type: ServiceTask
               name: Congruent accuracies
-              implementation: python://pandas.DataFrame.get
+              dataInputAssociations:
+                In_BC_C:
+                  sourceRef:
+                    - by_congruency
+                  transformation: self
+              dataOutputAssociations:
+                Out_Congruent:
+                  targetRef: accuracy_congruent
               additionalArguments:
                 key: Congruent
-              dataInputAssociations:
-                In_BC_C: { sourceRef: [by_congruency], transformation: self }
-              dataOutputAssociations:
-                Out_Congruent: { targetRef: accuracy_congruent }
+              implementation: python://pandas.DataFrame.get
             Cost:
               type: ServiceTask
               name: Congruency cost per subject
-              implementation: python://pandas.Series.sub
               dataInputAssociations:
-                In_Cost_C: { sourceRef: [accuracy_congruent], transformation: self }
-                In_Cost_I: { sourceRef: [accuracy_incongruent], transformation: other }
+                In_Cost_C:
+                  sourceRef:
+                    - accuracy_congruent
+                  transformation: self
+                In_Cost_I:
+                  sourceRef:
+                    - accuracy_incongruent
+                  transformation: other
               dataOutputAssociations:
-                Out_Costs: { targetRef: congruency_costs }
+                Out_Costs:
+                  targetRef: congruency_costs
                 Out_Cost_N:
                   targetRef: congruency_n
                   transformation: result.count().item()
+              implementation: python://pandas.Series.sub
             File_Congruency:
               type: DataObjectReference
               name: Congruency table
@@ -144,68 +160,40 @@ Decide:
             CPF_3: Accuracy_Congruent -> Accuracy_Incongruent
             CPF_4: Accuracy_Incongruent -> Cost
             CPF_5: Cost -> CP_End
-          font: "#7a67a6"
-          fill: "#e6dff1"
-          stroke: "#7a67a6"
-          bounds: 140 180 150 70
-          isExpanded: false
         Enough_Subjects:
           type: ExclusiveGateway
           name: Enough subjects?
           default: C_Enough
-          fill: "#e6dff1"
-          stroke: "#7a67a6"
-          bounds: 330 190 50 50
-          isMarkerVisible: true
-          label: 305 160 100 14
         Cost_Test:
           type: ServiceTask
           name: One-sided t test
-          implementation: python://scipy.stats.ttest_1samp
-          additionalArguments:
-            popmean: 0
-            alternative: greater
-            nan_policy: omit
           dataInputAssociations:
-            In_Costs: { sourceRef: [congruency_costs], transformation: a }
+            In_Costs:
+              sourceRef:
+                - congruency_costs
+              transformation: a
           dataOutputAssociations:
             Out_Cost_Test:
               targetRef: congruency_test
               transformation: "{'statistic': result.statistic, 'pvalue': result.pvalue}"
-          font: "#7a67a6"
-          fill: "#e6dff1"
-          stroke: "#7a67a6"
-          bounds: 440 180 150 70
+          additionalArguments:
+            popmean: 0
+            alternative: greater
+            nan_policy: omit
+          implementation: python://scipy.stats.ttest_1samp
         Congruency_Decision:
           type: ExclusiveGateway
           name: Less accurate when incongruent?
           default: C_No
-          fill: "#e6dff1"
-          stroke: "#7a67a6"
-          bounds: 640 190 50 50
-          isMarkerVisible: true
-          label: 580 160 170 14
         C_Supported:
           type: EndEvent
           name: Supported
-          fill: "#e6dff1"
-          stroke: "#7a67a6"
-          bounds: 770 197 36 36
-          label: 758 239 60 14
         C_Not_Supported:
           type: EndEvent
           name: Not supported
-          fill: "#e6dff1"
-          stroke: "#7a67a6"
-          bounds: 647 290 36 36
-          label: 626 332 78 14
         C_Not_Testable:
           type: EndEvent
           name: Not testable
-          fill: "#e6dff1"
-          stroke: "#7a67a6"
-          bounds: 337 290 36 36
-          label: 320 332 70 14
         CF_0: C_Start -> Cost_Per_Subject
         CF_1: Cost_Per_Subject -> Enough_Subjects
         C_Too_Few:
@@ -213,28 +201,88 @@ Decide:
           conditionExpression: congruency_n < min_subjects
           sourceRef: Enough_Subjects
           targetRef: C_Not_Testable
-          waypoint: 355,240 355,290
-          label: 360 258 44 14
         C_Enough:
           name: enough
           sourceRef: Enough_Subjects
           targetRef: Cost_Test
-          waypoint: 380,215 440,215
-          label: 388 196 44 14
         CF_2: Cost_Test -> Congruency_Decision
         C_Yes:
           name: "yes"
           conditionExpression: congruency_test['pvalue'] < alpha
           sourceRef: Congruency_Decision
           targetRef: C_Supported
-          waypoint: 690,215 770,215
-          label: 704 196 24 14
         C_No:
           name: "no"
           sourceRef: Congruency_Decision
           targetRef: C_Not_Supported
-          waypoint: 665,240 665,290
-          label: 670 258 20 14
+layout:
+  Decision_Rules:
+    bounds: 60 20 36 50
+    label: 102 32 90 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Congruency:
+    bounds: 40 100 820 260
+    font: "#7a67a6"
+    isExpanded: true
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  In_Rules_C:
+    waypoint: 78,70 78,100
+  C_Start:
+    bounds: 70 197 36 36
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Cost_Per_Subject:
+    bounds: 140 180 150 70
+    font: "#7a67a6"
+    isExpanded: false
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Enough_Subjects:
+    bounds: 330 190 50 50
+    isMarkerVisible: true
+    label: 305 160 100 14
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Cost_Test:
+    bounds: 440 180 150 70
+    font: "#7a67a6"
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Congruency_Decision:
+    bounds: 640 190 50 50
+    isMarkerVisible: true
+    label: 580 160 170 14
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  C_Supported:
+    bounds: 770 197 36 36
+    label: 758 239 60 14
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  C_Not_Supported:
+    bounds: 647 290 36 36
+    label: 626 332 78 14
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  C_Not_Testable:
+    bounds: 337 290 36 36
+    label: 320 332 70 14
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  C_Too_Few:
+    waypoint: 355,240 355,290
+    label: 360 258 44 14
+  C_Enough:
+    waypoint: 380,215 440,215
+    label: 388 196 44 14
+  C_Yes:
+    waypoint: 690,215 770,215
+    label: 704 196 24 14
+  C_No:
+    waypoint: 665,240 665,290
+    label: 670 258 20 14
 state:
   _meta:
     reached:

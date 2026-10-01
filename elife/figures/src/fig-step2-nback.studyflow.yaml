@@ -2,297 +2,165 @@ id: step2_nback
 definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
 NBack:
-  type: Process
+  type: studyflow:Study
   name: The n-back, drawn out and collapsed
   documentation: >-
-    The example study's second task at two grains. Above, one trial as an explicit sub-process repeated
-    fifty-six times: a stimulus activity reading its timings from a Parameters element, a boundary timer that
-    closes the response window, labelled match and non-match branches, and a timer for the inter-stimulus
-    interval. Below, the same two test blocks collapsed into the single Behaverse task the study actually wires
-    (`NB` / `XCIT_NB_01`, two test blocks of twenty-eight digits, after three tutorial blocks and a practice block
-    the drawing omits), configured by the same Parameters element — the `Bot:`
-    block, which is how the build plays for an actor that is not a person and where every timing above comes
-    from. The runner expands the collapsed task into the trials drawn above. The durations in that block are
-    engine-scaled seconds: the bot runs the engine clock twenty times faster, so the twenty-second response
-    window is one real second, which is what a local model needs to answer. The trial sub-process carries a
-    standard loop marker, not the parallel multi-instance marker the study's `Subject` carries: an n-back trial
-    is answered against the digit before it, so the trials depend on one another and the subjects do not.
-  extensionElements:
-    - type: studyflow:Study
-      seed: 42
-      runtime: local
+    The example study's second task at two grains. Above, one trial as an explicit sub-process repeated fifty-six times:
+    a stimulus activity reading its timings from a Parameters element, a boundary timer that closes the response window,
+    labelled match and non-match branches, and a timer for the inter-stimulus interval. Below, the same two test blocks
+    collapsed into the single Behaverse task the study actually wires (`NB` / `XCIT_NB_01`, two test blocks of
+    twenty-eight digits, after three tutorial blocks and a practice block the drawing omits), configured by the same
+    Parameters element — the `Bot:` block, which is how the build plays for an actor that is not a person and where
+    every timing above comes from. The runner expands the collapsed task into the trials drawn above. The durations in
+    that block are engine-scaled seconds: the bot runs the engine clock twenty times faster, so the twenty-second
+    response window is one real second, which is what a local model needs to answer. The trial sub-process carries a
+    standard loop marker, not the parallel multi-instance marker the study's `Subject` carries: an n-back trial is
+    answered against the digit before it, so the trials depend on one another and the subjects do not.
+  seed: 42
   flowElements:
     A_Start:
       type: StartEvent
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
       name: Begin block
-      bounds: 178 187 36 36
     Trial:
       type: SubProcess
-      font: "#5c8a55"
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
       name: "Trial (repeated 56 times: two test blocks of 28)"
       loopCharacteristics:
         type: StandardLoopCharacteristics
         loopCondition: state._meta.reached.Trial < 56
         loopMaximum: 56
-      bounds: 240 80 720 240
-      isExpanded: true
       flowElements:
         T_Start:
           type: StartEvent
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
-          bounds: 258 187 36 36
         Present:
           type: Task
-          font: "#5c8a55"
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
           name: Present digit (0.3 s)
           dataInputAssociations:
             In_Params:
-              stroke: "#5c8a55"
-              sourceRef: [Params_NBack]
-              waypoint: 390,145 390,165
-          bounds: 320 165 130 80
+              sourceRef:
+                - Params_NBack
         Response_Window:
           type: BoundaryEvent
-          fill: "#f0f6ee"
-          stroke: "#5c8a55"
-          name: "Response window (20 s scaled, 1 s real)"
+          name: Response window (20 s scaled, 1 s real)
           eventDefinitions:
             Timer_RW:
               type: TimerEventDefinition
               timeDuration: PT20S
           attachedToRef: Present
-          bounds: 422 227 36 36
-          label: 300 254 116 27
         Match:
           type: ExclusiveGateway
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
           name: same digit as the one before?
-          bounds: 485 180 50 50
-          label: 448 236 130 27
         Target:
           type: Task
-          font: "#5c8a55"
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
           name: "Match: record hit or miss"
-          bounds: 610 100 150 55
         NonTarget:
           type: Task
-          font: "#5c8a55"
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
           name: "NonMatch: record correct rejection or false alarm"
-          bounds: 610 175 150 60
         Timeout:
           type: Task
-          font: "#5c8a55"
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
           name: Record a missed trial
-          bounds: 610 254 150 46
         Merge:
           type: ExclusiveGateway
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
-          bounds: 790 180 50 50
         ISI:
           type: IntermediateCatchEvent
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
           name: Inter-stimulus interval (0.3 s)
           eventDefinitions:
             Timer_ISI:
               type: TimerEventDefinition
               timeDuration: PT0.3S
-          bounds: 860 187 36 36
-          label: 820 228 116 27
         T_End:
           type: EndEvent
-          fill: "#dcebd6"
-          stroke: "#5c8a55"
-          bounds: 915 187 36 36
-        TF_1:
-          sourceRef: T_Start
-          targetRef: Present
-          stroke: "#5c8a55"
-        TF_2:
-          sourceRef: Present
-          targetRef: Match
-          stroke: "#5c8a55"
+        TF_1: T_Start -> Present
+        TF_2: Present -> Match
         TF_Target:
-          stroke: "#5c8a55"
           name: match
           sourceRef: Match
           targetRef: Target
-          waypoint: 510,180 510,127 610,127
-          label: 518 110 44 14
         TF_NonTarget:
-          stroke: "#5c8a55"
           name: non-match
           sourceRef: Match
           targetRef: NonTarget
-          waypoint: 535,205 610,205
-          label: 538 188 70 14
-        TF_Timeout:
-          stroke: "#5c8a55"
-          sourceRef: Response_Window
-          targetRef: Timeout
-          waypoint: 440,263 440,277 610,277
-        TF_Target_Merge:
-          stroke: "#5c8a55"
-          sourceRef: Target
-          targetRef: Merge
-          waypoint: 760,127 815,127 815,180
-        TF_NonTarget_Merge:
-          sourceRef: NonTarget
-          targetRef: Merge
-          stroke: "#5c8a55"
-        TF_Timeout_Merge:
-          stroke: "#5c8a55"
-          sourceRef: Timeout
-          targetRef: Merge
-          waypoint: 760,277 815,277 815,230
-        TF_Merge_ISI:
-          sourceRef: Merge
-          targetRef: ISI
-          stroke: "#5c8a55"
-        TF_ISI_End:
-          sourceRef: ISI
-          targetRef: T_End
-          stroke: "#5c8a55"
+        TF_Timeout: Response_Window -> Timeout
+        TF_Target_Merge: Target -> Merge
+        TF_NonTarget_Merge: NonTarget -> Merge
+        TF_Timeout_Merge: Timeout -> Merge
+        TF_Merge_ISI: Merge -> ISI
+        TF_ISI_End: ISI -> T_End
     A_End:
       type: EndEvent
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
       name: Block complete
-      bounds: 990 187 36 36
     Params_NBack:
-      type: DataObjectReference
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
+      type: studyflow:Parameters
       name: Task settings (1-back)
-      extensionElements:
-        - type: studyflow:Parameters
-          values:
-            Bot:
-              Speed: 20
-              SkipInstructions: true
-              AutoClickInstructions: true
-              SkipFocusArea: true
-              overrideUserInputParameters: true
-              playerPaced: true
-              useNonMatchButton: true
-              maxResponseTime: 20
-              OverrideTemporalParameters: true
-              StimulusDisplayDuration: 0.3
-              InterStimulusInterval: 0.3
-              TrialForeperiod: 0.1
-      bounds: 372 95 36 50
-      label: 414 108 110 27
-    AF_1:
-      sourceRef: A_Start
-      targetRef: Trial
-      stroke: "#5c8a55"
-    AF_2:
-      sourceRef: Trial
-      targetRef: A_End
-      stroke: "#5c8a55"
+      values:
+        Bot:
+          Speed: 20
+          SkipInstructions: true
+          AutoClickInstructions: true
+          SkipFocusArea: true
+          overrideUserInputParameters: true
+          playerPaced: true
+          useNonMatchButton: true
+          maxResponseTime: 20
+          OverrideTemporalParameters: true
+          StimulusDisplayDuration: 0.3
+          InterStimulusInterval: 0.3
+          TrialForeperiod: 0.1
+    AF_1: A_Start -> Trial
+    AF_2: Trial -> A_End
     B_Start:
       type: StartEvent
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
       name: Begin battery
-      bounds: 178 432 36 36
     Task_WorkingMemory:
-      type: ChoreographyTask
-      font: "#5c8a55"
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
+      type: behaverse:Task
       name: Working memory (1-back)
-      extensionElements:
-        - type: behaverse:Task
-          instrument: NB
-          timeline: XCIT_NB_01
+      instrument: NB
+      timeline: XCIT_NB_01
       dataInputAssociations:
         In_Pace_WorkingMemory:
-          stroke: "#5c8a55"
-          sourceRef: [Bot_Pace_NB]
-          waypoint: 276,515 276,490
+          sourceRef:
+            - Bot_Pace_NB
       dataOutputAssociations:
         Out_Trials_WorkingMemory:
-          stroke: "#5c8a55"
           targetRef: Dataset_Trials
-          waypoint: 355,490 355,515
-      bounds: 240 410 150 80
     Bot_Pace_NB:
-      type: DataObjectReference
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
+      type: studyflow:Parameters
       name: Task settings (1-back)
       documentation: >-
-        The whole block the study wires into the task: the stream waits for the actor instead of running on a
-        fixed clock, which is what lets a model take it at all, and its stimulus, interval and foreperiod are
-        compressed. It defines no block and no timeline; the protocol is the instrument and the timeline alone,
-        and the trials are the timeline's own, in order.
-      extensionElements:
-        - type: studyflow:Parameters
-          values:
-            Bot:
-              Speed: 20
-              SkipInstructions: true
-              AutoClickInstructions: true
-              SkipFocusArea: true
-              overrideUserInputParameters: true
-              playerPaced: true
-              useNonMatchButton: true
-              maxResponseTime: 20
-              OverrideTemporalParameters: true
-              StimulusDisplayDuration: 0.3
-              InterStimulusInterval: 0.3
-              TrialForeperiod: 0.1
-      bounds: 258 515 36 50
-      label: 165 527 88 27
+        The whole block the study wires into the task: the stream waits for the actor instead of running on a fixed
+        clock, which is what lets a model take it at all, and its stimulus, interval and foreperiod are compressed. It
+        defines no block and no timeline; the protocol is the instrument and the timeline alone, and the trials are the
+        timeline's own, in order.
+      values:
+        Bot:
+          Speed: 20
+          SkipInstructions: true
+          AutoClickInstructions: true
+          SkipFocusArea: true
+          overrideUserInputParameters: true
+          playerPaced: true
+          useNonMatchButton: true
+          maxResponseTime: 20
+          OverrideTemporalParameters: true
+          StimulusDisplayDuration: 0.3
+          InterStimulusInterval: 0.3
+          TrialForeperiod: 0.1
     Dataset_Trials:
-      type: DataStoreReference
-      fill: "#f0f6ee"
-      stroke: "#5c8a55"
+      type: behaverse:BDMDataset
       name: Trials
+      dataLevel: trials
       uri: data/trials.jsonl
-      extensionElements:
-        - type: behaverse:BDMDataset
-          dataLevel: trials
-      bounds: 330 515 50 50
     B_End:
       type: EndEvent
-      fill: "#dcebd6"
-      stroke: "#5c8a55"
       name: Battery complete
-      bounds: 440 432 36 36
-    BF_1:
-      sourceRef: B_Start
-      targetRef: Task_WorkingMemory
-      stroke: "#5c8a55"
-    BF_2:
-      sourceRef: Task_WorkingMemory
-      targetRef: B_End
-      stroke: "#5c8a55"
+    BF_1: B_Start -> Task_WorkingMemory
+    BF_2: Task_WorkingMemory -> B_End
   artifacts:
     Group_A:
       type: Group
       categoryValueRef: CV_A
-      bounds: 160 40 890 310
     Group_B:
       type: Group
       categoryValueRef: CV_B
-      bounds: 160 370 890 220
 Category_A:
   type: Category
   categoryValue:
@@ -303,3 +171,140 @@ Category_B:
   categoryValue:
     CV_B:
       value: The same two test blocks, collapsed into the task the study wires
+layout:
+  A_Start:
+    bounds: 178 187 36 36
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  Trial:
+    bounds: 240 80 720 240
+    font: "#5c8a55"
+    isExpanded: true
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  T_Start:
+    bounds: 258 187 36 36
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  Present:
+    bounds: 320 165 130 80
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  In_Params:
+    waypoint: 390,145 390,165
+    stroke: "#5c8a55"
+  Response_Window:
+    bounds: 422 227 36 36
+    label: 300 254 116 27
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Match:
+    bounds: 485 180 50 50
+    label: 448 236 130 27
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  Target:
+    bounds: 610 100 150 55
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  NonTarget:
+    bounds: 610 175 150 60
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  Timeout:
+    bounds: 610 254 150 46
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  Merge:
+    bounds: 790 180 50 50
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  ISI:
+    bounds: 860 187 36 36
+    label: 820 228 116 27
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  T_End:
+    bounds: 915 187 36 36
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  TF_1:
+    stroke: "#5c8a55"
+  TF_2:
+    stroke: "#5c8a55"
+  TF_Target:
+    waypoint: 510,180 510,127 610,127
+    label: 518 110 44 14
+    stroke: "#5c8a55"
+  TF_NonTarget:
+    waypoint: 535,205 610,205
+    label: 538 188 70 14
+    stroke: "#5c8a55"
+  TF_Timeout:
+    waypoint: 440,263 440,277 610,277
+    stroke: "#5c8a55"
+  TF_Target_Merge:
+    waypoint: 760,127 815,127 815,180
+    stroke: "#5c8a55"
+  TF_NonTarget_Merge:
+    stroke: "#5c8a55"
+  TF_Timeout_Merge:
+    waypoint: 760,277 815,277 815,230
+    stroke: "#5c8a55"
+  TF_Merge_ISI:
+    stroke: "#5c8a55"
+  TF_ISI_End:
+    stroke: "#5c8a55"
+  A_End:
+    bounds: 990 187 36 36
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  Params_NBack:
+    bounds: 372 95 36 50
+    label: 414 108 110 27
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  AF_1:
+    stroke: "#5c8a55"
+  AF_2:
+    stroke: "#5c8a55"
+  B_Start:
+    bounds: 178 432 36 36
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  Task_WorkingMemory:
+    bounds: 240 410 150 80
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  In_Pace_WorkingMemory:
+    waypoint: 276,515 276,490
+    stroke: "#5c8a55"
+  Out_Trials_WorkingMemory:
+    waypoint: 355,490 355,515
+    stroke: "#5c8a55"
+  Bot_Pace_NB:
+    bounds: 258 515 36 50
+    label: 165 527 88 27
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Dataset_Trials:
+    bounds: 330 515 50 50
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  B_End:
+    bounds: 440 432 36 36
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  BF_1:
+    stroke: "#5c8a55"
+  BF_2:
+    stroke: "#5c8a55"
+  Group_A:
+    bounds: 160 40 890 310
+  Group_B:
+    bounds: 160 370 890 220

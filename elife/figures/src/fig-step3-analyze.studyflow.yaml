@@ -2,153 +2,155 @@ id: step3_analyze
 definitions:
   targetNamespace: http://bpmn.io/schema/bpmn
 Analyze:
-  type: Process
+  type: studyflow:Study
   name: Step 3 - Analyze
   documentation: >-
     Step 3 of the example study (`../study/example_study.studyflow`): its `Analysis` sub-process, unwrapped into a
     diagram of its own and otherwise unchanged — the same element ids, the same order, the same arguments. Seven
-    preregistered operations read left to right and then wrap: read the recorded trials, keep the answered trials
-    of the test blocks, per-subject accuracy in each task, group statistics, then the two questions (the congruency
-    effect within subjects, the divergence between the two dispositions), each a collapsed sub-process that ends in
-    a decision, and last the figure. Accuracy is the measure throughout; a language model's latency is generation
-    time, reported and not tested. The decision rules are one Parameters object wired into the two questions (in
-    the study it is wired into `Analysis`, which holds them); the trials dataset is bound to the
-    CSVW schema beside it. Every call is a library function named in full, so nothing here is code written for
-    this study and the registered and the executed analysis are the same object.
-  extensionElements:
-    - type: studyflow:Study
-      seed: 42
-      runtime: local
-      dependencies:
-        - pandas==2.3.3
-        - scipy==1.16.2
-        - scikit-learn==1.7.2
-        - matplotlib==3.10.7
+    preregistered operations read left to right and then wrap: read the recorded trials, keep the answered trials of the
+    test blocks, per-subject accuracy in each task, group statistics, then the two questions (the congruency effect
+    within subjects, the divergence between the two dispositions), each a collapsed sub-process that ends in a decision,
+    and last the figure. Accuracy is the measure throughout; a language model's latency is generation time, reported and
+    not tested. The decision rules are one Parameters object wired into the two questions (in the study it is wired into
+    `Analysis`, which holds them); the trials dataset is bound to the CSVW schema beside it. Every call is a library
+    function named in full, so nothing here is code written for this study and the registered and the executed analysis
+    are the same object.
+  seed: 42
+  dependencies:
+    - pandas==2.3.3
+    - scipy==1.16.2
+    - scikit-learn==1.7.2
+    - matplotlib==3.10.7
   properties:
-    derived: { name: derived }
-    answered: { name: answered }
-    kept: { name: kept }
-    test_trials: { name: test_trials }
-    trials: { name: trials }
-    per_subject_indexed: { name: per_subject_indexed }
-    per_subject: { name: per_subject }
-    smallest_arm: { name: smallest_arm }
+    derived:
+      name: derived
+    answered:
+      name: answered
+    kept:
+      name: kept
+    test_trials:
+      name: test_trials
+    trials:
+      name: trials
+    per_subject_indexed:
+      name: per_subject_indexed
+    per_subject:
+      name: per_subject
+    smallest_arm:
+      name: smallest_arm
   flowElements:
     Dataset_Trials:
-      type: DataStoreReference
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
+      type: behaverse:BDMDataset
       name: Trials
       documentation: >-
-        One line per recorded event, appended by every task of every subject: the build's own frame
-        (`trialContext`) plus the subject and the properties of the scope that played the trial (`context`).
+        One line per recorded event, appended by every task of every subject: the build's own frame (`trialContext`)
+        plus the subject and the properties of the scope that played the trial (`context`).
+      schema: Trial_Schema
+      dataLevel: trials
       uri: data/trials.jsonl
-      extensionElements:
-        - type: behaverse:BDMDataset
-          dataLevel: trials
-          schema: Trial_Schema
-      bounds: 60 20 50 50
-      label: 116 32 60 14
     Trial_Schema:
-      type: DataObjectReference
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
+      type: studyflow:Schema
       name: Trial schema
       documentation: >-
         The columns the analysis reads from the trials dataset, as a CSVW table schema: the trial's keys, its
         congruency, whether the answer was correct, and its latency. `studyflow validate` checks every column an
         operation reading the dataset names against this list, so a misspelled column fails before any data moves.
-      extensionElements:
-        - type: studyflow:Schema
-          format: csvw
-          body: >-
-            {"@context": "http://www.w3.org/ns/csvw", "tableSchema": {"columns": [
-            {"name": "context.subject", "datatype": "string"},
-            {"name": "context.state.arm", "datatype": "string"},
-            {"name": "trialContext.task.id", "datatype": "string"},
-            {"name": "trialContext.block.name", "datatype": "string"},
-            {"name": "trialContext.trial.id", "datatype": "string"},
-            {"name": "trialContext.congruency", "datatype": "string"},
-            {"name": "result.isCorrect", "datatype": "boolean"},
-            {"name": "trialContext.trial.timeInTrial", "datatype": "number"}]}}
-      bounds: 240 20 36 50
-      label: 282 32 80 14
+      body:
+        "@context": http://www.w3.org/ns/csvw
+        tableSchema:
+          columns:
+            - name: context.subject
+              datatype: string
+            - name: context.state.arm
+              datatype: string
+            - name: trialContext.task.id
+              datatype: string
+            - name: trialContext.block.name
+              datatype: string
+            - name: trialContext.trial.id
+              datatype: string
+            - name: trialContext.congruency
+              datatype: string
+            - name: result.isCorrect
+              datatype: boolean
+            - name: trialContext.trial.timeInTrial
+              datatype: number
     Decision_Rules:
-      type: DataObjectReference
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
+      type: studyflow:Parameters
       name: Decision rules
       documentation: >-
-        The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of
-        every test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm
-        test needs, four being the smallest arms for which shuffling labels across subjects can reach p < .05;
-        the permutations the divergence test draws.
-      extensionElements:
-        - type: studyflow:Parameters
-          values:
-            alpha: 0.05
-            min_subjects: 3
-            min_per_arm: 4
-            n_permutations: 1000
-      bounds: 267 400 36 50
-      label: 240 456 90 14
+        The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of every
+        test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm test needs,
+        four being the smallest arms for which shuffling labels across subjects can reach p < .05; the permutations the
+        divergence test draws.
+      values:
+        alpha: 0.05
+        min_subjects: 3
+        min_per_arm: 4
+        n_permutations: 1000
     An_Start:
       type: StartEvent
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 60 147 36 36
     Read_Trials:
       type: SubProcess
       name: Read the recorded trials
       documentation: >-
-        The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the
-        two calls inside reduce them to one row per trial — the congruency the task drew, whether the answer
-        was correct, and the latency — with the trial keys as columns.
+        The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the two calls
+        inside reduce them to one row per trial — the congruency the task drew, whether the answer was correct, and the
+        latency — with the trial keys as columns.
       flowElements:
         RT_Start:
           type: StartEvent
         Derive:
           type: ServiceTask
           name: One row per trial
-          implementation: python://pandas.DataFrame.pivot_table
+          dataInputAssociations:
+            In_Trials:
+              sourceRef:
+                - Dataset_Trials
+              transformation: self
+          dataOutputAssociations:
+            Out_Derived:
+              targetRef: derived
           additionalArguments:
-            index: ["context.subject", "context.state.arm", "trialContext.task.id", "trialContext.block.name", "trialContext.trial.id"]
-            values: ["trialContext.congruency", "result.isCorrect", "trialContext.trial.timeInTrial"]
+            index:
+              - context.subject
+              - context.state.arm
+              - trialContext.task.id
+              - trialContext.block.name
+              - trialContext.trial.id
+            values:
+              - trialContext.congruency
+              - result.isCorrect
+              - trialContext.trial.timeInTrial
             aggfunc:
               trialContext.congruency: first
               result.isCorrect: first
               trialContext.trial.timeInTrial: max
-          dataInputAssociations:
-            In_Trials:
-              sourceRef: [Dataset_Trials]
-              transformation: self
-          dataOutputAssociations:
-            Out_Derived: { targetRef: derived }
+          implementation: python://pandas.DataFrame.pivot_table
         Flatten_Index:
           type: ServiceTask
           name: Trial keys into columns
-          implementation: python://pandas.DataFrame.reset_index
           dataInputAssociations:
-            In_Derived: { sourceRef: [derived], transformation: self }
+            In_Derived:
+              sourceRef:
+                - derived
+              transformation: self
           dataOutputAssociations:
-            Out_Answered: { targetRef: answered }
+            Out_Answered:
+              targetRef: answered
+          implementation: python://pandas.DataFrame.reset_index
         RT_End:
           type: EndEvent
         RTF_0: RT_Start -> Derive
         RTF_1: Derive -> Flatten_Index
         RTF_2: Flatten_Index -> RT_End
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 120 130 150 70
-      isExpanded: false
     Filter:
       type: SubProcess
       name: Keep answered test trials
       documentation: >-
-        The trials the actor did not answer within the response window leave the table, and so do the 1-back's
-        tutorial and practice blocks, which are instruction rather than measurement; the two measures the rest of
-        the analysis works on become numbers.
+        The trials the actor did not answer within the response window leave the table, and so do the 1-back's tutorial
+        and practice blocks, which are instruction rather than measurement; the two measures the rest of the analysis
+        works on become numbers.
       checklist: |-
         - [ ] Trials the actor did not answer within the response window dropped
         - [ ] The 1-back's tutorial and practice blocks dropped
@@ -159,96 +161,119 @@ Analyze:
         Filter_Rows:
           type: ServiceTask
           name: Drop unanswered trials
-          implementation: python://pandas.DataFrame.dropna
-          additionalArguments:
-            subset: ["result.isCorrect"]
           dataInputAssociations:
-            In_Answered: { sourceRef: [answered], transformation: self }
+            In_Answered:
+              sourceRef:
+                - answered
+              transformation: self
           dataOutputAssociations:
-            Out_Kept: { targetRef: kept }
+            Out_Kept:
+              targetRef: kept
+          additionalArguments:
+            subset:
+              - result.isCorrect
+          implementation: python://pandas.DataFrame.dropna
         Test_Blocks:
           type: ServiceTask
           name: Keep the test blocks
           documentation: >-
-            The blocks the analysis measures, named as the build names them: the Simon block and the 1-back's two
-            test blocks. XCIT_NB_01's tutorial and practice blocks are instruction, not measurement.
-          implementation: python://pandas.DataFrame.query
+            The blocks the analysis measures, named as the build names them: the Simon block and the 1-back's two test
+            blocks. XCIT_NB_01's tutorial and practice blocks are instruction, not measurement.
+          dataInputAssociations:
+            In_Kept_Blocks:
+              sourceRef:
+                - kept
+              transformation: self
+          dataOutputAssociations:
+            Out_Test:
+              targetRef: test_trials
           additionalArguments:
             expr: "`trialContext.block.name` in ['Simon', 'XCIT_NB_01_Test_A', 'XCIT_NB_01_Test_B']"
-          dataInputAssociations:
-            In_Kept_Blocks: { sourceRef: [kept], transformation: self }
-          dataOutputAssociations:
-            Out_Test: { targetRef: test_trials }
+          implementation: python://pandas.DataFrame.query
         Measures:
           type: ServiceTask
           name: Measures as numbers
-          implementation: python://pandas.DataFrame.astype
+          dataInputAssociations:
+            In_Kept:
+              sourceRef:
+                - test_trials
+              transformation: self
+          dataOutputAssociations:
+            Out_Trials_Typed:
+              targetRef: trials
           additionalArguments:
             dtype:
               result.isCorrect: float
               trialContext.trial.timeInTrial: float
-          dataInputAssociations:
-            In_Kept: { sourceRef: [test_trials], transformation: self }
-          dataOutputAssociations:
-            Out_Trials_Typed: { targetRef: trials }
+          implementation: python://pandas.DataFrame.astype
         F_End:
           type: EndEvent
         FF_0: F_Start -> Filter_Rows
         FF_1: Filter_Rows -> Test_Blocks
         FF_2: Test_Blocks -> Measures
         FF_3: Measures -> F_End
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 300 130 150 70
-      isExpanded: false
     Per_Subject:
       type: SubProcess
       name: Per-subject accuracy by task
       documentation: >-
-        One row per subject: its mean accuracy in each task, with the subject and its arm as columns, written
-        out as the per-subject table of the results dataset; then the size of the smaller arm, which the
-        divergence question checks against the decision rules before it tests anything.
+        One row per subject: its mean accuracy in each task, with the subject and its arm as columns, written out as the
+        per-subject table of the results dataset; then the size of the smaller arm, which the divergence question checks
+        against the decision rules before it tests anything.
       flowElements:
         PS_Start:
           type: StartEvent
         Per_Subject_Table:
           type: ServiceTask
           name: Per-subject summary
-          implementation: python://pandas.DataFrame.pivot_table
+          dataInputAssociations:
+            In_Trials_PS:
+              sourceRef:
+                - trials
+              transformation: self
+          dataOutputAssociations:
+            Out_PS:
+              targetRef: per_subject_indexed
           additionalArguments:
-            index: ["context.subject", "context.state.arm"]
+            index:
+              - context.subject
+              - context.state.arm
             columns: trialContext.task.id
             values: result.isCorrect
             aggfunc: mean
-          dataInputAssociations:
-            In_Trials_PS: { sourceRef: [trials], transformation: self }
-          dataOutputAssociations:
-            Out_PS: { targetRef: per_subject_indexed }
+          implementation: python://pandas.DataFrame.pivot_table
         Per_Subject_Flat:
           type: ServiceTask
           name: Subject keys into columns
-          implementation: python://pandas.DataFrame.reset_index
           dataInputAssociations:
-            In_PS: { sourceRef: [per_subject_indexed], transformation: self }
+            In_PS:
+              sourceRef:
+                - per_subject_indexed
+              transformation: self
           dataOutputAssociations:
-            Out_PS_Flat: { targetRef: per_subject }
-            Out_PS_File: { targetRef: File_PerSubject }
+            Out_PS_Flat:
+              targetRef: per_subject
+            Out_PS_File:
+              targetRef: File_PerSubject
+          implementation: python://pandas.DataFrame.reset_index
         Arm_Sizes:
           type: ServiceTask
           name: Subjects per arm
           documentation: >-
-            How many subjects each arm holds; the smaller count is what the feasibility checks read, and an
-            arm nobody reached counts as zero.
-          implementation: python://pandas.DataFrame.value_counts
-          additionalArguments:
-            subset: ["context.state.arm"]
+            How many subjects each arm holds; the smaller count is what the feasibility checks read, and an arm nobody
+            reached counts as zero.
           dataInputAssociations:
-            In_PS_Arms: { sourceRef: [per_subject], transformation: self }
+            In_PS_Arms:
+              sourceRef:
+                - per_subject
+              transformation: self
           dataOutputAssociations:
             Out_Smallest_Arm:
               targetRef: smallest_arm
-              transformation: "result.min().item() if result.size == 2 else 0"
+              transformation: result.min().item() if result.size == 2 else 0
+          additionalArguments:
+            subset:
+              - context.state.arm
+          implementation: python://pandas.DataFrame.value_counts
         File_PerSubject:
           type: DataObjectReference
           name: Per-subject table
@@ -259,47 +284,53 @@ Analyze:
         PSF_1: Per_Subject_Table -> Per_Subject_Flat
         PSF_2: Per_Subject_Flat -> Arm_Sizes
         PSF_3: Arm_Sizes -> PS_End
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 480 130 150 70
-      isExpanded: false
     Group:
       type: ServiceTask
       name: Group statistics
       documentation: >-
         Mean and standard deviation of each task's accuracy, by disposition, from the per-subject table while the
         subject and its arm are still its index, so the arm is grouped by and every column is an accuracy.
-      implementation: python://pandas.DataFrame.pivot_table
-      additionalArguments:
-        index: "context.state.arm"
-        aggfunc: [mean, std]
       dataInputAssociations:
-        In_PS_G: { sourceRef: [per_subject_indexed], transformation: self }
+        In_PS_G:
+          sourceRef:
+            - per_subject_indexed
+          transformation: self
       dataOutputAssociations:
         Out_Group:
           targetRef: File_Group
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 660 130 150 70
+      additionalArguments:
+        index: context.state.arm
+        aggfunc:
+          - mean
+          - std
+      implementation: python://pandas.DataFrame.pivot_table
     Congruency:
       type: SubProcess
       name: Congruency effect
       documentation: >-
-        Is a subject less accurate on incongruent than on congruent Simon trials? Per subject, the mean accuracy
-        on congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction
-        with a one-sided one-sample t test. Accuracy rather than latency, because a language model's latency is
-        the time its server took to generate the reply. The decision was fixed before the first run: not testable
-        with fewer subjects than the decision rules' minimum, supported when p is below their alpha, not supported
-        otherwise. The descriptive table by disposition and congruency is written out either way.
+        Is a subject less accurate on incongruent than on congruent Simon trials? Per subject, the mean accuracy on
+        congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
+        one-sided one-sample t test. Accuracy rather than latency, because a language model's latency is the time its
+        server took to generate the reply. The decision was fixed before the first run: not testable with fewer subjects
+        than the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The
+        descriptive table by disposition and congruency is written out either way.
       properties:
-        by_congruency: { name: by_congruency }
-        accuracy_congruent: { name: accuracy_congruent }
-        accuracy_incongruent: { name: accuracy_incongruent }
-        congruency_costs: { name: congruency_costs }
-        congruency_n: { name: congruency_n }
-        congruency_test: { name: congruency_test }
+        by_congruency:
+          name: by_congruency
+        accuracy_congruent:
+          name: accuracy_congruent
+        accuracy_incongruent:
+          name: accuracy_incongruent
+        congruency_costs:
+          name: congruency_costs
+        congruency_n:
+          name: congruency_n
+        congruency_test:
+          name: congruency_test
+      dataInputAssociations:
+        In_Rules_C:
+          sourceRef:
+            - Decision_Rules
       flowElements:
         C_Start:
           type: StartEvent
@@ -307,69 +338,95 @@ Analyze:
           type: SubProcess
           name: Accuracy cost per subject
           documentation: >-
-            The descriptive table by disposition and congruency, written out as it stands; then, per subject,
-            the mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have
-            both.
+            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the mean
+            accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
           flowElements:
             CP_Start:
               type: StartEvent
             Congruency_Table:
               type: ServiceTask
               name: Accuracy and latency by congruency
-              implementation: python://pandas.DataFrame.pivot_table
-              additionalArguments:
-                index: ["context.state.arm", "trialContext.congruency"]
-                values: ["result.isCorrect", "trialContext.trial.timeInTrial"]
-                aggfunc: mean
               dataInputAssociations:
-                In_Trials_C: { sourceRef: [trials], transformation: self }
+                In_Trials_C:
+                  sourceRef:
+                    - trials
+                  transformation: self
               dataOutputAssociations:
-                Out_Congruency: { targetRef: File_Congruency }
+                Out_Congruency:
+                  targetRef: File_Congruency
+              additionalArguments:
+                index:
+                  - context.state.arm
+                  - trialContext.congruency
+                values:
+                  - result.isCorrect
+                  - trialContext.trial.timeInTrial
+                aggfunc: mean
+              implementation: python://pandas.DataFrame.pivot_table
             By_Congruency:
               type: ServiceTask
               name: Accuracy, one column per congruency
-              implementation: python://pandas.DataFrame.pivot_table
-              additionalArguments:
-                index: "context.subject"
-                columns: "trialContext.congruency"
-                values: "result.isCorrect"
-                aggfunc: mean
               dataInputAssociations:
-                In_Trials_BC: { sourceRef: [trials], transformation: self }
+                In_Trials_BC:
+                  sourceRef:
+                    - trials
+                  transformation: self
               dataOutputAssociations:
-                Out_BC: { targetRef: by_congruency }
+                Out_BC:
+                  targetRef: by_congruency
+              additionalArguments:
+                index: context.subject
+                columns: trialContext.congruency
+                values: result.isCorrect
+                aggfunc: mean
+              implementation: python://pandas.DataFrame.pivot_table
             Accuracy_Incongruent:
               type: ServiceTask
               name: Incongruent accuracies
-              implementation: python://pandas.DataFrame.get
+              dataInputAssociations:
+                In_BC_I:
+                  sourceRef:
+                    - by_congruency
+                  transformation: self
+              dataOutputAssociations:
+                Out_Incongruent:
+                  targetRef: accuracy_incongruent
               additionalArguments:
                 key: Incongruent
-              dataInputAssociations:
-                In_BC_I: { sourceRef: [by_congruency], transformation: self }
-              dataOutputAssociations:
-                Out_Incongruent: { targetRef: accuracy_incongruent }
+              implementation: python://pandas.DataFrame.get
             Accuracy_Congruent:
               type: ServiceTask
               name: Congruent accuracies
-              implementation: python://pandas.DataFrame.get
+              dataInputAssociations:
+                In_BC_C:
+                  sourceRef:
+                    - by_congruency
+                  transformation: self
+              dataOutputAssociations:
+                Out_Congruent:
+                  targetRef: accuracy_congruent
               additionalArguments:
                 key: Congruent
-              dataInputAssociations:
-                In_BC_C: { sourceRef: [by_congruency], transformation: self }
-              dataOutputAssociations:
-                Out_Congruent: { targetRef: accuracy_congruent }
+              implementation: python://pandas.DataFrame.get
             Cost:
               type: ServiceTask
               name: Congruency cost per subject
-              implementation: python://pandas.Series.sub
               dataInputAssociations:
-                In_Cost_C: { sourceRef: [accuracy_congruent], transformation: self }
-                In_Cost_I: { sourceRef: [accuracy_incongruent], transformation: other }
+                In_Cost_C:
+                  sourceRef:
+                    - accuracy_congruent
+                  transformation: self
+                In_Cost_I:
+                  sourceRef:
+                    - accuracy_incongruent
+                  transformation: other
               dataOutputAssociations:
-                Out_Costs: { targetRef: congruency_costs }
+                Out_Costs:
+                  targetRef: congruency_costs
                 Out_Cost_N:
                   targetRef: congruency_n
                   transformation: result.count().item()
+              implementation: python://pandas.Series.sub
             File_Congruency:
               type: DataObjectReference
               name: Congruency table
@@ -389,13 +446,11 @@ Analyze:
         Cost_Test:
           type: ServiceTask
           name: One-sided t test
-          implementation: python://scipy.stats.ttest_1samp
-          additionalArguments:
-            popmean: 0
-            alternative: greater
-            nan_policy: omit
           dataInputAssociations:
-            In_Costs: { sourceRef: [congruency_costs], transformation: a }
+            In_Costs:
+              sourceRef:
+                - congruency_costs
+              transformation: a
           dataOutputAssociations:
             Out_Cost_Test:
               targetRef: congruency_test
@@ -403,6 +458,11 @@ Analyze:
             Out_Cost_File:
               targetRef: File_Congruency_Test
               transformation: "{'statistic': result.statistic, 'pvalue': result.pvalue, 'subjects': congruency_n}"
+          additionalArguments:
+            popmean: 0
+            alternative: greater
+            nan_policy: omit
+          implementation: python://scipy.stats.ttest_1samp
         Congruency_Decision:
           type: ExclusiveGateway
           name: Less accurate when incongruent?
@@ -441,27 +501,27 @@ Analyze:
           name: "no"
           sourceRef: Congruency_Decision
           targetRef: C_Not_Supported
-      dataInputAssociations:
-        In_Rules_C: { sourceRef: [Decision_Rules], waypoint: "267,425 195,425 195,360" }
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 120 290 150 70
-      isExpanded: false
     Divergence:
       type: SubProcess
       name: Divergence between dispositions
       documentation: >-
-        Can a classifier tell the two dispositions apart better than chance? One row per subject, its
-        accuracy in each of the two tasks as features and its arm as the label, scored by leave-one-subject-out
-        cross-validation; the permutation test shuffles the arm labels across subjects, the unit that was
-        randomized, so chance is what the same classifier scores when the labels carry nothing. Fixed before
-        the first run: not testable when an arm holds fewer subjects than the decision rules' minimum,
-        supported when the permutation p is below their alpha, not supported otherwise.
+        Can a classifier tell the two dispositions apart better than chance? One row per subject, its accuracy in each
+        of the two tasks as features and its arm as the label, scored by leave-one-subject-out cross-validation; the
+        permutation test shuffles the arm labels across subjects, the unit that was randomized, so chance is what the
+        same classifier scores when the labels carry nothing. Fixed before the first run: not testable when an arm holds
+        fewer subjects than the decision rules' minimum, supported when the permutation p is below their alpha, not
+        supported otherwise.
       properties:
-        subject_features: { name: subject_features }
-        subject_labels: { name: subject_labels }
-        divergence_test: { name: divergence_test }
+        subject_features:
+          name: subject_features
+        subject_labels:
+          name: subject_labels
+        divergence_test:
+          name: divergence_test
+      dataInputAssociations:
+        In_Rules_D:
+          sourceRef:
+            - Decision_Rules
       flowElements:
         D_Start:
           type: StartEvent
@@ -472,27 +532,52 @@ Analyze:
         Features:
           type: ServiceTask
           name: Accuracy in each task
-          implementation: python://pandas.DataFrame.drop
-          additionalArguments:
-            columns: ["context.subject", "context.state.arm"]
           dataInputAssociations:
-            In_PS_F: { sourceRef: [per_subject], transformation: self }
+            In_PS_F:
+              sourceRef:
+                - per_subject
+              transformation: self
           dataOutputAssociations:
-            Out_Features: { targetRef: subject_features }
+            Out_Features:
+              targetRef: subject_features
+          additionalArguments:
+            columns:
+              - context.subject
+              - context.state.arm
+          implementation: python://pandas.DataFrame.drop
         Labels:
           type: ServiceTask
           name: Subject-level labels
-          implementation: python://pandas.DataFrame.get
-          additionalArguments:
-            key: "context.state.arm"
           dataInputAssociations:
-            In_PS_L: { sourceRef: [per_subject], transformation: self }
+            In_PS_L:
+              sourceRef:
+                - per_subject
+              transformation: self
           dataOutputAssociations:
-            Out_Labels: { targetRef: subject_labels }
+            Out_Labels:
+              targetRef: subject_labels
+          additionalArguments:
+            key: context.state.arm
+          implementation: python://pandas.DataFrame.get
         Permutation_Test:
           type: ServiceTask
           name: Classifier against shuffled labels
-          implementation: python://sklearn.model_selection.permutation_test_score
+          dataInputAssociations:
+            In_Features:
+              sourceRef:
+                - subject_features
+              transformation: X
+            In_Labels:
+              sourceRef:
+                - subject_labels
+              transformation: "y"
+          dataOutputAssociations:
+            Out_Divergence_Test:
+              targetRef: divergence_test
+              transformation: "{'accuracy': result[0], 'pvalue': result[2]}"
+            Out_Divergence:
+              targetRef: File_Divergence
+              transformation: "{'accuracy': result[0], 'pvalue': result[2]}"
           additionalArguments:
             estimator:
               implementation: python://sklearn.linear_model.LogisticRegression
@@ -502,16 +587,7 @@ Analyze:
               implementation: python://sklearn.model_selection.LeaveOneOut
             n_permutations: "{n_permutations}"
             scoring: accuracy
-          dataInputAssociations:
-            In_Features: { sourceRef: [subject_features], transformation: X }
-            In_Labels: { sourceRef: [subject_labels], transformation: "y" }
-          dataOutputAssociations:
-            Out_Divergence_Test:
-              targetRef: divergence_test
-              transformation: "{'accuracy': result[0], 'pvalue': result[2]}"
-            Out_Divergence:
-              targetRef: File_Divergence
-              transformation: "{'accuracy': result[0], 'pvalue': result[2]}"
+          implementation: python://sklearn.model_selection.permutation_test_score
         Divergence_Decision:
           type: ExclusiveGateway
           name: Told apart above chance?
@@ -551,68 +627,129 @@ Analyze:
           name: "no"
           sourceRef: Divergence_Decision
           targetRef: D_Not_Supported
-      dataInputAssociations:
-        In_Rules_D: { sourceRef: [Decision_Rules], waypoint: "303,425 375,425 375,360" }
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 300 290 150 70
-      isExpanded: false
     Plot:
       type: ServiceTask
       name: Figure
       documentation: Accuracy by disposition and congruency, as a box plot.
-      implementation: python://pandas.DataFrame.boxplot
-      additionalArguments:
-        column: ["result.isCorrect"]
-        by: ["context.state.arm", "trialContext.congruency"]
-        grid: false
-        rot: 30
       dataInputAssociations:
-        In_Trials_P: { sourceRef: [trials], transformation: self }
+        In_Trials_P:
+          sourceRef:
+            - trials
+          transformation: self
       dataOutputAssociations:
         Out_Plot:
           targetRef: File_Accuracy
           transformation: result.figure
-      font: "#7a67a6"
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 480 290 150 70
+      additionalArguments:
+        column:
+          - result.isCorrect
+        by:
+          - context.state.arm
+          - trialContext.congruency
+        grid: false
+        rot: 30
+      implementation: python://pandas.DataFrame.boxplot
     An_End:
       type: EndEvent
       name: Analyzed
-      fill: "#e6dff1"
-      stroke: "#7a67a6"
-      bounds: 680 307 36 36
-      label: 666 349 64 14
     File_Group:
       type: DataObjectReference
       name: Group table
       uri: results/group.csv
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
-      bounds: 842 140 36 50
-      label: 812 196 96 14
     File_Accuracy:
       type: DataObjectReference
       name: Accuracy figure
       uri: results/accuracy.png
-      fill: "#f4f1f8"
-      stroke: "#7a67a6"
-      bounds: 537 400 36 50
-      label: 579 412 96 14
     AF_0: An_Start -> Read_Trials
     AF_1: Read_Trials -> Filter
     AF_2: Filter -> Per_Subject
     AF_3: Per_Subject -> Group
-    AF_4:
-      sourceRef: Group
-      targetRef: Congruency
-      stroke: "#7a67a6"
-      waypoint: 735,200 735,245 195,245 195,290
+    AF_4: Group -> Congruency
     AF_5: Congruency -> Divergence
     AF_7: Divergence -> Plot
     AF_8: Plot -> An_End
+layout:
+  Dataset_Trials:
+    bounds: 60 20 50 50
+    label: 116 32 60 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Trial_Schema:
+    bounds: 240 20 36 50
+    label: 282 32 80 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Decision_Rules:
+    bounds: 267 400 36 50
+    label: 240 456 90 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  An_Start:
+    bounds: 60 147 36 36
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Read_Trials:
+    bounds: 120 130 150 70
+    font: "#7a67a6"
+    isExpanded: false
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Filter:
+    bounds: 300 130 150 70
+    font: "#7a67a6"
+    isExpanded: false
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Per_Subject:
+    bounds: 480 130 150 70
+    font: "#7a67a6"
+    isExpanded: false
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Group:
+    bounds: 660 130 150 70
+    font: "#7a67a6"
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  Congruency:
+    bounds: 120 290 150 70
+    font: "#7a67a6"
+    isExpanded: false
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  In_Rules_C:
+    waypoint: 267,425 195,425 195,360
+  Divergence:
+    bounds: 300 290 150 70
+    font: "#7a67a6"
+    isExpanded: false
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  In_Rules_D:
+    waypoint: 303,425 375,425 375,360
+  Plot:
+    bounds: 480 290 150 70
+    font: "#7a67a6"
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  An_End:
+    bounds: 680 307 36 36
+    label: 666 349 64 14
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  File_Group:
+    bounds: 842 140 36 50
+    label: 812 196 96 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  File_Accuracy:
+    bounds: 537 400 36 50
+    label: 579 412 96 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  AF_4:
+    waypoint: 735,200 735,245 195,245 195,290
+    stroke: "#7a67a6"
 state:
   _meta:
     reached:
