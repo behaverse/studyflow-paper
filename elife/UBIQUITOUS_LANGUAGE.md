@@ -25,6 +25,7 @@ Working vocabulary for the Studyflow paper (`elife/paper-v3.qmd`). This is guida
 | Prospective and retrospective provenance | W3C PROV's names for the plan versus the executed record. A Studyflow file is prospective provenance at deposit and accumulates retrospective provenance (the tool, the seed, the protocol digest, attrition counts) as it runs; the deviation report is the diff between the two states. |
 | Registered, deposited | Registered: the study file as it stood before any run; every run records the fingerprint (protocol digest) of the file it followed, so a later change shows. Deposited: sent to a registry or a journal before the run. The example study's files go with the paper in both states, as registered and after their runs; the paper does not use "sealed" (decided 2026-10-02). |
 | Fingerprint | The main text's word for the protocol digest (Methods keeps "digest"). |
+| Concealed allocation | An allocation gateway that draws from a seed of its own, which the registered file holds only as a digest and the executed copy reveals (`seedDigest`, then `allocationSeed` on the gateway's run record); what it hides depends on the type of allocation. |
 | Discontinuation rule | The main text's word for a task's conditional boundary event that sends a subject to the Discontinued exit. |
 | Data dictionary | The main text's word for a dataset's data schema (a CSVW schema in the example study). |
 | Claim state | The end event a registered question reaches: Supported, Not supported, or Not testable, decided by a rule drawn in the file before any run. |
