@@ -87,6 +87,9 @@ Example_Study:
     Discontinued) ends that instance only. The pool is divided into the three CONSORT phases a participant passes
     through, and into nothing else: a lane is a band of the drawing, so the flow crosses it without waiting.
   properties:
+    P_MaxUnanswered:
+      name: max_unanswered
+      value: 0.2
     P_Arm:
       name: arm
       value: none
@@ -119,6 +122,7 @@ Example_Study:
             - Failed_WorkingMemory
             - Discontinued
             - Debrief
+            - Record_Completion
             - Sub_End
   flowElements:
     Enroll:
@@ -236,6 +240,7 @@ Example_Study:
         wired in beside the task's settings. The task carries no message flow of its own: the trial and response
         exchange is the pool's, which every task inside inherits, and its result carries the share of the trials the
         build showed that it recorded no valid response for.
+      implementation: behaverse://assessment-unity@26.10
       instrument: WO
       timeline: SimonTask
       onset: T0+20s
@@ -286,11 +291,12 @@ Example_Study:
       documentation: >-
         The attrition rule, as the condition a BPMN conditional boundary event watches rather than an attribute of the
         task: the task's own result carries the share of the trials it recorded no valid response for, and above one in
-        five this instance leaves at Discontinued.
+        five this instance leaves at Discontinued. The threshold is the process's `max_unanswered`, written once and read by
+        the exit of both tasks.
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
-          condition: "{Task_Interference.failedTrialRate} > 0.2"
+          condition: "{Task_Interference.failedTrialRate} > max_unanswered"
       attachedToRef: Task_Interference
     Task_WorkingMemory:
       type: behaverse:Task
@@ -300,6 +306,7 @@ Example_Study:
         tutorial blocks and a practice block, then two test blocks of 28 digits, of which the analysis keeps the test
         blocks. The build sends each trial's digit alone, so the actor answers from what it remembers of the trial
         before: the Actor pool keeps one conversation per subject.
+      implementation: behaverse://assessment-unity@26.10
       instrument: NB
       timeline: XCIT_NB_01
       onset: T0+60s
@@ -346,7 +353,7 @@ Example_Study:
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
-          condition: "{Task_WorkingMemory.failedTrialRate} > 0.2"
+          condition: "{Task_WorkingMemory.failedTrialRate} > max_unanswered"
       attachedToRef: Task_WorkingMemory
     Discontinued:
       type: EndEvent
@@ -357,6 +364,22 @@ Example_Study:
       content: The session is over. Thank you for taking part; nothing further is asked of you.
       onset: T0+4min
       duration: 1s
+    Record_Completion:
+      type: ServiceTask
+      name: Record the completion
+      documentation: >-
+        Appends the subject's line to the completers dataset: its number and its arm, named as its trials name them.
+        Only a subject who completes the protocol passes here; one who leaves at an exit never does, so the analysis
+        takes its population from the protocol rather than from which trials it finds.
+      dataOutputAssociations:
+        Out_Completion:
+          targetRef: Dataset_Completers
+      additionalArguments:
+        context:
+          subject: "{state._meta.instance.Participant_Subject}"
+          state:
+            arm: "{arm}"
+      implementation: python://builtins.dict
     Sub_End:
       type: EndEvent
       name: Completed the protocol (n={reached})
@@ -384,7 +407,8 @@ Example_Study:
     SF_Merge_Interference: Merge_Allocation -> Task_Interference
     SF_Interference_WorkingMemory: Task_Interference -> Task_WorkingMemory
     SF_WorkingMemory_Debrief: Task_WorkingMemory -> Debrief
-    SF_Debrief_End: Debrief -> Sub_End
+    SF_Debrief_Record: Debrief -> Record_Completion
+    SF_Record_End: Record_Completion -> Sub_End
     SF_Failed_Interference: Failed_Interference -> Discontinued
     SF_Failed_WorkingMemory: Failed_WorkingMemory -> Discontinued
 Analysis_Report:
@@ -413,6 +437,15 @@ Analysis_Report:
       schema: Trial_Schema
       dataLevel: trials
       uri: data/trials.jsonl
+    Dataset_Completers:
+      type: studyflow:Dataset
+      name: Completers
+      documentation: >-
+        One line per subject who completed the protocol, appended by the step before the completion end event: the
+        subject and its arm (`context`), keyed as the trials are. A subject excluded at screening or discontinued on
+        either task has no line, so the analysis keeps exactly the subjects the participant flow counts as completed.
+      schema: Completer_Schema
+      uri: data/completers.jsonl
     Trial_Schema:
       type: studyflow:Schema
       name: Trial schema
@@ -438,6 +471,22 @@ Analysis_Report:
               datatype: string
             - name: result.isCorrect
               datatype: boolean
+    Completer_Schema:
+      type: studyflow:Schema
+      name: Completers schema
+      documentation: >-
+        The columns of the completers dataset, as a CSVW table schema: the subject and its arm, the keys the analysis
+        matches the trials on. `studyflow validate` checks the keys the analysis names against it, and before its first
+        line the dataset reads as a table with these columns and no row, so a cohort in which nobody completed is
+        analysed as one with no subject.
+      body:
+        "@context": http://www.w3.org/ns/csvw
+        tableSchema:
+          columns:
+            - name: context.subject
+              datatype: string
+            - name: context.state.arm
+              datatype: string
     Decision_Rules:
       type: studyflow:Parameters
       name: Decision rules
@@ -458,7 +507,7 @@ Analysis_Report:
         Seven preregistered operations, collapsed here and drawn in @fig-step3-analyze: read the recorded trials, keep
         the answered trials of the test blocks, per-subject accuracy in each task, group statistics, and then the two
         questions, each ending in a decision: the congruency effect within subjects and the divergence between the two
-        dispositions; last, the figure. Accuracy is the measure throughout: a language model's latency is the time its
+        dispositions; last, the figure, when any subject was analysed. Accuracy is the measure throughout: a language model's latency is the time its
         server took to generate the reply, so the build records it with every trial and no question tests it. Every step
         inside is one call to a library function named in full; nothing here is code written for this study. The
         decision rules wired in are read-only properties of this sub-process, so every question reads the same alpha and
@@ -478,8 +527,12 @@ Analysis_Report:
           name: per_subject_indexed
         per_subject:
           name: per_subject
+        analysed_trials:
+          name: analysed_trials
         smallest_arm:
           name: smallest_arm
+        analysed_subjects:
+          name: analysed_subjects
       dataInputAssociations:
         In_Trials_Analysis:
           sourceRef:
@@ -487,6 +540,9 @@ Analysis_Report:
         In_Rules:
           sourceRef:
             - Decision_Rules
+        In_Completers_Analysis:
+          sourceRef:
+            - Dataset_Completers
       dataOutputAssociations:
         Out_Results:
           targetRef: Dataset_Results
@@ -618,19 +674,46 @@ Analysis_Report:
           type: SubProcess
           name: Per-subject accuracy by task
           documentation: >-
-            One row per subject: its mean accuracy in each task, with the subject and its arm as columns, written out as
-            the per-subject table of the results dataset; then the size of the smaller arm, which the divergence
-            question checks against the decision rules before it tests anything.
+            The analysed population and its summary: the trials of the subjects who completed the protocol, as the
+            completers dataset lists them, which every question and the figure read; one row per subject, its mean
+            accuracy in each task, with the subject and its arm as columns, written out as the per-subject table of the
+            results dataset; then the size of the smaller arm, which the divergence question checks against the
+            decision rules before it tests anything.
           flowElements:
             PS_Start:
               type: StartEvent
+            Completer_Trials:
+              type: ServiceTask
+              name: Trials of the subjects who completed
+              documentation: >-
+                The analysed population: the trials of the subjects with a line in the completers dataset, matched on
+                the subject and its arm. A subject discontinued on either task, the 1-back included, has trials but no
+                line, and leaves here.
+              dataInputAssociations:
+                In_Trials_All:
+                  sourceRef:
+                    - trials
+                  transformation: self
+                In_Completers:
+                  sourceRef:
+                    - Dataset_Completers
+                  transformation: right
+              dataOutputAssociations:
+                Out_Analysed_Trials:
+                  targetRef: analysed_trials
+              additionalArguments:
+                "on":
+                  - context.subject
+                  - context.state.arm
+                how: inner
+              implementation: python://pandas.DataFrame.merge
             Per_Subject_Table:
               type: ServiceTask
               name: Per-subject summary
               dataInputAssociations:
                 In_Trials_PS:
                   sourceRef:
-                    - trials
+                    - analysed_trials
                   transformation: self
               dataOutputAssociations:
                 Out_PS:
@@ -662,7 +745,7 @@ Analysis_Report:
               name: Subjects per arm
               documentation: >-
                 How many subjects each arm holds; the smaller count is what the feasibility checks read, and an arm
-                nobody reached counts as zero.
+                nobody reached counts as zero. Their sum is how many subjects were analysed, which the figure checks.
               dataInputAssociations:
                 In_PS_Arms:
                   sourceRef:
@@ -672,6 +755,9 @@ Analysis_Report:
                 Out_Smallest_Arm:
                   targetRef: smallest_arm
                   transformation: if count(result) = 2 then min(result) else 0
+                Out_Analysed_Subjects:
+                  targetRef: analysed_subjects
+                  transformation: if count(result) = 0 then 0 else sum(result)
               additionalArguments:
                 subset:
                   - context.state.arm
@@ -682,10 +768,11 @@ Analysis_Report:
               uri: results/per_subject.csv
             PS_End:
               type: EndEvent
-            PSF_0: PS_Start -> Per_Subject_Table
-            PSF_1: Per_Subject_Table -> Per_Subject_Flat
-            PSF_2: Per_Subject_Flat -> Arm_Sizes
-            PSF_3: Arm_Sizes -> PS_End
+            PSF_0: PS_Start -> Completer_Trials
+            PSF_1: Completer_Trials -> Per_Subject_Table
+            PSF_2: Per_Subject_Table -> Per_Subject_Flat
+            PSF_3: Per_Subject_Flat -> Arm_Sizes
+            PSF_4: Arm_Sizes -> PS_End
         Group:
           type: ServiceTask
           name: Group statistics
@@ -746,7 +833,7 @@ Analysis_Report:
                   dataInputAssociations:
                     In_Trials_C:
                       sourceRef:
-                        - trials
+                        - analysed_trials
                       transformation: self
                   dataOutputAssociations:
                     Out_Congruency:
@@ -765,7 +852,7 @@ Analysis_Report:
                   dataInputAssociations:
                     In_Trials_BC:
                       sourceRef:
-                        - trials
+                        - analysed_trials
                       transformation: self
                   dataOutputAssociations:
                     Out_BC:
@@ -779,6 +866,7 @@ Analysis_Report:
                 Accuracy_Incongruent:
                   type: ServiceTask
                   name: Incongruent accuracies
+                  documentation: The incongruent column, one accuracy per subject; empty when no subject was analysed.
                   dataInputAssociations:
                     In_BC_I:
                       sourceRef:
@@ -789,10 +877,15 @@ Analysis_Report:
                       targetRef: accuracy_incongruent
                   additionalArguments:
                     key: Incongruent
+                    default:
+                      implementation: python://pandas.Series
+                      arguments:
+                        dtype: float
                   implementation: python://pandas.DataFrame.get
                 Accuracy_Congruent:
                   type: ServiceTask
                   name: Congruent accuracies
+                  documentation: The congruent column, one accuracy per subject; empty when no subject was analysed.
                   dataInputAssociations:
                     In_BC_C:
                       sourceRef:
@@ -803,6 +896,10 @@ Analysis_Report:
                       targetRef: accuracy_congruent
                   additionalArguments:
                     key: Congruent
+                    default:
+                      implementation: python://pandas.Series
+                      arguments:
+                        dtype: float
                   implementation: python://pandas.DataFrame.get
                 Cost:
                   type: ServiceTask
@@ -1024,6 +1121,10 @@ Analysis_Report:
               name: "no"
               sourceRef: Divergence_Decision
               targetRef: D_Not_Supported
+        Anyone_Analysed:
+          type: ExclusiveGateway
+          name: Anyone analysed?
+          default: AF_No_Figure
         Plot:
           type: ServiceTask
           name: Figure
@@ -1031,7 +1132,7 @@ Analysis_Report:
           dataInputAssociations:
             In_Trials_P:
               sourceRef:
-                - trials
+                - analysed_trials
               transformation: self
           dataOutputAssociations:
             Out_Plot:
@@ -1063,7 +1164,16 @@ Analysis_Report:
         AF_3: Per_Subject -> Group
         AF_4: Group -> Congruency
         AF_5: Congruency -> Divergence
-        AF_7: Divergence -> Plot
+        AF_7: Divergence -> Anyone_Analysed
+        AF_Figure:
+          name: "yes"
+          conditionExpression: analysed_subjects > 0
+          sourceRef: Anyone_Analysed
+          targetRef: Plot
+        AF_No_Figure:
+          name: "no"
+          sourceRef: Anyone_Analysed
+          targetRef: An_End
         AF_8: Plot -> An_End
     Dataset_Results:
       type: studyflow:Dataset
@@ -1239,17 +1349,25 @@ layout:
     stroke: "#5c8a55"
   Discontinued:
     bounds: 830 800 36 36
-    label: 756 840 184 28
+    label: 700 842 184 28
     fill: "#f1d0cd"
     stroke: "#ac5a54"
   Debrief:
-    bounds: 664 678 130 92
+    bounds: 656 678 96 92
     font: "#a2803c"
     fill: "#f6e8c9"
     stroke: "#a2803c"
+  Record_Completion:
+    bounds: 770 678 104 92
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Out_Completion:
+    waypoint: 860,770 860,790 908,790 908,920
+    stroke: "#a2803c"
   Sub_End:
-    bounds: 830 706 36 36
-    label: 800 746 96 42
+    bounds: 890 706 36 36
+    label: 850 648 90 28
     fill: "#f6e8c9"
     stroke: "#a2803c"
   SF_Start_Screening:
@@ -1287,10 +1405,13 @@ layout:
     waypoint: 460,724 490,724
     stroke: "#5c8a55"
   SF_WorkingMemory_Debrief:
-    waypoint: 640,724 664,724
+    waypoint: 640,724 656,724
     stroke: "#a2803c"
-  SF_Debrief_End:
-    waypoint: 794,724 830,724
+  SF_Debrief_Record:
+    waypoint: 752,724 770,724
+    stroke: "#a2803c"
+  SF_Record_End:
+    waypoint: 874,724 890,724
     stroke: "#a2803c"
   SF_Failed_Interference:
     waypoint: 442,788 442,818 830,818
@@ -1308,9 +1429,21 @@ layout:
     label: 294 938 60 14
     fill: "#f4f1f8"
     stroke: "#7a67a6"
+  Dataset_Completers:
+    bounds: 883 920 50 50
+    label: 812 938 66 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  In_Completers_Analysis:
+    waypoint: 908,970 908,984 460,984 460,1002
   Trial_Schema:
     bounds: 620 920 36 50
     label: 662 938 80 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Completer_Schema:
+    bounds: 880 1084 36 50
+    label: 770 1102 104 14
     fill: "#f4f1f8"
     stroke: "#7a67a6"
   Decision_Rules:

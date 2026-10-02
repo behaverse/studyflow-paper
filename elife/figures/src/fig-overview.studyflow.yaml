@@ -7,7 +7,8 @@ Example_Study:
   documentation: >-
     The example study (`../study/example_study.studyflow`) compacted to one row for the overview figure (@fig-overview):
     the same element ids, the pool of four parallel subjects flattened to the one subject it repeats, the analysis
-    collapsed to one box, and the three pools, the message flows and the per-subject debrief dropped for width. What is
+    collapsed to one box, and the three pools, the message flows and the per-subject end of session (the debrief and
+    the step that records a completer) dropped for width. What is
     left is laid out left to right under the four lifecycle stages. Every `n` is a run-state value the runner writes as
     the cohort runs; they all read zero here because this figure is drawn from the deposited plan. Its Gantt, Checklist
     and Provenance views are the modeler's own renderings of it.
@@ -254,7 +255,7 @@ Example_Study:
       checklist: |-
         - [x] Trials the actor did not answer within the response window dropped
         - [x] The 1-back's tutorial and practice blocks dropped
-        - [x] Every remaining trial carries a congruency and a latency
+        - [x] Every remaining trial carries its task and block
       onset: T0+6min
       duration: 30s
     Render:

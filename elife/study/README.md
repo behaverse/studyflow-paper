@@ -13,6 +13,9 @@ study sets its length) and the 1-back (`NB` on `XCIT_NB_01`: three tutorial bloc
 blocks of 28 digits, which the analysis keeps). Each task sends every trial to the Actor pool along one pair of message
 flows (`behaverse:Trial` out, `behaverse:Response` back) and writes the build's records to `data/trials.jsonl`. The
 Parameters with a `Bot:` entry say how the build plays for an actor that is not a person; they are not the protocol.
+Both tasks name the build they were written for, `behaverse://assessment-unity@26.10` (its `productVersion`, built from
+assessment-unity's `refactor` at `635eb4434`, the first build whose Simon task describes its stimulus to an agent);
+the runner does not check it, and each run records the version of the build that played it.
 
 ## The sealed files
 
@@ -20,11 +23,11 @@ The three files differ in one line, the Actor's `implementation`:
 
 | File | Actor | Protocol digest |
 | --- | --- | --- |
-| `example_study.studyflow.yaml` | `ollama://gemma4:e2b-mlx` | `sha256:e2b45736a3e40495832e1d203015925c410fa2ac19e1d18ec05a49f81d03dce1` |
-| `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:bff65427f5c9a2a9c0b80b0879824443e9b45cb0b53215088a77787c7aa0d8bd` |
-| `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:c6e13551f99778e2ca0236af46c19b04c2e1808b8e651675c85e21582036e2f0` |
+| `example_study.studyflow.yaml` | `ollama://gemma4:e2b-mlx` | `sha256:2f3581434276f6175259f524a2fa7ccee41005aae5c712b86076f0374578e71f` |
+| `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:11c516ed47cb26e2b360500eb2ce61c4a8fe8cc88c9f3ab9ea83159262d3df9a` |
+| `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:940e82e549520daa1a5795693489680634f3807145d9a07000c0e1444a62c706` |
 
-Digests computed on 2026-10-02 with a build of the modeler's main at `1e2897bd`. Any edit to the protocol changes
+Digests computed on 2026-10-02 with a build of the modeler's main at `cc797016` (`studyflow info`), after two changes to all five files: the discontinuation threshold became one property of the subject's process (`max_unanswered`) that both tasks' exits read, and a step on the completion path (`Record_Completion`, before the completion end event) appends each completer's subject and arm to a Completers dataset (`data/completers.jsonl`), whose trials are the only ones the analysis reads, so a subject discontinued on either task, or excluded, is never analysed and leaves the classifier no missing value. The Completers dataset is bound to a schema of its two columns, so a cohort in which nobody completes reads it as an empty table, and the analysis then ends both questions at *Not testable* (the figure is drawn only when someone was analysed). Appending one record per subject to a `.jsonl` dataset, and reading a not-yet-written one as empty, need the python runner of the modeler's branch `feat/subject-exits` (commits `57ef0393` and `a6f09259`), not yet merged; with an earlier runtime these files fail at `Record_Completion`. Any edit to the protocol changes
 them, the cohort size included; the drawing, the Gantt progress and checklist ticks do not. The language-model runs are
 pending: the author runs them, with more subjects, once the Behaverse runner sends each trial's stimulus to the model.
 
@@ -39,11 +42,13 @@ supported* in the null run, and it does (the paper's `tbl-planted`).
 
 | File | Actor | Protocol digest |
 | --- | --- | --- |
-| `pipeline-check/planted.studyflow.yaml` | `simulate://planted` | `sha256:cf618897260557f1a870df96cdf53823b367791fae0e04e10f6f34715fbfaf19` |
-| `pipeline-check/null.studyflow.yaml` | `simulate://null` | `sha256:22a631fde3feccb698c2ee5eaa3999156c07c3d87902d36ea596ba36f9587afe` |
+| `pipeline-check/planted.studyflow.yaml` | `simulate://planted` | `sha256:ce371386487d5e1bd421c325bf3016891032105a1b2105a3d85d42581bceb933` |
+| `pipeline-check/null.studyflow.yaml` | `simulate://null` | `sha256:2aab3966f0559410f891d287b1f2bfc6263e755fa431ad226a7620962ca1ba43` |
 
-Both were run on 2026-10-02 by a CLI built from the modeler's main at `722fd5c9` (`run-planted/`, `run-null/`: the
-executed copy, the trials, the results and the run repository of each); each executed copy validates, its protocol
+Both were re-run on 2026-10-02 by a CLI built from the modeler's branch `feat/subject-exits` (`a6f09259`, on main `e62f8d36`), after the two changes above
+(`run-planted/`, `run-null/`: the executed copy, the trials, the results and the run repository of each). They
+reproduced the tables and decisions of the earlier runs exactly; those runs, made at `722fd5c9` before the changes,
+are in `../../archived/elife/study-runs-2026-10-02-before-completers/`. Each executed copy validates, its protocol
 matching the digest its run recorded. A random gateway draws for each subject from the seed, the gateway and the
 subject's number, so these runs deal the arms differently from the runs of 2026-09-29, which are archived in
 `../../archived/elife/study-runs-2026-09-29/` with the faulty re-run of 2026-10-02 (its CLI replayed one subject's

@@ -8,10 +8,10 @@ Analyze:
     Step 3 of the example study (`../study/example_study.studyflow`): its `Analysis` sub-process, unwrapped into a
     diagram of its own and otherwise unchanged — the same element ids, the same order, the same arguments. Seven
     preregistered operations read left to right and then wrap: read the recorded trials, keep the answered trials of the
-    test blocks, per-subject accuracy in each task, group statistics, then the two questions (the congruency effect
+    test blocks, per-subject accuracy in each task of the subjects the Completers dataset lists (the subject's process
+    appends one line per completer), group statistics, then the two questions (the congruency effect
     within subjects, the divergence between the two dispositions), each a collapsed sub-process that ends in a decision,
-    and last the figure. Accuracy is the measure throughout; a language model's latency is generation time, reported and
-    not tested. The decision rules are one Parameters object wired into the two questions (in the study it is wired into
+    and last the figure, when any subject was analysed. Accuracy is the measure throughout. The decision rules are one Parameters object wired into the two questions (in the study it is wired into
     `Analysis`, which holds them); the trials dataset is bound to the CSVW schema beside it. Every call is a library
     function named in full, so nothing here is code written for this study and the registered and the executed analysis
     are the same object.
@@ -36,8 +36,12 @@ Analyze:
       name: per_subject_indexed
     per_subject:
       name: per_subject
+    analysed_trials:
+      name: analysed_trials
     smallest_arm:
       name: smallest_arm
+    analysed_subjects:
+      name: analysed_subjects
   flowElements:
     Dataset_Trials:
       type: behaverse:BDMDataset
@@ -48,13 +52,22 @@ Analyze:
       schema: Trial_Schema
       dataLevel: trials
       uri: data/trials.jsonl
+    Dataset_Completers:
+      type: studyflow:Dataset
+      name: Completers
+      documentation: >-
+        One line per subject who completed the protocol, appended by the step before the completion end event: the
+        subject and its arm (`context`), keyed as the trials are. A subject excluded at screening or discontinued on
+        either task has no line, so the analysis keeps exactly the subjects the participant flow counts as completed.
+      schema: Completer_Schema
+      uri: data/completers.jsonl
     Trial_Schema:
       type: studyflow:Schema
       name: Trial schema
       documentation: >-
         The columns the analysis reads from the trials dataset, as a CSVW table schema: the trial's keys, its
-        congruency, whether the answer was correct, and its latency. `studyflow validate` checks every column an
-        operation reading the dataset names against this list, so a misspelled column fails before any data moves.
+        congruency, and whether the answer was correct. `studyflow validate` checks every column an operation reading
+        the dataset names against this list, so a misspelled column fails before any data moves.
       body:
         "@context": http://www.w3.org/ns/csvw
         tableSchema:
@@ -73,8 +86,22 @@ Analyze:
               datatype: string
             - name: result.isCorrect
               datatype: boolean
-            - name: trialContext.trial.timeInTrial
-              datatype: number
+    Completer_Schema:
+      type: studyflow:Schema
+      name: Completers schema
+      documentation: >-
+        The columns of the completers dataset, as a CSVW table schema: the subject and its arm, the keys the analysis
+        matches the trials on. `studyflow validate` checks the keys the analysis names against it, and before its first
+        line the dataset reads as a table with these columns and no row, so a cohort in which nobody completed is
+        analysed as one with no subject.
+      body:
+        "@context": http://www.w3.org/ns/csvw
+        tableSchema:
+          columns:
+            - name: context.subject
+              datatype: string
+            - name: context.state.arm
+              datatype: string
     Decision_Rules:
       type: studyflow:Parameters
       name: Decision rules
@@ -94,9 +121,9 @@ Analyze:
       type: SubProcess
       name: Read the recorded trials
       documentation: >-
-        The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the two calls
-        inside reduce them to one row per trial — the congruency the task drew, whether the answer was correct, and the
-        latency — with the trial keys as columns.
+        The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the two
+        calls inside reduce them to one row per trial — the congruency the task drew and whether the answer was
+        correct — with the trial keys as columns.
       flowElements:
         RT_Start:
           type: StartEvent
@@ -121,11 +148,9 @@ Analyze:
             values:
               - trialContext.congruency
               - result.isCorrect
-              - trialContext.trial.timeInTrial
             aggfunc:
               trialContext.congruency: first
               result.isCorrect: first
-              trialContext.trial.timeInTrial: max
           implementation: python://pandas.DataFrame.pivot_table
         Flatten_Index:
           type: ServiceTask
@@ -148,13 +173,13 @@ Analyze:
       type: SubProcess
       name: Keep answered test trials
       documentation: >-
-        The trials the actor did not answer within the response window leave the table, and so do the 1-back's tutorial
-        and practice blocks, which are instruction rather than measurement; the two measures the rest of the analysis
-        works on become numbers.
+        The trials the actor did not answer within the response window leave the table, and so do the 1-back's
+        tutorial and practice blocks, which are instruction rather than measurement; the two measures the rest of
+        the analysis works on become numbers.
       checklist: |-
         - [ ] Trials the actor did not answer within the response window dropped
         - [ ] The 1-back's tutorial and practice blocks dropped
-        - [ ] Every remaining trial carries a congruency and a latency
+        - [ ] Every remaining trial carries its task and block
       flowElements:
         F_Start:
           type: StartEvent
@@ -177,8 +202,8 @@ Analyze:
           type: ServiceTask
           name: Keep the test blocks
           documentation: >-
-            The blocks the analysis measures, named as the build names them: the Simon block and the 1-back's two test
-            blocks. XCIT_NB_01's tutorial and practice blocks are instruction, not measurement.
+            The blocks the analysis measures, named as the timelines name them: the Simon block and the 1-back's two
+            test blocks.
           dataInputAssociations:
             In_Kept_Blocks:
               sourceRef:
@@ -204,7 +229,6 @@ Analyze:
           additionalArguments:
             dtype:
               result.isCorrect: float
-              trialContext.trial.timeInTrial: float
           implementation: python://pandas.DataFrame.astype
         F_End:
           type: EndEvent
@@ -216,19 +240,46 @@ Analyze:
       type: SubProcess
       name: Per-subject accuracy by task
       documentation: >-
-        One row per subject: its mean accuracy in each task, with the subject and its arm as columns, written out as the
-        per-subject table of the results dataset; then the size of the smaller arm, which the divergence question checks
-        against the decision rules before it tests anything.
+        The analysed population and its summary: the trials of the subjects who completed the protocol, as the
+        completers dataset lists them, which every question and the figure read; one row per subject, its mean
+        accuracy in each task, with the subject and its arm as columns, written out as the per-subject table of the
+        results dataset; then the size of the smaller arm, which the divergence question checks against the
+        decision rules before it tests anything.
       flowElements:
         PS_Start:
           type: StartEvent
+        Completer_Trials:
+          type: ServiceTask
+          name: Trials of the subjects who completed
+          documentation: >-
+            The analysed population: the trials of the subjects with a line in the completers dataset, matched on
+            the subject and its arm. A subject discontinued on either task, the 1-back included, has trials but no
+            line, and leaves here.
+          dataInputAssociations:
+            In_Trials_All:
+              sourceRef:
+                - trials
+              transformation: self
+            In_Completers:
+              sourceRef:
+                - Dataset_Completers
+              transformation: right
+          dataOutputAssociations:
+            Out_Analysed_Trials:
+              targetRef: analysed_trials
+          additionalArguments:
+            "on":
+              - context.subject
+              - context.state.arm
+            how: inner
+          implementation: python://pandas.DataFrame.merge
         Per_Subject_Table:
           type: ServiceTask
           name: Per-subject summary
           dataInputAssociations:
             In_Trials_PS:
               sourceRef:
-                - trials
+                - analysed_trials
               transformation: self
           dataOutputAssociations:
             Out_PS:
@@ -259,8 +310,8 @@ Analyze:
           type: ServiceTask
           name: Subjects per arm
           documentation: >-
-            How many subjects each arm holds; the smaller count is what the feasibility checks read, and an arm nobody
-            reached counts as zero.
+            How many subjects each arm holds; the smaller count is what the feasibility checks read, and an arm
+            nobody reached counts as zero. Their sum is how many subjects were analysed, which the figure checks.
           dataInputAssociations:
             In_PS_Arms:
               sourceRef:
@@ -270,6 +321,9 @@ Analyze:
             Out_Smallest_Arm:
               targetRef: smallest_arm
               transformation: if count(result) = 2 then min(result) else 0
+            Out_Analysed_Subjects:
+              targetRef: analysed_subjects
+              transformation: if count(result) = 0 then 0 else sum(result)
           additionalArguments:
             subset:
               - context.state.arm
@@ -280,10 +334,11 @@ Analyze:
           uri: results/per_subject.csv
         PS_End:
           type: EndEvent
-        PSF_0: PS_Start -> Per_Subject_Table
-        PSF_1: Per_Subject_Table -> Per_Subject_Flat
-        PSF_2: Per_Subject_Flat -> Arm_Sizes
-        PSF_3: Arm_Sizes -> PS_End
+        PSF_0: PS_Start -> Completer_Trials
+        PSF_1: Completer_Trials -> Per_Subject_Table
+        PSF_2: Per_Subject_Table -> Per_Subject_Flat
+        PSF_3: Per_Subject_Flat -> Arm_Sizes
+        PSF_4: Arm_Sizes -> PS_End
     Group:
       type: ServiceTask
       name: Group statistics
@@ -310,8 +365,7 @@ Analyze:
       documentation: >-
         Is a subject less accurate on incongruent than on congruent Simon trials? Per subject, the mean accuracy on
         congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
-        one-sided one-sample t test. Accuracy rather than latency, because a language model's latency is the time its
-        server took to generate the reply. The decision was fixed before the first run: not testable with fewer subjects
+        one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects
         than the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The
         descriptive table by disposition and congruency is written out either way.
       properties:
@@ -338,18 +392,18 @@ Analyze:
           type: SubProcess
           name: Accuracy cost per subject
           documentation: >-
-            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the mean
-            accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
+            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the
+            mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
           flowElements:
             CP_Start:
               type: StartEvent
             Congruency_Table:
               type: ServiceTask
-              name: Accuracy and latency by congruency
+              name: Accuracy by congruency
               dataInputAssociations:
                 In_Trials_C:
                   sourceRef:
-                    - trials
+                    - analysed_trials
                   transformation: self
               dataOutputAssociations:
                 Out_Congruency:
@@ -360,7 +414,6 @@ Analyze:
                   - trialContext.congruency
                 values:
                   - result.isCorrect
-                  - trialContext.trial.timeInTrial
                 aggfunc: mean
               implementation: python://pandas.DataFrame.pivot_table
             By_Congruency:
@@ -369,7 +422,7 @@ Analyze:
               dataInputAssociations:
                 In_Trials_BC:
                   sourceRef:
-                    - trials
+                    - analysed_trials
                   transformation: self
               dataOutputAssociations:
                 Out_BC:
@@ -383,6 +436,7 @@ Analyze:
             Accuracy_Incongruent:
               type: ServiceTask
               name: Incongruent accuracies
+              documentation: The incongruent column, one accuracy per subject; empty when no subject was analysed.
               dataInputAssociations:
                 In_BC_I:
                   sourceRef:
@@ -393,10 +447,15 @@ Analyze:
                   targetRef: accuracy_incongruent
               additionalArguments:
                 key: Incongruent
+                default:
+                  implementation: python://pandas.Series
+                  arguments:
+                    dtype: float
               implementation: python://pandas.DataFrame.get
             Accuracy_Congruent:
               type: ServiceTask
               name: Congruent accuracies
+              documentation: The congruent column, one accuracy per subject; empty when no subject was analysed.
               dataInputAssociations:
                 In_BC_C:
                   sourceRef:
@@ -407,6 +466,10 @@ Analyze:
                   targetRef: accuracy_congruent
               additionalArguments:
                 key: Congruent
+                default:
+                  implementation: python://pandas.Series
+                  arguments:
+                    dtype: float
               implementation: python://pandas.DataFrame.get
             Cost:
               type: ServiceTask
@@ -505,12 +568,12 @@ Analyze:
       type: SubProcess
       name: Divergence between dispositions
       documentation: >-
-        Can a classifier tell the two dispositions apart better than chance? One row per subject, its accuracy in each
-        of the two tasks as features and its arm as the label, scored by leave-one-subject-out cross-validation; the
-        permutation test shuffles the arm labels across subjects, the unit that was randomized, so chance is what the
-        same classifier scores when the labels carry nothing. Fixed before the first run: not testable when an arm holds
-        fewer subjects than the decision rules' minimum, supported when the permutation p is below their alpha, not
-        supported otherwise.
+        Can a classifier tell the two dispositions apart better than chance? One row per subject, its accuracy in
+        each of the two tasks as standardized features and its arm as the label, a logistic regression scored by
+        leave-one-subject-out cross-validation; the permutation test shuffles the arm labels across subjects, the
+        unit that was randomized, so chance is what the same classifier scores when the labels carry nothing. Fixed
+        before the first run: not testable when an arm holds fewer subjects than the decision rules' minimum,
+        supported when the permutation p is below their alpha, not supported otherwise.
       properties:
         subject_features:
           name: subject_features
@@ -532,6 +595,7 @@ Analyze:
         Features:
           type: ServiceTask
           name: Accuracy in each task
+          documentation: The per-subject table without its key columns, one column per task, so the features are the tasks.
           dataInputAssociations:
             In_PS_F:
               sourceRef:
@@ -580,9 +644,13 @@ Analyze:
               transformation: "{accuracy: result[1], pvalue: result[3]}"
           additionalArguments:
             estimator:
-              implementation: python://sklearn.linear_model.LogisticRegression
+              implementation: python://sklearn.pipeline.make_pipeline
               arguments:
-                max_iter: 1000
+                args:
+                  - implementation: python://sklearn.preprocessing.StandardScaler
+                  - implementation: python://sklearn.linear_model.LogisticRegression
+                    arguments:
+                      max_iter: 1000
             cv:
               implementation: python://sklearn.model_selection.LeaveOneOut
             n_permutations: "{n_permutations}"
@@ -627,6 +695,10 @@ Analyze:
           name: "no"
           sourceRef: Divergence_Decision
           targetRef: D_Not_Supported
+    Anyone_Analysed:
+      type: ExclusiveGateway
+      name: Anyone analysed?
+      default: AF_No_Figure
     Plot:
       type: ServiceTask
       name: Figure
@@ -634,7 +706,7 @@ Analyze:
       dataInputAssociations:
         In_Trials_P:
           sourceRef:
-            - trials
+            - analysed_trials
           transformation: self
       dataOutputAssociations:
         Out_Plot:
@@ -666,12 +738,31 @@ Analyze:
     AF_3: Per_Subject -> Group
     AF_4: Group -> Congruency
     AF_5: Congruency -> Divergence
-    AF_7: Divergence -> Plot
+    AF_7: Divergence -> Anyone_Analysed
+    AF_Figure:
+      name: "yes"
+      conditionExpression: analysed_subjects > 0
+      sourceRef: Anyone_Analysed
+      targetRef: Plot
+    AF_No_Figure:
+      name: "no"
+      sourceRef: Anyone_Analysed
+      targetRef: An_End
     AF_8: Plot -> An_End
 layout:
   Dataset_Trials:
     bounds: 60 20 50 50
     label: 116 32 60 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Dataset_Completers:
+    bounds: 530 20 50 50
+    label: 586 32 66 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Completer_Schema:
+    bounds: 680 20 36 50
+    label: 722 32 104 14
     fill: "#f4f1f8"
     stroke: "#7a67a6"
   Trial_Schema:
@@ -727,14 +818,28 @@ layout:
     stroke: "#7a67a6"
   In_Rules_D:
     waypoint: 303,425 375,425 375,360
+  Anyone_Analysed:
+    bounds: 480 300 50 50
+    isMarkerVisible: true
+    label: 455 356 100 14
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  AF_Figure:
+    waypoint: 530,325 570,325
+    label: 538 306 24 14
+    stroke: "#7a67a6"
+  AF_No_Figure:
+    waypoint: 505,300 505,270 788,270 788,307
+    label: 512 274 20 14
+    stroke: "#7a67a6"
   Plot:
-    bounds: 480 290 150 70
+    bounds: 570 290 150 70
     font: "#7a67a6"
     fill: "#e6dff1"
     stroke: "#7a67a6"
   An_End:
-    bounds: 680 307 36 36
-    label: 666 349 64 14
+    bounds: 770 307 36 36
+    label: 756 349 64 14
     fill: "#e6dff1"
     stroke: "#7a67a6"
   File_Group:
@@ -743,8 +848,8 @@ layout:
     fill: "#f4f1f8"
     stroke: "#7a67a6"
   File_Accuracy:
-    bounds: 537 400 36 50
-    label: 579 412 96 14
+    bounds: 627 400 36 50
+    label: 669 412 96 14
     fill: "#f4f1f8"
     stroke: "#7a67a6"
   AF_4:

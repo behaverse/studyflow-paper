@@ -83,6 +83,7 @@ Example_Study:
             - Failed_WorkingMemory
             - Discontinued
             - Debrief
+            - Record_Completion
             - Sub_End
   flowElements:
     Enroll:
@@ -177,6 +178,19 @@ Example_Study:
       content: The session is over. Thank you for taking part; nothing further is asked of you.
       onset: T0+4min
       duration: 1s
+    Record_Completion:
+      type: ServiceTask
+      name: Record the completion
+      documentation: >-
+        Appends the subject's line to the completers dataset: its number and its arm, named as its trials name them.
+        Only a subject who completes the protocol passes here; one who leaves at an exit never does, so the analysis
+        takes its population from the protocol rather than from which trials it finds.
+      additionalArguments:
+        context:
+          subject: "{state._meta.instance.Participant_Subject}"
+          state:
+            arm: "{arm}"
+      implementation: python://builtins.dict
     Sub_End:
       type: EndEvent
       name: Completed the protocol (n={reached})
@@ -204,7 +218,8 @@ Example_Study:
     SF_Merge_Interference: Merge_Allocation -> Task_Interference
     SF_Interference_WorkingMemory: Task_Interference -> Task_WorkingMemory
     SF_WorkingMemory_Debrief: Task_WorkingMemory -> Debrief
-    SF_Debrief_End: Debrief -> Sub_End
+    SF_Debrief_Record: Debrief -> Record_Completion
+    SF_Record_End: Record_Completion -> Sub_End
     SF_Failed_Interference: Failed_Interference -> Discontinued
     SF_Failed_WorkingMemory: Failed_WorkingMemory -> Discontinued
 layout:
@@ -301,13 +316,18 @@ layout:
     fill: "#f1d0cd"
     stroke: "#ac5a54"
   Debrief:
-    bounds: 640 506 140 80
+    bounds: 640 506 140 64
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Record_Completion:
+    bounds: 640 588 140 58
     font: "#a2803c"
     fill: "#f6e8c9"
     stroke: "#a2803c"
   Sub_End:
-    bounds: 692 646 36 36
-    label: 645 688 140 28
+    bounds: 692 664 36 36
+    label: 645 704 140 28
     fill: "#f6e8c9"
     stroke: "#a2803c"
   SF_Start_Screening:
@@ -347,8 +367,11 @@ layout:
   SF_WorkingMemory_Debrief:
     waypoint: 588,546 640,546
     stroke: "#a2803c"
-  SF_Debrief_End:
-    waypoint: 710,586 710,646
+  SF_Debrief_Record:
+    waypoint: 710,570 710,588
+    stroke: "#a2803c"
+  SF_Record_End:
+    waypoint: 710,646 710,664
     stroke: "#a2803c"
   SF_Failed_Interference:
     waypoint: 374,604 374,656
@@ -417,7 +440,9 @@ state:
       NBack_End: 8
       SF_WorkingMemory_Debrief: 8
       Debrief: 8
-      SF_Debrief_End: 8
+      SF_Debrief_Record: 8
+      Record_Completion: 8
+      SF_Record_End: 8
       Sub_End: 8
       Flow_Allocate_Cautious: 4
       Allocate_Cautious: 4

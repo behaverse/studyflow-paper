@@ -16,8 +16,8 @@ Decide:
     - pandas==2.3.3
     - scipy==1.16.2
   properties:
-    trials:
-      name: trials
+    analysed_trials:
+      name: analysed_trials
   flowElements:
     Decision_Rules:
       type: studyflow:Parameters
@@ -35,6 +35,12 @@ Decide:
     Congruency:
       type: SubProcess
       name: Congruency effect
+      documentation: >-
+        Is a subject less accurate on incongruent than on congruent Simon trials? Per subject, the mean accuracy on
+        congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
+        one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects
+        than the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The
+        descriptive table by disposition and congruency is written out either way.
       properties:
         by_congruency:
           name: by_congruency
@@ -59,18 +65,18 @@ Decide:
           type: SubProcess
           name: Accuracy cost per subject
           documentation: >-
-            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the mean
-            accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
+            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the
+            mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
           flowElements:
             CP_Start:
               type: StartEvent
             Congruency_Table:
               type: ServiceTask
-              name: Accuracy and latency by congruency
+              name: Accuracy by congruency
               dataInputAssociations:
                 In_Trials_C:
                   sourceRef:
-                    - trials
+                    - analysed_trials
                   transformation: self
               dataOutputAssociations:
                 Out_Congruency:
@@ -81,7 +87,6 @@ Decide:
                   - trialContext.congruency
                 values:
                   - result.isCorrect
-                  - trialContext.trial.timeInTrial
                 aggfunc: mean
               implementation: python://pandas.DataFrame.pivot_table
             By_Congruency:
@@ -90,7 +95,7 @@ Decide:
               dataInputAssociations:
                 In_Trials_BC:
                   sourceRef:
-                    - trials
+                    - analysed_trials
                   transformation: self
               dataOutputAssociations:
                 Out_BC:
@@ -104,6 +109,7 @@ Decide:
             Accuracy_Incongruent:
               type: ServiceTask
               name: Incongruent accuracies
+              documentation: The incongruent column, one accuracy per subject; empty when no subject was analysed.
               dataInputAssociations:
                 In_BC_I:
                   sourceRef:
@@ -114,10 +120,15 @@ Decide:
                   targetRef: accuracy_incongruent
               additionalArguments:
                 key: Incongruent
+                default:
+                  implementation: python://pandas.Series
+                  arguments:
+                    dtype: float
               implementation: python://pandas.DataFrame.get
             Accuracy_Congruent:
               type: ServiceTask
               name: Congruent accuracies
+              documentation: The congruent column, one accuracy per subject; empty when no subject was analysed.
               dataInputAssociations:
                 In_BC_C:
                   sourceRef:
@@ -128,6 +139,10 @@ Decide:
                   targetRef: accuracy_congruent
               additionalArguments:
                 key: Congruent
+                default:
+                  implementation: python://pandas.Series
+                  arguments:
+                    dtype: float
               implementation: python://pandas.DataFrame.get
             Cost:
               type: ServiceTask
@@ -176,6 +191,9 @@ Decide:
             Out_Cost_Test:
               targetRef: congruency_test
               transformation: "{statistic: result.statistic, pvalue: result.pvalue}"
+            Out_Cost_File:
+              targetRef: File_Congruency_Test
+              transformation: "{statistic: result.statistic, pvalue: result.pvalue, subjects: congruency_n}"
           additionalArguments:
             popmean: 0
             alternative: greater
@@ -194,6 +212,10 @@ Decide:
         C_Not_Testable:
           type: EndEvent
           name: Not testable
+        File_Congruency_Test:
+          type: DataObjectReference
+          name: Congruency test
+          uri: results/congruency_test.json
         CF_0: C_Start -> Cost_Per_Subject
         CF_1: Cost_Per_Subject -> Enough_Subjects
         C_Too_Few:

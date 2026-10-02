@@ -7,8 +7,8 @@ Report_Collaboration:
   documentation: >-
     Step 4 of the example study (`../study/example_study.studyflow`): everything the study does for reporting, with the
     study's own element ids, and in the two pools the study itself uses, because the two halves run on different beats.
-    In the subjects' pool, once per subject, a debrief closes the session and the instance ends at `Completed the
-    protocol`; the pool carries the parallel marker for its eight instances. In the analysis and report pool, once,
+    In the subjects' pool, once per subject, a debrief closes the session, a step records the subject as one who
+    completed, and the instance ends at `Completed the protocol`; the pool carries the parallel marker for its eight instances. In the analysis and report pool, once,
     after the analysis, a manual activity renders the reporting artifacts from the results dataset and the study ends at
     `Completed`. The render is manual on purpose — a person reads the figures before they go into the manuscript — and
     nothing else is added for reporting: the CONSORT flow (@fig-consort), the SPIRIT schedule, the checklist and the
@@ -40,11 +40,25 @@ Subject_Report:
       content: The session is over. Thank you for taking part; nothing further is asked of you.
       onset: T0+80s
       duration: 1s
+    Record_Completion:
+      type: ServiceTask
+      name: Record the completion
+      documentation: >-
+        Appends the subject's line to the completers dataset: its number and its arm, named as its trials name them.
+        Only a subject who completes the protocol passes here; one who leaves at an exit never does, so the analysis
+        takes its population from the protocol rather than from which trials it finds.
+      additionalArguments:
+        context:
+          subject: "{state._meta.instance.Participant_Subject}"
+          state:
+            arm: "{arm}"
+      implementation: python://builtins.dict
     Sub_End:
       type: EndEvent
       name: Completed the protocol (n={reached})
     SF_Battery_Debrief: Battery_Done -> Debrief
-    SF_Debrief_End: Debrief -> Sub_End
+    SF_Debrief_Record: Debrief -> Record_Completion
+    SF_Record_End: Record_Completion -> Sub_End
 Report:
   type: Process
   name: Once, after the analysis
@@ -93,20 +107,28 @@ layout:
     fill: "#f6e8c9"
     stroke: "#a2803c"
   Debrief:
-    bounds: 330 90 160 70
+    bounds: 330 90 110 70
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Record_Completion:
+    bounds: 466 90 116 70
     font: "#a2803c"
     fill: "#f6e8c9"
     stroke: "#a2803c"
   Sub_End:
-    bounds: 560 112 36 36
-    label: 506 154 140 28
+    bounds: 622 112 36 36
+    label: 570 154 140 28
     fill: "#f6e8c9"
     stroke: "#a2803c"
   SF_Battery_Debrief:
     waypoint: 266,128 330,128
     stroke: "#a2803c"
-  SF_Debrief_End:
-    waypoint: 490,130 560,130
+  SF_Debrief_Record:
+    waypoint: 440,125 466,125
+    stroke: "#a2803c"
+  SF_Record_End:
+    waypoint: 582,130 622,130
     stroke: "#a2803c"
   R_Start:
     bounds: 230 390 36 36
@@ -141,5 +163,6 @@ state:
   _meta:
     reached:
       Debrief: 0
+      Record_Completion: 0
       Sub_End: 0
       Completed: 0
