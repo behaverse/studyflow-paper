@@ -201,7 +201,7 @@ image(STRIP, X0 + 2, FY + 30, W - 4)
 
 # ---------------------------------------------------------------- c) the modeler's views of the file
 PY = STRIP_BOTTOM + 34
-GAP, LW = 12, 556
+GAP, LW = 12, 400
 RW = W - LW - GAP
 LX, RX = X0, X0 + LW + GAP
 tops = {}
@@ -218,11 +218,12 @@ def panel(x, y, w, name, ico, who, whoic, images, arrow_x, gap=6, entry=None):
 
 
 y1 = panel(LX, PY, LW, 'Gantt view', 'rows', 'ethics board', 'account-group-outline', [BUILD / 'view-gantt.png'], LX + LW / 2)
-y2 = panel(RX, PY, RW, 'Checklist view', 'check-square', 'reviewer', 'account-eye-outline',
-           sorted(BUILD.glob('view-checklist-*.png')), RX + RW / 2)
-# the run history sits under the schedule; its arrow leaves the file beside the Gantt panel and turns in at its corner
-y3 = panel(LX, y1 + 14, LW, 'Provenance view', 'git-branch', 'replicator', 'account-convert-outline',
-           [BUILD / 'view-provenance.png'], LX + LW + GAP / 2, entry=0.96)
+# the checklists sit under the schedule; their arrow leaves the file beside the Gantt panel and turns in at its corner
+y2 = panel(LX, y1 + 14, LW, 'Checklist view', 'check-square', 'reviewer', 'account-eye-outline',
+           sorted(BUILD.glob('view-checklist-*.png')), LX + LW + GAP / 2, entry=0.96)
+# the run history, two runs and a re-run that branches after an invalidated step, takes the column beside them
+y3 = panel(RX, PY, RW, 'Provenance view', 'git-branch', 'replicator', 'account-convert-outline',
+           [BUILD / 'view-provenance.png'], RX + RW / 2)
 H = max(y2, y3) + 12
 
 # ---------------------------------------------------------------- write

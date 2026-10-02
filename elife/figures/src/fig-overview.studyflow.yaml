@@ -33,12 +33,34 @@ Example_Study:
     Enroll:
       type: StartEvent
       name: Enrolled and consented
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:17.635+02:00"
+          run: run
+          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:29:13.794+02:00"
+          run: rerun
+          commit: a7bc99cfce062aabeff0904e83e50da664328612
       onset: T0
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
     Screening:
       type: cognitive:Questionnaire
       name: Assessed for eligibility (n={reached})
       instrument: comprehension-check
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:17.702+02:00"
+          run: run
+          commit: 2da1be3e47a3482c699f549aa27a7b02d81d7cfa
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:29:13.856+02:00"
+          run: rerun
+          commit: d986a5edbcabdbe23577490facb2fc94a881d99e
       checklist: |-
         - [x] Consent recorded
         - [x] Executor configuration pinned (model id, sampling parameters)
@@ -53,6 +75,18 @@ Example_Study:
         - Comprehension check answered as instructed
       exclusionCriteria:
         - No answer, or an answer that does not follow the instruction
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:17.811+02:00"
+          what: Flow_Eligible
+          run: run
+          commit: dd8eab6a0d69868bfa3429db921c0516ccfc3fff
+        - type: prov:Activity
+          action: reused
+          when: "2026-10-02T07:29:13.956+02:00"
+          what: "2026-09-29T23:01:17.811+02:00"
+          run: rerun
       default: Flow_Excluded_Pre
     Excluded_Pre:
       type: EndEvent
@@ -62,10 +96,28 @@ Example_Study:
       name: Which disposition? (n={reached})
       algorithm: block
       allocationRatio: "1:1"
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:17.919+02:00"
+          what: Flow_Allocate_Impulsive
+          run: run
+          commit: 855dbe5b9ba86d491a0655184def6dcd45b89743
+        - type: prov:Activity
+          action: reused
+          when: "2026-10-02T07:29:14.046+02:00"
+          what: "2026-09-29T23:01:17.919+02:00"
+          run: rerun
       default: Flow_Allocate_Impulsive
     Allocate_Cautious:
       type: ServiceTask
       name: Allocated to cautious (n={reached})
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:00:51.808+02:00"
+          run: run
+          commit: 35705098ba02609b410a535b9ff1136856d0a275
       onset: T0
       duration: 1s
       additionalArguments:
@@ -75,6 +127,17 @@ Example_Study:
     Allocate_Impulsive:
       type: ServiceTask
       name: Allocated to impulsive (n={reached})
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:18.206+02:00"
+          run: run
+          commit: 263e4ad89320cd2294fe0f869cb5f40f841a50bf
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:29:14.303+02:00"
+          run: rerun
+          commit: f7553f97f03e93443f7c93ea67a0d33863741269
       onset: T0
       duration: 1s
       additionalArguments:
@@ -95,6 +158,17 @@ Example_Study:
       name: Interference control (Simon)
       instrument: WO
       timeline: SimonTask
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:27.337+02:00"
+          run: run
+          commit: 762b168ba7cf0676ffde2fd62a70b5eb65114525
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:29:22.805+02:00"
+          run: rerun
+          commit: d0d6c29e9c4810744e08854d74463dcdcb8dc6ef
       onset: T0+20s
       duration: 40s
       dataInputAssociations:
@@ -114,6 +188,17 @@ Example_Study:
       name: Working memory (1-back)
       instrument: NB
       timeline: XCIT_NB_01
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:44.212+02:00"
+          run: run
+          commit: 39005f94265efff78edc15df48128e783aaf53fb
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:29:38.037+02:00"
+          run: rerun
+          commit: cca7afdbe7a8149e21d3373b033cd8e3d932cfaa
       onset: T0+60s
       duration: 3min
       dataOutputAssociations:
@@ -131,6 +216,15 @@ Example_Study:
       type: behaverse:BDMDataset
       name: Trials
       dataLevel: trials
+      extensionElements:
+        - type: prov:Activity
+          action: created
+          when: "2026-09-29T23:01:44.211+02:00"
+          run: run
+        - type: prov:Activity
+          action: created
+          when: "2026-10-02T07:29:38.037+02:00"
+          run: rerun
       uri: data/trials.jsonl
     Discontinued:
       type: EndEvent
@@ -139,6 +233,24 @@ Example_Study:
       type: SubProcess
       name: Analysis
       documentation: Seven preregistered operations, collapsed here; @fig-step3-analyze draws them.
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:02:15.868+02:00"
+          run: run
+          commit: bf31ffb5a1ebd383a758a4da7e5b451a3e8b9297
+        - type: prov:Activity
+          action: invalidated
+          when: "2026-10-02T07:26:25.949+02:00"
+          who: morteza
+          with: studyflow-modeler/26.9.29
+          what: "2026-09-29T23:02:15.868+02:00"
+          run: run
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:30:13.095+02:00"
+          run: rerun
+          commit: 6283b44132f25f4cc40ba81dcc165b43404c7e76
       checklist: |-
         - [x] Trials the actor did not answer within the response window dropped
         - [x] The 1-back's tutorial and practice blocks dropped
@@ -148,6 +260,17 @@ Example_Study:
     Render:
       type: ManualTask
       name: Render the report
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:02:16.076+02:00"
+          run: run
+          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:30:13.196+02:00"
+          run: rerun
+          commit: a7bc99cfce062aabeff0904e83e50da664328612
       checklist: |-
         - [x] CONSORT participant flow exported from the Figure view
         - [x] SPIRIT schedule exported from the Gantt view
@@ -157,6 +280,17 @@ Example_Study:
     Completed:
       type: EndEvent
       name: Study complete
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:02:16.233+02:00"
+          run: run
+          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:30:13.294+02:00"
+          run: rerun
+          commit: a7bc99cfce062aabeff0904e83e50da664328612
     Flow_Enroll_Screening: Enroll -> Screening
     Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
     Flow_Eligible: Eligibility_Gateway -> Randomize_Disposition
@@ -324,6 +458,13 @@ state:
         who: morteza
         with: studyflow-cli/26.9.29
         run: run
+        seed: 42
+        plan: sha256:b31e928d7a1bafb89fba8b5b1972b4f2018b02dc638628ad9845a292aea1f38e
+      - action: executed
+        when: "2026-10-02T07:26:26.394+02:00"
+        who: morteza
+        with: studyflow-cli/26.9.29
+        run: rerun
         seed: 42
         plan: sha256:b31e928d7a1bafb89fba8b5b1972b4f2018b02dc638628ad9845a292aea1f38e
     instance:
