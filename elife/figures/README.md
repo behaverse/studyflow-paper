@@ -1,23 +1,40 @@
 # Figures
 
-The figures `../paper-v3.qmd` cites, one PNG per `@fig-…` label. All but the three named at the bottom are generated, from [`src/`](src/) or from [`../study/`](../study/README.md).
+The figures `../paper-v3.qmd` cites, one PNG per `@fig-…` label. Every figure that shows a study is a Studyflow
+diagram drawn by the reference modeler, and its PNG carries that diagram: `studyflow info <png>` reads it back, and
+the modeler opens the PNG as the study. Each PNG also carries its print size.
 
-```sh
-MODELER=~/workspace/behaverse/studyflow-modeler src/render.sh                 # every figure, ~10 min
-MODELER=~/workspace/behaverse/studyflow-modeler src/render.sh fig-consort     # one of them
-```
+| Figure | What it shows | Its diagram |
+|:--|:--|:--|
+| `fig-overview` | the lifecycle grid, today's artifacts and tools, and the example study with three of the modeler's views (Gantt, Checklist, Provenance) | `src/fig-overview.studyflow.yaml`, laid out in `fig-overview.drawio` |
+| `fig-combined` | the executable example study, as the run left it | `../study/run/example_study.studyflow.yaml`, with the one-row key `src/fig-key.studyflow.yaml` under it |
+| `fig-consort` | the CONSORT participant flow (the Manuscript Figure view), beside `fig-consort-reference` | `src/fig-consort.studyflow.yaml` |
+| `fig-step1-design` … `fig-step4-report` | the study built one step at a time | `src/fig-step*.studyflow.yaml` |
+| `fig-step2-nback`, beside `fig-step2-nback-classic` | the N-back drawn out, beside a slide-style drawing of it | `src/fig-step2-nback.studyflow.yaml` |
+| `fig-views` | the Gantt, Provenance and Checklist views of `fig-combined` at full size | screenshots of the modeler's dialogs; no diagram embedded |
+| `fig-elements` | every element the palette offers | the modeler's kitchen sink example |
+| `fig-s2-modeler` | the modeler editing Step 2 | a screenshot |
 
-`src/render.sh` is the list of figures, their sources and their print scales; each script says what it does at its top.
+`fig-consort-reference` and `fig-step2-nback-classic` are the two hand-drawn panels; their sources are the `.svg`
+files in `src/`.
 
-- `fig-*.studyflow.yaml` — hand-written diagrams, drawn by the modeler. `layout.py` routes the flows that carry no `waypoint`; `colorize.py` colours everything by the step it belongs to (its docstring is the palette and the rule); labels cite run state as `{reached}`, which renders 0 for an element no run reached.
-- `fig-consort`, `fig-overview` and the six `fig-step*` diagrams are simplifications of the example study and reuse its element ids (`fig-step3-decision` is its `Congruency` question expanded, the second panel of @fig-step3-analyze), so a reader can match any box to a box in @fig-combined. `fig-consort` carries the same three lanes and `fig-step1-design` the two its topic covers; the CONSORT phases are lanes directly in the subjects' pool, never groups and never a sub-process, and the flow drops straight down from one lane to the next at one x. In @fig-combined each exit sits at the right edge of the lane it leaves; `fig-consort` is a narrow column, so its exits sit where the column has room instead. One container level is the rule: a pool holds lanes, and anything that needs another level becomes another pool. Each lane carries the tint of its step (`colorize.py`) and the pool under it none; the pool's own multiplicity marker sits in its title band, which no lane reaches. The step figures draw the deposited plan, so every `(n=…)` in them prints `n=0`; `fig-consort` and `fig-overview` carry the `state:` block of the reported run (see below), so theirs print the run's counts. `studyflow validate` reports those two copies for what they are, drawings of the study rather than the protocol that ran: a seal warning on both, and unbalanced counts where `fig-overview` compacts the study (see [`../study/README.md`](../study/README.md)).
-- `fig-combined` has no source here: it is the executable example study, [`../study/example_study.studyflow.yaml`](../study/README.md). `render.sh` draws it from `../study/run/example_study.studyflow.yaml`, the executed copy, when a run has left one, and from the deposited file otherwise, so its CONSORT numbers are the numbers a run produced. Three pools stacked (the model, the subjects, the analysis and report), one `trial`/`response` exchange drawn on the subjects' pool and one `all subjects complete` message from it to the analysis pool's start event, the subjects' pool carrying BPMN's parallel marker and `×8` in its title band for its eight instances and divided into the three CONSORT phases as **lanes** (Enrolment, Allocation, Follow-up), the `Trials` dataset between the two lab pools, `Analysis` collapsed to its `+`; @fig-step2-run draws the exchange per task and @fig-step3-analyze expands the analysis into its seven operations.
-- `fig-*.svg` — the two hand-drawn panels (the CONSORT 2025 template, the slide-style N-back).
-- `fig-step3-coordinator` — an alternative drawing of Step 3, not cited by the paper: the same analysis with the diagram as coordination only (order, hand-offs, the data contract, every feasibility and decision gate, the decision rules, the claim states) and the computation delegated to `src/analysis.py`, five functions deposited beside the study, each a library call or two. The two questions fit one row each, so both are drawn expanded. The first step names the columns it reads in its `columns` argument, which is where the data-contract check reads them. `python3 src/analysis.py` self-checks the module on a synthetic cohort of eight.
-- `fig-views` — the modeler's Gantt, Provenance and Checklist dialogs of `fig-combined` (`views.mjs`, `compose_views.py`), composed from whatever the three dialogs had to show. The provenance log exists only once the file carries run records, so the deposited plan captures the dialog's `No provenance yet.` instead; that panel fills in after a run. `fig-s2-modeler` — a modeler screenshot of Step 2 (`modeler.mjs`); `fig-elements` — the modeler's kitchen sink.
-- `fig-key.studyflow.yaml` is the one-row symbol key `compose_key.py` puts under `fig-combined`; it has no figure of its own.
-- `fig-overview` — `fig-overview.py` lays the lifecycle grid out in draw.io and embeds the modeler's renders of `fig-overview.studyflow.yaml` (the example study compacted to one row: the pool of eight subjects flattened to one, `Analysis` collapsed) and of its views. Edit the yaml or the script, never `fig-overview.drawio`, which it overwrites. Its Provenance view shows two runs: the reported one, and a re-run after its `Analysis` record was invalidated, which branches there (`../study/run-2026-10-02-rerun/`, a copy of `../study/run/` run again by the CLI that made it; the subjects are simulated, so it called no model). `src/overview-history.py` gives the yaml both repositories' records. `icons.json` is the draw.io icon palette for the non-Studyflow furniture.
+## How the diagrams relate
 
-Every PNG `render.sh` draws from a `.studyflow.yaml` carries that diagram (`studyflow info <png>` reads it back; the modeler opens it) and its print size in a `pHYs` chunk. `fig-views` is the exception: it is a composite of dialog screenshots, so it carries the print size and no diagram. `fig-combined`, `fig-consort` and `fig-overview` are one study, so the `state:` block of `fig-consort.studyflow.yaml` is copied byte for byte from `../study/run/example_study.studyflow.yaml` after a run, and `fig-overview.studyflow.yaml` takes the same block with the re-run's timeline of runs (`src/overview-history.py`); re-copying them after a new run is what refills them, before re-rendering those two and `fig-views`.
+- The step figures, `fig-consort` and `fig-overview` simplify the example study and reuse its element ids, so a reader
+  can match any box to one in `fig-combined`. `fig-step3-decision` is its `Congruency` question expanded.
+- The CONSORT phases are lanes directly in the subjects' pool, never groups and never a sub-process. A pool holds lanes,
+  and anything that needs another level becomes another pool. Each lane carries the tint of its lifecycle step.
+- The step figures draw the deposited plan, so their counts print `n=0`. `fig-combined`, `fig-consort` and
+  `fig-overview` are one study and print the run's counts: the `state:` block of `fig-consort.studyflow.yaml` is the
+  run's (`../study/run/`), copied byte for byte, and `fig-overview.studyflow.yaml` has the same block with a longer
+  timeline of runs. `studyflow validate` reports both copies for what they are, drawings of the study rather than the
+  protocol that ran: a seal warning on both, and unbalanced counts where `fig-overview` compacts the study.
+- The Provenance view in `fig-overview` shows two runs: the reported one, and a re-run after its `Analysis` record was
+  invalidated, which branches at that step (`../study/run-2026-10-02-rerun/`, see `../study/README.md`). Its steps carry
+  the records of both run repositories.
 
-Three PNGs have no source here. `figS3-runner.studyflow.png` (no longer cited: its figure was cut on 2026-09-27, since the panel shows a diagram column and none of the runner screens its caption described) and `rt_analysis.studyflow.png` are older hand-composed panels that carry a diagram in an earlier embedding this `studyflow info` no longer reads, and neither carries a print size. `todo_fig_extensions.png` is an uncited sketch with nothing embedded.
+## Rebuilding
+
+The scripts that drew these PNGs (layout, colouring, composing the key and the views, the draw.io overview, and the
+history merge for the overview) are archived in `../../archived/elife/figure-tools/`, with `render.sh` as the entry
+point. To redraw a figure, open its diagram in the modeler and export it, or restore those scripts beside `src/`.

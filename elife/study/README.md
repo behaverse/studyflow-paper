@@ -65,5 +65,6 @@ out of any commit of this folder, and delete it before re-running.
   model, four subjects), kept for reference.
 - `run-2026-10-02-rerun/`: a copy of `run/` re-run on 2026-10-02 after its `Analysis` record was invalidated, by the
   CLI that made `run/` (studyflow-modeler at 39314fe9), so its history branches there; the subjects are simulated, so
-  it called no model. Only the overview figure's Provenance view reads it (`../figures/src/overview-history.py`);
-  `run/` stays as the run left it.
+  it called no model. Only the overview figure's Provenance view reads it
+  (`../../archived/elife/figure-tools/overview-history.py` merges its records with `run/`'s); `run/` stays as the run
+  left it.

@@ -32,11 +32,11 @@ Target: submit on **Fri 2026-10-16**. The date is fixed; the scope is not.
 - [ ] Fill `tbl-agents`, `tbl-analyses`, `lst-diff`, and the Results paragraph at the end of Step 3 (2026-09-30: `tbl-planted`, `lst-diff` and the end of Step 3 now come from the planted and null runs; `tbl-agents` is the twins' table, `[TODO]` until their runs; there is no `tbl-analyses` any more.)
 - [x] Add a Model column to `tbl-agents`, and one sentence in Step 2 saying the sealed files differ in one line
 - [ ] Copy the `state:` block of the run in `elife/study/run/` into the `fig-consort` and `fig-overview` sources, then re-render every figure from the worktree. The pinned modeler's SVG export adds margin to seven figures (fig-key 24 units wider, the fig-overview strip 21, fig-step3-analyze 18): check the column edges in `fig-overview.py` (`BOUNDS`) after the render; `fig-elements` changes one glyph (EEG store). `fig-s2-modeler` is already re-rendered (Timeline `XCIT_NB_01`). (2026-09-30: moved to "At the modeler release"; seven figure sources must first be rebuilt from the current study, and `fig-s2-modeler`, which shows the previous protocol's Step 2, must be re-shot.)
-- [ ] **Checkpoint 1 (Fri Oct 2):** sync the Doc and the qmd, update the qmd's `Mirrors the Google Doc` line, and clear the Doc-only TODOs (equivalence margin, thresholds, fig-overview redraw) against the qmd (2026-09-30: the qmd no longer has that line, removed in `e24e0fb`, and the current study has no equivalence question.)
+- [ ] **Checkpoint 1 (Fri Oct 2):** (2026-10-02: the Doc was compared with the qmd; it is the qmd of about Oct 1 with two edits of its own, both now in the qmd, so the sync is qmd to Doc. See "Status 2026-10-02".) sync the Doc and the qmd, update the qmd's `Mirrors the Google Doc` line, and clear the Doc-only TODOs (equivalence margin, thresholds, fig-overview redraw) against the qmd (2026-09-30: the qmd no longer has that line, removed in `e24e0fb`, and the current study has no equivalence question.)
 
 ## Week 2: text (Mon Oct 5 to Fri Oct 9)
 
-- [ ] Pedro's 10 open comments in the Doc (Jul 29)
+- [x] Pedro's 10 open comments in the Doc (Jul 29) (2026-10-02: the Doc has no open thread; its one thread, on figure images, is resolved.)
 - [x] Discussion: the "say why this matters" TODO
 - [x] Reproducibility: the allocation concealment TODO (Done 2026-09-30 in the merge: Reproducibility says the example study has no human participants, and that a seed deposited with the file makes a human cohort's allocation foreseeable unless it is withheld until enrollment closes.)
 - [x] `tbl-compare`: fill the three empty rows, or move it to Supplementary Note 2 (Superseded 2026-09-30: `tbl-compare` is dropped; the Discussion's prose comparison and Appendix 2 stay.)
@@ -133,6 +133,62 @@ From today's audits:
 ## Status 2026-09-30, evening
 
 The one-pass merge was reverted (`ebbf55e` restores the pre-merge text). `paper-v3.qmd` was then improved section by section, each change approved by the author on a review page and committed per section: `9669390` Abstract, `6ec3866` Introduction, `174d79b` Notation, `e8f5678` Results, `b158d36` Discussion and Limitations, `0a6ff3c` the author's abstract (174 words), `0e328aa` back matter (Appendix 3 holds the encoded studies and the blind calibration; the pipeline check with a planted truth is in Methods). Decisions: the final run uses the Behaverse battery tasks with the language-model cohorts, with a harder n-back; the files are deposited before submission; tools and schema are MIT. Left for the final run: every `[TODO]` (tbl-agents, Step 3, fig-combined counts, lst-diff, three "confirm from the language-model runs" markers), the study files, figures and listings. Left for the author: AI-use statement, CRediT, funding, acknowledgements, DOIs, how the blind seeding was done, reviewers.
+
+## Status 2026-10-02
+
+The Google Doc against `elife/paper-v3.qmd` (Doc as of 2026-10-01 16:35, diffed with the mirror scripts now in
+`archived/elife/`):
+
+- The Doc is an older copy of the qmd. Every Doc paragraph that differs is either an earlier qmd wording or one of
+  four author TODOs the qmd has since resolved (a reference for DAG engines, the PNG embedding, "Use a better term"
+  for the token, the "invetigations" typo).
+- Two Doc-only edits were folded into the qmd: "projections (functions) map it to the views (representations)" in
+  the Notation's opening, and "the modeler also enforces the second [condition] while drawing" (true: the canvas
+  picks an edge's kind from its endpoints and refuses a sequence flow across a container).
+- The Doc still carries `fig-s1-multimodal`, which the qmd cut on 2026-10-01 (`2283438`), and lacks the three
+  appendix tables below. Checkpoint 1 is therefore a paste from the qmd into the Doc, not a merge.
+
+Fixed in the qmd today:
+
+- `tbl-planted`, `tbl-encoded` and `tbl-blind` had captions and no tables since the back-matter rewrite of 2026-09-30
+  (`0e328aa`), so their cross-references did not resolve. The bodies are restored from v4, checked against the files:
+  `tbl-planted` matches `study/run/results/` and `study/run-null/results/` to the digit; in `tbl-blind`, today's
+  validator also warns on blind fault 4 (the criterion relaxed on one branch, whose conditions now overlap), so the
+  validator reports two of twelve and the digest all twelve. The Appendix 3 sentence, its caption and the cover
+  letter say so. `tbl-planted`'s two tables share one caption in a `::: {#tbl-planted}` div.
+- "twelve of fourteen faults" in the Results now reads thirteen of fifteen, as in `tbl-faults`.
+- `quarto render elife --to html` resolves every cross-reference.
+
+Done today besides (figures and folder):
+
+- Figures redrawn from what is on disk, nothing run: `fig-combined`, `fig-views`, `fig-consort` and `fig-overview` from
+  the 2026-09-29 run (`fig-consort` and `fig-overview` carry its `state:` block); the overview's Provenance view shows
+  a re-run of that run, after its Analysis record was invalidated, from a copy (`study/run-2026-10-02-rerun/`, made by
+  the CLI that made the run; simulated subjects, no model). The other figure sources now validate (FEEL expressions).
+- `elife/` cleaned to what the paper needs: `paper-v4`, the Doc mirror scripts, the figure toolchain and the uncited
+  figures are in `archived/elife/`; `elife/README.md` and `elife/figures/README.md` describe what is there.
+
+Remaining, in order (each also in the sections below):
+
+1. Checkpoint 1, overdue: paste the qmd into the Doc, tab by tab (restore `archived/elife/doc-sync.py` beside
+   `paper-v3.qmd` to write the paste files), then read the Doc once against the PDF.
+2. The modeler release: tag it, replace `[TODO: modeler release]` (Results Step 4 caption, Methods "The example study",
+   "Availability and use"), and run "At the modeler release" below, including the re-checks this week's modeler
+   changes call for: the runtimes moved to `packages/runtime-local` and `packages/runtime-browser`, `prov` is part of
+   the `studyflow` skill, `cognitive` and `jspsych` are optional skills and the browser runtime plays jsPsych steps,
+   and `validate` checks edge endpoints (condition 2). `tbl-claims`, `tbl-faults`, `tbl-blind`, Appendix 1 and the
+   grammar listing quote these.
+3. The language-model twin runs (author): fill `tbl-agents` (12 cells), the Results Step 3 decisions, the three
+   "confirm from the language-model runs" markers, the Methods Ollama version, the `fig-combined` caption's counts,
+   and `lst-diff`; then redraw `fig-combined`, `fig-views`, `fig-consort` and `fig-overview` from the run the paper
+   reports, and re-shoot `fig-s2-modeler`, which still shows the previous protocol's Step 2.
+4. The allocation-concealment TODO is still in Methods (the 2026-09-30 note says it was closed; the qmd has a
+   `TODO: confirm allocation concealment mechanics for the human participants` comment): close it or remove it.
+5. Author input, unchanged: AI-use statement, Zenodo and deposit DOIs and the WebGL build URL, CRediT roles, funding,
+   acknowledgements, reviewers, and how the blind seeding was done (v4's caption said the agent "was given only the
+   study file and the categories of deviation documented for preregistrations, and never saw the validator":
+   confirm, and the Appendix 3 TODO can take that sentence).
+6. Read the supplement once and remove its "outdated" note; then Checkpoint 2.
 
 ## At the modeler release
 

@@ -64,7 +64,7 @@ This paper makes three contributions. The first contribution is the notation: a 
 
 # The Studyflow notation
 
-Studyflow is one formal object, and projections map it to the views each audience reads, such as a diagram, a schedule, a checklist, or a figure. This section defines that object, relates it to the BPMN standard, describes how it is stored on disk, and gives its execution semantics.
+Studyflow is one formal object, and projections (functions) map it to the views (representations) each audience reads, such as a diagram, a schedule, a checklist, or a figure. This section defines that object, relates it to the BPMN standard, describes how it is stored on disk, and gives its execution semantics.
 
 ## The formal object
 
@@ -82,7 +82,7 @@ Data elements come in two kinds, a distinction Studyflow takes from BPMN [@bpmns
 
 $G_{\mathrm{ctrl}}$ is directed but not acyclic. Experimental procedures often contain interrupts, loops, and multi-agent exchanges, which cannot be expressed by the plain directed acyclic graphs (DAG) that common workflow engines execute [@nextflow; @cwl; @pydra]. Where a custom DAG pushes that control logic elsewhere, BPMN's boundary events, message flows, and choreography express these constructs natively, in the same diagram.
 
-Not every diagram is well-formed. A diagram is well-formed when four conditions hold. First, $\tau$ and $\lambda$ validate against the $\Sigma$ type hierarchy and against the context-free grammar relating the types in $\Sigma$ (@lst-grammar in the Supplementary materials). Second, edge endpoints respect type and scope: every control-flow edge runs between flow nodes (events, activities, gateways), every data-flow edge connects a data element to a flow node, and a node reads or writes a property only where a containing scope declares it. Third, $G_{\mathrm{ctrl}}$ is connected: it has at least one start event and at least one end event, and every flow node lies on some path from a start event of its scope, or from a boundary event, to an end event. Connectedness rules out steps that no path reaches; it does not detect a branch whose condition can never hold, and it is weaker than the soundness of workflow nets [@vanderaalst2011soundness], which the reference implementation checks separately, by exploring the runs a study can take (Materials and methods). Fourth, the export of $S$ to BPMN 2.0 is a valid XML document, the format in which BPMN tools exchange diagrams. In summary, the first condition states the syntactic and semantic constraints; the second and third state domain-specific constraints that a generic BPMN validator cannot express; and the fourth states the compatibility and extensibility constraint. The reference implementation checks all four before any run and refuses to start a study that fails them with an error (Materials and methods).
+Not every diagram is well-formed. A diagram is well-formed when four conditions hold. First, $\tau$ and $\lambda$ validate against the $\Sigma$ type hierarchy and against the context-free grammar relating the types in $\Sigma$ (@lst-grammar in the Supplementary materials). Second, edge endpoints respect type and scope: every control-flow edge runs between flow nodes (events, activities, gateways), every data-flow edge connects a data element to a flow node, and a node reads or writes a property only where a containing scope declares it. Third, $G_{\mathrm{ctrl}}$ is connected: it has at least one start event and at least one end event, and every flow node lies on some path from a start event of its scope, or from a boundary event, to an end event. Connectedness rules out steps that no path reaches; it does not detect a branch whose condition can never hold, and it is weaker than the soundness of workflow nets [@vanderaalst2011soundness], which the reference implementation checks separately, by exploring the runs a study can take (Materials and methods). Fourth, the export of $S$ to BPMN 2.0 is a valid XML document, the format in which BPMN tools exchange diagrams. In summary, the first condition states the syntactic and semantic constraints; the second and third state domain-specific constraints that a generic BPMN validator cannot express; and the fourth states the compatibility and extensibility constraint. The reference implementation checks all four before any run and refuses to start a study that fails them with an error; the modeler also enforces the second while drawing (Materials and methods).
 
 ### Projections
 
@@ -174,7 +174,7 @@ The same views are the artifacts many reporting guidelines ask for. The SPIRIT 2
 
 Deviations from the preregistration are found the same way. Since the file deposited at registration and the file after execution are the same object at two points in time, their diff is the deviation report (@lst-diff). In the example study every line of that diff is an addition: the run's records, the counts, and the values the analysis wrote [TODO: confirm from the language-model runs]. A protocol edited after the run cannot hide from that comparison either, because each run records a digest of the protocol it walked and the validator recomputes it (Materials and methods). A prose comparison between a registry entry and a published paper offers no such guarantee [@claesen2021adherence; @cummins2026regcheck].
 
-Adherence to guidelines is checked from the same file. Guideline items map onto the elements that satisfy them (@fig-elements), so the Checklist view lets a reader audit the study against CONSORT, SPIRIT, or CHART without leaving the diagram, and a validator catches faults a text description is unlikely to catch, such as a count that does not add up or an analysis that reads a column no schema defines. Seeded one at a time into a small study, twelve of fourteen faults were caught (@tbl-faults), a decision rule whose inequality was flipped before deposit among them, because the flip leaves a value for which both branches hold and one for which neither does. One of the two missed is scientific rather than formal, a difference test used where the question asks for equivalence: the file is well-formed, and only a reader who knows what the question means can see the fault. The other, a decision drawn as an inclusive gateway, runs as drawn, because its conditions exclude each other.
+Adherence to guidelines is checked from the same file. Guideline items map onto the elements that satisfy them (@fig-elements), so the Checklist view lets a reader audit the study against CONSORT, SPIRIT, or CHART without leaving the diagram, and a validator catches faults a text description is unlikely to catch, such as a count that does not add up or an analysis that reads a column no schema defines. Seeded one at a time into a small study, thirteen of fifteen faults were caught (@tbl-faults), a decision rule whose inequality was flipped before deposit among them, because the flip leaves a value for which both branches hold and one for which neither does. One of the two missed is scientific rather than formal, a difference test used where the question asks for equivalence: the file is well-formed, and only a reader who knows what the question means can see the fault. The other, a decision drawn as an inclusive gateway, runs as drawn, because its conditions exclude each other.
 
 ## Step 5) Conclusion: one file for everything
 
@@ -538,7 +538,23 @@ C_Yes:
 : Accuracy in each task for each model and disposition, from each model's run (`results/group.csv`): means over subjects, with their standard deviations. The cautious prompt reads "Take your time on every trial" and the impulsive one "Go with your first impression". Latency is not tabulated: for a language model it is the time its server took to generate the reply, recorded with every trial but not a response time. {#tbl-agents}
 
 
-: Each run's accuracy by instruction (`results/group.csv`, means over the four subjects of each arm with their standard deviations), and the claim state each question reached. The planted participant is less accurate on incongruent Simon trials and under the impulsive instruction; the null participant is equally accurate everywhere. Each run enrolled eight subjects, all eight completed, and the protocol digests of the two sealed files are `sha256:b31e928d…` (planted) and `sha256:db032e27…` (null). {#tbl-planted}
+::: {#tbl-planted}
+
+| Actor | Instruction | Subjects | Simon accuracy, mean (SD) | 1-back accuracy, mean (SD) |
+|:----|:----|:---:|:---:|:---:|
+| Planted (`simulate://planted`) | Cautious | 4 | .92 (.05) | .90 (.03) |
+| | Impulsive | 4 | .72 (.07) | .68 (.04) |
+| Null (`simulate://null`) | Cautious | 4 | .89 (.03) | .82 (.04) |
+| | Impulsive | 4 | .82 (.10) | .87 (.02) |
+
+| Question | Planted truth | Planted run | Null run |
+|:----|:----|:----|:----|
+| Congruency effect (Simon) | present | *Supported*: $t(7) = 4.15$, one-sided $p = .002$ | *Not supported*: $t(7) = 1.44$, $p = .096$ |
+| Divergence between instructions | present | *Supported*: accuracy 1.00, permutation $p = .035$ | *Not supported*: accuracy .50, $p = .22$ |
+
+Each run's accuracy by instruction (`results/group.csv`, means over the four subjects of each arm with their standard deviations), and the claim state each question reached. The planted participant is less accurate on incongruent Simon trials and under the impulsive instruction; the null participant is equally accurate everywhere. Each run enrolled eight subjects, all eight completed, and the protocol digests of the two sealed files are `sha256:b31e928d…` (planted) and `sha256:db032e27…` (null).
+
+:::
 # Materials and methods
 
 ## The language specification
@@ -741,11 +757,31 @@ The drive toward machine-readable protocols is not unique to cognitive and behav
 
 To see what the notation asks of a written method, we encoded two published studies from their Methods sections alone: the flanker task of Study 1 of @hedge2018reliability, and the double-shot Simon condition of the final experiment of @kucina2023calibration. Each encoding is a file that `studyflow validate` accepts; every value it carries is quoted from the Methods section, and every value a replicator needs that the section does not state is written `unstated`. Both left about ten run-critical parameters unstated (@tbl-encoded), among them how trials were ordered and seeded. The notation does not make those values known, but it makes their absence visible.
 
+| Study | What the encoding carries | Run-critical values the Methods section does not state |
+|:----|:----|:----|
+| @hedge2018reliability, Study 1, flanker | 50 recruited, 47 analysed; two sessions three weeks apart; 240 trials per condition in five blocks; ISI 750 ms, stimulus until response; exclusion below 60% accuracy; RT trimming; ICC(2,1) | trial order and its randomization, seed, practice trials, response deadline, handling of a missed response, trial-level feedback, trials per block, viewing distance, display refresh rate, the trimming implementation |
+| @kucina2023calibration, final experiment, double-shot Simon | eligibility checks, random assignment to one of six conditions, tutorial with eight chances to qualify, 432 trials in 12-trial blocks, second response on a random third of trials, three exclusion rules, 30 analysed | proportion of congruent trials, trial order and seed, inter-trial interval, stimulus duration, trials per session, interval between sessions, allocation ratio, the reliability implementation |
+
 : Two published studies encoded from their Methods sections alone (`elife/study/encoded/`). Both files are well-formed; each value a replicator needs that the section does not state is written `unstated`. Some of these values may be stated in supplements or code that we did not consult; the encoding measures what the Methods section alone specifies. {#tbl-encoded}
 
-The fault library of @tbl-faults was seeded by the authors of the checks. As a calibration, an agent that never saw the checks seeded twelve deviations of the kinds that audits of preregistered studies report [@claesen2021adherence], from a changed number of trials or exclusion rule to a replaced test and a misrouted dropout (@tbl-blind). The validator reported one of them as an error, and the protocol digest reported all twelve as departures from the deposited plan. <!-- TODO (author): confirm how the blind seeding was done (which agent, what it was given) -->
+The fault library of @tbl-faults was seeded by the authors of the checks. As a calibration, an agent that never saw the checks seeded twelve deviations of the kinds that audits of preregistered studies report [@claesen2021adherence], from a changed number of trials or exclusion rule to a replaced test and a misrouted dropout (@tbl-blind). The validator reported one of them as an error and warned on another, a criterion relaxed on one branch only so that the two conditions overlap; the protocol digest reported all twelve as departures from the deposited plan. <!-- TODO (author): confirm how the blind seeding was done (which agent, what it was given) -->
 
-: Twelve deviations of the kinds that audits of preregistered studies report [@claesen2021adherence], seeded one at a time into the fault library's small study by an agent that never saw the checks (`elife/study/blind-faults/`). The validator judges form, so it reports one; the digest proves change, so it reports all twelve against the sealed file; whether any change is justified is for a reader. {#tbl-blind}
+| Deviation, seeded blind to the checks | `studyflow validate` | Protocol digest against the deposit |
+|:----|:----|:----|
+| Random seed changed without report | passes | changed |
+| Fewer trials per participant than registered | passes | changed |
+| Accuracy criterion relaxed | passes | changed |
+| Criterion relaxed on one branch only, so the two conditions overlap | warning: both conditions hold for accuracy in [0.7, 0.8) | changed |
+| Equivalence margin widened | passes | changed |
+| Equivalence test replaced by a difference test | passes | changed |
+| Primary outcome replaced (response time for accuracy) | passes | changed |
+| Per-subject summary step dropped | passes | changed |
+| Exclusion criterion added (age) | passes | changed |
+| Aggregation changed (sum for mean) | passes | changed |
+| Column type changed in the data schema | passes | changed |
+| Dropouts rerouted to the completion exit | error: an exit on no path | changed |
+
+: Twelve deviations of the kinds that audits of preregistered studies report [@claesen2021adherence], seeded one at a time into the fault library's small study by an agent that never saw the checks (`elife/study/blind-faults/`). The validator judges form, so it reports two; the digest proves change, so it reports all twelve against the sealed file; whether any change is justified is for a reader. {#tbl-blind}
 
 ## Supplementary figures
 
