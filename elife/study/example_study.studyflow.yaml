@@ -10,14 +10,14 @@ Example_Study_Collaboration:
     Enrolment, Allocation, Follow-up, each a band the flow crosses on its way down, with the exits at the right edge of
     the band they leave from. Labels are the study's own words rather than BPMN's: a gateway asks a question and its
     flows are the answers, an exit says why the subject left, and @fig-key names each symbol. The subjects' pool carries
-    a participant multiplicity of eight, so the cohort is eight instances of that pool's process, one per subject; BPMN
-    draws the parallel marker at the pool's bottom. The cohort is one actor, whoever the pool's `implementation` names:
-    `simulate://planted`, a simulated participant with a planted effect, in this file, and a language model served by a
-    local Ollama (`ollama://…`) in its sealed twins, which differ from it in that one line. The whole exchange with it
-    crosses the pool boundary as one pair of message flows at pool level: one `behaverse:Trial` out per trial and one
-    `behaverse:Response` back, inherited by whichever task is playing. @fig-step2-run draws the same exchange per task.
-    Labels cite `{reached}`, which the runner fills in as the cohort runs, so the executed copy of this file is the
-    CONSORT participant flow of the study as executed.
+    a participant multiplicity, so the cohort is that many instances of the pool's process, one per subject; BPMN draws
+    the parallel marker at the pool's bottom. The cohort is one actor, whoever the Actor pool's `implementation` names:
+    a language model served by a local Ollama (`ollama://…`), and the study's copies for other models differ from this
+    one in that line alone. Both tasks are the Behaverse battery's, played by its WebGL build, and the whole exchange
+    with the actor crosses the pool boundary as one pair of message flows at pool level: one `behaverse:Trial` out per
+    trial and one `behaverse:Response` back, inherited by whichever task is playing. @fig-step2-run draws the same
+    exchange per task. Labels cite `{reached}`, which the runner fills in as the cohort runs, so the executed copy of
+    this file is the CONSORT participant flow of the study as executed.
   extensionElements:
     - type: studyflow:Study
       seed: 42
@@ -35,11 +35,11 @@ Example_Study_Collaboration:
     Participant_Model:
       type: studyflow:Actor
       name: Actor
-      implementation: simulate://planted
+      implementation: ollama://gemma4:e2b-mlx
+      memory: conversation
     Participant_Subject:
       name: Each subject
       participantMultiplicity:
-        minimum: 8
         maximum: 8
       processRef: Example_Study
     Participant_Analysis:
@@ -80,9 +80,9 @@ Example_Study:
   name: Each subject
   documentation: >-
     One subject, from consent to debriefing, and the pool is the boundary of that system. The participant multiplicity
-    of eight on the pool makes eight instances of this process, one per subject in the cohort; they do not depend on one
-    another, which is why this is a multiplicity and not a loop. `arm` is a property of this process, so each instance
-    draws and carries its own disposition, and the runtime stamps every recorded trial with the pool's instance index as
+    on the pool makes one instance of this process per subject in the cohort; they do not depend on one another, which
+    is why this is a multiplicity and not a loop. `arm` is a property of this process, so each instance draws and
+    carries its own disposition, and the runtime stamps every recorded trial with the pool's instance index as
     `context.subject`, so nothing in the diagram has to number subjects. An exit inside an instance (Excluded_Pre,
     Discontinued) ends that instance only. The pool is divided into the three CONSORT phases a participant passes
     through, and into nothing else: a lane is a band of the drawing, so the flow crosses it without waiting.
@@ -214,128 +214,72 @@ Example_Study:
       type: agentic:Prompt
       name: Battery prompt
       template: |
-        You are taking a computerised cognitive test one trial at a time. Each message is one trial, as
-        JSON, beside the instruction you were given for the whole test. Answer with one of the strings in
-        the trial's ResponseOptions, copied exactly and with nothing else; any other reply is a lost trial.
-        The trial's Rule says which option is right for what it shows.
+        {instruction}
+
+        You are taking a computerised cognitive test one trial at a time. That instruction is yours for the whole
+        test. Each message is one trial of one of two tasks, and lists the answers that trial accepts. Answer with
+        one of them, copied exactly and with nothing else; any other reply is a lost trial.
+
+        When the answers are "Left" and "Right": a coloured disk appears on the left or the right of the screen,
+        above two buttons of different colours. Answer with the position of the button whose colour is the
+        disk's colour, wherever the disk appears.
+
+        When the answers are "Match" and "NonMatch": the trial shows one digit. Answer Match if it is the same
+        digit as the one on the trial before, and NonMatch otherwise.
     Task_Interference:
-      type: SubProcess
+      type: behaverse:Task
       name: Interference control (Simon)
       documentation: >-
-        A Simon task drawn in the notation: its timeline (30 trials, half congruent, a coloured square on one side,
-        answered by its colour), one pass per trial asking the actor, and the record of every trial. Nothing outside the
-        diagram presents it, so any actor that answers the pool's messages can take it.
+        The Simon task the Behaverse build ships as WhichOne (`WO`), on its `SimonTask` timeline: one block, a coloured
+        disk on the left or the right, answered by its colour, its congruency (congruent, incongruent, neutral) drawn
+        per trial, so the congruency contrast is inside the block. How many trials the block runs is the Simon timeline
+        wired in beside the task's settings. The task carries no message flow of its own: the trial and response
+        exchange is the pool's, which every task inside inherits, and its result carries the share of the trials the
+        build showed that it recorded no valid response for.
+      instrument: WO
+      timeline: SimonTask
+      onset: T0+20s
+      duration: 40s
       dataInputAssociations:
         In_Prompt_Task_Interference:
           sourceRef:
             - Prompt_Battery
+        In_Timeline_Task_Interference:
+          sourceRef:
+            - Simon_Timeline
+        In_Pace_Task_Interference:
+          sourceRef:
+            - Bot_Pace_Simon
       dataOutputAssociations:
         Out_Trials_Task_Interference:
           targetRef: Dataset_Trials
-      onset: T0+20s
-      duration: 40s
-      flowElements:
-        Simon_Start:
-          type: StartEvent
-        Simon_Timeline:
-          type: ServiceTask
-          name: Simon timeline
-          documentation: >-
-            The task's trials, one list every subject meets in the same order, and their key: each trial's right answer
-            and condition, which no subject is sent and only the record step reads.
-          dataOutputAssociations:
-            Out_Simon_Timeline:
-              targetRef: Simon_Trials
-              transformation: result.trials
-            Out_Simon_Key:
-              targetRef: Simon_Key
-              transformation: result.key
-          additionalArguments:
-            trials: 30
-          implementation: simulate://simon
-        Simon_Trials:
-          type: DataObjectReference
-          name: Simon trials
-        Simon_Key:
-          type: DataObjectReference
-          name: Simon key
-        Simon_Block:
-          type: SubProcess
-          name: Each trial
-          documentation: >-
-            One pass per trial: the trial goes to the actor along the pool's message flows, with the instruction of the
-            subject's arm and the battery's prompt, and the answer comes back as the pass's output.
-          properties:
-            Simon_Trial:
-              name: trial
-            Simon_Answer:
-              name: answer
-          loopCharacteristics:
-            type: MultiInstanceLoopCharacteristics
-            isSequential: true
-            loopDataInputRef: Simon_Trials
-            loopDataOutputRef: Simon_Answers
-            inputDataItem:
-              name: trial
-              id: Simon_Trial_Item
-            outputDataItem:
-              name: answer
-              id: Simon_Answer_Item
-          flowElements:
-            Simon_Trial_Start:
-              type: StartEvent
-            Simon_Ask:
-              type: Task
-              name: Answer the trial
-              dataInputAssociations:
-                In_Simon_Trial:
-                  sourceRef:
-                    - Simon_Trial
-                In_Simon_Instruction:
-                  sourceRef:
-                    - P_Instruction
-                In_Simon_Prompt:
-                  sourceRef:
-                    - Prompt_Battery
-              dataOutputAssociations:
-                Out_Simon_Answer:
-                  targetRef: Simon_Answer
-            Simon_Trial_End:
-              type: EndEvent
-            Simon_TF_0: Simon_Trial_Start -> Simon_Ask
-            Simon_TF_1: Simon_Ask -> Simon_Trial_End
-        Simon_Answers:
-          type: DataObjectReference
-          name: Simon answers
-        Simon_Record:
-          type: ServiceTask
-          name: Record the trials
-          documentation: >-
-            Scores each answer by the timeline's key and appends one row per trial to the trials dataset, keyed by the
-            subject and its arm; its result carries the share of trials left unanswered, which the boundary event reads.
-          dataInputAssociations:
-            In_Simon_Record_Trials:
-              sourceRef:
-                - Simon_Trials
-            In_Simon_Record_Key:
-              sourceRef:
-                - Simon_Key
-            In_Simon_Record_Answers:
-              sourceRef:
-                - Simon_Answers
-          dataOutputAssociations:
-            Out_Simon_Record:
-              targetRef: Dataset_Trials
-          additionalArguments:
-            subject: "{state._meta.instance.Participant_Subject}"
-            arm: "{arm}"
-          implementation: simulate://record
-        Simon_End:
-          type: EndEvent
-        Simon_F_0: Simon_Start -> Simon_Timeline
-        Simon_F_1: Simon_Timeline -> Simon_Block
-        Simon_F_2: Simon_Block -> Simon_Record
-        Simon_F_3: Simon_Record -> Simon_End
+    Simon_Timeline:
+      type: studyflow:Parameters
+      name: Simon timeline
+      documentation: >-
+        The protocol of the Simon task: its timeline as the build ships it, one block (`Simon`) that its exit rule ends
+        after a number of trials. The build merges these Parameters over its own definition of the timeline, so this
+        number is the one place the study sets how many trials every subject meets.
+      values:
+        Timelines:
+          SimonTask:
+            Blocks:
+              - Name: Simon
+                ExitRules:
+                  - Trials: 30
+    Bot_Pace_Simon:
+      type: studyflow:Parameters
+      name: Task settings (Simon)
+      documentation: >-
+        Not the protocol: how the build plays for an actor that is not a person. It skips the instruction screens nobody
+        is there to click and runs the engine clock faster; WhichOne's response window is not scaled by it. A Parameters
+        object only reaches a step it is wired into, so each task carries its own.
+      values:
+        Bot:
+          Speed: 5
+          SkipInstructions: true
+          AutoClickInstructions: true
+          SkipFocusArea: true
     Failed_Interference:
       type: BoundaryEvent
       name: "> 20% unanswered"
@@ -346,137 +290,63 @@ Example_Study:
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
-          condition: "{Simon_Record.failedTrialRate} > 0.2"
+          condition: "{Task_Interference.failedTrialRate} > 0.2"
       attachedToRef: Task_Interference
     Task_WorkingMemory:
-      type: SubProcess
+      type: behaverse:Task
       name: Working memory (1-back)
       documentation: >-
-        A 1-back drawn in the notation: two test blocks of 28 digits, about a third repeating the digit before, one pass
-        per digit asking the actor, and the record of every trial. Each trial carries the digit before it, because the
-        pool is asked one message at a time and keeps nothing between messages.
+        The 1-back the build ships as `NB`, on `XCIT_NB_01`, the timeline the battery's human studies run: three
+        tutorial blocks and a practice block, then two test blocks of 28 digits, of which the analysis keeps the test
+        blocks. The build sends each trial's digit alone, so the actor answers from what it remembers of the trial
+        before: the Actor pool keeps one conversation per subject.
+      instrument: NB
+      timeline: XCIT_NB_01
+      onset: T0+60s
+      duration: 3min
       dataInputAssociations:
         In_Prompt_Task_WorkingMemory:
           sourceRef:
             - Prompt_Battery
+        In_Pace_Task_WorkingMemory:
+          sourceRef:
+            - Bot_Pace_NB
       dataOutputAssociations:
         Out_Trials_Task_WorkingMemory:
           targetRef: Dataset_Trials
-      onset: T0+60s
-      duration: 3min
-      flowElements:
-        NBack_Start:
-          type: StartEvent
-        NBack_Timeline:
-          type: ServiceTask
-          name: 1-back timeline
-          documentation: >-
-            The task's trials, one list every subject meets in the same order, and their key: each trial's right answer
-            and condition, which no subject is sent and only the record step reads.
-          dataOutputAssociations:
-            Out_NBack_Timeline:
-              targetRef: NBack_Trials
-              transformation: result.trials
-            Out_NBack_Key:
-              targetRef: NBack_Key
-              transformation: result.key
-          additionalArguments:
-            "n": 1
-            trials: 28
-            blocks:
-              - Test_A
-              - Test_B
-          implementation: simulate://nback
-        NBack_Trials:
-          type: DataObjectReference
-          name: 1-back trials
-        NBack_Key:
-          type: DataObjectReference
-          name: 1-back key
-        NBack_Block:
-          type: SubProcess
-          name: Each trial
-          documentation: >-
-            One pass per trial: the trial goes to the actor along the pool's message flows, with the instruction of the
-            subject's arm and the battery's prompt, and the answer comes back as the pass's output.
-          properties:
-            NBack_Trial:
-              name: trial
-            NBack_Answer:
-              name: answer
-          loopCharacteristics:
-            type: MultiInstanceLoopCharacteristics
-            isSequential: true
-            loopDataInputRef: NBack_Trials
-            loopDataOutputRef: NBack_Answers
-            inputDataItem:
-              name: trial
-              id: NBack_Trial_Item
-            outputDataItem:
-              name: answer
-              id: NBack_Answer_Item
-          flowElements:
-            NBack_Trial_Start:
-              type: StartEvent
-            NBack_Ask:
-              type: Task
-              name: Answer the trial
-              dataInputAssociations:
-                In_NBack_Trial:
-                  sourceRef:
-                    - NBack_Trial
-                In_NBack_Instruction:
-                  sourceRef:
-                    - P_Instruction
-                In_NBack_Prompt:
-                  sourceRef:
-                    - Prompt_Battery
-              dataOutputAssociations:
-                Out_NBack_Answer:
-                  targetRef: NBack_Answer
-            NBack_Trial_End:
-              type: EndEvent
-            NBack_TF_0: NBack_Trial_Start -> NBack_Ask
-            NBack_TF_1: NBack_Ask -> NBack_Trial_End
-        NBack_Answers:
-          type: DataObjectReference
-          name: 1-back answers
-        NBack_Record:
-          type: ServiceTask
-          name: Record the trials
-          documentation: >-
-            Scores each answer by the timeline's key and appends one row per trial to the trials dataset, keyed by the
-            subject and its arm; its result carries the share of trials left unanswered, which the boundary event reads.
-          dataInputAssociations:
-            In_NBack_Record_Trials:
-              sourceRef:
-                - NBack_Trials
-            In_NBack_Record_Key:
-              sourceRef:
-                - NBack_Key
-            In_NBack_Record_Answers:
-              sourceRef:
-                - NBack_Answers
-          dataOutputAssociations:
-            Out_NBack_Record:
-              targetRef: Dataset_Trials
-          additionalArguments:
-            subject: "{state._meta.instance.Participant_Subject}"
-            arm: "{arm}"
-          implementation: simulate://record
-        NBack_End:
-          type: EndEvent
-        NBack_F_0: NBack_Start -> NBack_Timeline
-        NBack_F_1: NBack_Timeline -> NBack_Block
-        NBack_F_2: NBack_Block -> NBack_Record
-        NBack_F_3: NBack_Record -> NBack_End
+    Bot_Pace_NB:
+      type: studyflow:Parameters
+      name: Task settings (1-back)
+      documentation: >-
+        Not the protocol: how the build plays for an actor that is not a person. The same pacing, plus the fields the
+        1-back's own bot declares: the stream waits for the actor instead of running on a fixed clock, which is what
+        lets a model take it at all, with a response window of `maxResponseTime` engine seconds, which `Speed` divides;
+        its stimulus, interval and foreperiod are compressed. The build marks a 1-back answer correct or not only in a
+        block that shows accuracy feedback, which the test blocks do not, so the bot shows it in every block; an actor
+        that reads the trial as text sees none of it.
+      values:
+        Bot:
+          Speed: 20
+          SkipInstructions: true
+          AutoClickInstructions: true
+          SkipFocusArea: true
+          overrideUserInputParameters: true
+          playerPaced: true
+          useNonMatchButton: true
+          maxResponseTime: 20
+          OverrideTemporalParameters: true
+          StimulusDisplayDuration: 0.3
+          InterStimulusInterval: 0.3
+          TrialForeperiod: 0.1
+          overrideFeedbackParameters: true
+          showAccuracyOnButtonFeedback: true
     Failed_WorkingMemory:
       type: BoundaryEvent
       name: "> 20% unanswered"
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
-          condition: "{NBack_Record.failedTrialRate} > 0.2"
+          condition: "{Task_WorkingMemory.failedTrialRate} > 0.2"
       attachedToRef: Task_WorkingMemory
     Discontinued:
       type: EndEvent
@@ -523,8 +393,8 @@ Analysis_Report:
   documentation: >-
     The same lab system as the pool above, in a second pool because it runs on a different beat: the protocol runs once
     per subject, the analysis once over the whole cohort. A multi-instance pool sends its outgoing message once, after
-    its last instance ends, so the message start event here waits for all eight subjects and the analysis reads a
-    complete trials dataset. Nothing here is divided further: four steps in a row need no lanes.
+    its last instance ends, so the message start event here waits for the last subject and the analysis reads a complete
+    trials dataset. Nothing here is divided further: four steps in a row need no lanes.
   flowElements:
     All_Complete:
       type: StartEvent
@@ -536,10 +406,10 @@ Analysis_Report:
       type: behaverse:BDMDataset
       name: Trials
       documentation: >-
-        One line per trial, appended by the record step of every task of every subject: the trial (`trialContext`), the
-        answer and whether it was correct (`result`), and the subject and its arm (`context`), in the Behaverse Data
-        Model's trial-level shape. It sits between the two lab pools because both touch it: the tasks above write it,
-        the analysis below reads it.
+        One line per event the build records, appended by every task of every subject: the trial it belongs to
+        (`trialContext`), what it measured, whether an answer was correct among it (`result`), and the subject and the
+        properties in scope when the task started, its arm among them (`context`), in the Behaverse Data Model. It sits
+        between the two lab pools because both touch it: the tasks above write it, the analysis below reads it.
       schema: Trial_Schema
       dataLevel: trials
       uri: data/trials.jsonl
@@ -588,10 +458,11 @@ Analysis_Report:
         Seven preregistered operations, collapsed here and drawn in @fig-step3-analyze: read the recorded trials, keep
         the answered trials of the test blocks, per-subject accuracy in each task, group statistics, and then the two
         questions, each ending in a decision: the congruency effect within subjects and the divergence between the two
-        dispositions; last, the figure. Accuracy is the measure throughout: an actor asked one message at a time has no
-        response time the study controls, so none is recorded. Every step inside is one call to a library function named
-        in full; nothing here is code written for this study. The decision rules wired in are read-only properties of
-        this sub-process, so every question reads the same alpha and the same minimum sample.
+        dispositions; last, the figure. Accuracy is the measure throughout: a language model's latency is the time its
+        server took to generate the reply, so the build records it with every trial and no question tests it. Every step
+        inside is one call to a library function named in full; nothing here is code written for this study. The
+        decision rules wired in are read-only properties of this sub-process, so every question reads the same alpha and
+        the same minimum sample.
       properties:
         derived:
           name: derived
@@ -720,7 +591,7 @@ Analysis_Report:
                 Out_Test:
                   targetRef: test_trials
               additionalArguments:
-                expr: "`trialContext.block.name` in ['Simon', 'Test_A', 'Test_B']"
+                expr: "`trialContext.block.name` in ['Simon', 'XCIT_NB_01_Test_A', 'XCIT_NB_01_Test_B']"
               implementation: python://pandas.DataFrame.query
             Measures:
               type: ServiceTask
@@ -1318,8 +1189,24 @@ layout:
   In_Prompt_Task_Interference:
     waypoint: 500,627 440,627 440,678
     stroke: "#5c8a55"
+  In_Timeline_Task_Interference:
+    waypoint: 178,652 178,740 310,740
+    stroke: "#5c8a55"
+  In_Pace_Task_Interference:
+    waypoint: 328,652 328,678
+    stroke: "#5c8a55"
   Out_Trials_Task_Interference:
     waypoint: 385,770 385,920
+    stroke: "#5c8a55"
+  Simon_Timeline:
+    bounds: 160 602 36 50
+    label: 64 614 92 14
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Bot_Pace_Simon:
+    bounds: 310 602 36 50
+    label: 200 612 104 28
+    fill: "#f0f6ee"
     stroke: "#5c8a55"
   Failed_Interference:
     bounds: 424 752 36 36
@@ -1334,8 +1221,16 @@ layout:
   In_Prompt_Task_WorkingMemory:
     waypoint: 518,652 518,664 560,664 560,678
     stroke: "#5c8a55"
+  In_Pace_Task_WorkingMemory:
+    waypoint: 708,652 708,664 618,664 618,678
+    stroke: "#5c8a55"
   Out_Trials_Task_WorkingMemory:
     waypoint: 565,770 565,945 410,945
+    stroke: "#5c8a55"
+  Bot_Pace_NB:
+    bounds: 690 602 36 50
+    label: 732 608 96 28
+    fill: "#f0f6ee"
     stroke: "#5c8a55"
   Failed_WorkingMemory:
     bounds: 604 752 36 36

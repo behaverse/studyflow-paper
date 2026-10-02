@@ -1,70 +1,76 @@
 # The example study
 
 `example_study.studyflow.yaml` is the paper's example study (`paper-v3.qmd`): one Studyflow file carrying the protocol,
-the cohort, both tasks down to the trial, and the analysis. It is a collaboration of three pools. **Actor** has no
-process: whoever its `implementation` names answers every message the study sends it. **Each subject** is the
-protocol one subject walks, eight instances (`participantMultiplicity`), its lanes the three CONSORT phases.
-**Analysis and report** runs once, after the last subject.
+the cohort, both tasks, and the analysis. It is a collaboration of three pools. **Actor** has no process: the language
+model its `implementation` names (`ollama://…`, a local Ollama) answers every message the study sends it, and keeps one
+conversation per subject (`memory: conversation`). **Each subject** is the protocol one subject walks, eight instances
+for now (`participantMultiplicity`, a placeholder the author raises for the reported runs), its lanes the three CONSORT
+phases. **Analysis and report** runs once, after the last subject.
 
-Each task is a sub-process drawn to the trial: a timeline step (`simulate://simon`, 30 trials; `simulate://nback`,
-two test blocks of 28 digits) that makes the trials as a subject sees them and, apart, their key (each trial's right
-answer and condition), a multi-instance sub-process whose one task sends each trial and the subject's instruction to
-the Actor pool, and a record step (`simulate://record`) that scores the answers by the key and appends one row per
-trial to `data/trials.jsonl`. No subject is sent the key: the simulated participant tells the right answer from the
-stimulus and the rule, as a language model has to. The analysis is unchanged in structure from this file's previous version (commit
-`e24e0fb`) except that latency is gone (a pool asked one message at a time has no response time the study controls)
-and the divergence classifier standardizes its features (the planted run showed that without it the classifier
-scores 0% under leave-one-out).
+Both tasks are the Behaverse battery's, played by its Unity WebGL build (`behaverse:Task`): the Simon task (`WO` on the
+`SimonTask` timeline, one block whose exit rule, `Trials: 30` in the `Simon_Timeline` Parameters, is the one place the
+study sets its length) and the 1-back (`NB` on `XCIT_NB_01`: three tutorial blocks, a practice block, and two test
+blocks of 28 digits, which the analysis keeps). Each task sends every trial to the Actor pool along one pair of message
+flows (`behaverse:Trial` out, `behaverse:Response` back) and writes the build's records to `data/trials.jsonl`. The
+Parameters with a `Bot:` entry say how the build plays for an actor that is not a person; they are not the protocol.
 
 ## The sealed files
 
-The files differ from `example_study.studyflow.yaml` in one line, the Actor's `implementation`:
+The three files differ in one line, the Actor's `implementation`:
 
 | File | Actor | Protocol digest |
 | --- | --- | --- |
-| `example_study.studyflow.yaml` | `simulate://planted` | `sha256:f5a4afc5a2c39fbfdf75c109e76880b923373ae6400b50d6cbc16a755e40ac93` |
-| `example_study-null.studyflow.yaml` | `simulate://null` | `sha256:3510cfc231f69c5bb76d7426fcdb2a11cad295a660f14aa8b1f7ba0644a98be7` |
-| `example_study-gemma4-e2b.studyflow.yaml` | `ollama://gemma4:e2b-mlx` | `sha256:2f3f89d12b6985701a82dd23b6f1c397a9ad9bc56368d299e247f38533632928` |
-| `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:c5e0e242f0c1b6013fc91662687e1a37e7fa066f398b8cda8bcb994bdcce4732` |
-| `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:9e5b947d350538de52fb98ead1a229fade9c1934931dc5e553349311b79b0380` |
+| `example_study.studyflow.yaml` | `ollama://gemma4:e2b-mlx` | `sha256:e2b45736a3e40495832e1d203015925c410fa2ac19e1d18ec05a49f81d03dce1` |
+| `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:bff65427f5c9a2a9c0b80b0879824443e9b45cb0b53215088a77787c7aa0d8bd` |
+| `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:c6e13551f99778e2ca0236af46c19b04c2e1808b8e651675c85e21582036e2f0` |
 
-Digests computed on 2026-10-01 with a build of the modeler's main at `6389edc1`, where the modeler reads and writes a study as the study model its YAML spells (moddle only reads and writes BPMN XML), after the answer key was kept from
-the subject (the modeler's `simulate` fix, "a subject is never sent a trial's answer") and after the scoring of a
-reply moved into the files: each asking step's data output names, in FEEL, which option a reply gives, and the record
-step counts only an answer that is one of the options. Since the same day a random gateway draws for each subject
-from the seed, the gateway and the subject's number, so the release runs deal the arms differently from the runs of
-2026-09-29. Any edit to the protocol of a sealed file changes them; its spelling does not (the files were re-spelled
-as that build writes them, and their digests, read from the YAML or from the BPMN XML it spells, stayed). The planted and null
-files were run on 2026-09-29, before the key was split off: those runs sent each trial with its answer to the
-simulated participant, which read its answer from it. Told the answer by the stimulus and the rule instead, it gives
-the same answers, so the file run with the key kept apart gives the same trials and results byte for byte; the runs
-are re-made at the release. The three language-model twins are run by the
-author, after the release, and their results are pending.
+Digests computed on 2026-10-02 with a build of the modeler's main at `1e2897bd`. Any edit to the protocol changes
+them, the cohort size included; the drawing, the Gantt progress and checklist ticks do not. The language-model runs are
+pending: the author runs them, with more subjects, once the Behaverse runner sends each trial's stimulus to the model.
+
+## The pipeline check
+
+`pipeline-check/` holds the same registered analysis on a variant whose tasks are `simulate://` timelines (a Simon task
+of 30 trials, a 1-back of two test blocks of 28 digits) and whose actor is a simulated participant, in two copies that
+differ in that one line: `planted.studyflow.yaml` (`simulate://planted`, less accurate on incongruent Simon trials and
+under the impulsive instruction) and `null.studyflow.yaml` (`simulate://null`, equally accurate everywhere). Because
+the truth is known, the registered analysis must reach *Supported* on both questions in the planted run and *Not
+supported* in the null run, and it does (the paper's `tbl-planted`).
+
+| File | Actor | Protocol digest |
+| --- | --- | --- |
+| `pipeline-check/planted.studyflow.yaml` | `simulate://planted` | `sha256:cf618897260557f1a870df96cdf53823b367791fae0e04e10f6f34715fbfaf19` |
+| `pipeline-check/null.studyflow.yaml` | `simulate://null` | `sha256:22a631fde3feccb698c2ee5eaa3999156c07c3d87902d36ea596ba36f9587afe` |
+
+Both were run on 2026-10-02 by a CLI built from the modeler's main at `722fd5c9` (`run-planted/`, `run-null/`: the
+executed copy, the trials, the results and the run repository of each); each executed copy validates, its protocol
+matching the digest its run recorded. A random gateway draws for each subject from the seed, the gateway and the
+subject's number, so these runs deal the arms differently from the runs of 2026-09-29, which are archived in
+`../../archived/elife/study-runs-2026-09-29/` with the faulty re-run of 2026-10-02 (its CLI replayed one subject's
+allocation for all eight).
 
 ## Running it
 
 ```sh
+studyflow run --runtime local pipeline-check/planted.studyflow.yaml --repo pipeline-check/run-planted
+studyflow run --runtime local pipeline-check/null.studyflow.yaml --repo pipeline-check/run-null
+studyflow validate pipeline-check/run-planted/planted.studyflow.yaml
 studyflow run --runtime local example_study.studyflow.yaml --repo run
-studyflow run --runtime local example_study-null.studyflow.yaml --repo run-null
-studyflow validate run/example_study.studyflow.yaml
 ```
 
-`studyflow` is a CLI built from the modeler at commit `bfbea295`, which reproduces both runs (the `v26.9.29` release
-has no `simulate` skill). It needs `uv`; each run takes about four minutes and needs no
-model server or task build. A run directory is a git repository of its own (the provenance record), so keep it
-out of any commit of this folder, and delete it before re-running.
+Until the next release, `studyflow` is a CLI built from the modeler's main (`npm install && npm run build` in a clone;
+`node packages/cli/dist/studyflow.mjs`); its `--version` still prints 26.9.29, and the `v26.9.29` release has no
+`simulate` skill. The local runtime needs `uv`. A pipeline-check run takes under a minute and needs no model server or
+task build. The example study needs an Ollama server holding the three model tags and the Behaverse WebGL build
+(`UNITY_BUILD_PATH`, or an `assessment-unity` checkout beside the modeler). A run directory is a git repository of its
+own (the provenance record), so keep it out of any commit of this folder, and delete it before re-running.
 
 ## Other folders
 
-- `run/`, `run-null/`: the executed copies, the trials, the results and the run repositories of the two runs.
 - `encoded/`: two published studies encoded from their Methods sections alone (Hedge et al. 2018; Kucina et al. 2023),
   with `unstated` where the section does not give a value.
 - `blind-faults/`: twelve deviations seeded into the fault library's small study by an agent that never saw the
   checks (`faults.json` lists them), scored in the paper's blind-calibration table.
 - `run-2026-09-21-previous-protocol/`: the 2026-09-21 run of an earlier protocol (Behaverse WebGL tasks, one language
-  model, four subjects), kept for reference.
-- `run-2026-10-02-rerun/`: a copy of `run/` re-run on 2026-10-02 after its `Analysis` record was invalidated, by the
-  CLI that made `run/` (studyflow-modeler at 39314fe9), so its history branches there; the subjects are simulated, so
-  it called no model. Only the overview figure's Provenance view reads it
-  (`../../archived/elife/figure-tools/overview-history.py` merges its records with `run/`'s); `run/` stays as the run
-  left it.
+  model, four subjects), kept for reference; at the modeler's main it no longer validates (its expressions are not
+  FEEL).

@@ -7,7 +7,7 @@ the modeler opens the PNG as the study. Each PNG also carries its print size.
 | Figure | What it shows | Its diagram |
 |:--|:--|:--|
 | `fig-overview` | the lifecycle grid, today's artifacts and tools, and the example study with three of the modeler's views (Gantt, Checklist, Provenance) | `src/fig-overview.studyflow.yaml`, laid out in `fig-overview.drawio` |
-| `fig-combined` | the executable example study, as the run left it | `../study/run/example_study.studyflow.yaml`, with the one-row key `src/fig-key.studyflow.yaml` under it |
+| `fig-combined` | the executable example study, as the run left it | for now the planted pipeline run of 2026-09-29 (`../../archived/elife/study-runs-2026-09-29/run-planted/`), with the one-row key `src/fig-key.studyflow.yaml` under it; redrawn from a language-model run of `../study/example_study.studyflow.yaml` |
 | `fig-consort` | the CONSORT participant flow (the Manuscript Figure view), beside `fig-consort-reference` | `src/fig-consort.studyflow.yaml` |
 | `fig-step1-design` … `fig-step4-report` | the study built one step at a time | `src/fig-step*.studyflow.yaml` |
 | `fig-step2-nback`, beside `fig-step2-nback-classic` | the N-back drawn out, beside a slide-style drawing of it | `src/fig-step2-nback.studyflow.yaml` |
@@ -26,12 +26,14 @@ files in `src/`.
   and anything that needs another level becomes another pool. Each lane carries the tint of its lifecycle step.
 - The step figures draw the deposited plan, so their counts print `n=0`. `fig-combined`, `fig-consort` and
   `fig-overview` are one study and print the run's counts: the `state:` block of `fig-consort.studyflow.yaml` is the
-  run's (`../study/run/`), copied byte for byte, and `fig-overview.studyflow.yaml` has the same block with a longer
+  run's (now `../../archived/elife/study-runs-2026-09-29/run-planted/`), copied byte for byte, and `fig-overview.studyflow.yaml` has the same block with a longer
   timeline of runs. `studyflow validate` reports both copies for what they are, drawings of the study rather than the
   protocol that ran: a seal warning on both, and unbalanced counts where `fig-overview` compacts the study.
 - The Provenance view in `fig-overview` shows two runs: the reported one, and a re-run after its `Analysis` record was
-  invalidated, which branches at that step (`../study/run-2026-10-02-rerun/`, see `../study/README.md`). Its steps carry
-  the records of both run repositories.
+  invalidated, which branches at that step (`../../archived/elife/study-runs-2026-09-29/run-planted-rerun/`). Its steps carry
+  the records of both run repositories. That re-run replayed one subject's allocation for all eight, which the modeler
+  has since fixed. These three figures show the `simulate://` pipeline check until a language-model run of the
+  Behaverse study replaces them.
 
 ## Rebuilding
 

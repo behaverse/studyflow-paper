@@ -210,7 +210,7 @@ When the design-review follow-ups are finished and a release is tagged after the
 - [ ] Acknowledgements, or a statement that there are none.
 - [ ] CRediT roles: each author confirms or corrects the proposal at the end of `elife/cover-letter.md`.
 - [ ] The AI-use statement (eLife policy; the TODO at the end of Methods, after "Availability and use").
-- [ ] Zenodo DOIs of the modeler and schemas releases, and the deposit DOI of `elife/study/` (sealed files, executed copies and run repositories, encoded studies, blind faults).
+- [ ] Zenodo DOI of the modeler release (the schemas are in it), and the deposit DOI of `elife/study/` (sealed files, executed copies and run repositories, encoded studies, blind faults).
 - [ ] Suggested reviewers and editors: the four slots in `elife/cover-letter.md`.
 - [ ] Confirm `[@REF]` → `[@claesen2021adherence; @hair2019iicarus]` (Introduction, "even when standard research practices are endorsed").
 - [ ] How the blind seeding was done: which agent, and what it was given (the TODO in Methods, "Validation and its calibration").

@@ -35,7 +35,7 @@ Example_Study_Collaboration:
     Participant_Model:
       type: studyflow:Actor
       name: Actor
-      implementation: ollama://gemma4:e2b-mlx
+      implementation: simulate://planted
     Participant_Subject:
       name: Each subject
       participantMultiplicity:
