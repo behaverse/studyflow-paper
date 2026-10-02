@@ -269,7 +269,7 @@ Analyze:
           dataOutputAssociations:
             Out_Smallest_Arm:
               targetRef: smallest_arm
-              transformation: result.min().item() if result.size == 2 else 0
+              transformation: if count(result) = 2 then min(result) else 0
           additionalArguments:
             subset:
               - context.state.arm
@@ -425,7 +425,7 @@ Analyze:
                   targetRef: congruency_costs
                 Out_Cost_N:
                   targetRef: congruency_n
-                  transformation: result.count().item()
+                  transformation: count(result)
               implementation: python://pandas.Series.sub
             File_Congruency:
               type: DataObjectReference
@@ -454,10 +454,10 @@ Analyze:
           dataOutputAssociations:
             Out_Cost_Test:
               targetRef: congruency_test
-              transformation: "{'statistic': result.statistic, 'pvalue': result.pvalue}"
+              transformation: "{statistic: result.statistic, pvalue: result.pvalue}"
             Out_Cost_File:
               targetRef: File_Congruency_Test
-              transformation: "{'statistic': result.statistic, 'pvalue': result.pvalue, 'subjects': congruency_n}"
+              transformation: "{statistic: result.statistic, pvalue: result.pvalue, subjects: congruency_n}"
           additionalArguments:
             popmean: 0
             alternative: greater
@@ -494,7 +494,7 @@ Analyze:
         CF_2: Cost_Test -> Congruency_Decision
         C_Yes:
           name: "yes"
-          conditionExpression: congruency_test['pvalue'] < alpha
+          conditionExpression: congruency_test.pvalue < alpha
           sourceRef: Congruency_Decision
           targetRef: C_Supported
         C_No:
@@ -574,10 +574,10 @@ Analyze:
           dataOutputAssociations:
             Out_Divergence_Test:
               targetRef: divergence_test
-              transformation: "{'accuracy': result[0], 'pvalue': result[2]}"
+              transformation: "{accuracy: result[1], pvalue: result[3]}"
             Out_Divergence:
               targetRef: File_Divergence
-              transformation: "{'accuracy': result[0], 'pvalue': result[2]}"
+              transformation: "{accuracy: result[1], pvalue: result[3]}"
           additionalArguments:
             estimator:
               implementation: python://sklearn.linear_model.LogisticRegression
@@ -620,7 +620,7 @@ Analyze:
         DF_3: Permutation_Test -> Divergence_Decision
         D_Yes:
           name: "yes"
-          conditionExpression: divergence_test['pvalue'] < alpha
+          conditionExpression: divergence_test.pvalue < alpha
           sourceRef: Divergence_Decision
           targetRef: D_Supported
         D_No:

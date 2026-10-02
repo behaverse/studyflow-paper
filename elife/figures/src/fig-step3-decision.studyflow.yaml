@@ -146,7 +146,7 @@ Decide:
                   targetRef: congruency_costs
                 Out_Cost_N:
                   targetRef: congruency_n
-                  transformation: result.count().item()
+                  transformation: count(result)
               implementation: python://pandas.Series.sub
             File_Congruency:
               type: DataObjectReference
@@ -175,7 +175,7 @@ Decide:
           dataOutputAssociations:
             Out_Cost_Test:
               targetRef: congruency_test
-              transformation: "{'statistic': result.statistic, 'pvalue': result.pvalue}"
+              transformation: "{statistic: result.statistic, pvalue: result.pvalue}"
           additionalArguments:
             popmean: 0
             alternative: greater
@@ -208,7 +208,7 @@ Decide:
         CF_2: Cost_Test -> Congruency_Decision
         C_Yes:
           name: "yes"
-          conditionExpression: congruency_test['pvalue'] < alpha
+          conditionExpression: congruency_test.pvalue < alpha
           sourceRef: Congruency_Decision
           targetRef: C_Supported
         C_No:

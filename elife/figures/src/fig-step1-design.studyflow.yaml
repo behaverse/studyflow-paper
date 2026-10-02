@@ -150,10 +150,10 @@ Design:
       dataOutputAssociations:
         Out_Arm_Cautious:
           targetRef: P_Arm
-          transformation: result['arm']
+          transformation: result.arm
         Out_Instruction_Cautious:
           targetRef: P_Instruction
-          transformation: result['instruction']
+          transformation: result.instruction
       onset: T0
       duration: 1s
       additionalArguments:
@@ -166,10 +166,10 @@ Design:
       dataOutputAssociations:
         Out_Arm_Impulsive:
           targetRef: P_Arm
-          transformation: result['arm']
+          transformation: result.arm
         Out_Instruction_Impulsive:
           targetRef: P_Instruction
-          transformation: result['instruction']
+          transformation: result.instruction
       onset: T0
       duration: 1s
       additionalArguments:
@@ -185,7 +185,7 @@ Design:
     SF_Screening_Eligibility: Screening -> Eligibility_Gateway
     Flow_Eligible:
       name: yes (n={reached})
-      conditionExpression: "'READY' in (Screening or '').upper()"
+      conditionExpression: contains(upper case(Screening), "READY")
       sourceRef: Eligibility_Gateway
       targetRef: Randomize_Disposition
     Flow_Excluded_Pre:

@@ -1,5 +1,5 @@
 """The computations of the example study's analysis, as the five functions `fig-step3-coordinator.studyflow.yaml`
-calls: what the diagram hands off to Python when it coordinates rather than computes. Each function is one
+calls: what the diagram hands off to Python when it coordinates rather than computes. Each function is a
 call of a library the study pins (pandas, scipy, scikit-learn, matplotlib); the diagram keeps what is not
 computation, the order of the steps, the hand-offs between them, the feasibility gates, the decision rules, and
 the claim state each question ends in. Accuracy is the measure throughout: a language model's latency is the
@@ -32,9 +32,12 @@ def trials_table(events: pd.DataFrame, columns: list[str], blocks: list[str]) ->
     return rows.dropna(subset=[ACCURACY]).astype({ACCURACY: float, LATENCY: float})
 
 
-def per_subject(trials: pd.DataFrame) -> pd.DataFrame:
-    """One row per subject: its arm and its mean accuracy in each task, one column per task."""
-    return trials.pivot_table(index=[SUBJECT, ARM], columns=TASK, values=ACCURACY, aggfunc="mean").reset_index()
+def per_subject(trials: pd.DataFrame) -> dict:
+    """One row per subject, its arm and its mean accuracy in each task, one column per task (`table`); and the two
+    counts the feasibility gates read: the number of subjects and the size of the smaller arm, 0 with one arm."""
+    table = trials.pivot_table(index=[SUBJECT, ARM], columns=TASK, values=ACCURACY, aggfunc="mean").reset_index()
+    arms = table[ARM].value_counts()
+    return {"table": table, "subjects": len(table), "smallest_arm": int(arms.min()) if len(arms) == 2 else 0}
 
 
 def congruency_test(trials: pd.DataFrame) -> dict:
@@ -96,8 +99,9 @@ if __name__ == "__main__":  # a synthetic cohort of eight, four per arm, walked 
     columns = KEYS + [CONGRUENCY, ACCURACY, LATENCY]
     trials = trials_table(pd.DataFrame(events), columns, ["Simon", "XCIT_NB_01_Test_A", "XCIT_NB_01_Test_B"])
     assert set(trials[BLOCK]) == {"Simon", "XCIT_NB_01_Test_A", "XCIT_NB_01_Test_B"}
-    subjects = per_subject(trials)
-    smallest_arm = int(subjects[ARM].value_counts().min())
+    summary = per_subject(trials)
+    subjects, smallest_arm = summary["table"], summary["smallest_arm"]
+    assert summary["subjects"] == 8 and smallest_arm == 4
     rules = {"alpha": 0.05, "min_subjects": 3, "min_per_arm": 4, "n_permutations": 200}
     congruency = congruency_test(trials) if len(subjects) >= rules["min_subjects"] else None
     divergence = divergence_test(subjects, rules["n_permutations"]) if smallest_arm >= rules["min_per_arm"] else None

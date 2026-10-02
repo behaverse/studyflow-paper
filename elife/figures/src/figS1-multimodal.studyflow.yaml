@@ -6,22 +6,20 @@ Multimodal_Pipeline:
   name: Multimodal preprocessing and training
   documentation: >-
     Figure S1: a use-case pipeline harmonizing EEG, fMRI, and behavioral recordings. Three source datasets feed
-    modality-specific preprocessing (EEGPrep, fMRIPrep, BDM conversion), one after another since a pool walks one path;
-    a compose/expansion step produces a harmonized corpus, then a model is trained on its training split and evaluated
-    on its test split. The implementations are illustrative references, not packages a run installs.
+    modality-specific preprocessing (EEGPrep, fMRIPrep, BDM conversion), the three at once between a parallel split and
+    its join; a compose/expansion step then produces a harmonized corpus, then a model is trained on its training split
+    and evaluated on its test split. The implementations are illustrative references, not packages a run installs.
   flowElements:
     Start:
       type: StartEvent
     eeg_raw:
-      type: studyflow:Dataset
+      type: eeg:BIDSDataset
       name: EEG (BIDS)
-      format: bids
-      bidsDataType: eeg
+      dataType: eeg
     fmri_raw:
-      type: studyflow:Dataset
+      type: eeg:BIDSDataset
       name: fMRI (BIDS)
-      format: bids
-      bidsDataType: func
+      dataType: func
     beh_raw:
       type: behaverse:BDMDataset
       name: Behavior (BDM)
@@ -44,7 +42,7 @@ Multimodal_Pipeline:
         da_fmri:
           sourceRef:
             - fmri_raw
-      implementation: docker://nipreps/fmriprep@23.2.0
+      implementation: docker://nipreps/fmriprep:23.2.0
     BehConv:
       type: ServiceTask
       name: BDM conversion
@@ -75,50 +73,70 @@ Multimodal_Pipeline:
     Done:
       type: EndEvent
       name: Done
-    m0: Start -> EEGPrep
-    m1: EEGPrep -> fMRIPrep
-    m2: fMRIPrep -> BehConv
-    m3: BehConv -> Compose
+    Split:
+      type: ParallelGateway
+    Join:
+      type: ParallelGateway
+    m0: Start -> Split
+    s1: Split -> EEGPrep
+    s2: Split -> fMRIPrep
+    s3: Split -> BehConv
+    j1: EEGPrep -> Join
+    j2: fMRIPrep -> Join
+    j3: BehConv -> Join
+    m3: Join -> Compose
     m4: Compose -> Train
     m7: Train -> Evaluate
     m8: Evaluate -> Done
 layout:
   Start:
-    bounds: 322 -40 36 36
+    bounds: 442 0 36 36
   eeg_raw:
-    bounds: 120 55 50 50
+    bounds: 40 215 50 50
   fmri_raw:
-    bounds: 120 275 50 50
+    bounds: 300 215 50 50
   beh_raw:
-    bounds: 120 475 50 50
+    bounds: 560 215 50 50
   EEGPrep:
-    bounds: 280 40 120 80
+    bounds: 140 200 120 80
   fMRIPrep:
-    bounds: 280 260 120 80
+    bounds: 400 200 120 80
   BehConv:
-    bounds: 280 460 120 80
+    bounds: 660 200 120 80
   Compose:
-    bounds: 500 260 120 80
+    bounds: 400 430 120 80
   harmonized:
-    bounds: 535 400 50 50
+    bounds: 290 445 50 50
   Train:
-    bounds: 820 180 120 80
+    bounds: 600 430 120 80
   Evaluate:
-    bounds: 820 340 120 80
+    bounds: 800 430 120 80
   Done:
-    bounds: 1030 282 36 36
-    label: 1072 293 30 14
+    bounds: 992 452 36 36
+    label: 1036 463 30 14
+  Split:
+    bounds: 435 90 50 50
+  Join:
+    bounds: 435 330 50 50
   m0:
-    waypoint: 340,-4 340,40
-  m1:
-    waypoint: 340,120 340,260
-  m2:
-    waypoint: 340,340 340,460
+    waypoint: 460,36 460,90
+  s1:
+    waypoint: 435,115 200,115 200,200
+  s2:
+    waypoint: 460,140 460,200
+  s3:
+    waypoint: 485,115 720,115 720,200
+  j1:
+    waypoint: 200,280 200,355 435,355
+  j2:
+    waypoint: 460,280 460,330
+  j3:
+    waypoint: 720,280 720,355 485,355
   m3:
-    waypoint: 400,500 460,500 460,300 500,300
+    waypoint: 460,380 460,430
   m4:
-    waypoint: 620,300 720,300 720,220 820,220
+    waypoint: 520,470 600,470
   m7:
-    waypoint: 880,260 880,340
+    waypoint: 720,470 800,470
   m8:
-    waypoint: 940,380 1048,380 1048,318
+    waypoint: 920,470 992,470

@@ -128,8 +128,8 @@ Coordinate:
         Per-subject accuracy
         analysis.per_subject
       documentation: >-
-        One row per subject, with its arm and its accuracy in each task; the two counts the feasibility gates read, the
-        number of subjects and the size of the smaller arm, are taken from that table on the way out.
+        One row per subject, with its arm and its accuracy in each task, and beside the table the two counts the
+        feasibility gates read: the number of subjects and the size of the smaller arm.
       dataInputAssociations:
         In_Trials_PS:
           sourceRef:
@@ -138,12 +138,13 @@ Coordinate:
       dataOutputAssociations:
         Out_PS:
           targetRef: per_subject
+          transformation: result.table
         Out_N:
           targetRef: n_subjects
-          transformation: len(result)
+          transformation: result.subjects
         Out_Smallest_Arm:
           targetRef: smallest_arm
-          transformation: result['context.state.arm'].value_counts().min().item() if result['context.state.arm'].nunique() == 2 else 0
+          transformation: result.smallest_arm
       implementation: python://analysis.per_subject
     Congruency:
       type: SubProcess
@@ -202,7 +203,7 @@ Coordinate:
         CF_2: C_Test -> C_Decision
         C_Yes:
           name: "yes"
-          conditionExpression: congruency_test['pvalue'] < alpha
+          conditionExpression: congruency_test.pvalue < alpha
           sourceRef: C_Decision
           targetRef: C_Supported
         C_No:
@@ -269,7 +270,7 @@ Coordinate:
         DF_2: D_Test -> D_Decision
         D_Yes:
           name: "yes"
-          conditionExpression: divergence_test['pvalue'] < alpha
+          conditionExpression: divergence_test.pvalue < alpha
           sourceRef: D_Decision
           targetRef: D_Supported
         D_No:

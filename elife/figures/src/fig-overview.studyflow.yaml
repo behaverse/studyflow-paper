@@ -320,38 +320,68 @@ state:
   _meta:
     prov:
       - action: executed
-        when: "2026-09-21T08:43:55.172+02:00"
+        when: "2026-09-29T22:58:13.523+02:00"
         who: morteza
-        with: studyflow-cli/26.9.28
+        with: studyflow-cli/26.9.29
         run: run
         seed: 42
-        plan: sha256:daeefe00a260ef679e395a9f72939b9eedb40f1e816c994900c80f8efeb96bf4
+        plan: sha256:b31e928d7a1bafb89fba8b5b1972b4f2018b02dc638628ad9845a292aea1f38e
     instance:
-      Participant_Subject: 4
+      Participant_Subject: 8
+      Simon_Block: 30
+      NBack_Block: 56
     reached:
-      Enroll: 4
+      Enroll: 8
       All_Complete: 1
-      SF_Start_Screening: 4
-      Screening: 4
-      SF_Screening_Eligibility: 4
-      Eligibility_Gateway: 4
-      Flow_Eligible: 4
-      Randomize_Disposition: 4
-      Flow_Allocate_Impulsive: 2
-      Allocate_Impulsive: 2
-      SF_Impulsive_Merge: 2
-      Merge_Allocation: 4
-      SF_Merge_Interference: 4
-      Task_Interference: 4
-      SF_Interference_WorkingMemory: 4
-      Task_WorkingMemory: 4
-      SF_WorkingMemory_Debrief: 4
-      Debrief: 4
-      SF_Debrief_End: 4
-      Sub_End: 4
-      Flow_Allocate_Cautious: 2
-      Allocate_Cautious: 2
-      SF_Cautious_Merge: 2
+      SF_Start_Screening: 8
+      Screening: 8
+      SF_Screening_Eligibility: 8
+      Eligibility_Gateway: 8
+      Flow_Eligible: 8
+      Randomize_Disposition: 8
+      Flow_Allocate_Impulsive: 4
+      Allocate_Impulsive: 4
+      SF_Impulsive_Merge: 4
+      Merge_Allocation: 8
+      SF_Merge_Interference: 8
+      Task_Interference: 8
+      Simon_Start: 8
+      Simon_F_0: 8
+      Simon_Timeline: 8
+      Simon_F_1: 8
+      Simon_Block: 8
+      Simon_Trial_Start: 240
+      Simon_TF_0: 240
+      Simon_Ask: 240
+      Simon_TF_1: 240
+      Simon_Trial_End: 240
+      Simon_F_2: 8
+      Simon_Record: 8
+      Simon_F_3: 8
+      Simon_End: 8
+      SF_Interference_WorkingMemory: 8
+      Task_WorkingMemory: 8
+      NBack_Start: 8
+      NBack_F_0: 8
+      NBack_Timeline: 8
+      NBack_F_1: 8
+      NBack_Block: 8
+      NBack_Trial_Start: 448
+      NBack_TF_0: 448
+      NBack_Ask: 448
+      NBack_TF_1: 448
+      NBack_Trial_End: 448
+      NBack_F_2: 8
+      NBack_Record: 8
+      NBack_F_3: 8
+      NBack_End: 8
+      SF_WorkingMemory_Debrief: 8
+      Debrief: 8
+      SF_Debrief_End: 8
+      Sub_End: 8
+      Flow_Allocate_Cautious: 4
+      Allocate_Cautious: 4
+      SF_Cautious_Merge: 4
       Flow_Start_Analysis: 1
       Analysis: 1
       An_Start: 1
@@ -370,8 +400,10 @@ state:
       FF_0: 1
       Filter_Rows: 1
       FF_1: 1
-      Measures: 1
+      Test_Blocks: 1
       FF_2: 1
+      Measures: 1
+      FF_3: 1
       F_End: 1
       AF_2: 1
       Per_Subject: 1
@@ -397,9 +429,9 @@ state:
       CPF_1: 1
       By_Congruency: 1
       CPF_2: 1
-      Accuracy_Incongruent: 1
-      CPF_3: 1
       Accuracy_Congruent: 1
+      CPF_3: 1
+      Accuracy_Incongruent: 1
       CPF_4: 1
       Cost: 1
       CPF_5: 1
@@ -410,15 +442,23 @@ state:
       Cost_Test: 1
       CF_2: 1
       Congruency_Decision: 1
-      C_No: 1
-      C_Not_Supported: 1
+      C_Yes: 1
+      C_Supported: 1
       AF_5: 1
       Divergence: 1
       D_Start: 1
       DF_0: 1
       Enough_Per_Arm_D: 1
-      D_Too_Few: 1
-      D_Not_Testable: 1
+      D_Enough: 1
+      Features: 1
+      DF_1: 1
+      Labels: 1
+      DF_2: 1
+      Permutation_Test: 1
+      DF_3: 1
+      Divergence_Decision: 1
+      D_Yes: 1
+      D_Supported: 1
       AF_7: 1
       Plot: 1
       AF_8: 1
@@ -430,14 +470,45 @@ state:
   Example_Study:
     arm: impulsive
     instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+  Simon_Block:
+    trial:
+      Task: Simon
+      Block: Simon
+      Trial: 30
+      Congruency: Congruent
+      Stimulus: a red square on the left of the screen
+      Rule: Answer left for a red square and right for a blue one, wherever it appears.
+      ResponseOptions:
+        - left
+        - right
+      Correct: left
+    answer: left
+  NBack_Block:
+    trial:
+      Task: NBack
+      Block: Test_B
+      Trial: 28
+      Digit: 1
+      Before:
+        - 7
+      Rule: Answer match when this digit is the one shown 1 before it, else non-match.
+      ResponseOptions:
+        - match
+        - non-match
+      Correct: non-match
+    answer: match
   Analysis:
     alpha: 0.05
     min_subjects: 3
     min_per_arm: 4
     n_permutations: 1000
-    smallest_arm: 2
+    smallest_arm: 4
   Congruency:
-    congruency_n: 4
+    congruency_n: 8
     congruency_test:
-      statistic: -3.3943472161453743
-      pvalue: 0.9786808981792949
+      statistic: 4.149046124862334
+      pvalue: 0.002150110392471851
+  Divergence:
+    divergence_test:
+      accuracy: 1
+      pvalue: 0.03496503496503497
