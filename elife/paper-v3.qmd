@@ -180,7 +180,7 @@ Adherence to guidelines is checked from the same file. Guideline items map onto 
 
 The demonstration makes five points. First, the notation works: each of the four steps exercised one property, and each held in the run [TODO: confirm from the language-model runs]. The design ran as written (Step 1), the same file drove execution and data collection (Step 2), the registered pipeline produced the reported estimates and decided each question by its rule (Step 3), and the reporting artifacts were exported from the file and checked against it (Step 4). Second, one file covers the whole lifecycle: each step is a complete working example on its own, and the full study is their composition, the end events of one diagram meeting the start events of the next. The result is the single file of @fig-combined, laid out to match the CONSORT structure, at once the protocol as registered, the study as executed, and the provenance record of what happened. Third, the artifacts that current practice draws by hand come out of that file: the CONSORT flow, the SPIRIT schedule, the checklist, and the deviation report are views of it, and the counts the CONSORT flow reports are the counts the runner wrote.
 
-Fourth, there is no second copy. The Simon task's length shows what that provides. It is set in the file exactly once (`trials: 30` in the timeline step of @lst-step2-run). The Study view displays it, the runner uses it to produce the Simon task's trials, the analysis receives the data it produces, and the exported figure renders it. A protocol, a script, a methods paragraph, and a figure cannot disagree about its value, because there is no second copy. Changing it to forty trials is one edit whose entire footprint under version control is:
+Fourth, there is no second copy. The Simon task's length shows what that provides. It is set in the file exactly once (`trials: 30` in the Simon task's timeline step). The Study view displays it, the runner uses it to produce the Simon task's trials, the analysis receives the data it produces, and the exported figure renders it. A protocol, a script, a methods paragraph, and a figure cannot disagree about its value, because there is no second copy. Changing it to forty trials is one edit whose entire footprint under version control is:
 
 ```diff
 -            trials: 30
@@ -233,7 +233,7 @@ A single source of truth also concentrates risk, so the design keeps the notatio
 
 We have not measured whether Studyflow diagrams are easier to read than the protocol PDFs, figures, and scripts they replace, and the classic flowchart-versus-text comparisons are mixed [@scanlan1989flowcharts; @shneiderman1977flowcharts]. We designed every feature with comprehension in mind, but we treat the benefit as a hypothesis awaiting a usability study [@figl2017comprehension].
 
-Finally, the large language models in the example study are not replacements for humans, and treating their data as human evidence invites documented misinterpretations [@dillion2023replace; @lin2025fallacies; @messeri2024illusions]. Most experimental research in cognitive science has so far engaged AI as the intervention rather than the subject, the setting CONSORT-AI and SPIRIT-AI were written for [@liu2020consortai; @cruzrivera2020spiritai]. Our claim in the example study stays at the level of notation. Whether the tasks measure the same constructs in artificial agents as in humans is an open question that the shared protocol makes testable rather than resolves [@bean2025construct]. Working memory is one clear case: the study asks the model one message at a time and the model keeps nothing between messages, so each 1-back message carries the digit before it, and the task tests matching rather than working memory.
+Finally, the large language models in the example study are not replacements for humans, and treating their data as human evidence invites documented misinterpretations [@dillion2023replace; @lin2025fallacies; @messeri2024illusions]. Most experimental research in cognitive science has so far engaged AI as the intervention rather than the subject, the setting CONSORT-AI and SPIRIT-AI were written for [@liu2020consortai; @cruzrivera2020spiritai]. Our claim in the example study stays at the level of notation. Whether the tasks measure the same constructs in artificial agents as in humans is an open question that the shared protocol makes testable rather than resolves [@bean2025construct]. Working memory is one clear case: the study asks the model one message at a time and the model keeps nothing between messages (its pool's `memory` is `none`, the default; `conversation` would keep each subject's earlier trials), so each 1-back message carries the digit before it, and the task tests matching rather than working memory.
 
 # Future work
 
@@ -356,14 +356,12 @@ Randomize_Disposition:
   default: Flow_Allocate_Impulsive
 ```
 
-```{#lst-step2-run .yaml lst-cap="Step 2: the 1-back task node, the settings wired into it, and its exit (an excerpt of the example study, its drawing omitted). The task names its instrument and timeline in a typed extension; the Parameters element carries the settings the runner passes to the task, InterStimulusInterval among them; the conditional boundary event reads the task's own result."}
+```{#lst-step2-run .yaml lst-cap="Step 2: the 1-back task node, the settings wired into it, and its exit (an excerpt of the example study, its drawing omitted). The task names its instrument and timeline as a typed element; the Parameters element carries the settings the runner passes to the task, InterStimulusInterval among them; the conditional boundary event reads the task's own result."}
 Task_WorkingMemory:
-  type: ChoreographyTask
-  extensionElements:
-    - type: behaverse:Task
-      instrument: NB
-      timeline: XCIT_NB_01
+  type: behaverse:Task
   name: Working memory (1-back)
+  instrument: NB
+  timeline: XCIT_NB_01
   dataInputAssociations:
     In_Prompt_WorkingMemory:
       sourceRef:
@@ -372,24 +370,22 @@ Task_WorkingMemory:
       sourceRef:
         - Bot_Pace_NB
 Bot_Pace_NB:
-  type: DataObjectReference
-  extensionElements:
-    - type: studyflow:Parameters
-      values:
-        Bot:
-          Speed: 20
-          SkipInstructions: true
-          AutoClickInstructions: true
-          SkipFocusArea: true
-          overrideUserInputParameters: true
-          playerPaced: true
-          useNonMatchButton: true
-          maxResponseTime: 20
-          OverrideTemporalParameters: true
-          StimulusDisplayDuration: 0.3
-          InterStimulusInterval: 0.3
-          TrialForeperiod: 0.1
+  type: studyflow:Parameters
   name: Task settings (1-back)
+  values:
+    Bot:
+      Speed: 20
+      SkipInstructions: true
+      AutoClickInstructions: true
+      SkipFocusArea: true
+      overrideUserInputParameters: true
+      playerPaced: true
+      useNonMatchButton: true
+      maxResponseTime: 20
+      OverrideTemporalParameters: true
+      StimulusDisplayDuration: 0.3
+      InterStimulusInterval: 0.3
+      TrialForeperiod: 0.1
 Failed_WorkingMemory:
   type: BoundaryEvent
   name: "> 20% unanswered"
@@ -567,7 +563,7 @@ The Studyflow language is defined once and projected into the format each tool n
 
 The runner is designed to administer every user through one message-passing interface. Per trial it sends an observation (the stimulus, the allowed responses, the timing constraint, and where needed a rendered frame at a declared resolution) and receives a response and, where the actor produces one behaviorally, a response time. An actor is anything that implements this function from observations to responses; humans and language models are instances of one abstraction. The interface coincides with the observation-action loop AI evaluation harnesses and task standards expose [@metr2024taskstandard; @aisi2024inspect], so a bridge to those harnesses is a compilation, not a redesign (Discussion). The exchange itself is expressible in the notation: in the example study it is one pair of message flows between the subjects' pool and the model's pool, a `behaverse:Trial` out per trial and a `behaverse:Response` back, inherited by whichever task is playing (@fig-step2-run): a step with no message flow of its own exchanges along those of the nearest sub-process or pool drawn around it, so the exchange is drawn once, on that container, rather than once per task, and reaches no further than the container's border. A task from another toolkit is named the same way: the modeler opens a jsPsych timeline as one cognitive task per timeline node (`platform: jspsych`, the plugin as `jspsych://<plugin>@<version>`, its parameters in a wired Parameters object) [@deleeuw2015jspsych], the form of @lst-minimal-study, and the browser runtime plays such a step, its trials' data the step's result.
 
-The semantics are pinned in the specification because most engines that claim BPMN 2.0 compliance do not actually run the execution format [@geiger2016bpmn]. The local runtime's contract (`packages/runtime-local/CONTRACT.md`) fixes how a partial runner claims elements and exchanges state and messages. The local runtime emits a complete execution trace as it walks. Its record, `events.jsonl`, lists in order every step it ran with the step's record, every gateway decision with the conditions it weighed, every message, and every exchange with a model (the request as sent, the executor configuration, and the reply); the run is kept as a git repository with one commit per step, whose trailers name the step and the run. The record, the seed, and the trials table together reconstruct the path any subject took. Packaging that repository as a Workflow Run RO-Crate [@leo2024wfrunrocrate] is future work.
+The semantics are pinned in the specification because most engines that claim BPMN 2.0 compliance do not actually run the execution format [@geiger2016bpmn]. The local runtime's contract (`packages/runtime-local/CONTRACT.md`) fixes how a partial runner claims elements and exchanges state and messages. The local runtime emits a complete execution trace as it walks. Its record, `events.jsonl`, lists in order every step it ran with the step's record, every gateway decision with the conditions it weighed, every message, and every exchange with a model (the request as sent, the executor configuration, and the reply); the run is kept as a git repository with one commit per step, whose trailers name the step and the run. The record, the seed, and the trials table together reconstruct the path any subject took. `studyflow prov` writes that record as W3C PROV-O [@w3cprov]: the run and each step are activities, and the study, named by its digest, is the plan they followed. Packaging that repository as a Workflow Run RO-Crate [@leo2024wfrunrocrate] is future work.
 
 ## Expressiveness and limits
 
@@ -657,6 +653,7 @@ Every exchange with a model records the executor configuration with it: the mode
 | The file validates against the language schema, with unknown keys and duplicate ids reported | implemented | `core/fault-library` |
 | Every edge joins elements of the kinds and scope it may join (well-formedness, second condition) | implemented; `studyflow run` refuses a study that fails it | `core/endpoints`, `core/fault-library` |
 | Every flow node lies on a path from a start to an end event (well-formedness, third condition) | implemented; `studyflow run` refuses a study that fails it | `core/connected`, `core/fault-library` |
+| The BPMN XML export is valid BPMN 2.0 (well-formedness, fourth condition) | implemented in `studyflow validate`, against the OMG schema with `xmllint`; `studyflow run` does not check it | `modeler/cli-checks` |
 | The counts balance at every node of an executed copy | implemented; the runners count sequence flows as well as nodes | `core/flow-consistency`, `runtime-local/cli-run` |
 | A column an operation reads exists in the schema of its dataset | implemented before the run for schema-bound datasets; for derived tables, when the step runs, where pandas is installed | `core/data-contract`, `python/test_local` |
 | A protocol edited after a run is detected | implemented: each run records a protocol digest, and `studyflow validate` recomputes it | `core/protocol-digest`, `core/seal` |
@@ -675,6 +672,7 @@ Every exchange with a model records the executor configuration with it: the mode
 | The counts and the provenance are written into the executed copy of the file, kept in the run repository | the local runtime only; the browser runner keeps them in its session | `runtime-local/cli-run` |
 | Guideline items are attributes of the elements they concern | implemented as checklists, whose items are free text the author types; scoring adherence automatically is not, apart from the flow consistency of CONSORT | `core/checklist` |
 | A task from another toolkit is named the same way | the jsPsych import is implemented, and the browser runtime plays a `jspsych://` step with its Parameters, its trials' data the step's result | `jspsych/jspsych-import`, `jspsych/jspsych-run` |
+| The run record exports as W3C PROV-O | implemented: `studyflow prov` writes the run and each step as activities, under the study as their plan | `runtime-local/w3c` |
 | External calls run in containers | not implemented | none |
 | The run trace packages as a Workflow Run RO-Crate | not implemented | none |
 
@@ -802,7 +800,7 @@ The fault library of @tbl-faults was seeded by the authors of the checks. As a c
 | Property | `bpmn:Property` | `value`, the initial value of the state a scope declares |
 | Conditional and timer events | `bpmn:ConditionalEventDefinition`, `bpmn:TimerEventDefinition` | `condition`; `timeDuration`, `timeDate`, `timeCycle` (a cycle is waited for its first firing only) |
 | Loop marker | `bpmn:StandardLoopCharacteristics` | `loopCondition` |
-| `studyflow:Actor` | `bpmn:Participant` | `actorType` (human, software, hardware; llm from the agentic skill), `implementation` |
+| `studyflow:Actor` | `bpmn:Participant` | `actorType` (human, software, hardware; llm from the agentic skill), `implementation`, `memory` (none, conversation) |
 | `studyflow:Parameters` | `bpmn:DataObjectReference` | `values`, read by the steps it is wired into |
 | `studyflow:Schema` | `bpmn:DataObjectReference` | `format` (`csvw` by default), `body` |
 | `studyflow:Dataset` | `bpmn:DataStoreReference` | `format` (psych-ds; bids and nwb from the eeg skill, bdm from the behaverse skill), `schema`, `catalog` |
