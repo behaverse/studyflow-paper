@@ -38,9 +38,9 @@ Decide:
       documentation: >-
         Is a subject less accurate on incongruent than on congruent Simon trials? Per subject, the mean accuracy on
         congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
-        one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects
-        than the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The
-        descriptive table by disposition and congruency is written out either way.
+        one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects than
+        the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The descriptive
+        table by disposition and congruency is written out either way.
       properties:
         by_congruency:
           name: by_congruency
@@ -65,8 +65,8 @@ Decide:
           type: SubProcess
           name: Accuracy cost per subject
           documentation: >-
-            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the
-            mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
+            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the mean
+            accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
           flowElements:
             CP_Start:
               type: StartEvent

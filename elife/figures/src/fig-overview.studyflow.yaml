@@ -6,12 +6,14 @@ Example_Study:
   name: Example study (overview)
   documentation: >-
     The example study (`../study/example_study.studyflow`) compacted to one row for the overview figure (@fig-overview):
-    the same element ids, the pool of four parallel subjects flattened to the one subject it repeats, the analysis
-    collapsed to one box, and the three pools, the message flows and the per-subject end of session (the debrief and
-    the step that records a completer) dropped for width. What is
-    left is laid out left to right under the four lifecycle stages. Every `n` is a run-state value the runner writes as
-    the cohort runs; they all read zero here because this figure is drawn from the deposited plan. Its Gantt, Checklist
-    and Provenance views are the modeler's own renderings of it.
+    the same element ids, the pool of eight parallel subjects flattened to the one subject it repeats, the analysis
+    collapsed to one box, and the three pools, the message flows, the debrief and the step that records a completer
+    dropped for width. As in the study, the subject's row ends at its completion end event, reached once per subject,
+    and the analysis starts at its own start event, once the last subject is done. What is left is laid out left to
+    right under the four lifecycle stages. Every `n` is a run-state value the runner writes as the cohort runs; here
+    they are the counts of the pipeline-check run whose state this figure carries (see `../README.md`), and each flow
+    the compaction draws carries the count of the path it stands for in that run. Its Gantt, Checklist and Provenance
+    views are the modeler's own renderings of it.
   seed: 42
   dependencies:
     - pandas==2.3.3
@@ -24,6 +26,9 @@ Example_Study:
     - Pedro Cardoso-Leite
   version: "1.0"
   properties:
+    P_MaxUnanswered:
+      name: max_unanswered
+      value: 0.2
     P_Arm:
       name: arm
       value: none
@@ -182,7 +187,7 @@ Example_Study:
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
-          condition: "{Task_Interference.failedTrialRate} > 0.2"
+          condition: "{Task_Interference.failedTrialRate} > max_unanswered"
       attachedToRef: Task_Interference
     Task_WorkingMemory:
       type: behaverse:Task
@@ -211,7 +216,7 @@ Example_Study:
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
-          condition: "{Task_WorkingMemory.failedTrialRate} > 0.2"
+          condition: "{Task_WorkingMemory.failedTrialRate} > max_unanswered"
       attachedToRef: Task_WorkingMemory
     Dataset_Trials:
       type: behaverse:BDMDataset
@@ -230,6 +235,37 @@ Example_Study:
     Discontinued:
       type: EndEvent
       name: "Discontinued: more than 20% of trials unanswered (n={reached})"
+    Sub_End:
+      type: EndEvent
+      name: Completed the protocol (n={reached})
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:44.428+02:00"
+          run: run
+          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:29:38.228+02:00"
+          run: rerun
+          commit: a7bc99cfce062aabeff0904e83e50da664328612
+    All_Complete:
+      type: StartEvent
+      name: All subjects complete
+      extensionElements:
+        - type: prov:Activity
+          action: executed
+          when: "2026-09-29T23:01:44.428+02:00"
+          run: run
+          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
+        - type: prov:Activity
+          action: executed
+          when: "2026-10-02T07:29:38.229+02:00"
+          run: rerun
+          commit: a7bc99cfce062aabeff0904e83e50da664328612
+      eventDefinitions:
+        Def_All_Complete:
+          type: MessageEventDefinition
     Analysis:
       type: SubProcess
       name: Analysis
@@ -312,7 +348,8 @@ Example_Study:
     Flow_Interference_WorkingMemory: Task_Interference -> Task_WorkingMemory
     Flow_Failed_Interference: Failed_Interference -> Discontinued
     Flow_Failed_WorkingMemory: Failed_WorkingMemory -> Discontinued
-    Flow_WorkingMemory_Analysis: Task_WorkingMemory -> Analysis
+    Flow_WorkingMemory_End: Task_WorkingMemory -> Sub_End
+    Flow_Start_Analysis: All_Complete -> Analysis
     Flow_Analysis_Render: Analysis -> Render
     Flow_Render_Completed: Render -> Completed
 layout:
@@ -392,20 +429,30 @@ layout:
     label: 490 208 240 28
     fill: "#f1d0cd"
     stroke: "#ac5a54"
+  Sub_End:
+    bounds: 760 84 32 32
+    label: 736 40 80 42
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  All_Complete:
+    bounds: 848 84 32 32
+    label: 824 120 80 28
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
   Analysis:
-    bounds: 768 68 140 64
+    bounds: 904 68 120 64
     font: "#7a67a6"
     isExpanded: false
     fill: "#e6dff1"
     stroke: "#7a67a6"
   Render:
-    bounds: 932 66 128 68
+    bounds: 1048 66 116 68
     font: "#a2803c"
     fill: "#f6e8c9"
     stroke: "#a2803c"
   Completed:
-    bounds: 1086 84 32 32
-    label: 1060 120 96 28
+    bounds: 1190 84 32 32
+    label: 1158 120 96 28
     fill: "#f6e8c9"
     stroke: "#a2803c"
   Flow_Enroll_Screening:
@@ -442,14 +489,17 @@ layout:
   Flow_Failed_WorkingMemory:
     waypoint: 730,150 730,186 600,186
     stroke: "#ac5a54"
-  Flow_WorkingMemory_Analysis:
-    waypoint: 744,100 768,100
+  Flow_WorkingMemory_End:
+    waypoint: 744,100 760,100
+    stroke: "#a2803c"
+  Flow_Start_Analysis:
+    waypoint: 880,100 904,100
     stroke: "#7a67a6"
   Flow_Analysis_Render:
-    waypoint: 908,100 932,100
+    waypoint: 1024,100 1048,100
     stroke: "#a2803c"
   Flow_Render_Completed:
-    waypoint: 1060,100 1086,100
+    waypoint: 1164,100 1190,100
     stroke: "#a2803c"
 state:
   _meta:
@@ -609,6 +659,12 @@ state:
       Render: 1
       Flow_Render_Completed: 1
       Completed: 1
+      Flow_Enroll_Screening: 8
+      Flow_Screening_Eligibility: 8
+      Flow_Cautious_Interference: 4
+      Flow_Impulsive_Interference: 4
+      Flow_Interference_WorkingMemory: 8
+      Flow_WorkingMemory_End: 8
   Example_Study:
     arm: impulsive
     instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.

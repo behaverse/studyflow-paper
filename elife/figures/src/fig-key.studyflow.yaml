@@ -13,13 +13,17 @@ Key:
     count, `×8`, under it, and here it rides a plain box, because a pool draws its name up its band and so could not
     carry this caption. The caption carries the two symbols left out for width: `+` marks a sub-process expanded in
     another figure, and dashed arrows crossing the pool boundary are messages to the model.
+  properties:
+    P_MaxUnanswered:
+      name: max_unanswered
+      value: 0.2
   flowElements:
     K_Start:
       type: StartEvent
       name: start
     K_Task:
       type: Task
-      name: a step
+      name: an activity
     K_Gateway:
       type: ExclusiveGateway
       name: a decision
@@ -28,7 +32,7 @@ Key:
       name: an exit
     K_Data:
       type: DataObjectReference
-      name: data a step reads or writes
+      name: data an activity reads or writes
     K_Store:
       type: DataStoreReference
       name: a dataset
@@ -40,7 +44,7 @@ Key:
       eventDefinitions:
         Cond_Key:
           type: ConditionalEventDefinition
-          condition: "{K_Boundary_Task.failedTrialRate} > 0.2"
+          condition: "{K_Boundary_Task.failedTrialRate} > max_unanswered"
       attachedToRef: K_Boundary_Task
     K_Parallel:
       type: Task

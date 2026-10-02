@@ -291,8 +291,8 @@ Example_Study:
       documentation: >-
         The attrition rule, as the condition a BPMN conditional boundary event watches rather than an attribute of the
         task: the task's own result carries the share of the trials it recorded no valid response for, and above one in
-        five this instance leaves at Discontinued. The threshold is the process's `max_unanswered`, written once and read by
-        the exit of both tasks.
+        five this instance leaves at Discontinued. The threshold is the process's `max_unanswered`, written once and
+        read by the exit of both tasks.
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
@@ -507,11 +507,11 @@ Analysis_Report:
         Seven preregistered operations, collapsed here and drawn in @fig-step3-analyze: read the recorded trials, keep
         the answered trials of the test blocks, per-subject accuracy in each task, group statistics, and then the two
         questions, each ending in a decision: the congruency effect within subjects and the divergence between the two
-        dispositions; last, the figure, when any subject was analysed. Accuracy is the measure throughout: a language model's latency is the time its
-        server took to generate the reply, so the build records it with every trial and no question tests it. Every step
-        inside is one call to a library function named in full; nothing here is code written for this study. The
-        decision rules wired in are read-only properties of this sub-process, so every question reads the same alpha and
-        the same minimum sample.
+        dispositions; last, the figure, when any subject was analysed. Accuracy is the measure throughout: a language
+        model's latency is the time its server took to generate the reply, so the build records it with every trial and
+        no question tests it. Every step inside is one call to a library function named in full; nothing here is code
+        written for this study. The decision rules wired in are read-only properties of this sub-process, so every
+        question reads the same alpha and the same minimum sample.
       properties:
         derived:
           name: derived
@@ -677,8 +677,8 @@ Analysis_Report:
             The analysed population and its summary: the trials of the subjects who completed the protocol, as the
             completers dataset lists them, which every question and the figure read; one row per subject, its mean
             accuracy in each task, with the subject and its arm as columns, written out as the per-subject table of the
-            results dataset; then the size of the smaller arm, which the divergence question checks against the
-            decision rules before it tests anything.
+            results dataset; then the size of the smaller arm, which the divergence question checks against the decision
+            rules before it tests anything.
           flowElements:
             PS_Start:
               type: StartEvent
@@ -1378,19 +1378,19 @@ layout:
     stroke: "#4e6f95"
   Flow_Eligible:
     waypoint: 385,303 385,388
-    label: 392 316 30 14
+    label: 392 316 68 14
     stroke: "#4e6f95"
   Flow_Excluded_Pre:
     waypoint: 410,278 840,278
-    label: 420 256 30 14
+    label: 420 256 62 14
     stroke: "#ac5a54"
   Flow_Allocate_Cautious:
     waypoint: 360,413 285,413 285,452
-    label: 288 394 58 14
+    label: 258 390 100 14
     stroke: "#4e6f95"
   Flow_Allocate_Impulsive:
     waypoint: 410,413 565,413 565,452
-    label: 474 394 66 14
+    label: 474 390 106 14
     stroke: "#4e6f95"
   SF_Cautious_Merge:
     waypoint: 285,514 285,551 360,551
@@ -1434,8 +1434,6 @@ layout:
     label: 812 938 66 14
     fill: "#f4f1f8"
     stroke: "#7a67a6"
-  In_Completers_Analysis:
-    waypoint: 908,970 908,984 460,984 460,1002
   Trial_Schema:
     bounds: 620 920 36 50
     label: 662 938 80 14
@@ -1461,6 +1459,8 @@ layout:
     waypoint: 385,970 385,1002
   In_Rules:
     waypoint: 248,1084 248,1060 295,1060
+  In_Completers_Analysis:
+    waypoint: 908,970 908,984 460,984 460,1002
   Out_Results:
     waypoint: 385,1072 385,1084
   Dataset_Results:

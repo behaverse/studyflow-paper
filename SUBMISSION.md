@@ -1,5 +1,8 @@
 # Submission plan: eLife, Tools and Resources
 
+
+> **Decided 2026-10-02:** no sealing, registry deposit or DOI step for the example study. Its Studyflow files are submitted with the paper in both states (as registered and after their runs); the embedded provenance serves as preregistration and record. Checklist items below about sealing, Zenodo or deposit DOIs are dropped.
+
 Target: submit on **Fri 2026-10-16**. The date is fixed; the scope is not.
 
 ## Decisions (2026-09-26)

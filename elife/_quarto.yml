@@ -7,3 +7,25 @@ manuscript:
 format:
   html: default
   elife-pdf: default
+
+# Supplementary items number on their own: Supplementary Figure S1, Table S1 and S2, Listing S1.
+crossref:
+  custom:
+    - kind: float
+      key: suppfig
+      reference-prefix: "Supplementary Figure S"
+      caption-prefix: "Supplementary Figure S"
+      space-before-numbering: false
+      latex-env: suppfig
+    - kind: float
+      key: supptbl
+      reference-prefix: "Supplementary Table S"
+      caption-prefix: "Supplementary Table S"
+      space-before-numbering: false
+      latex-env: supptbl
+    - kind: float
+      key: supplst
+      reference-prefix: "Supplementary Listing S"
+      caption-prefix: "Supplementary Listing S"
+      space-before-numbering: false
+      latex-env: supplst

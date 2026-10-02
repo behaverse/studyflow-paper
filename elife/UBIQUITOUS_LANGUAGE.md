@@ -23,7 +23,7 @@ Working vocabulary for the Studyflow paper (`elife/paper-v3.qmd`). This is guida
 | Run | One administration of the whole protocol to one subject. |
 | Study seed (sigma) | Fixes every random draw: a gateway's from the seed, the gateway, the participant and that participant's visit; a timeline's from the seed and the step; a simulated participant's from the seed and each message's identity. A language model's responses are sampled, not seeded. |
 | Prospective and retrospective provenance | W3C PROV's names for the plan versus the executed record. A Studyflow file is prospective provenance at deposit and accumulates retrospective provenance (the tool, the seed, the protocol digest, attrition counts) as it runs; the deviation report is the diff between the two states. |
-| Sealed, deposited | Sealed: the file's protocol digest is recorded, so any later change to the protocol shows. Deposited: archived where a timestamp proves when it was registered. The example study was sealed and run, not deposited first. |
+| Registered, deposited | Registered: the study file as it stood before any run; every run records the fingerprint (protocol digest) of the file it followed, so a later change shows. Deposited: sent to a registry or a journal before the run. The example study's files go with the paper in both states, as registered and after their runs; the paper does not use "sealed" (decided 2026-10-02). |
 | Fingerprint | The main text's word for the protocol digest (Methods keeps "digest"). |
 | Discontinuation rule | The main text's word for a task's conditional boundary event that sends a subject to the Discontinued exit. |
 | Data dictionary | The main text's word for a dataset's data schema (a CSVW schema in the example study). |

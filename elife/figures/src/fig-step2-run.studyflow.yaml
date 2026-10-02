@@ -65,6 +65,9 @@ Run:
   seed: 42
   version: "1.0"
   properties:
+    P_MaxUnanswered:
+      name: max_unanswered
+      value: 0.2
     P_Arm:
       name: arm
       value: none
@@ -152,7 +155,7 @@ Run:
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
-          condition: "{Task_Interference.failedTrialRate} > 0.2"
+          condition: "{Task_Interference.failedTrialRate} > max_unanswered"
       attachedToRef: Task_Interference
     Task_WorkingMemory:
       type: behaverse:Task
@@ -180,7 +183,7 @@ Run:
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
-          condition: "{Task_WorkingMemory.failedTrialRate} > 0.2"
+          condition: "{Task_WorkingMemory.failedTrialRate} > max_unanswered"
       attachedToRef: Task_WorkingMemory
     Discontinued:
       type: EndEvent

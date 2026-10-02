@@ -119,11 +119,12 @@ sw_px, sh_px = png_size(STRIP)
 S = (W - 4) / (sw_px / SCALE)                    # strip units -> canvas units (fits the container)
 STRIP_H = sh_px / SCALE * S
 # stage boundaries in strip units: after the allocation, after the battery, after the analysis
-BOUNDS = [0, 460, 756, 920, sw_px / SCALE]
+BOUNDS = [0, 460, 820, 1036, sw_px / SCALE]
 COLS = ['design', 'run', 'analyze', 'report']
 NAMES = ['Design', 'Run', 'Analyze', 'Report']
 cx = lambda i: X0 + 2 + BOUNDS[i] * S
 cw = lambda i: (BOUNDS[i + 1] - BOUNDS[i]) * S
+RIGHT = 955.8                                     # the export's right edge: 939.8 units from x = 16, 176.3 mm
 
 FY = 366                                          # the file container
 FH = 30 + STRIP_H + 6
@@ -157,7 +158,9 @@ ARTS = [[('Protocol PDF', 'file-text', 'researcher', 'account-details-outline'),
 for i, items in enumerate(ARTS):
     pos = [0.5] if len(items) == 1 else ([0.3, 0.7] if cw(i) > 300 else [0.22, 0.78])
     for p, (name, ic, who, whoic) in zip(pos, items):
-        x = cx(i) + cw(i) * p
+        # A caption cell (120 wide) never reaches past RIGHT, the right edge of the first export, so the figure keeps
+        # its print width (176.3 mm) however narrow the strip makes the Report column.
+        x = min(cx(i) + cw(i) * p, RIGHT - 60)
         cell('', f'shape=note;size=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor={DATA};strokeWidth=1.3;', x - 24, 72, 48, 56)
         icon(ic, x - 11, 90, 22, DATA)
         two = '<br>' in name
@@ -246,7 +249,7 @@ if '--export' in sys.argv:
     body = b'pHYs' + ppm.to_bytes(4, 'big') * 2 + b'\x01'
     raw.write_bytes(data[:33] + (9).to_bytes(4, 'big') + body + zlib.crc32(body).to_bytes(4, 'big') + data[33:])
     final = OUT / 'fig-overview.studyflow.png'   # the deposited figure carries the diagram it shows, like its siblings
-    # the laid-out copy, as render.sh embeds for every other figure: a flow's colour lives on its routed edge
-    subprocess.run(['node', 'packages/cli/dist/studyflow.mjs', 'convert', '--into', raw, LAID, final],
+    # the source itself, as every figure re-rendered on 2026-10-02 embeds it: the modeler routes an unrouted flow
+    subprocess.run(['node', 'packages/cli/dist/studyflow.mjs', 'convert', '--into', raw, HERE / 'fig-overview.studyflow.yaml', final],
                    cwd=MODELER, check=True)
     print(f'exported {final}')

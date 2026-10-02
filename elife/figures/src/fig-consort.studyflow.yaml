@@ -12,8 +12,8 @@ Consort_Collaboration:
     a participant multiplicity of eight, so the eight subjects are eight independent instances of the pool's process,
     each with its own exits. The actor pool and the trial exchange are dropped: a CONSORT flow is a participant flow,
     and the three pools of the study do not fit a column this narrow — @fig-combined shows them. Every `n` is a
-    run-state value the runner writes as the cohort runs; they all read zero here because this figure is drawn from the
-    deposited plan.
+    run-state value the runner writes as the cohort runs; here they are the counts of the pipeline-check run whose state
+    this figure carries (see `../README.md`).
   extensionElements:
     - type: studyflow:Study
       seed: 42
@@ -48,9 +48,12 @@ Example_Study:
   type: Process
   name: Each subject
   documentation: >-
-    One subject, from consent to debriefing; the participant multiplicity of four on the pool makes one instance per
+    One subject, from consent to debriefing; the participant multiplicity of eight on the pool makes one instance per
     subject in the cohort, and an exit inside an instance (Excluded_Pre, Discontinued) ends that instance only.
   properties:
+    P_MaxUnanswered:
+      name: max_unanswered
+      value: 0.2
     P_Arm:
       name: arm
       value: none
@@ -152,7 +155,7 @@ Example_Study:
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
-          condition: "{Task_Interference.failedTrialRate} > 0.2"
+          condition: "{Task_Interference.failedTrialRate} > max_unanswered"
       attachedToRef: Task_Interference
     Task_WorkingMemory:
       type: behaverse:Task
@@ -167,7 +170,7 @@ Example_Study:
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
-          condition: "{Task_WorkingMemory.failedTrialRate} > 0.2"
+          condition: "{Task_WorkingMemory.failedTrialRate} > max_unanswered"
       attachedToRef: Task_WorkingMemory
     Discontinued:
       type: EndEvent

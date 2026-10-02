@@ -9,12 +9,12 @@ Analyze:
     diagram of its own and otherwise unchanged — the same element ids, the same order, the same arguments. Seven
     preregistered operations read left to right and then wrap: read the recorded trials, keep the answered trials of the
     test blocks, per-subject accuracy in each task of the subjects the Completers dataset lists (the subject's process
-    appends one line per completer), group statistics, then the two questions (the congruency effect
-    within subjects, the divergence between the two dispositions), each a collapsed sub-process that ends in a decision,
-    and last the figure, when any subject was analysed. Accuracy is the measure throughout. The decision rules are one Parameters object wired into the two questions (in the study it is wired into
-    `Analysis`, which holds them); the trials dataset is bound to the CSVW schema beside it. Every call is a library
-    function named in full, so nothing here is code written for this study and the registered and the executed analysis
-    are the same object.
+    appends one line per completer), group statistics, then the two questions (the congruency effect within subjects,
+    the divergence between the two dispositions), each a collapsed sub-process that ends in a decision, and last the
+    figure, when any subject was analysed. Accuracy is the measure throughout. The decision rules are one Parameters
+    object wired into the two questions (in the study it is wired into `Analysis`, which holds them); the trials dataset
+    is bound to the CSVW schema beside it. Every call is a library function named in full, so nothing here is code
+    written for this study and the registered and the executed analysis are the same object.
   seed: 42
   dependencies:
     - pandas==2.3.3
@@ -121,9 +121,9 @@ Analyze:
       type: SubProcess
       name: Read the recorded trials
       documentation: >-
-        The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the two
-        calls inside reduce them to one row per trial — the congruency the task drew and whether the answer was
-        correct — with the trial keys as columns.
+        The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the two calls
+        inside reduce them to one row per trial — the congruency the task drew and whether the answer was correct — with
+        the trial keys as columns.
       flowElements:
         RT_Start:
           type: StartEvent
@@ -173,9 +173,9 @@ Analyze:
       type: SubProcess
       name: Keep answered test trials
       documentation: >-
-        The trials the actor did not answer within the response window leave the table, and so do the 1-back's
-        tutorial and practice blocks, which are instruction rather than measurement; the two measures the rest of
-        the analysis works on become numbers.
+        The trials the actor did not answer within the response window leave the table, and so do the 1-back's tutorial
+        and practice blocks, which are instruction rather than measurement; the two measures the rest of the analysis
+        works on become numbers.
       checklist: |-
         - [ ] Trials the actor did not answer within the response window dropped
         - [ ] The 1-back's tutorial and practice blocks dropped
@@ -241,10 +241,10 @@ Analyze:
       name: Per-subject accuracy by task
       documentation: >-
         The analysed population and its summary: the trials of the subjects who completed the protocol, as the
-        completers dataset lists them, which every question and the figure read; one row per subject, its mean
-        accuracy in each task, with the subject and its arm as columns, written out as the per-subject table of the
-        results dataset; then the size of the smaller arm, which the divergence question checks against the
-        decision rules before it tests anything.
+        completers dataset lists them, which every question and the figure read; one row per subject, its mean accuracy
+        in each task, with the subject and its arm as columns, written out as the per-subject table of the results
+        dataset; then the size of the smaller arm, which the divergence question checks against the decision rules
+        before it tests anything.
       flowElements:
         PS_Start:
           type: StartEvent
@@ -252,9 +252,9 @@ Analyze:
           type: ServiceTask
           name: Trials of the subjects who completed
           documentation: >-
-            The analysed population: the trials of the subjects with a line in the completers dataset, matched on
-            the subject and its arm. A subject discontinued on either task, the 1-back included, has trials but no
-            line, and leaves here.
+            The analysed population: the trials of the subjects with a line in the completers dataset, matched on the
+            subject and its arm. A subject discontinued on either task, the 1-back included, has trials but no line, and
+            leaves here.
           dataInputAssociations:
             In_Trials_All:
               sourceRef:
@@ -310,8 +310,8 @@ Analyze:
           type: ServiceTask
           name: Subjects per arm
           documentation: >-
-            How many subjects each arm holds; the smaller count is what the feasibility checks read, and an arm
-            nobody reached counts as zero. Their sum is how many subjects were analysed, which the figure checks.
+            How many subjects each arm holds; the smaller count is what the feasibility checks read, and an arm nobody
+            reached counts as zero. Their sum is how many subjects were analysed, which the figure checks.
           dataInputAssociations:
             In_PS_Arms:
               sourceRef:
@@ -365,9 +365,9 @@ Analyze:
       documentation: >-
         Is a subject less accurate on incongruent than on congruent Simon trials? Per subject, the mean accuracy on
         congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
-        one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects
-        than the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The
-        descriptive table by disposition and congruency is written out either way.
+        one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects than
+        the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The descriptive
+        table by disposition and congruency is written out either way.
       properties:
         by_congruency:
           name: by_congruency
@@ -392,8 +392,8 @@ Analyze:
           type: SubProcess
           name: Accuracy cost per subject
           documentation: >-
-            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the
-            mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
+            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the mean
+            accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
           flowElements:
             CP_Start:
               type: StartEvent
@@ -568,12 +568,12 @@ Analyze:
       type: SubProcess
       name: Divergence between dispositions
       documentation: >-
-        Can a classifier tell the two dispositions apart better than chance? One row per subject, its accuracy in
-        each of the two tasks as standardized features and its arm as the label, a logistic regression scored by
-        leave-one-subject-out cross-validation; the permutation test shuffles the arm labels across subjects, the
-        unit that was randomized, so chance is what the same classifier scores when the labels carry nothing. Fixed
-        before the first run: not testable when an arm holds fewer subjects than the decision rules' minimum,
-        supported when the permutation p is below their alpha, not supported otherwise.
+        Can a classifier tell the two dispositions apart better than chance? One row per subject, its accuracy in each
+        of the two tasks as standardized features and its arm as the label, a logistic regression scored by
+        leave-one-subject-out cross-validation; the permutation test shuffles the arm labels across subjects, the unit
+        that was randomized, so chance is what the same classifier scores when the labels carry nothing. Fixed before
+        the first run: not testable when an arm holds fewer subjects than the decision rules' minimum, supported when
+        the permutation p is below their alpha, not supported otherwise.
       properties:
         subject_features:
           name: subject_features
@@ -760,14 +760,14 @@ layout:
     label: 586 32 66 14
     fill: "#f4f1f8"
     stroke: "#7a67a6"
-  Completer_Schema:
-    bounds: 680 20 36 50
-    label: 722 32 104 14
-    fill: "#f4f1f8"
-    stroke: "#7a67a6"
   Trial_Schema:
     bounds: 240 20 36 50
     label: 282 32 80 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Completer_Schema:
+    bounds: 680 20 36 50
+    label: 722 32 104 14
     fill: "#f4f1f8"
     stroke: "#7a67a6"
   Decision_Rules:
@@ -824,14 +824,6 @@ layout:
     label: 455 356 100 14
     fill: "#e6dff1"
     stroke: "#7a67a6"
-  AF_Figure:
-    waypoint: 530,325 570,325
-    label: 538 306 24 14
-    stroke: "#7a67a6"
-  AF_No_Figure:
-    waypoint: 505,300 505,270 788,270 788,307
-    label: 512 274 20 14
-    stroke: "#7a67a6"
   Plot:
     bounds: 570 290 150 70
     font: "#7a67a6"
@@ -854,6 +846,13 @@ layout:
     stroke: "#7a67a6"
   AF_4:
     waypoint: 735,200 735,245 195,245 195,290
+    stroke: "#7a67a6"
+  AF_Figure:
+    waypoint: 530,325 570,325
+    label: 538 306 24 14
+  AF_No_Figure:
+    waypoint: 505,300 505,270 788,270 788,307
+    label: 512 274 20 14
     stroke: "#7a67a6"
 state:
   _meta:
