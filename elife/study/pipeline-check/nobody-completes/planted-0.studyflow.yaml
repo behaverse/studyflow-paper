@@ -82,14 +82,15 @@ Example_Study:
     One subject, from consent to debriefing, and the pool is the boundary of that system. The participant multiplicity
     of eight on the pool makes eight instances of this process, one per subject in the cohort; they do not depend on one
     another, which is why this is a multiplicity and not a loop. `arm` is a property of this process, so each instance
-    draws and carries its own disposition, and the runtime stamps every recorded trial with the pool's instance index as
-    `context.subject`, so nothing in the diagram has to number subjects. An exit inside an instance (Excluded_Pre,
-    Discontinued) ends that instance only. The pool is divided into the three CONSORT phases a participant passes
-    through, and into nothing else: a lane is a band of the drawing, so the flow crosses it without waiting.
+    draws and carries its own instruction condition, and the runtime stamps every recorded trial with the pool's
+    instance index as `context.subject`, so nothing in the diagram has to number subjects. An exit inside an instance
+    (Excluded_Pre, Discontinued) ends that instance only. The pool is divided into the three CONSORT phases a
+    participant passes through, and into nothing else: a lane is a band of the drawing, so the flow crosses it without
+    waiting.
   properties:
     P_MaxUnanswered:
       name: max_unanswered
-      value: 0.0
+      value: 0
     P_Arm:
       name: arm
       value: none
@@ -170,13 +171,13 @@ Example_Study:
       name: "Excluded: did not understand the task (n={reached})"
     Randomize_Disposition:
       type: cognitive:RandomGateway
-      name: Which disposition? (n={reached})
+      name: Which instruction? (n={reached})
       algorithm: block
       allocationRatio: "1:1"
       default: Flow_Allocate_Impulsive
     Allocate_Cautious:
       type: ServiceTask
-      name: Allocated to cautious disposition (n={reached})
+      name: Allocated to the cautious instruction (n={reached})
       documentation: >-
         The allocation writes the arm's label into the subject's `arm` property and the instruction that arm receives
         into `instruction`, through the drawn data edges. The battery's prompt cites the instruction as `{instruction}`;
@@ -197,7 +198,7 @@ Example_Study:
       implementation: python://builtins.dict
     Allocate_Impulsive:
       type: ServiceTask
-      name: Allocated to impulsive disposition (n={reached})
+      name: Allocated to the impulsive instruction (n={reached})
       documentation: The other arm, written into the same two properties by the same mechanism.
       dataOutputAssociations:
         Out_Arm_Impulsive:
@@ -346,8 +347,8 @@ Example_Study:
       documentation: >-
         The attrition rule, as the condition a BPMN conditional boundary event watches rather than an attribute of the
         task: the task's own result carries the share of the trials it recorded no valid response for, and above one in
-        five this instance leaves at Discontinued. The threshold is the process's `max_unanswered`, written once and read by
-        the exit of both tasks.
+        five this instance leaves at Discontinued. The threshold is the process's `max_unanswered`, written once and
+        read by the exit of both tasks.
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
@@ -622,7 +623,7 @@ Analysis_Report:
         The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of every
         test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm test needs,
         four being the smallest arms for which shuffling labels across subjects can reach p < .05; the permutations the
-        divergence test draws.
+        difference test draws.
       values:
         alpha: 0.05
         min_subjects: 3
@@ -634,11 +635,12 @@ Analysis_Report:
       documentation: >-
         Seven preregistered operations, collapsed here and drawn in @fig-step3-analyze: read the recorded trials, keep
         the answered trials of the test blocks, per-subject accuracy in each task, group statistics, and then the two
-        questions, each ending in a decision: the congruency effect within subjects and the divergence between the two
-        dispositions; last, the figure, when any subject was analysed. Accuracy is the measure throughout: an actor asked one message at a time has no
-        response time the study controls, so none is recorded. Every step inside is one call to a library function named
-        in full; nothing here is code written for this study. The decision rules wired in are read-only properties of
-        this sub-process, so every question reads the same alpha and the same minimum sample.
+        questions, each ending in a decision: the congruency effect within subjects and the difference between the two
+        instruction conditions; last, the figure, when any subject was analysed. Accuracy is the measure throughout: an
+        actor asked one message at a time has no response time the study controls, so none is recorded. Every step
+        inside is one call to a library function named in full; nothing here is code written for this study. The
+        decision rules wired in are read-only properties of this sub-process, so every question reads the same alpha and
+        the same minimum sample.
       properties:
         derived:
           name: derived
@@ -804,8 +806,8 @@ Analysis_Report:
             The analysed population and its summary: the trials of the subjects who completed the protocol, as the
             completers dataset lists them, which every question and the figure read; one row per subject, its mean
             accuracy in each task, with the subject and its arm as columns, written out as the per-subject table of the
-            results dataset; then the size of the smaller arm, which the divergence question checks against the
-            decision rules before it tests anything.
+            results dataset; then the size of the smaller arm, which the difference question checks against the decision
+            rules before it tests anything.
           flowElements:
             PS_Start:
               type: StartEvent
@@ -904,8 +906,8 @@ Analysis_Report:
           type: ServiceTask
           name: Group statistics
           documentation: >-
-            Mean and standard deviation of each task's accuracy, by disposition, from the per-subject table while the
-            subject and its arm are still its index, so the arm is grouped by and every column is an accuracy.
+            Mean and standard deviation of each task's accuracy, by instruction condition, from the per-subject table
+            while the subject and its arm are still its index, so the arm is grouped by and every column is an accuracy.
           dataInputAssociations:
             In_PS_G:
               sourceRef:
@@ -928,7 +930,7 @@ Analysis_Report:
             congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
             one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects
             than the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The
-            descriptive table by disposition and congruency is written out either way.
+            descriptive table by instruction condition and congruency is written out either way.
           properties:
             by_congruency:
               name: by_congruency
@@ -949,8 +951,9 @@ Analysis_Report:
               type: SubProcess
               name: Accuracy cost per subject
               documentation: >-
-                The descriptive table by disposition and congruency, written out as it stands; then, per subject, the
-                mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
+                The descriptive table by instruction condition and congruency, written out as it stands; then, per
+                subject, the mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects
+                have both.
               flowElements:
                 CP_Start:
                   type: StartEvent
@@ -1123,14 +1126,14 @@ Analysis_Report:
               targetRef: C_Not_Supported
         Divergence:
           type: SubProcess
-          name: Divergence between dispositions
+          name: Difference between instructions
           documentation: >-
-            Can a classifier tell the two dispositions apart better than chance? One row per subject, its accuracy in
-            each of the two tasks as standardized features and its arm as the label, a logistic regression scored by
-            leave-one-subject-out cross-validation; the permutation test shuffles the arm labels across subjects, the
-            unit that was randomized, so chance is what the same classifier scores when the labels carry nothing. Fixed
-            before the first run: not testable when an arm holds fewer subjects than the decision rules' minimum,
-            supported when the permutation p is below their alpha, not supported otherwise.
+            Can a classifier tell the two instruction conditions apart better than chance? One row per subject, its
+            accuracy in each of the two tasks as standardized features and its arm as the label, a logistic regression
+            scored by leave-one-subject-out cross-validation; the permutation test shuffles the arm labels across
+            subjects, the unit that was randomized, so chance is what the same classifier scores when the labels carry
+            nothing. Fixed before the first run: not testable when an arm holds fewer subjects than the decision rules'
+            minimum, supported when the permutation p is below their alpha, not supported otherwise.
           properties:
             subject_features:
               name: subject_features
@@ -1224,7 +1227,7 @@ Analysis_Report:
               name: Not testable
             File_Divergence:
               type: DataObjectReference
-              name: Divergence
+              name: Difference test
               uri: results/divergence.json
             DF_0: D_Start -> Enough_Per_Arm_D
             D_Too_Few:
@@ -1255,7 +1258,7 @@ Analysis_Report:
         Plot:
           type: ServiceTask
           name: Figure
-          documentation: Accuracy by disposition and congruency, as a box plot.
+          documentation: Accuracy by instruction condition and congruency, as a box plot.
           dataInputAssociations:
             In_Trials_P:
               sourceRef:
@@ -1317,7 +1320,7 @@ Analysis_Report:
       checklist: |-
         - [ ] CONSORT participant flow exported from the Figure view
         - [ ] SPIRIT schedule exported from the Gantt view
-        - [ ] CHART items recorded from the run provenance
+        - [ ] Model, prompts and sampling settings recorded with each exchange
       onset: T0+7min
       duration: 2min
     Completed:
@@ -1481,19 +1484,19 @@ layout:
     stroke: "#4e6f95"
   Flow_Eligible:
     waypoint: 385,303 385,388
-    label: 392 316 30 14
+    label: 392 316 68 14
     stroke: "#4e6f95"
   Flow_Excluded_Pre:
     waypoint: 410,278 840,278
-    label: 420 256 30 14
+    label: 420 256 62 14
     stroke: "#ac5a54"
   Flow_Allocate_Cautious:
     waypoint: 360,413 285,413 285,452
-    label: 288 394 58 14
+    label: 258 390 100 14
     stroke: "#4e6f95"
   Flow_Allocate_Impulsive:
     waypoint: 410,413 565,413 565,452
-    label: 474 394 66 14
+    label: 474 390 106 14
     stroke: "#4e6f95"
   SF_Cautious_Merge:
     waypoint: 285,514 285,551 360,551
@@ -1537,8 +1540,6 @@ layout:
     label: 812 938 66 14
     fill: "#f4f1f8"
     stroke: "#7a67a6"
-  In_Completers_Analysis:
-    waypoint: 908,970 908,984 460,984 460,1002
   Trial_Schema:
     bounds: 620 920 36 50
     label: 662 938 80 14
@@ -1564,6 +1565,8 @@ layout:
     waypoint: 385,970 385,1002
   In_Rules:
     waypoint: 248,1084 248,1060 295,1060
+  In_Completers_Analysis:
+    waypoint: 908,970 908,984 460,984 460,1002
   Out_Results:
     waypoint: 385,1072 385,1084
   Dataset_Results:

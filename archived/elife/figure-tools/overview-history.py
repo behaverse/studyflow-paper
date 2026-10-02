@@ -1,57 +1,75 @@
-#!/usr/bin/env python3
-"""Give `fig-overview.studyflow.yaml` the run history its Provenance view shows: the reported run, then a re-run after
-its `Analysis` record was invalidated, which branches there.
+"""Give fig-consort and fig-overview the state and records of the current planted pipeline-check run
+(`../study/pipeline-check/run-planted/planted.studyflow.yaml`), so they show the run fig-combined draws.
 
-The re-run is `../../study/run-2026-10-02-rerun/`: a copy of `../../study/run/` (which stays as the run left it) with
-an `invalidated` marker on `Analysis`, run again by the CLI that made the reported run (studyflow-modeler at 39314fe9,
-`studyflow-cli/26.9.29`). Its subjects are simulated, so it called no model. That CLI keeps only a re-executed step's
-latest record, so each element here gets the records of both repositories, oldest first; `_meta.prov` (the timeline
-of runs) is the re-run's, and the counts stay the reported run's, as in `fig-combined` and `fig-consort`. Re-spell
-the result with `studyflow convert` afterwards.
+fig-consort takes the run's `state:` block as it is. fig-overview takes it too, each of its elements takes the run's
+records of the element with the same id, and each flow its compaction draws takes the count of the path it stands
+for. Both are then written in the modeler's own spelling.
 
-    python3 src/overview-history.py && node $MODELER/packages/cli/dist/studyflow.mjs convert \\
-        src/fig-overview.studyflow.yaml src/fig-overview.studyflow.yaml
+Run it from the figures folder, with these scripts restored in `src/`, then re-render both figures:
+
+    python3 src/overview-history.py ../study/pipeline-check/run-planted/planted.studyflow.yaml src
+
+It replaces the two-run merge it used to be (the 2026-09-29 run and its faulty re-run).
 """
+import copy, subprocess, sys, tempfile
 from pathlib import Path
-
 import yaml
 
-HERE = Path(__file__).resolve().parent
-STUDY = HERE.parents[1] / 'study'
-TARGET = HERE / 'fig-overview.studyflow.yaml'
-PROV = 'prov:Activity'
+CLI = str(Path(__import__("os").environ.get("MODELER", "../../studyflow-modeler")) / "packages/cli/dist/studyflow.mjs")
+PROV = "prov:Activity"
+# fig-overview's compact flows, each with the run's flow it stands for (its first one, where it stands for a path)
+COMPACT = {
+    "Flow_Enroll_Screening": "SF_Start_Screening", "Flow_Screening_Eligibility": "SF_Screening_Eligibility",
+    "Flow_Cautious_Interference": "SF_Cautious_Merge", "Flow_Impulsive_Interference": "SF_Impulsive_Merge",
+    "Flow_Interference_WorkingMemory": "SF_Interference_WorkingMemory", "Flow_Failed_Interference": "SF_Failed_Interference",
+    "Flow_Failed_WorkingMemory": "SF_Failed_WorkingMemory", "Flow_WorkingMemory_End": "SF_WorkingMemory_Debrief",
+}
 
 
 def elements(node, found=None):
-    """Every element of a study by id, outside its drawing and its state."""
     found = {} if found is None else found
     for key, value in (node.items() if isinstance(node, dict) else enumerate(node) if isinstance(node, list) else []):
-        if key in ('layout', 'state'):
+        if key in ("layout", "state"):
             continue
-        if isinstance(value, dict) and 'type' in value:
+        if isinstance(value, dict) and "type" in value:
             found.setdefault(key, value)
         elements(value, found)
     return found
 
 
 def records(element):
-    return [e for e in element.get('extensionElements') or [] if isinstance(e, dict) and e.get('type') == PROV]
+    return [e for e in element.get("extensionElements") or [] if isinstance(e, dict) and e.get("type") == PROV]
 
 
-run = yaml.safe_load((STUDY / 'run' / 'example_study.studyflow.yaml').read_text())
-rerun = yaml.safe_load((STUDY / 'run-2026-10-02-rerun' / 'example_study.studyflow.yaml').read_text())
-study = yaml.safe_load(TARGET.read_text())
-sources = [elements(run), elements(rerun)]
-for key, element in elements(study).items():
-    merged = {}
-    for source in sources:
-        for record in records(source.get(key, {})):
-            merged.setdefault((record.get('action'), str(record.get('when')), record.get('run')), record)
-    if not merged:
-        continue
-    kept = [e for e in element.get('extensionElements') or [] if not (isinstance(e, dict) and e.get('type') == PROV)]
-    element['extensionElements'] = kept + sorted(merged.values(), key=lambda record: str(record.get('when')))
-study['state'] = run['state']
-study['state']['_meta']['prov'] = rerun['state']['_meta']['prov']
-TARGET.write_text(yaml.safe_dump(study, sort_keys=False, allow_unicode=True, width=120))
-print(f'wrote {TARGET.name}')
+def write(path, data):
+    with tempfile.TemporaryDirectory() as tmp:
+        raw, canon = f"{tmp}/raw.studyflow.yaml", f"{tmp}/canon.studyflow.yaml"
+        yaml.safe_dump(data, open(raw, "w"), sort_keys=False, allow_unicode=True, width=120)
+        subprocess.run(["node", CLI, "convert", raw, canon], check=True, capture_output=True)
+        assert yaml.safe_load(open(canon)) == data, path
+        Path(path).write_text(Path(canon).read_text())
+
+
+run = yaml.safe_load(open(sys.argv[1]))
+src = Path(sys.argv[2])
+
+consort = yaml.safe_load(open(src / "fig-consort.studyflow.yaml"))
+consort["state"] = copy.deepcopy(run["state"])
+write(src / "fig-consort.studyflow.yaml", consort)
+
+overview = yaml.safe_load(open(src / "fig-overview.studyflow.yaml"))
+ran = elements(run)
+for key, element in elements(overview).items():
+    kept = [e for e in element.get("extensionElements") or [] if not (isinstance(e, dict) and e.get("type") == PROV)]
+    taken = records(ran.get(key, {}))
+    if kept or taken:
+        element["extensionElements"] = kept + copy.deepcopy(taken)
+    elif "extensionElements" in element:
+        del element["extensionElements"]
+overview["state"] = copy.deepcopy(run["state"])
+reached = overview["state"]["_meta"]["reached"]
+for flow, stands_for in COMPACT.items():
+    if reached.get(stands_for):
+        reached[flow] = reached[stands_for]
+write(src / "fig-overview.studyflow.yaml", overview)
+print("carried", run["state"]["_meta"]["prov"][-1]["run"], "into fig-consort and fig-overview")

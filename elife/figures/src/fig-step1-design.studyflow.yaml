@@ -52,8 +52,9 @@ Design:
   type: studyflow:Study
   name: Step 1 - Design
   documentation: >-
-    `arm` is a property of this process, so each instance of the pool draws and carries its own allocated disposition;
-    the instances do not depend on one another, which is why this is a participant multiplicity and not a loop.
+    `arm` is a property of this process, so each instance of the pool draws and carries its own allocated instruction
+    condition; the instances do not depend on one another, which is why this is a participant multiplicity and not a
+    loop.
   seed: 42
   authors:
     - Morteza Ansarinia
@@ -132,7 +133,7 @@ Design:
       name: "Excluded: did not understand the task (n={reached})"
     Randomize_Disposition:
       type: cognitive:RandomGateway
-      name: Which disposition? (n={reached})
+      name: Which instruction? (n={reached})
       documentation: >-
         Allocation is concealed: the draw comes from the study seed and the subject identifier, so it cannot be
         predicted by whoever enrols the subject.
@@ -141,7 +142,7 @@ Design:
       default: Flow_Allocate_Impulsive
     Allocate_Cautious:
       type: ServiceTask
-      name: Allocated to cautious disposition (n={reached})
+      name: Allocated to the cautious instruction (n={reached})
       documentation: >-
         The allocation writes the arm's label into the subject's `arm` property and the instruction that arm receives
         into `instruction`; the battery's prompt cites the instruction as `{instruction}`, and the label is what the
@@ -162,7 +163,7 @@ Design:
       implementation: python://builtins.dict
     Allocate_Impulsive:
       type: ServiceTask
-      name: Allocated to impulsive disposition (n={reached})
+      name: Allocated to the impulsive instruction (n={reached})
       dataOutputAssociations:
         Out_Arm_Impulsive:
           targetRef: P_Arm
@@ -291,7 +292,7 @@ layout:
     stroke: "#4e6f95"
   Flow_Eligible:
     waypoint: 560,430 560,500
-    label: 566 450 70 14
+    label: 566 442 70 14
     stroke: "#4e6f95"
   Flow_Excluded_Pre:
     waypoint: 585,405 800,405
@@ -299,11 +300,11 @@ layout:
     stroke: "#ac5a54"
   Flow_Allocate_Cautious:
     waypoint: 535,525 360,525 360,585
-    label: 390 506 90 14
+    label: 380 502 100 14
     stroke: "#4e6f95"
   Flow_Allocate_Impulsive:
     waypoint: 585,525 740,525 740,585
-    label: 630 506 90 14
+    label: 630 502 100 14
     stroke: "#4e6f95"
   SF_Cautious_Merge:
     waypoint: 455,621 535,621

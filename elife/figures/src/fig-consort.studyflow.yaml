@@ -118,13 +118,13 @@ Example_Study:
       name: "Excluded: did not understand the task (n={reached})"
     Randomize_Disposition:
       type: cognitive:RandomGateway
-      name: Which disposition? (n={reached})
+      name: Which instruction? (n={reached})
       algorithm: block
       allocationRatio: "1:1"
       default: Flow_Allocate_Impulsive
     Allocate_Cautious:
       type: ServiceTask
-      name: Allocated to cautious disposition (n={reached})
+      name: Allocated to the cautious instruction (n={reached})
       onset: T0
       duration: 1s
       additionalArguments:
@@ -133,7 +133,7 @@ Example_Study:
       implementation: python://builtins.dict
     Allocate_Impulsive:
       type: ServiceTask
-      name: Allocated to impulsive disposition (n={reached})
+      name: Allocated to the impulsive instruction (n={reached})
       onset: T0
       duration: 1s
       additionalArguments:
@@ -280,12 +280,12 @@ layout:
     fill: "#dbe6f2"
     stroke: "#4e6f95"
   Allocate_Cautious:
-    bounds: 300 338 160 62
+    bounds: 300 328 160 80
     font: "#4e6f95"
     fill: "#dbe6f2"
     stroke: "#4e6f95"
   Allocate_Impulsive:
-    bounds: 500 338 160 62
+    bounds: 500 328 160 80
     font: "#4e6f95"
     fill: "#dbe6f2"
     stroke: "#4e6f95"
@@ -348,18 +348,18 @@ layout:
     label: 520 170 66 14
     stroke: "#ac5a54"
   Flow_Allocate_Cautious:
-    waypoint: 415,287 380,287 380,338
-    label: 286 294 90 14
+    waypoint: 415,287 380,287 380,328
+    label: 280 294 96 14
     stroke: "#4e6f95"
   Flow_Allocate_Impulsive:
-    waypoint: 465,287 580,287 580,338
-    label: 486 294 90 14
+    waypoint: 465,287 580,287 580,328
+    label: 476 294 100 14
     stroke: "#4e6f95"
   SF_Cautious_Merge:
-    waypoint: 380,400 380,451 415,451
+    waypoint: 380,408 380,451 415,451
     stroke: "#4e6f95"
   SF_Impulsive_Merge:
-    waypoint: 580,400 580,451 465,451
+    waypoint: 580,408 580,451 465,451
     stroke: "#4e6f95"
   SF_Merge_Interference:
     waypoint: 440,476 440,492 324,492 324,506
@@ -386,12 +386,12 @@ state:
   _meta:
     prov:
       - action: executed
-        when: "2026-09-29T22:58:13.523+02:00"
+        when: "2026-10-02T19:29:26.728+02:00"
         who: morteza
         with: studyflow-cli/26.9.29
-        run: run
+        run: run-planted
         seed: 42
-        plan: sha256:b31e928d7a1bafb89fba8b5b1972b4f2018b02dc638628ad9845a292aea1f38e
+        plan: sha256:6c2c0ee7f0a24c450565fda7734d81f1ef5b98a1c52d79e3e7983309c10cbe8f
     instance:
       Participant_Subject: 8
       Simon_Block: 30
@@ -477,12 +477,14 @@ state:
       Per_Subject: 1
       PS_Start: 1
       PSF_0: 1
-      Per_Subject_Table: 1
+      Completer_Trials: 1
       PSF_1: 1
-      Per_Subject_Flat: 1
+      Per_Subject_Table: 1
       PSF_2: 1
-      Arm_Sizes: 1
+      Per_Subject_Flat: 1
       PSF_3: 1
+      Arm_Sizes: 1
+      PSF_4: 1
       PS_End: 1
       AF_3: 1
       Group: 1
@@ -528,6 +530,8 @@ state:
       D_Yes: 1
       D_Supported: 1
       AF_7: 1
+      Anyone_Analysed: 1
+      AF_Figure: 1
       Plot: 1
       AF_8: 1
       An_End: 1
@@ -536,20 +540,19 @@ state:
       Flow_Render_Completed: 1
       Completed: 1
   Example_Study:
-    arm: impulsive
-    instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+    max_unanswered: 0.2
+    arm: cautious
+    instruction: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
   Simon_Block:
     trial:
       Task: Simon
       Block: Simon
       Trial: 30
-      Congruency: Congruent
       Stimulus: a red square on the left of the screen
       Rule: Answer left for a red square and right for a blue one, wherever it appears.
       ResponseOptions:
         - left
         - right
-      Correct: left
     answer: left
   NBack_Block:
     trial:
@@ -563,20 +566,20 @@ state:
       ResponseOptions:
         - match
         - non-match
-      Correct: non-match
-    answer: match
+    answer: non-match
   Analysis:
     alpha: 0.05
     min_subjects: 3
     min_per_arm: 4
     n_permutations: 1000
     smallest_arm: 4
+    analysed_subjects: 8
   Congruency:
     congruency_n: 8
     congruency_test:
-      statistic: 4.149046124862334
-      pvalue: 0.002150110392471851
+      statistic: 4.079853428221753
+      pvalue: 0.0023452759794757665
   Divergence:
     divergence_test:
       accuracy: 1
-      pvalue: 0.03496503496503497
+      pvalue: 0.03696303696303696

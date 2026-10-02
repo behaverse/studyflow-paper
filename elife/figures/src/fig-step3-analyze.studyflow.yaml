@@ -10,11 +10,11 @@ Analyze:
     preregistered operations read left to right and then wrap: read the recorded trials, keep the answered trials of the
     test blocks, per-subject accuracy in each task of the subjects the Completers dataset lists (the subject's process
     appends one line per completer), group statistics, then the two questions (the congruency effect within subjects,
-    the divergence between the two dispositions), each a collapsed sub-process that ends in a decision, and last the
-    figure, when any subject was analysed. Accuracy is the measure throughout. The decision rules are one Parameters
-    object wired into the two questions (in the study it is wired into `Analysis`, which holds them); the trials dataset
-    is bound to the CSVW schema beside it. Every call is a library function named in full, so nothing here is code
-    written for this study and the registered and the executed analysis are the same object.
+    the difference between the two instruction conditions), each a collapsed sub-process that ends in a decision, and
+    last the figure, when any subject was analysed. Accuracy is the measure throughout. The decision rules are one
+    Parameters object wired into the two questions (in the study it is wired into `Analysis`, which holds them); the
+    trials dataset is bound to the CSVW schema beside it. Every call is a library function named in full, so nothing
+    here is code written for this study and the registered and the executed analysis are the same object.
   seed: 42
   dependencies:
     - pandas==2.3.3
@@ -109,7 +109,7 @@ Analyze:
         The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of every
         test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm test needs,
         four being the smallest arms for which shuffling labels across subjects can reach p < .05; the permutations the
-        divergence test draws.
+        difference test draws.
       values:
         alpha: 0.05
         min_subjects: 3
@@ -243,7 +243,7 @@ Analyze:
         The analysed population and its summary: the trials of the subjects who completed the protocol, as the
         completers dataset lists them, which every question and the figure read; one row per subject, its mean accuracy
         in each task, with the subject and its arm as columns, written out as the per-subject table of the results
-        dataset; then the size of the smaller arm, which the divergence question checks against the decision rules
+        dataset; then the size of the smaller arm, which the difference question checks against the decision rules
         before it tests anything.
       flowElements:
         PS_Start:
@@ -343,8 +343,8 @@ Analyze:
       type: ServiceTask
       name: Group statistics
       documentation: >-
-        Mean and standard deviation of each task's accuracy, by disposition, from the per-subject table while the
-        subject and its arm are still its index, so the arm is grouped by and every column is an accuracy.
+        Mean and standard deviation of each task's accuracy, by instruction condition, from the per-subject table while
+        the subject and its arm are still its index, so the arm is grouped by and every column is an accuracy.
       dataInputAssociations:
         In_PS_G:
           sourceRef:
@@ -367,7 +367,7 @@ Analyze:
         congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
         one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects than
         the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The descriptive
-        table by disposition and congruency is written out either way.
+        table by instruction condition and congruency is written out either way.
       properties:
         by_congruency:
           name: by_congruency
@@ -392,8 +392,8 @@ Analyze:
           type: SubProcess
           name: Accuracy cost per subject
           documentation: >-
-            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the mean
-            accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
+            The descriptive table by instruction condition and congruency, written out as it stands; then, per subject,
+            the mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
           flowElements:
             CP_Start:
               type: StartEvent
@@ -566,10 +566,10 @@ Analyze:
           targetRef: C_Not_Supported
     Divergence:
       type: SubProcess
-      name: Divergence between dispositions
+      name: Difference between instructions
       documentation: >-
-        Can a classifier tell the two dispositions apart better than chance? One row per subject, its accuracy in each
-        of the two tasks as standardized features and its arm as the label, a logistic regression scored by
+        Can a classifier tell the two instruction conditions apart better than chance? One row per subject, its accuracy
+        in each of the two tasks as standardized features and its arm as the label, a logistic regression scored by
         leave-one-subject-out cross-validation; the permutation test shuffles the arm labels across subjects, the unit
         that was randomized, so chance is what the same classifier scores when the labels carry nothing. Fixed before
         the first run: not testable when an arm holds fewer subjects than the decision rules' minimum, supported when
@@ -671,7 +671,7 @@ Analyze:
           name: Not testable
         File_Divergence:
           type: DataObjectReference
-          name: Divergence
+          name: Difference test
           uri: results/divergence.json
         DF_0: D_Start -> Enough_Per_Arm_D
         D_Too_Few:
@@ -702,7 +702,7 @@ Analyze:
     Plot:
       type: ServiceTask
       name: Figure
-      documentation: Accuracy by disposition and congruency, as a box plot.
+      documentation: Accuracy by instruction condition and congruency, as a box plot.
       dataInputAssociations:
         In_Trials_P:
           sourceRef:

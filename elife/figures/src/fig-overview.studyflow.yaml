@@ -42,14 +42,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:17.635+02:00"
-          run: run
-          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:29:13.794+02:00"
-          run: rerun
-          commit: a7bc99cfce062aabeff0904e83e50da664328612
+          when: "2026-10-02T19:29:52.518+02:00"
+          run: run-planted
+          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
       onset: T0
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
     Screening:
@@ -59,14 +54,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:17.702+02:00"
-          run: run
-          commit: 2da1be3e47a3482c699f549aa27a7b02d81d7cfa
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:29:13.856+02:00"
-          run: rerun
-          commit: d986a5edbcabdbe23577490facb2fc94a881d99e
+          when: "2026-10-02T19:29:52.519+02:00"
+          run: run-planted
+          commit: 8458fc986f31bc4b896c474890a4e1ae82278ece
       checklist: |-
         - [x] Consent recorded
         - [x] Executor configuration pinned (model id, sampling parameters)
@@ -84,46 +74,36 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:17.811+02:00"
+          when: "2026-10-02T19:29:52.538+02:00"
           what: Flow_Eligible
-          run: run
-          commit: dd8eab6a0d69868bfa3429db921c0516ccfc3fff
-        - type: prov:Activity
-          action: reused
-          when: "2026-10-02T07:29:13.956+02:00"
-          what: "2026-09-29T23:01:17.811+02:00"
-          run: rerun
+          run: run-planted
+          commit: 68027048aa09556256c57d15933e3895f16fb2b9
       default: Flow_Excluded_Pre
     Excluded_Pre:
       type: EndEvent
       name: "Excluded: did not understand the task (n={reached})"
     Randomize_Disposition:
       type: cognitive:RandomGateway
-      name: Which disposition? (n={reached})
+      name: Which instruction? (n={reached})
       algorithm: block
       allocationRatio: "1:1"
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:17.919+02:00"
-          what: Flow_Allocate_Impulsive
-          run: run
-          commit: 855dbe5b9ba86d491a0655184def6dcd45b89743
-        - type: prov:Activity
-          action: reused
-          when: "2026-10-02T07:29:14.046+02:00"
-          what: "2026-09-29T23:01:17.919+02:00"
-          run: rerun
+          when: "2026-10-02T19:29:52.558+02:00"
+          what: Flow_Allocate_Cautious
+          run: run-planted
+          commit: c15a30a312b6f5e6642275ef6baa244d6305306e
       default: Flow_Allocate_Impulsive
     Allocate_Cautious:
       type: ServiceTask
-      name: Allocated to cautious (n={reached})
+      name: Allocated to the cautious instruction (n={reached})
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:00:51.808+02:00"
-          run: run
-          commit: 35705098ba02609b410a535b9ff1136856d0a275
+          when: "2026-10-02T19:29:52.578+02:00"
+          run: run-planted
+          commit: cf871ca7b526aadfae2d36b4111b66d92f4b5f0c
       onset: T0
       duration: 1s
       additionalArguments:
@@ -132,18 +112,13 @@ Example_Study:
       implementation: python://builtins.dict
     Allocate_Impulsive:
       type: ServiceTask
-      name: Allocated to impulsive (n={reached})
+      name: Allocated to the impulsive instruction (n={reached})
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:18.206+02:00"
-          run: run
-          commit: 263e4ad89320cd2294fe0f869cb5f40f841a50bf
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:29:14.303+02:00"
-          run: rerun
-          commit: f7553f97f03e93443f7c93ea67a0d33863741269
+          when: "2026-10-02T19:29:49.020+02:00"
+          run: run-planted
+          commit: ce83c73b1c8c93f2038e13e34bef3139b8052779
       onset: T0
       duration: 1s
       additionalArguments:
@@ -152,7 +127,7 @@ Example_Study:
       implementation: python://builtins.dict
     Prompt_Battery:
       type: agentic:Prompt
-      name: Disposition prompt
+      name: Battery prompt
       template: |
         {instruction}
 
@@ -167,14 +142,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:27.337+02:00"
-          run: run
-          commit: 762b168ba7cf0676ffde2fd62a70b5eb65114525
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:29:22.805+02:00"
-          run: rerun
-          commit: d0d6c29e9c4810744e08854d74463dcdcb8dc6ef
+          when: "2026-10-02T19:29:53.753+02:00"
+          run: run-planted
+          commit: 4cc128f6352cd0b72f965370392462e6c9a5bc23
       onset: T0+20s
       duration: 40s
       dataInputAssociations:
@@ -197,14 +167,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:44.212+02:00"
-          run: run
-          commit: 39005f94265efff78edc15df48128e783aaf53fb
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:29:38.037+02:00"
-          run: rerun
-          commit: cca7afdbe7a8149e21d3373b033cd8e3d932cfaa
+          when: "2026-10-02T19:29:55.721+02:00"
+          run: run-planted
+          commit: 46af6df211e078dbce98f31197fa182ca79307a9
       onset: T0+60s
       duration: 3min
       dataOutputAssociations:
@@ -225,12 +190,8 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: created
-          when: "2026-09-29T23:01:44.211+02:00"
-          run: run
-        - type: prov:Activity
-          action: created
-          when: "2026-10-02T07:29:38.037+02:00"
-          run: rerun
+          when: "2026-10-02T19:29:55.721+02:00"
+          run: run-planted
       uri: data/trials.jsonl
     Discontinued:
       type: EndEvent
@@ -241,28 +202,18 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:44.428+02:00"
-          run: run
-          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:29:38.228+02:00"
-          run: rerun
-          commit: a7bc99cfce062aabeff0904e83e50da664328612
+          when: "2026-10-02T19:29:55.780+02:00"
+          run: run-planted
+          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
     All_Complete:
       type: StartEvent
       name: All subjects complete
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:01:44.428+02:00"
-          run: run
-          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:29:38.229+02:00"
-          run: rerun
-          commit: a7bc99cfce062aabeff0904e83e50da664328612
+          when: "2026-10-02T19:29:55.781+02:00"
+          run: run-planted
+          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
       eventDefinitions:
         Def_All_Complete:
           type: MessageEventDefinition
@@ -273,21 +224,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:02:15.868+02:00"
-          run: run
-          commit: bf31ffb5a1ebd383a758a4da7e5b451a3e8b9297
-        - type: prov:Activity
-          action: invalidated
-          when: "2026-10-02T07:26:25.949+02:00"
-          who: morteza
-          with: studyflow-modeler/26.9.29
-          what: "2026-09-29T23:02:15.868+02:00"
-          run: run
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:30:13.095+02:00"
-          run: rerun
-          commit: 6283b44132f25f4cc40ba81dcc165b43404c7e76
+          when: "2026-10-02T19:30:08.043+02:00"
+          run: run-planted
+          commit: 4ece089d28dd1eef810706d940f4e52b34e98c0e
       checklist: |-
         - [x] Trials the actor did not answer within the response window dropped
         - [x] The 1-back's tutorial and practice blocks dropped
@@ -300,18 +239,13 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:02:16.076+02:00"
-          run: run
-          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:30:13.196+02:00"
-          run: rerun
-          commit: a7bc99cfce062aabeff0904e83e50da664328612
+          when: "2026-10-02T19:30:08.061+02:00"
+          run: run-planted
+          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
       checklist: |-
         - [x] CONSORT participant flow exported from the Figure view
         - [x] SPIRIT schedule exported from the Gantt view
-        - [x] CHART items recorded from the run provenance
+        - [x] Model, prompts and sampling settings recorded with each exchange
       onset: T0+7min
       duration: 2min
     Completed:
@@ -320,14 +254,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-09-29T23:02:16.233+02:00"
-          run: run
-          commit: 53c7dfd054d22a1cba23d60d20b2de81777face2
-        - type: prov:Activity
-          action: executed
-          when: "2026-10-02T07:30:13.294+02:00"
-          run: rerun
-          commit: a7bc99cfce062aabeff0904e83e50da664328612
+          when: "2026-10-02T19:30:08.079+02:00"
+          run: run-planted
+          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
     Flow_Enroll_Screening: Enroll -> Screening
     Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
     Flow_Eligible: Eligibility_Gateway -> Randomize_Disposition
@@ -381,12 +310,12 @@ layout:
     fill: "#dbe6f2"
     stroke: "#4e6f95"
   Allocate_Cautious:
-    bounds: 304 6 140 62
+    bounds: 304 6 140 78
     font: "#4e6f95"
     fill: "#dbe6f2"
     stroke: "#4e6f95"
   Allocate_Impulsive:
-    bounds: 304 132 140 62
+    bounds: 304 116 140 78
     font: "#4e6f95"
     fill: "#dbe6f2"
     stroke: "#4e6f95"
@@ -467,18 +396,18 @@ layout:
     label: 176 140 32 14
     stroke: "#ac5a54"
   Flow_Allocate_Cautious:
-    waypoint: 290,100 296,100 296,37 304,37
+    waypoint: 290,100 296,100 296,45 304,45
     label: 236 20 56 14
     stroke: "#4e6f95"
   Flow_Allocate_Impulsive:
-    waypoint: 290,100 296,100 296,163 304,163
+    waypoint: 290,100 296,100 296,155 304,155
     label: 228 168 62 14
     stroke: "#4e6f95"
   Flow_Cautious_Interference:
-    waypoint: 444,37 460,37 460,100 476,100
+    waypoint: 444,45 460,45 460,100 476,100
     stroke: "#5c8a55"
   Flow_Impulsive_Interference:
-    waypoint: 444,163 460,163 460,100 476,100
+    waypoint: 444,155 460,155 460,100 476,100
     stroke: "#5c8a55"
   Flow_Interference_WorkingMemory:
     waypoint: 600,100 620,100
@@ -505,19 +434,12 @@ state:
   _meta:
     prov:
       - action: executed
-        when: "2026-09-29T22:58:13.523+02:00"
+        when: "2026-10-02T19:29:26.728+02:00"
         who: morteza
         with: studyflow-cli/26.9.29
-        run: run
+        run: run-planted
         seed: 42
-        plan: sha256:b31e928d7a1bafb89fba8b5b1972b4f2018b02dc638628ad9845a292aea1f38e
-      - action: executed
-        when: "2026-10-02T07:26:26.394+02:00"
-        who: morteza
-        with: studyflow-cli/26.9.29
-        run: rerun
-        seed: 42
-        plan: sha256:b31e928d7a1bafb89fba8b5b1972b4f2018b02dc638628ad9845a292aea1f38e
+        plan: sha256:6c2c0ee7f0a24c450565fda7734d81f1ef5b98a1c52d79e3e7983309c10cbe8f
     instance:
       Participant_Subject: 8
       Simon_Block: 30
@@ -569,7 +491,9 @@ state:
       NBack_End: 8
       SF_WorkingMemory_Debrief: 8
       Debrief: 8
-      SF_Debrief_End: 8
+      SF_Debrief_Record: 8
+      Record_Completion: 8
+      SF_Record_End: 8
       Sub_End: 8
       Flow_Allocate_Cautious: 4
       Allocate_Cautious: 4
@@ -601,12 +525,14 @@ state:
       Per_Subject: 1
       PS_Start: 1
       PSF_0: 1
-      Per_Subject_Table: 1
+      Completer_Trials: 1
       PSF_1: 1
-      Per_Subject_Flat: 1
+      Per_Subject_Table: 1
       PSF_2: 1
-      Arm_Sizes: 1
+      Per_Subject_Flat: 1
       PSF_3: 1
+      Arm_Sizes: 1
+      PSF_4: 1
       PS_End: 1
       AF_3: 1
       Group: 1
@@ -652,6 +578,8 @@ state:
       D_Yes: 1
       D_Supported: 1
       AF_7: 1
+      Anyone_Analysed: 1
+      AF_Figure: 1
       Plot: 1
       AF_8: 1
       An_End: 1
@@ -666,20 +594,19 @@ state:
       Flow_Interference_WorkingMemory: 8
       Flow_WorkingMemory_End: 8
   Example_Study:
-    arm: impulsive
-    instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+    max_unanswered: 0.2
+    arm: cautious
+    instruction: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
   Simon_Block:
     trial:
       Task: Simon
       Block: Simon
       Trial: 30
-      Congruency: Congruent
       Stimulus: a red square on the left of the screen
       Rule: Answer left for a red square and right for a blue one, wherever it appears.
       ResponseOptions:
         - left
         - right
-      Correct: left
     answer: left
   NBack_Block:
     trial:
@@ -693,20 +620,20 @@ state:
       ResponseOptions:
         - match
         - non-match
-      Correct: non-match
-    answer: match
+    answer: non-match
   Analysis:
     alpha: 0.05
     min_subjects: 3
     min_per_arm: 4
     n_permutations: 1000
     smallest_arm: 4
+    analysed_subjects: 8
   Congruency:
     congruency_n: 8
     congruency_test:
-      statistic: 4.149046124862334
-      pvalue: 0.002150110392471851
+      statistic: 4.079853428221753
+      pvalue: 0.0023452759794757665
   Divergence:
     divergence_test:
       accuracy: 1
-      pvalue: 0.03496503496503497
+      pvalue: 0.03696303696303696

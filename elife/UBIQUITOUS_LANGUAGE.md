@@ -39,7 +39,7 @@ Working vocabulary for the Studyflow paper (`elife/paper-v3.qmd`). This is guida
 | Simulated participant | A runner-only actor of the `simulate` skill (`simulate://planted`, `simulate://null`) that answers each trial correctly with a set probability; the example study's cohort, not a participant in the CONSORT sense. |
 | Planted truth | An effect built into simulated participants, so the correct outcome of each registered question is known before the run; the null twin plants nothing. |
 | Artificial agent | A non-human actor (a simulated participant or a language model); the umbrella term. |
-| Instruction condition | The main text's name for the two arms (cautious, impulsive); the study file's labels call them dispositions. |
+| Instruction condition | The two arms (cautious, impulsive); the study files' labels say "instruction" ("Which instruction?"), and only element ids keep "Disposition". |
 | Pilot | What the example study's run is: artificial agents take every element of the protocol so that it can be checked as registered; its questions exercise the registered analysis, not hypotheses about the subjects. |
 | Modeler, reference runtimes | The modeler authors diagrams. The two reference runtimes execute them: the local runtime (`studyflow run --runtime local`) walks the whole study and writes its record into the executed copy; the browser runner walks one process, one screen at a time, and keeps its record in the session. |
 | Executor configuration | What a language model's runner records with every exchange (model digest and quantization, sampling parameters, server version, request and reply); the file names the model but cannot set its sampling. |

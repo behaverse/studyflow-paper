@@ -126,7 +126,7 @@ cx = lambda i: X0 + 2 + BOUNDS[i] * S
 cw = lambda i: (BOUNDS[i + 1] - BOUNDS[i]) * S
 RIGHT = 955.8                                     # the export's right edge: 939.8 units from x = 16, 176.3 mm
 
-FY = 366                                          # the file container
+FY = 345                                          # the file container, under the four tool bars
 FH = 30 + STRIP_H + 6
 STRIP_BOTTOM = FY + FH
 
@@ -174,7 +174,7 @@ for i, items in enumerate(ARTS):
 # ---------------------------------------------------------------- b) existing tools
 band_title('b', 'Existing tools: each covers a slice of the lifecycle', 190)
 TOOLS = [('Reporting guidelines', 'book-open-text', [0, 3]), ('Experiment builders', 'cursor-click', [1]),
-         ('Evaluation harnesses', 'gauge', [1, 2]), ('Data standards', 'database', [1, 2]), ('Workflow engines', 'git-branch', [2])]
+         ('Data standards', 'database', [1, 2]), ('Workflow engines', 'git-branch', [2])]
 y = 212
 for name, ic, span in TOOLS:
     runs = [[span[0]]]
@@ -224,7 +224,7 @@ y1 = panel(LX, PY, LW, 'Gantt view', 'rows', 'ethics board', 'account-group-outl
 # the checklists sit under the schedule; their arrow leaves the file beside the Gantt panel and turns in at its corner
 y2 = panel(LX, y1 + 14, LW, 'Checklist view', 'check-square', 'reviewer', 'account-eye-outline',
            sorted(BUILD.glob('view-checklist-*.png')), LX + LW + GAP / 2, entry=0.96)
-# the run history, two runs and a re-run that branches after an invalidated step, takes the column beside them
+# the run history, the one run the file carries, takes the column beside them
 y3 = panel(RX, PY, RW, 'Provenance view', 'git-branch', 'replicator', 'account-convert-outline',
            [BUILD / 'view-provenance.png'], RX + RW / 2)
 H = max(y2, y3) + 12

@@ -75,7 +75,7 @@ Report:
       checklist: |-
         - [ ] CONSORT participant flow exported from the Figure view
         - [ ] SPIRIT schedule exported from the Gantt view
-        - [ ] CHART items recorded from the run provenance
+        - [ ] Model, prompts and sampling settings recorded with each exchange
       dataInputAssociations:
         In_Results:
           sourceRef:

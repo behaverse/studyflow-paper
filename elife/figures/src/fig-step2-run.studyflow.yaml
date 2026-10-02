@@ -11,12 +11,12 @@ Run_Collaboration:
     study's system, the model is another, and the only thing crossing the boundary is the exchange drawn here — one
     `behaverse:Trial` out per trial and one `behaverse:Response` back, per task. @fig-combined folds the same four flows
     into one pair at the pool level, which every task inside inherits. The shared `agentic:Prompt` carries the task
-    rules and cites the instruction of the subject's allocated disposition as `{instruction}`, so the same battery,
-    unchanged, is administered to whichever arm the subject was drawn into. The two pacing elements are not the
-    protocol: they are how the build plays for an actor that is not a person, and each task needs its own, since a
-    Parameters object only reaches a step it is wired into. The attrition rule is a conditional boundary event reading
-    the task's own missed-trial rate, not an attribute of the task: above one in five, the subject leaves at
-    Discontinued. The counts are zero because nothing has run: this is the deposited plan.
+    rules and cites the instruction the subject was allocated as `{instruction}`, so the same battery, unchanged, is
+    administered to whichever arm the subject was drawn into. The two pacing elements are not the protocol: they are how
+    the build plays for an actor that is not a person, and each task needs its own, since a Parameters object only
+    reaches a step it is wired into. The attrition rule is a conditional boundary event reading the task's own
+    missed-trial rate, not an attribute of the task: above one in five, the subject leaves at Discontinued. The counts
+    are zero because nothing has run: this is the deposited plan.
   participants:
     Participant_Model:
       type: studyflow:Actor
@@ -93,7 +93,7 @@ Run:
           SkipFocusArea: true
     Prompt_Battery:
       type: agentic:Prompt
-      name: Disposition prompt
+      name: Battery prompt
       template: |
         {instruction}
 

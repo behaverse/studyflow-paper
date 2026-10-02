@@ -26,7 +26,7 @@ Decide:
         The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of every
         test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm test needs,
         four being the smallest arms for which shuffling labels across subjects can reach p < .05; the permutations the
-        divergence test draws.
+        difference test draws.
       values:
         alpha: 0.05
         min_subjects: 3
@@ -40,7 +40,7 @@ Decide:
         congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
         one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects than
         the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The descriptive
-        table by disposition and congruency is written out either way.
+        table by instruction condition and congruency is written out either way.
       properties:
         by_congruency:
           name: by_congruency
@@ -65,8 +65,8 @@ Decide:
           type: SubProcess
           name: Accuracy cost per subject
           documentation: >-
-            The descriptive table by disposition and congruency, written out as it stands; then, per subject, the mean
-            accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
+            The descriptive table by instruction condition and congruency, written out as it stands; then, per subject,
+            the mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects have both.
           flowElements:
             CP_Start:
               type: StartEvent
