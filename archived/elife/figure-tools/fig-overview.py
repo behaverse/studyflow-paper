@@ -172,7 +172,7 @@ for i, items in enumerate(ARTS):
         text(who, x + 8 - ww / 2, yy, ww + 6, 16, size=fs, color=MUTED, align='left')
 
 # ---------------------------------------------------------------- b) existing tools
-band_title('b', 'Existing tools: each covers a slice of the lifecycle', 190)
+band_title('b', 'Tools today: each covers a slice of the lifecycle', 190)
 TOOLS = [('Reporting guidelines', 'book-open-text', [0, 3]), ('Experiment builders', 'cursor-click', [1]),
          ('Data standards', 'database', [1, 2]), ('Workflow engines', 'git-branch', [2])]
 y = 212

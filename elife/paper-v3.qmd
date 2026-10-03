@@ -68,37 +68,19 @@ Studyflow is one formal object, and projections map it to the views each audienc
 
 ## The formal object
 
-A Studyflow diagram represents a study as a graph, $S$, whose nodes and edges have types fixed by a schema (Materials and methods). In experimental terms, the nodes are a study's events, tasks, decisions, and data, and the edges record both what happens next (control flow) and which data each node reads and writes (data flow).
-
-### Data and state
-
-Data elements come in two kinds, a distinction Studyflow takes from BPMN [@bpmnspec]. *Datasets* appear on the diagram as data objects and stores, such as the recorded trials or a table of results. *Properties* never appear on the diagram; the study, an activity, or an event declares them, and they hold the study's *state*, the values a run accumulates and later reads, such as an allocated condition, a running count of failed trials, or a fitted model. A container element, such as the study itself or a subprocess (an activity that holds a diagram of its own), also fixes the scope of data. State declared on the study lasts as long as the study and carries from one run to the next; state declared on a subprocess, such as a cognitive battery or an analysis pipeline, lasts for one instance of it.
+A Studyflow diagram represents a study as a graph, $S$, whose nodes and edges have types fixed by a schema (Materials and methods). In experimental terms, the nodes are a study's events, tasks, decisions, and data, and the edges record both what happens next (control flow) and which data each node reads and writes (data flow). Data appear on the diagram as datasets, such as the recorded trials; the values a run accumulates and later reads, such as an allocated condition or a running count of failed trials, are the study's *state* (Materials and methods).
 
 ### Projections
 
-Projections are the key mechanism to satisfy the specific information needs of different audiences about a common study. @fig-views shows the most common views supported by Studyflow, each targeting different information needs. The *Study* view shows all the information available about the study (as in the authoring tools). The *Gantt* view keeps elements carrying an onset or duration and renders them as interdependent tasks with a timeline. The *Checklist* view keeps elements carrying checklist items and renders them as a list. The *Provenance* view keeps the records of the runs and renders them as a list of runs, each with its random seed, the software that ran it, and a fingerprint that identifies the protocol it followed. The *Manuscript Figure* view keeps what the drawing shows and discards the rest, but embeds the full study as read-only metadata in an editable image. The projection mechanism implemented in Studyflow therefore addresses multiple limitations these study artifacts have when they are handcrafted, as is customary today. With Studyflow the different artifacts are consistent by construction; whether they are complete depends on what the file states, and a file can mark a value as unstated (@tbl-encoded).
+Projections are the key mechanism to satisfy the specific information needs of different audiences about a common study. Each view keeps what one audience needs and renders it in a familiar form, such as a schedule, a checklist, or a figure (@fig-views); Step 4 describes what each view shows of the example study. The projection mechanism implemented in Studyflow therefore addresses multiple limitations these study artifacts have when they are handcrafted, as is customary today. With Studyflow the different artifacts are consistent by construction; whether they are complete depends on what the file states, and a file can mark a value as unstated (@tbl-encoded).
 
 ## Relation to the BPMN standard
 
-The object $S$ is implemented as a domain-specific profile of BPMN 2.0 [@bpmnspec; @white2004introduction], using BPMN's own extension mechanism to add domain types and their attributes without breaking the standard [@stroppi2011; @magnani2009bpdmn].
+The object $S$ is implemented as a domain-specific profile of BPMN 2.0, the Object Management Group's (OMG) standard [@bpmnspec; @white2004introduction], using BPMN's own extension mechanism to add domain types without breaking the standard [@stroppi2011; @magnani2009bpdmn]. Studyflow keeps BPMN's shapes and adds the elements experimental research needs: cognitive tasks, questionnaires, and instructions; gateways for randomization and eligibility; and datasets bound to community standards such as BIDS [@bids] and Psych-DS [@psychds] (@supptbl-catalog). A lab or a field can add element types of its own, and the places where running a diagram departs from the BPMN specification are listed in Materials and methods (@tbl-departures).
 
-*What Studyflow inherits.* Studyflow reuses BPMN's control-flow vocabulary and visual shapes: events, activities, gateways, data objects and stores, pools and lanes (the bands that separate the parties to a process and its phases), and the choreography task's shape for an exchange between parties. Each element keeps its standard appearance; its execution follows Studyflow's own rules, which depart from the BPMN specification of the Object Management Group (OMG) in the places @tbl-departures lists [@bpmnspec]. The exported BPMN file remains a standard BPMN file.
+## One file, from plan to record
 
-*What Studyflow adds.* Four groups of elements extend BPMN: a root study container for study-wide metadata; domain types, such as questionnaires, instructions, and cognitive tasks, each an ordinary BPMN element under a distinctive icon; data elements bound to community schemas (e.g., BIDS [@bids], Psych-DS [@psychds], the Behaverse Data Model, BDM [@bdm], or a table description in the W3C's CSVW format [@csvw]), with operations that name the external code they call and its version; and research gateways for randomization, stratified allocation, and eligibility, with optional timing attributes from which the Gantt view derives a schedule. @tbl-elements shows a representative subset; @fig-elements gives the full catalog.
-
-Studyflow is itself extensible: a lab or a field adds element types through a schema that extends the core one, and the extended diagram stays a well-formed Studyflow diagram that still exports to valid BPMN 2.0 (@fig-overview).
-
-## File format
-
-A study lives on disk as a plain-text Studyflow file (`.studyflow.yaml`) that records the BPMN diagram completely (@lst-minimal-study). It converts losslessly to and from standard BPMN 2.0 XML, which generic BPMN tools read (Materials and methods); the YAML is the source of truth and the XML its format for exchange.
-
-Two further conventions serve the single source of truth requirement (R1 in @tbl-requirements). First, the YAML file is plain text with one attribute per line, so a version-control system such as Git shows an edit as the lines it changed (@lst-diff). Second, the source can be embedded losslessly in an exported image (SVG or PNG); the embedded source, not the image, is authoritative.
-
-A deposited Studyflow figure is therefore shareable as it is: the image *is* the Studyflow file, carrying all the information about the study (Appendix 2 gives the precedents for both conventions).
-
-## Execution
-
-A Studyflow file is read before a run (prospective provenance, the plan or recipe) and written to during one (retrospective provenance, the history of what executed) [@freire2008provenance; @lim2010prospective; @w3cprov]. A Studyflow file is prospective provenance once preregistered, and accumulates retrospective provenance as it runs: the software that ran it, the random seed, a fingerprint of the protocol each run followed (a cryptographic digest; Materials and methods), and the study state. The two forms live in the same object, so the study's deviation report (@sec-results) is the difference (a diff) between its prospective and retrospective states, rather than a comparison across unrelated documents.
+A study lives on disk as one plain-text Studyflow file, which records the diagram completely and converts without loss to the standard BPMN file that any BPMN tool reads. Two conventions serve the single source of truth requirement (R1 in @tbl-requirements). Version control shows each edit to the file as the lines it changed (@lst-diff), and an exported image of the diagram carries the whole file, so a deposited Studyflow figure is shareable as it is: the image *is* the Studyflow file, carrying all the information about the study. The same file holds the plan before a run and, as the study runs, the record of what happened: the software that ran it, the random seed, a fingerprint of the protocol each run followed, and the counts. The deviation report (@sec-results) is therefore the difference between the file's two states, rather than a comparison across unrelated documents.
 
 In summary, a Studyflow file is one object: people read it as a diagram, machines check and run it, each audience receives it as a view, and every run leaves its record in the same file.
 
@@ -106,15 +88,13 @@ In summary, a Studyflow file is one object: people read it as a diagram, machine
 
 @fig-combined is the whole example study as one diagram: who was enrolled and how they were allocated, what each did trial by trial and who stopped, how the data were analyzed and each question decided, and what was reported, with every count recorded as the study ran. The rest of this section reads that figure one part at a time.
 
-The example study takes the form of a randomized controlled trial, not because this design needs one but because CONSORT's participant flow is the most demanding flow a reporting guideline asks for: a within-subject experiment is the same file without its allocation lane. It enrolls a small cohort and administers two cognitive tasks (Materials and methods). A subject is enrolled at a start event, screened against eligibility criteria, and allocated at random to one of two instruction conditions. The subject is then administered the tasks one trial at a time: an interference-control task (a Simon task, one block of 30 trials) and a working-memory task (a 1-back, on the timeline the battery's human studies run). A subject who fails the screening, or leaves more than one trial in five unanswered on a task (the preregistered discontinuation criterion), leaves through an exit that the diagram draws and counts. We use artificial agents, small language models, for convenience. The run is a pilot in the sense used for experiment software: the agents stand in for people so that every element of the protocol can be run and checked as registered, not so that their behavior can be studied, and we draw no conclusions about language models from it. A human cohort would take the same protocol through the same interface; what differs is the actor, not the protocol.
+The example study takes the form of a randomized controlled trial, not because this design needs one but because CONSORT's participant flow is the most demanding flow a reporting guideline asks for: a within-subject experiment is the same file without its allocation phase. It enrolls a small cohort and administers two cognitive tasks (Materials and methods). A participant is enrolled at a start event, screened against eligibility criteria, and allocated at random to one of two instruction conditions. The participant is then administered the tasks one trial at a time: an interference-control task (a Simon task, one block of 30 trials) and a working-memory task (a 1-back, on the timeline the battery's human studies run). A participant who fails the screening, or leaves more than one trial in five unanswered on a task (the preregistered discontinuation criterion), leaves through an exit that the diagram draws and counts. We use artificial agents, small language models, for convenience: they stand in for people so that every element of the protocol can be run and checked as registered, and we draw no conclusions about language models from them (Box 1). A human cohort would take the same protocol through the same interface; what differs is the actor, not the protocol.
 
-::: {.callout-note title="Box 1. What this pilot shows, and what it does not"}
-**Shows.** One Studyflow file enrolled, screened, allocated, administered, excluded, analyzed, and reported a cohort, and the CONSORT flow, the SPIRIT schedule, the checklist, and the deviation report were exported from it [TODO: confirm from the language-model runs]. The registered analysis reached *Supported* where an effect was planted and *Not supported* where none was. Replacing who takes the study changed one line of the file.
-
-**Does not show.** How language models perform cognitive tasks, whether they show a Simon effect, or whether they can stand in for human participants; the timing of the tasks for people; or a human cohort taking the same file, which is designed for but not demonstrated here.
+::: {.callout-note title="Box 1. What this pilot does not show"}
+The pilot does not show how language models perform cognitive tasks, whether they show a Simon effect, or whether they can stand in for human participants. Nor does it show the timing of the tasks for people, or a human cohort taking the same file, which is designed for but not demonstrated here.
 :::
 
-The subsections that follow state one claim each. The first measures the problem: published Methods sections leave run-critical decisions unstated. The next four build the example study one step per stage of the study lifecycle, each a complete Studyflow diagram that passes the validator on its own and each showing one property of the notation. A table of pilot outcomes then checks each step against what was registered, and the last subsection returns to the whole file of @fig-combined, which is at once the preregistration, the running experiment, the analysis, and the figure printed in this paper.
+The first subsection measures the problem: published Methods sections leave run-critical decisions unstated. The next four build the example study one step per stage of its lifecycle, each a complete diagram that runs on its own. The last draws five conclusions: Studyflow works, it supports the full study lifecycle, it can replace current practices, it avoids their problems because there is one document, and it opens up new uses.
 
 ## Prose leaves critical decisions unstated
 
@@ -130,60 +110,58 @@ Who was enrolled, who was excluded and why, and how were the rest allocated? The
 
 Domain-specific elements make each design decision explicit rather than narrative. The enrollment start event references the consent document, so when the protocol runs a human cohort, an ethics board approves the same form that renders at that node. The screening task carries the checklist that later drives the guideline audits, and asks the actor the comprehension check wired into it. The eligibility gateway lists its inclusion and exclusion criteria (for this cohort, a registered model at a recorded version, and a comprehension check answered as instructed), and its "yes" flow carries the condition that tests the screening answer. The randomization gateway carries its allocation rule and parameters (permuted blocks of four, 1:1), and each cognitive task reads the settings wired into it. Every element defines information that the study will later consume, such as the random assignment of participants during data collection.
 
-How these elements are wired together is as much a part of the design as the elements themselves. Participant attrition, for example, is encoded in the control flow rather than manually annotated beside it. In a published CONSORT figure, each Excluded, Lost to follow-up, or Discontinued box sits off to the side, and the reader has to infer that its counts subtract from the main path. In Studyflow, every exit is a path of the control flow that ends at a named end event. The eligibility gateway's "no" answer ends at the Excluded exit, and each task carries a preregistered discontinuation rule that ends at the Discontinued exit; the rule is drawn with BPMN's standard mechanism for leaving an activity when a condition on its result holds, a conditional boundary event [@bpmnspec; @dijkman2008semantics]. The connections of the published flow diagram are the paths the study takes when it runs.
+How these elements are wired together is as much a part of the design as the elements themselves. Participant attrition, for example, is encoded in the control flow rather than manually annotated beside it. In a published CONSORT figure, each Excluded, Lost to follow-up, or Discontinued box sits off to the side, and the reader has to infer that its counts subtract from the main path. In Studyflow, every exit is a path of the control flow that ends at a named end event. The eligibility gateway's "no" answer ends at the Excluded exit, and each task carries a preregistered discontinuation rule that ends at the Discontinued exit; the rule is drawn on the task itself. The connections of the published flow diagram are the paths the study takes when it runs.
 
-As the study runs, it counts the subjects that reach every element and follow every path, and each exit label cites its own element's count: `n={reached}` in the deposited file, where every count is zero, and a number in the post-run figure. The registered plan and the final report are therefore one diagram at two points in its life. Because flows are counted too, the counts must balance at every node, the subjects that came in equalling those that went on plus those that left, which the validator checks (Step 4).
+As the study runs, it counts the participants that reach every element and follow every path, and each exit label shows its count: zero in the registered file, and the number reached in the figure after the run. The registered plan and the final report are therefore one diagram at two points in its life. Because flows are counted too, the counts must balance at every node, the participants that came in equalling those that went on plus those that left, which the validator checks.
 
 ## Step 2 (Run): one interface administers any actor
 
-What did each participant do, trial by trial, and who stopped? The second step executes the two tasks, one trial at a time. At each trial, the study exchanges two messages with the actor, that is, whoever is taking the study (human or artificial). The first message carries the observation: the stimulus, the response options, the timing constraint, and, for actors that need to see the screen, the rendered frame. The second carries back the response, which the task times. Studyflow draws this exchange in the diagram itself, as a pair of message flows between the subjects and the actor (BPMN's construct for an exchange between two parties, each drawn as a pool). The interface between the study and whoever takes it is thus part of the protocol rather than of custom code. What the exchange looks like depends only on the actor: a language model receives the trial as text.
+What did each participant do, trial by trial, and who stopped? The second step executes the two tasks, one trial at a time. At each trial, the study exchanges two messages with the actor, that is, whoever is taking the study (human or artificial). The first message carries the observation: the stimulus, the response options, the timing constraint, and, for actors that need to see the screen, the rendered frame. The second carries back the response, which the task times. Studyflow draws this exchange in the diagram itself, as two arrows between the participants and the actor, so the interface between the study and whoever takes it is part of the protocol rather than of custom code. What the exchange looks like depends only on the actor: a language model receives the trial as text.
 
-In the example study the actor is a small open-weight language model, and each pilot cohort is eight subjects answered by one such model (Materials and methods). Three models take the study, each from its own copy of the file, and the copies differ in one line, the one that names the model (@lst-swap): the protocol is written once, whoever answers it. The randomization gateway from Step 1 assigns each subject to one of two instruction conditions, cautious or impulsive, whose text is wired into both tasks, as instructions that stress accuracy or speed would be for human participants [@heitz2014sat]. The cohort is deliberately small, enough to walk the protocol end to end and reach a decision on each question, not to estimate an effect.
+In the example study the actor is a small language model, and each pilot cohort is eight participants answered by one such model (Materials and methods). Three models take the study, each from its own copy of the file, and the copies differ in one line, the one that names the model (@lst-swap): the protocol is written once, whoever answers it. The randomization gateway from Step 1 assigns each participant to one of two instruction conditions, cautious or impulsive, whose text is wired into both tasks, as instructions that stress accuracy or speed would be for human participants [@heitz2014sat]. The cohort is deliberately small, enough to walk the protocol end to end and reach a decision on each question, not to estimate an effect.
 
 Both tasks come from the Behaverse battery [@behaverse], and the study seed fixes every random branch the diagram takes, the allocation included, so the path of any run can be replayed.
 
-To see what one of these tasks contains, @fig-step2-nback shows the traditional slide figure of the N-back next to its Studyflow diagram. The traditional slide is intuitive but underspecified: timing values live in the caption, the trial-to-block boundary stays implicit, and what counts as a correct match is buried in analysis code. Such details matter: trial timing alone differs measurably across experiment platforms [@bridges2020timing; @anwylirvine2021timing]. In contrast, the Studyflow diagram makes the trial an explicit subprocess, with a stimulus activity, a boundary timer that closes the response window, a second timer for the inter-stimulus interval, and labeled match and non-match branches. Trial data is logged in a standard format, here the BDM schema [@bdm].
+To see what one of these tasks contains, @fig-step2-nback shows the traditional slide figure of the N-back next to its Studyflow diagram. The traditional slide is intuitive but underspecified: timing values live in the caption, the trial-to-block boundary stays implicit, and what counts as a correct match is buried in analysis code. Such details matter: trial timing alone differs measurably across experiment platforms [@bridges2020timing; @anwylirvine2021timing]. In contrast, the Studyflow diagram draws the trial itself: the stimulus, a timer that closes the response window, a second timer for the interval between stimuli, and labeled match and non-match branches.
 
-Not every trial succeeds, and failures take the exits that Step 1 already describes. A reply outside the allowed response options, or none within the response window, leaves that trial unanswered, and each task's result carries the share of its trials that went unanswered. Each task's discontinuation rule compares that share with the study's threshold of one trial in five; when it holds, the subject leaves at the exit labeled "Discontinued" (@fig-step2-run). Discontinuation therefore adds to the same counts as any other attrition, and every exchange is recorded with the run (Materials and methods), so failures can be examined afterwards rather than silently dropped.
+A reply outside the allowed options, or none within the response window, leaves a trial unanswered. A participant who leaves more than one trial in five unanswered on a task takes the counted Discontinued exit of Step 1 (@fig-step2-run), and every exchange is recorded with the run (Materials and methods), so failures can be examined afterwards rather than silently dropped.
 
 ## Step 3 (Analyze): the registered analysis decides each question by its rule
 
-What was tested, and how was each question decided? The third step is the analysis, drawn in the same notation as the study it analyzes rather than kept as a separate script (@fig-step3-analyze). It asks two example questions, of the kind a study with these tasks would register; in this pilot they exercise the registered analysis rather than test a hypothesis about the subjects. Both are about accuracy, because response times are not analyzed here (Materials and methods). 1) Does the cohort show the congruency effect of the Simon task, more errors when the stimulus appears on the side opposite the response it calls for [@simon1969reactions]? 2) Do the two instruction conditions differ, that is, does a classifier separate them from accuracy in the two tasks better than chance? Each question has a test and a decision rule fixed in the diagram before the first run (Materials and methods), so the registered analysis and the executed analysis are the same object. Because what an artificial cohort will do is not known in advance, the registered analysis was first checked where the answer is known, as a statistical method is checked on simulated data and a model on parameter recovery [@morris2019simulation; @wilson2019tensimple]. On simulated participants with a planted congruency cost and a planted difference between the instruction conditions, it reached *Supported* on both questions; on a null copy with neither, it reached *Not supported* on both (@tbl-pilot; Materials and methods).
+What was tested, and how was each question decided? The third step is the analysis, drawn in the same notation as the study it analyzes rather than kept as a separate script (@fig-step3-analyze). It asks two example questions, of the kind a study with these tasks would register; in this pilot they exercise the registered analysis rather than test a hypothesis about the participants. Both are about accuracy, because response times are not analyzed here (Materials and methods). 1) Does the cohort show the congruency effect of the Simon task, more errors when the stimulus appears on the side opposite the response it calls for [@simon1969reactions]? 2) Do the two instruction conditions differ, that is, does a classifier separate them from accuracy in the two tasks better than chance? Each question has a test and a decision rule fixed in the diagram before the first run (Materials and methods), so the registered analysis and the executed analysis are the same object.
 
 The pipeline that answers them is a chain of data operations. It reads the raw trials, excludes the unanswered ones, and keeps the trials of the participants who completed the protocol, as an activity on their completion path records them. It then summarizes in two stages, first to one accuracy per participant and task and then to group-level statistics, and hands each question the table it needs. The two exclusion operations are the analysis exclusions that the CONSORT flow reports, and because they are fixed before the first run, they remove choices an analyst could otherwise make after seeing the data [@simmons2011falsepositive].
 
-Each question ends in a decision, and the decision is drawn (@fig-step3-analyze-b). @tbl-rule sets one question as preregistrations typically word it beside what the diagram fixes: the decisions the prose leaves to the analyst are elements of the diagram. A first gateway sends a cohort too small for the test to *Not testable* (fewer than four subjects per arm for a test between the arms, three for a test within subjects); otherwise the test runs, and a second gateway compares its $p$ value with alpha, ending at *Supported* or *Not supported*. The run records which end was reached, so every question leaves the study with a claim state rather than a bare estimate. The direction of a hypothesis is part of its rule, so a congruency cost in the wrong direction ends at *Not supported* however small its two-sided $p$. Every threshold sits once, in one table of decision rules that the analysis reads.
+Each question ends in a decision, and the decision is drawn (@fig-step3-analyze-b). @tbl-rule sets one question as preregistrations typically word it beside what the diagram fixes: the decisions the prose leaves to the analyst are elements of the diagram. A first gateway sends a cohort too small for the test to *Not testable*; otherwise the test runs, and a second gateway compares its $p$ value with alpha, ending at *Supported* or *Not supported*. The run records which end was reached, so every question leaves the study with a claim state rather than a bare estimate. Every threshold, and the direction of each hypothesis, sits once, in one table of decision rules that the analysis reads.
 
-Each operation names the published function that performs it, such as pingouin's paired *t* test, with its arguments and its package version (@fig-step3-analyze), so a statistical test and a classifier share one notation and the analysis reruns as it ran [@kapoor2023leakage; @tetzlaff2022bpmn4sml].
-
-Datasets and their data dictionaries are elements of the diagram too, linked by dashed edges to the operations that read and write them (@lst-step3-analyze). The trials dataset is bound to a data dictionary of the columns the analysis reads, so an operation that names a column the dictionary lacks is rejected before any data are collected [@csvw; @hoytO3GuidelinesOpen2024].
+Each operation names the published function that performs it, with its arguments and its package version, so the analysis reruns as it ran [@kapoor2023leakage]. The recorded trials come with a data dictionary of their columns, so an analysis that reads a column the data will not have is rejected before any data are collected (@supplst-step3-analyze) [@hoytO3GuidelinesOpen2024].
 
 ## Step 4 (Report): views are exported, and deviations are a diff
 
-Where do the reported figures and counts come from, and what changed since registration? The fourth step closes the study lifecycle (@fig-step4-report) with one activity that turns the analysis outputs into the reporting artifacts and a completion event that ends the study. Nothing else is added for reporting, because every reporting artifact renders a view of the file that Steps 1 to 3 built (@fig-views).
+Where do the reported figures and counts come from, and what changed since registration? The fourth step closes the study lifecycle (@fig-combined; @suppfig-step4-report) with one activity that turns the analysis outputs into the reporting artifacts and a completion event that ends the study. Nothing else is added for reporting, because every reporting artifact renders a view of the file that Steps 1 to 3 built (@fig-views).
 
-The Study view is the full diagram of @fig-combined. The Gantt view reads the onset and duration of each activity and lays them out on a time axis, so one can see that the two tasks run in a fixed order, the Simon task first and the 1-back second, and how long a full session takes per participant. The Checklist view lists the screening checklist, the analysis exclusion criteria, and the reporting exports as items, which is the form an audit ticks off. The Manuscript Figure view is the diagram with the state of Step 1 resolved: after the runs, the exit labels read the actual counts, and the exported image embeds the full file in its metadata, so a deposited figure is the runnable study and provenance rather than a picture of it.
+The Study view shows all the information available about the study: here, the full diagram of @fig-combined. The Gantt view reads the onset and duration of each activity and lays them out on a time axis, so one can see that the two tasks run in a fixed order, the Simon task first and the 1-back second, and how long a full session takes per participant. The Checklist view lists the screening checklist, the analysis exclusion criteria, and the reporting exports as items, which is the form an audit ticks off. The Provenance view lists the runs, each with its random seed, the software that ran it, and the fingerprint of the protocol it followed. The Manuscript Figure view is the diagram with the state of Step 1 resolved: after the runs, the exit labels read the actual counts, and the exported image embeds the full file in its metadata, so a deposited figure is the runnable study and provenance rather than a picture of it.
 
 The same views are the artifacts many reporting guidelines ask for. The SPIRIT 2025 schedule of enrollment and assessment is the Gantt view [@chan2025spirit; @spirit2013]. The CONSORT participant flow is the Manuscript Figure view after execution, with attrition already counted on the error exits. At publication these artifacts are exported, not redrawn.
 
 Deviations from the preregistration are found the same way. Since the file deposited at registration and the file after execution are the same object at two points in time, their diff is the deviation report (@lst-diff). In the example study every line of that diff is an addition: the run's records, the counts, and the values the analysis wrote [TODO: confirm from the language-model runs]. A protocol edited after the run cannot hide from that comparison either, because each run records a fingerprint of the protocol it followed and the validator recomputes it (Materials and methods). A prose comparison between a registry entry and a published paper offers no such guarantee [@claesen2021adherence; @cummins2026regcheck], and current guidance asks authors to compile their deviations into a table by hand [@willroth2024deviations].
 
-To see what that comparison reports, an agent that never saw the checks seeded twelve deviations into a small registered study, one at a time (@tbl-blind; Appendix 3). They were of the kinds that audits of preregistered studies find [@claesen2021adherence], among them fewer trials than registered, a relaxed accuracy criterion, an added exclusion criterion, a replaced primary outcome, an equivalence test swapped for a difference test, and dropouts rerouted to the completion exit. Every one changed the protocol's fingerprint, as any edit does. What a reader gains is where: the diff between the registered file and the altered one shows each deviation as the line that changed, with its old and new value, inside the element that carries it, so a deviation is located rather than merely detected. Only two of the twelve were also faults of form that the validator reported, an exit that no path reaches and two conditions that overlap; the other ten are well-formed studies that differ from the registered one, and whether each change was justified is for a reader to judge.
-
-The validator also checks the file for faults of form, such as a count that does not add up or an analysis that reads a column no data dictionary defines, but not for faults of meaning, such as a difference test used where the question asks for equivalence [@lakens2017equivalence] (@tbl-faults; Limitations).
-
-## The pilot ran as registered
-
-Each step above makes a claim that its run can confirm or refute, and the registered file fixes in advance what each check should return (@tbl-pilot). Permuted blocks of four split a cohort of eight four and four; the counts balance at every node and equal those the run recorded; the discontinuation rule removes exactly the subjects whose trials cross its threshold; the protocol a run followed is the registered one; and the copy of the study for another actor differs in one line. The two example questions add a check only where the answer is known: the planted cohort must reach *Supported* on both and the null cohort *Not supported*. Both pipeline-check cohorts passed every check.
-
-<!-- TODO: run the three language-model copies (eight subjects per model, one copy per model) and fill tbl-pilot, supptbl-agents and lst-diff from those runs. -->
-[TODO: from the language-model runs: which checks held for each model, how many of its eight subjects completed the protocol, and the claim state of each question.] For the language models, these claim states are outputs of the pilot, not claims about language models; their accuracies are in @supptbl-agents, and what a congruency effect would mean in an artificial cohort is a question we return to in the Limitations.
+To see what that comparison reports, twelve deviations of the kinds that audits of preregistered studies find [@claesen2021adherence], among them fewer trials than registered, a relaxed accuracy criterion, and a replaced primary outcome, were seeded one at a time into a small registered study by an agent that never saw the checks (@tbl-blind; Appendix 3). The diff between the registered file and each altered one shows the deviation as the line that changed, with its old and new value, inside the element that carries it, so a deviation is located rather than merely detected; whether each change was justified is for a reader to judge.
 
 ## One file, no second copy
 
-The demonstration makes four further points. First, one file covers the whole lifecycle: each step is a complete example on its own, and @fig-combined is their composition, at once the protocol as registered, the study as executed, and the record of what happened. Second, the artifacts that current practice draws by hand come out of that file: the CONSORT flow, the SPIRIT schedule, the checklist, and the deviation report are views of it, and the counts the CONSORT flow reports are the counts recorded as the study ran.
+The example study supports five conclusions.
 
-Third, there is no second copy. The Simon task's length shows what that provides. It is set in the file exactly once (`Trials: 30`, the exit rule of the Simon task's one block, in the Parameters wired into the task). The Study view displays it, the task's build uses it to end the block, the analysis receives the data it produces, and the exported figure renders it. A protocol, a script, a methods paragraph, and a figure cannot disagree about its value, because there is no second copy. Changing it to forty trials is one edit whose entire footprint under version control is:
+**Studyflow works.** The registered file fixed in advance what each check should return, and every check held (@tbl-pilot). Permuted blocks of four split a cohort of eight four and four. The counts balance at every node and equal those the run recorded. The discontinuation rule removed exactly the participants whose trials crossed its threshold, and the protocol each run followed is the registered one. Because what an artificial cohort will do is not known in advance, the registered analysis was also checked where the answer is known, as a statistical method is checked on simulated data and a model on parameter recovery [@morris2019simulation; @wilson2019tensimple]: it reached *Supported* on both questions when an effect was planted, and *Not supported* on both when none was (Materials and methods).
+
+<!-- TODO: run the three language-model copies (eight subjects per model, one copy per model) and fill tbl-pilot, supptbl-agents and lst-diff from those runs. -->
+[TODO: from the language-model runs: which checks held for each model, how many of its eight participants completed the protocol, and the claim state of each question.] For the language models, these claim states are outputs of the pilot, not claims about language models; their accuracies are in @supptbl-agents, and what a congruency effect would mean in an artificial cohort is a question we return to in the Limitations.
+
+**It supports the full study lifecycle.** Each step is a complete example on its own, and @fig-combined is their composition: at once the protocol as registered, the study as executed, and the record of what happened.
+
+**It can replace current practices.** The artifacts that current practice draws by hand come out of that file. The CONSORT flow, the SPIRIT schedule, the checklist, and the deviation report are views of it, and the counts the CONSORT flow reports are the counts recorded as the study ran.
+
+**It avoids the problems of current practices, because there is one document.** The Simon task's length shows what that provides. It is set in the file exactly once (`Trials: 30`, in the settings wired into the task). The Study view displays it, the task uses it to end the block, the analysis receives the data it produces, and the exported figure renders it. A protocol, a script, a methods paragraph, and a figure cannot disagree about its value, because there is no second copy. Changing it to forty trials is a one-line edit:
 
 ```diff
 -                  - Trials: 30
@@ -192,7 +170,7 @@ Third, there is no second copy. The Simon task's length shows what that provides
 
 @tbl-copies extends the count to four decisions of the example study. Kept as separate documents, each would be written in three or four places that someone keeps in agreement by hand; in the Studyflow file each is written once, and everything else reads it there.
 
-Fourth, the file reaches a use that current practice does not. The study needed no code beyond the task implementations it names, so a pilot cohort of artificial agents was enrolled, administered two tasks, and analyzed from one file [TODO: confirm from the language-model runs], on the protocol a human cohort would take through the same interface. The file serves the two kinds of repetition differently [@nosek2022replicability]: anyone can reproduce the analysis from the executed copy and its data, and a replication can run the deposited protocol on new participants, which this paper designs for but does not demonstrate.
+**It opens up new uses.** Here we used Studyflow to orchestrate artificial agents across two tasks of a cognitive battery and to automate the analysis of their responses, without writing any code for the study: the file calls only the task software and the published library functions it names [TODO: confirm from the language-model runs]. The same file serves the two kinds of repetition differently [@nosek2022replicability]. Anyone can reproduce the analysis from the executed copy and its data, and a replication can run the deposited protocol on new participants, which this paper designs for but does not demonstrate.
 
 # Discussion {#sec-discussion}
 
@@ -200,28 +178,19 @@ Fourth, the file reaches a use that current practice does not. The study needed 
 
 Current practice in cognitive science typically scatters an experimental study across a registry entry, an ethics PDF, a recruitment system, custom analysis code, and a flow diagram drawn only for publication, none of them a machine-readable representation of the others [@moher2012; @rennie2001]. Studyflow collapses that trail into one diagram whose views cannot diverge. Because the file is plain text, every change to it shows line by line under version control, and it can be embedded in exported images. Both properties serve reproducibility and quality control. A protocol change is a reviewable diff rather than a new version of a document; the deviation between the deposited plan and the executed study is the diff between two copies of one file (@lst-diff); and a published figure carries the study that produced it, so a reader who has only the image can open, validate, and run that study.
 
-For preregistration, merging those documents changes the registered object itself. Preregistered studies deviate from their registrations without disclosure often enough that researchers now use language models to compare registrations against the papers that follow them [@claesen2021adherence; @hardwicke2023preregistration; @bakcoleman2024rigour; @cummins2026regcheck]. Two earlier ideas pushed in the same direction: structured preregistration made the plan machine-readable [@peters2023preregr], and machine-readable hypothesis tests made the results checkable [@lakens2021machinereadable]. Studyflow extends that logic to the whole experimental process. The diagram is the plan, each question ends in a claim state its registered rule decides, and a deviation is a diff rather than a prose comparison (@lst-diff). Agentic analysis systems have converged on the same records from the other direction. Brain Researcher seals a commitment card with a content hash before an analysis runs and writes a claim card with one of six claim states after it [@chen2026brainresearcher]. A deposited Studyflow file plays the part of the commitment card, and its executed copy the part of the claim record, with two differences: the file also runs and prints as the figure, and it spans the study from consent to report rather than the analysis of data that already exist.
+For preregistration, merging those documents changes the registered object itself. Preregistered studies deviate from their registrations without disclosure often enough that researchers now use language models to compare registrations against the papers that follow them [@claesen2021adherence; @hardwicke2023preregistration; @bakcoleman2024rigour; @cummins2026regcheck]. Two earlier ideas pushed in the same direction: structured preregistration made the plan machine-readable [@peters2023preregr], and machine-readable hypothesis tests made the results checkable [@lakens2021machinereadable]. Studyflow extends that logic to the whole experimental process. The diagram is the plan, each question ends in a claim state its registered rule decides, and a deviation is a diff rather than a prose comparison (@lst-diff).
 
-The reporting guidelines that journals ask authors to follow, such as CONSORT for trials or PRISMA for reviews, fit the same notation. A guideline consists of a controlled vocabulary, a checklist, and sometimes a flow diagram. In a Studyflow diagram, the vocabulary becomes the elements, the checklist becomes an attribute of the elements it concerns, and the flow becomes the topology of the diagram itself. Adherence is then a property of the file that a reader can audit and, for a flow's counts, a validator can verify. The same mapping holds for the other guidelines in this family, among them SPIRIT, TIDieR, and ARRIVE, and their AI extensions CONSORT-AI and SPIRIT-AI [@page2021prisma; @hoffmann2014tidier; @percie2020arrive; @liu2020consortai; @cruzrivera2020spiritai].
+The reporting guidelines that journals ask authors to follow, such as CONSORT for trials or PRISMA for reviews, fit the same notation. A guideline consists of a controlled vocabulary, a checklist, and sometimes a flow diagram. In a Studyflow diagram, the vocabulary becomes the elements, the checklist becomes an attribute of the elements it concerns, and the flow becomes the structure of the diagram itself. Adherence is then a property of the file that a reader can audit and, for a flow's counts, a validator can verify. The same mapping holds for the other guidelines in this family, among them SPIRIT, TIDieR, and ARRIVE, and their AI extensions CONSORT-AI and SPIRIT-AI [@page2021prisma; @hoffmann2014tidier; @percie2020arrive; @liu2020consortai; @cruzrivera2020spiritai].
 
 ## What a researcher gains, and what it costs
 
 Studyflow asks for work before any data are collected, so a lab will ask what it gives back before the study is published. It gives back three things at once. First, the design is checked before anyone is recruited: an exit no participant can reach, two criteria that overlap, or an analysis that names a column the data will not have are reported as faults of the file (@tbl-faults). Second, the registered analysis can run on simulated participants before the first real one is enrolled. The example study's pipeline check did this with a planted effect and a null copy, and found two faults in an analysis that had looked correct: a classifier that failed on unstandardized features, and an analysis that stopped when a participant was discontinued (Materials and methods). Any study written in the notation can be checked this way, which extends the advice to simulate before collecting data [@wilson2019tensimple] from a model to a whole protocol. Third, the participant flow and the schedule that a registration and a journal ask for are views of the file rather than drawings made for the occasion.
 
-The costs are as concrete. The author learns a notation and a modeler; the example study, a pilot with two tasks, is a file of more than a thousand lines; and what happens within a task, such as the order of its trials, stays in the task software unless the author writes it into the file (@tbl-scope). Whether the gains outweigh these costs for a given lab is an empirical question that we have not measured (Limitations).
+Studyflow also has costs. The author learns a notation and a modeler; the example study, a pilot with two tasks, is a file of more than a thousand lines; and what happens within a task, such as the order of its trials, stays in the task software unless the author writes it into the file (@tbl-scope). Whether the gains outweigh these costs for a given lab is an empirical question that we have not measured (Limitations).
 
-## Where Studyflow sits among workflow tools
+## Where Studyflow sits among other tools
 
-Studyflow can be read as a workflow modeling approach. Existing approaches separate along three axes: definition versus execution, domain-generic versus domain-specific, and control-flow versus data-flow orientation. On the third axis, control-flow systems model what happens next, while data-flow systems model what is derived from what, increasingly with the data product itself as the central object. A study needs both a procedural flow (conditions, phases, approvals) and a data flow (raw to cleaned to analyzed), which is why a Studyflow diagram carries both over one shared set of nodes; few existing systems offer both in one object. To our knowledge, no existing approach is at once a readable definition and an executable specification of a whole experimental study. Studyflow targets that gap and replaces none of the alternatives (@fig-overview). No neighboring family meets R1, R5, or R7 in full (@tbl-compare), and Appendix 2 gives the extended comparison.
-
-Workflow engines and evaluation harnesses execute directed acyclic graphs of computation at scale [@nextflow; @cwl; @pydra; @zhao2008scientific_workflows; @cuevasvicenttin2013workflows]. A study, by contrast, is iterative and cyclic: piloting revises the design, sessions repeat, and a preregistered sequential design can send a researcher back to collect more data [@ghareeb2025]. Studyflow keeps the loop in the diagram, as statecharts did for state machines [@harel1987statecharts], and hands each external computation to the toolkit built for it [@ghosh2025reproducible_digital_health].
-
-Experiment builders and task scripts specify the trial, the stimuli, or the runtime platform, several of them more expressively than Studyflow does [@strittmatter2025sweetbean; @tessler2025deliberatelab; @beadl; @musslick2022sweetpea; @musslick2024autora; @harrison2026psynet; @almaatouq2021empirica]. Studyflow composes these rather than competing with them: a task authored in jsPsych [@deleeuw2015jspsych] can be followed by one authored in PsychoPy [@peirce2019psychopy] once a skill runs PsychoPy tasks, with the diagram supplying the surrounding consent, eligibility, allocation, data format, and rendering (@lst-minimal-study).
-
-Data, provenance, and reporting standards occupy the data subspace and describe the datasets [@bids; @bdm; @psychds; @csvw]. Studyflow references them and describes the process that produced the data. Provenance tools, in turn, describe what was run after the fact [@w3cprov; @soilandreyes2022rocrate; @leo2024wfrunrocrate], whereas Studyflow specifies the study in advance and accumulates its metadata across the study lifecycle, in an interchangeable format that can be executed, diffed, and audited.
-
-None of the tool families discussed here, however, can express the study itself: a between-subjects design, assignment semantics, a consent step, or a preregistered hypothesis. Studyflow adopts the primitives they share (typed steps, named data artifacts, directed graphs, and provenance) and focuses its novelty on that missing layer (Appendix 2).
-
+Studyflow replaces none of the tools a study already uses (@fig-overview). Experiment builders such as jsPsych [@deleeuw2015jspsych] and PsychoPy [@peirce2019psychopy] specify the trials, several of them more expressively than Studyflow does; workflow engines run analysis pipelines at scale [@nextflow; @cwl]; and data and provenance standards describe the datasets and what was run [@bids; @psychds; @w3cprov]. None of them expresses the study itself: a between-subjects design, the assignment of participants, a consent step, or a preregistered hypothesis. Studyflow adds that missing layer and calls the other tools from it; no neighboring family meets R1, R5, or R7 in full (@tbl-compare; Appendix 2).
 
 ## Between prose and code
 
@@ -229,17 +198,13 @@ These properties matter more as language models enter research. Natural language
 
 # Limitations
 
-BPMN is heavyweight, and asking researchers to learn one more notation is a real cost. Comprehension of a process model also degrades as the model grows [@reijers2011understandability; @bogale2024]; the usual mitigation, which Studyflow inherits from BPMN, is hierarchical decomposition into subprocesses that expand and collapse. We hold that cost down with a small vocabulary specific to cognitive science over a domain-neutral core. Conceptually, a Studyflow diagram is a flowchart carrying extra attributes, one that can also be checked automatically, tracked line by line under version control, embedded in an image, and run. Like any domain-specific notation, Studyflow's core vocabulary is designed to cover common experimental workflows rather than every possible experimental paradigm. Specialized use cases are expected to extend the core schema with additional elements where needed, while preserving compatibility with the underlying notation.
+BPMN is heavyweight, and asking researchers to learn one more notation is a cost. Comprehension of a process model also degrades as the model grows [@reijers2011understandability; @bogale2024]; the usual mitigation, which Studyflow inherits from BPMN, is hierarchical decomposition into subprocesses that expand and collapse. We hold that cost down with a small vocabulary specific to cognitive science over a domain-neutral core. Conceptually, a Studyflow diagram is a flowchart carrying extra attributes, one that can also be checked automatically, tracked line by line under version control, embedded in an image, and run. Like any domain-specific notation, Studyflow's core vocabulary is designed to cover common experimental workflows rather than every possible experimental paradigm. Specialized use cases are expected to extend the core schema with additional elements where needed, while preserving compatibility with BPMN.
 
-An executable figure shifts where trust in a study rests. Running a Studyflow diagram asks the reader to trust two things: the external code it references, and the correspondence between the rendered diagram and its source file. Both yield to ordinary software engineering and security remedies: fingerprinting the source and recording the version of the external code, and restricting each external call to its declared operation, for example through containers (@tbl-claims lists which of these the reference implementation provides).
-
-Validation checks form, not science. A file that passes validation is well-formed, its counts balance, and its protocol is the one its runs recorded; the validator cannot tell a difference test from an equivalence test, or an inequality flipped in every branch from an intended one (@tbl-faults). A passing check read as an endorsement would discourage exactly the reading those faults need.
+Validation checks form, not science. A file that passes validation is well-formed, its counts balance, and its protocol is the one its runs recorded; the validator cannot tell a difference test from an equivalence test [@lakens2017equivalence], or an inequality flipped in every branch from an intended one (@tbl-faults). A passing check read as an endorsement would discourage exactly the reading those faults need.
 
 A human cohort taking the same file is a design goal that this paper does not demonstrate: the example study ran only with artificial agents, in the reference implementation's local runtime (Appendix 1).
 
-The reference implementation also leaves parts of a study outside the file or outside what runs (@tbl-scope). What happens within a task is registered only when it is written into the settings wired to the task; in the example study, the file states how the Simon task draws each trial's congruency, but the draw happens as the task runs, so the order of trials is recorded after the run rather than registered before it. The analysis runs only as calls to Python library functions; R and mixed-effects models are not demonstrated. The browser runtime keeps a session's record in the browser rather than sending it to the platforms laboratories use to host online studies, and it does not resume an interrupted session. A run can keep its participants' data out of its version-controlled history, but participant identifiers are not yet pseudonymised, so a study with human participants needs data protection beyond what is built in. Return visits and EEG acquisition are described by the notation but not run, and stratified allocation and minimization run only in the local runtime. Each of these is a matter of tooling rather than of the notation, and each is future work.
-
-A single source of truth also concentrates risk, so the design keeps the notation independent of any one tool: the schema is versioned apart from the code that reads it, and the exported BPMN 2.0 XML opens in any compliant BPMN tool, which ignores the Studyflow extensions it does not recognize [@bpmnspec; @magnani2009bpdmn]. A project that no longer uses our toolkits is left with a valid, standard file that no single tool owns and any BPMN tool can draw. Running it again, however, needs a runtime that follows the Studyflow specification, since a generic BPMN engine does not read the extensions and few engines run BPMN's own execution semantics [@geiger2016bpmn]. What has to outlive our implementation is therefore the specification, and at present one group maintains both.
+The reference tools do not yet run everything the notation can state (@tbl-scope; @tbl-claims). What happens within a task is registered only when it is written into the task's settings, so in the example study the order of trials is recorded after the run rather than registered before it. The analysis runs only as calls to Python library functions, and a study with human participants needs data protection beyond what is built in. Running a diagram also asks the reader to trust the external code it calls, which the file pins by version. Any BPMN tool can open and draw the exported file, but running it needs a runtime that follows the Studyflow specification, which at present one group maintains.
 
 We have not measured whether Studyflow diagrams are easier to read than the protocol PDFs, figures, and scripts they replace, and the classic flowchart-versus-text comparisons are mixed [@scanlan1989flowcharts; @shneiderman1977flowcharts]. Diagrams can make explicit the relations that a text leaves the reader to infer [@larkin1987diagram], and we designed every feature with comprehension in mind, but we treat the benefit as a hypothesis awaiting a usability study [@figl2017comprehension].
 
@@ -254,7 +219,7 @@ The second direction is to standardize experimental science. Experimental scienc
 # Figures
 
 
-![**Unlike data, the process has no standard shared artifact. Studyflow notation standardizes the process.** The four columns are the stages of a study's lifecycle (Design, Run, Analyze, Report), colored as in every following figure. **(a)** Today, each audience works from its own artifact: the researcher from a protocol PDF, the ethics board from an ethics application, the engineer from an experiment script, the participant from task screens, the analyst from an analysis notebook, the reviewer from checklists, and the replicator from a manuscript figure. Each holds its own copy of the study's parameters, and nothing keeps the copies consistent. **(b)** Families of existing tools mapped onto the slice of the lifecycle each covers; no representation spans the whole study in a form every audience can read, validate, and execute. **(c)** Studyflow closes that gap with one file. The example study of @sec-results, compacted to one row (the pool of eight subjects drawn as one, the analysis collapsed), as the reference modeler draws it: a consented start event, the screening questionnaire, the eligibility and randomization gateways, the two allocation arms, the two tasks with the instruction of each condition wired in as a data object, the preregistered analysis, and the report, with the counts recorded at every exit. Existing tools plug into it (Behaverse or jsPsych tasks, library code for the analysis) rather than being replaced. Below it, three of the modeler's views of that same file, unedited: the Gantt view from each activity's onset and duration (the schedule an ethics board or a SPIRIT registration asks for), the Checklist view from the checklists the elements carry (what a reviewer audits), and the Provenance view from the run records (the seed, the software, and the run repository a replicator needs, with the protocol's fingerprint in the same record). The Manuscript Figure view of the full study, its CONSORT participant flow, is @fig-consort; its Gantt, Provenance, and Checklist views at full size are @fig-views.](figures/fig-overview.studyflow.png){#fig-overview}
+![**Unlike data, the process has no standard shared artifact. Studyflow notation standardizes the process.** The four columns are the stages of a study's lifecycle (Design, Run, Analyze, Report), colored as in every following figure. **(a)** Today, each audience works from its own artifact: the researcher from a protocol PDF, the ethics board from an ethics application, the engineer from an experiment script, the participant from task screens, the analyst from an analysis notebook, the reviewer from checklists, and the replicator from a manuscript figure. Each holds its own copy of the study's parameters, and nothing keeps the copies consistent. **(b)** Families of tools mapped onto the slice of the lifecycle each covers; no representation spans the whole study in a form every audience can read, validate, and execute. **(c)** Studyflow closes that gap with one file. The example study of @sec-results, compacted to one row (the pool of eight subjects drawn as one, the analysis collapsed), as the reference modeler draws it: a consented start event, the screening questionnaire, the eligibility and randomization gateways, the two allocation arms, the two tasks with the instruction of each condition wired in as a data object, the preregistered analysis, and the report, with the counts recorded at every exit. Other tools plug into it (Behaverse or jsPsych tasks, library code for the analysis) rather than being replaced. Below it, three of the modeler's views of that same file, unedited: the Gantt view from each activity's onset and duration (the schedule an ethics board or a SPIRIT registration asks for), the Checklist view from the checklists the elements carry (what a reviewer audits), and the Provenance view from the run records (the seed, the software, and the run repository a replicator needs, with the protocol's fingerprint in the same record). The Manuscript Figure view of the full study, its CONSORT participant flow, is @fig-consort; its Gantt, Provenance, and Checklist views at full size are @fig-views.](figures/fig-overview.studyflow.png){#fig-overview}
 
 ![**The complete example study as a single Studyflow file (`example_study.studyflow.yaml`), after execution.** Three pools, top to bottom: the actor, a language model that answers for the subjects, the subjects (one process run once per subject, eight times, as the parallel marker in its title band shows, with its three CONSORT phases as lanes), and the analysis and report, which the subjects' pool starts once its last instance has ended. Every `n` is a count recorded as the cohort ran: [TODO: from the re-run: how many were assessed for eligibility, excluded, randomized, allocated to each condition, discontinued, and completed the protocol]. Beside the trials dataset sits the data dictionary it is bound to, and beside the collapsed analysis the Decision rules it reads. Record the completion appends each completer to the Completers dataset, whose subjects alone the analysis reads. The protocol, tasks, analysis, and report all live in this one artifact; the views, the guideline audits, and the deviation report are derived from it.](figures/fig-combined.studyflow.png){#fig-combined height=82%}
 
@@ -267,7 +232,7 @@ The second direction is to standardize experimental science. Experimental scienc
 **The CONSORT flow.** The example study's participant flow is the protocol itself, not a picture drawn for publication. (a) The CONSORT 2025 reference flow, redrawn from the template [@hopewell2025consort]. (b) The executed example study projected as its Manuscript Figure view: the three CONSORT phases as lanes of the subjects' pool, the analysis and the report as a pool of their own, attrition drawn as the paths that end at the Excluded and Discontinued exits, and every `n` a count recorded as the study ran (`{reached}` on each element the subjects passed). The counts differ in kind: the template asks, at each step, for those who left and those who continued, whereas here every element carries the number that reached it and each answer of a gateway the number that took it, so a branch's continuing count is the count on the element it leads to. Opened in a Studyflow editor, each element shows its details, such as every reason for exclusion behind one count.
 :::
 
-![**Step 1 (Design): the enrollment and allocation phases** as a complete, runnable fragment, laid out in Enrolment and Allocation lanes. The consented start event binds the consent form; the screening questionnaire carries the audit checklist and asks the actor the comprehension check along message flows; the eligibility gateway lists its criteria and its "yes" flow tests the answer; the randomization gateway carries its allocation rule (permuted blocks of four, 1:1); the allocation tasks record each subject's arm and the instruction that goes with it. Every exit counts the subjects that reach it, cited by its label as `n={reached}`, and the file is deposited with every count at zero. @lst-step1-design shows these elements in the file.](figures/fig-step1-design.studyflow.png){#fig-step1-design}
+![**Step 1 (Design): the enrollment and allocation phases** as a part of the study that runs on its own, laid out in Enrolment and Allocation lanes. The consented start event binds the consent form; the screening questionnaire carries the audit checklist and asks the actor the comprehension check along message flows; the eligibility gateway lists its criteria and its "yes" flow tests the answer; the randomization gateway carries its allocation rule (permuted blocks of four, 1:1); the allocation tasks record each subject's arm and the instruction that goes with it. Every exit counts the subjects that reach it, cited by its label as `n={reached}`, and the file is deposited with every count at zero. @supplst-step1-design shows these elements in the file.](figures/fig-step1-design.studyflow.png){#fig-step1-design}
 
 ::: {#fig-step2-nback layout="[[51,-49],[100]]"}
 
@@ -278,7 +243,7 @@ The second direction is to standardize experimental science. Experimental scienc
 **Step 2 (Run): the N-back.** (a) The traditional slide-style figure is intuitive but underspecified: timing values live in the caption, the trial-to-block boundary stays implicit, and what counts as a correct match is buried in analysis code. (b) The Studyflow diagram makes the trial of the example study's 1-back an explicit subprocess repeated once per digit of its two test blocks of 28 (BPMN's loop marker; the timeline's tutorial and practice blocks are not drawn): a stimulus activity, a boundary timer that closes the response window, labeled match and non-match branches, and a timer for the inter-stimulus interval. The same block collapses into a single Behaverse task that names its timeline (`XCIT_NB_01`), from which the build makes its trials, and reads the 1-back protocol and the settings for an artificial actor. The timings drawn are the protocol's for a person, as the file states them: each digit for 0.5 s, then 2.2 s, with 2.7 s from its onset to answer. The settings for an artificial actor let each digit wait up to 30 s for its answer instead.
 :::
 
-![**Step 2 (Run): one interface, any actor.** The subjects' pool administers the two tasks one trial at a time; at every trial a task sends a trial (stimulus, options, timing) to the actor's pool and receives its response, drawn as typed message flows (a trial out, a response back). The actor's pool names its kind and the model that answers (Materials and methods); a human participant (designed for, not demonstrated) or another model would take the same exchange through a pool of its own, with the protocol unchanged. The instruction of the subject's condition is wired into both tasks, and each task names its instrument and reads its protocol, wired in beside it, and the settings for an artificial actor, drawn in the actor's pool, which give the actor 30 s to answer every trial. A task whose result reports more than 20% of its trials unanswered triggers its discontinuation rule (a conditional boundary event), which routes to the counted Discontinued exit. Every trial is logged to the BDM trials dataset. @lst-step2-run shows the 1-back task and its exit in the file.](figures/fig-step2-run.studyflow.png){#fig-step2-run}
+![**Step 2 (Run): one interface, any actor.** The subjects' pool administers the two tasks one trial at a time; at every trial a task sends a trial (stimulus, options, timing) to the actor's pool and receives its response, drawn as typed message flows (a trial out, a response back). The actor's pool names its kind and the model that answers (Materials and methods); a human participant (designed for, not demonstrated) or another model would take the same exchange through a pool of its own, with the protocol unchanged. The instruction of the subject's condition is wired into both tasks, and each task names its instrument and reads its protocol, wired in beside it, and the settings for an artificial actor, drawn in the actor's pool, which give the actor 30 s to answer every trial. A task whose result reports more than 20% of its trials unanswered triggers its discontinuation rule (a conditional boundary event), which routes to the counted Discontinued exit. Every trial is logged to the BDM trials dataset. @supplst-step2-run shows the 1-back task and its exit in the file.](figures/fig-step2-run.studyflow.png){#fig-step2-run}
 
 ::: {#fig-step3-analyze layout="[[100],[100]]"}
 
@@ -289,130 +254,17 @@ The second direction is to standardize experimental science. Experimental scienc
 **Step 3 (Analyze): the analysis as data operations, each question ending in a decision.** (a) Seven preregistered operations: read the recorded trials, keep the answered trials of the test blocks (the first analysis exclusion), summarize the trials of the subjects who completed the protocol (the second) to one accuracy per subject and task, summarize those to group statistics, the two questions (the congruency effect within subjects and the difference between the two instruction conditions), and the figure. Every operation names the library function it calls (for example pingouin's paired *t* test), or groups the few such calls one operation takes; nothing here is code written for the study. The trials dataset is bound to its data dictionary, and the thresholds of every decision (alpha, the minimum samples, the number of permutations) sit in one Decision rules table wired into the questions that read them, so a change of rule is an edit to a value rather than a redraw. (b) The congruency question expanded: the descriptive table, a feasibility gateway that ends a cohort too small for the test at Not testable, the one-sided paired t test, one library call on the trials, and a decision gateway whose answers end at Supported or Not supported. The run records which end each question reached. Everything here is fixed before the first run, so the registered and the executed analysis are the same object.
 :::
 
-![**Step 4 (Report): the report as a runnable fragment.** In each subject's pool a debrief instruction closes the session, Record the completion appends the subject to the Completers dataset, and a completion end event ends it; for a human cohort, that end event would carry the recruitment platform's completion code. In the analysis pool one manual task, a person's step, renders the reporting artifacts from the results dataset and reads them before they go into the manuscript (its checklist lists the exports an audit ticks off). Everything else about reporting is a view of the same file.](figures/fig-step4-report.studyflow.png){#fig-step4-report}
 
 ![**Step 4 (Report): one file, five views.** The Study view of the executed example study is @fig-combined and its Manuscript Figure view, the CONSORT participant flow, is @fig-consort; the other three views are the reference modeler's own renderings of the same file. (a) The Gantt view, from each activity's onset and duration, on a time axis from the consent event. (b) The Provenance view, from the records appended to the file as the study ran: the run that executed the study, named by its seed (42), the software that ran it, and its run repository, with a record for every step it ran. (c) The Checklist view, from the declared checklists: the screening checklist, the analysis exclusion criteria, and the reporting exports. Because projections only discard and never rewrite, editing the file updates every view.](figures/fig-views.studyflow.png){#fig-views height=85%}
 
 <!-- TODO: re-render fig-combined, fig-consort and fig-overview (and fig-step2-run) from a language-model run of the Behaverse study; until then they show the planted pipeline run, whose tasks are simulate:// timelines -->
 
 
-![**The catalog of Studyflow elements, as the modeler draws it.**](figures/fig-elements.studyflow.png){#fig-elements}
 
 # Code listings
 
-```{#lst-minimal-study .yaml lst-cap="A complete minimal study: a start event, one task and the settings wired into it, and an end event. The start event binds the consent form. The task is a jsPsych trial in the form the modeler's jsPsych import writes: a cognitive task on `platform: jspsych` that names its plugin as its implementation and reads the trial's parameters from a wired Parameters object, which the browser runtime plays with jsPsych itself. The end event issues a completion code. The steps in the Results grow this skeleton one fragment at a time: a design with gateways and counted exits (Step 1), a battery (Step 2), data contracts and an analysis (Step 3), and the report (Step 4)."}
-id: minimal_study
-definitions:
-  targetNamespace: http://bpmn.io/schema/bpmn
-Minimal_Study:
-  type: studyflow:Study
-  name: Minimal study
-  flowElements:
-    Enroll:
-      type: StartEvent
-      consentFormUri: https://example.org/consent.md
-    Flanker:
-      type: UserTask
-      name: Flanker
-      extensionElements:
-        - type: cognitive:CognitiveTask
-          platform: jspsych
-      dataInputAssociations:
-        In_Flanker_Parameters:
-          sourceRef:
-            - Flanker_Parameters
-      implementation: jspsych://html-keyboard-response@8
-    Flanker_Parameters:
-      type: studyflow:Parameters
-      name: Parameters
-      values:
-        stimulus: <<<<<
-        choices:
-          - f
-          - j
-    Done:
-      type: EndEvent
-      redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
-      completionCodeType: dynamic
-    F1: Enroll -> Flanker
-    F2: Flanker -> Done
-```
 
-```{#lst-step1-design .yaml lst-cap="Step 1: a runnable fragment carrying CONSORT 2025 labels (an excerpt of the example study, its drawing omitted). The start event binds the consent form an ethics board approves; the eligibility gateway lists its criteria and its yes flow tests the screening answer; the randomization gateway carries its allocation rule, permuted blocks at the default size of four; and every exit cites its own count as n={reached}."}
-Enroll:
-  type: StartEvent
-  name: Enrolled and consented
-  onset: T0
-  consentFormUri: https://behaverse.org/protocols/example-study/consent.md
-Eligibility_Gateway:
-  type: cognitive:EligibilityGateway
-  name: Understood the instructions?
-  inclusionCriteria:
-    - Registered artificial actor family with a pinned model tag
-    - Comprehension check answered as instructed
-  exclusionCriteria:
-    - No answer, or an answer that does not follow the instruction
-  default: Flow_Excluded_Pre
-Flow_Eligible:
-  name: yes (n={reached})
-  conditionExpression: contains(upper case(Screening), "READY")
-  sourceRef: Eligibility_Gateway
-  targetRef: Randomize_Disposition
-Excluded_Pre:
-  type: EndEvent
-  name: "Excluded: did not understand the task (n={reached})"
-Randomize_Disposition:
-  type: cognitive:RandomGateway
-  name: Which instruction? (n={reached})
-  algorithm: block
-  allocationRatio: "1:1"
-  default: Flow_Allocate_Impulsive
-```
 
-```{#lst-step2-run .yaml lst-cap="Step 2: the 1-back task node, the settings wired into it, and its exit (an excerpt of the example study, its documentation and drawing omitted). The task names its instrument and timeline as a typed element. Two Parameters elements are wired into it: the 1-back protocol (`NBack_Protocol`, not shown), which states the practice and test blocks, and the settings for an actor that is not a person, which depart from the protocol where the listing shows: the stream waits up to 30 s for each answer instead of moving on every 2.7 s. The conditional boundary event compares the task's own result with the subject process's `max_unanswered` (0.2), the one threshold both tasks' exits read, and its label shows that value rather than repeating it."}
-Task_WorkingMemory:
-  type: behaverse:Task
-  name: Working memory (1-back)
-  implementation: behaverse://assessment-unity@26.10
-  instrument: NB
-  timeline: XCIT_NB_01
-  dataInputAssociations:
-    In_Prompt_Task_WorkingMemory:
-      sourceRef:
-        - Prompt_Battery
-    In_Protocol_Task_WorkingMemory:
-      sourceRef:
-        - NBack_Protocol
-    In_Pace_Task_WorkingMemory:
-      sourceRef:
-        - Bot_Pace_NB
-Bot_Pace_NB:
-  type: studyflow:Parameters
-  name: Task settings (1-back)
-  values:
-    Bot:
-      Speed: 1
-      SkipInstructions: true
-      AutoClickInstructions: true
-      SkipFocusArea: true
-      overrideUserInputParameters: true
-      playerPaced: true
-      useNonMatchButton: true
-      maxResponseTime: 30
-      OverrideTemporalParameters: true
-      TrialForeperiod: 0.1
-      stimulusMovingAnimationDuration: 0.1
-      overrideFeedbackParameters: true
-      showAccuracyOnButtonFeedback: true
-Failed_WorkingMemory:
-  type: BoundaryEvent
-  name: "> {max_unanswered:%} unanswered"
-  eventDefinitions:
-    Cond_WorkingMemory:
-      type: ConditionalEventDefinition
-      condition: "{Task_WorkingMemory.failedTrialRate} > max_unanswered"
-  attachedToRef: Task_WorkingMemory
-```
 
 
 ```{#lst-swap .diff lst-cap="Who takes the study is one line. The example study and each of its copies for another model differ only in the actor pool's implementation, the language model a local Ollama serves; the planted and null files of the pipeline check differ from each other the same way (Materials and methods)."}
@@ -424,43 +276,6 @@ Failed_WorkingMemory:
 +++ example_study-llama3.1-8b.studyflow.yaml
 -      implementation: ollama://gemma4:e2b-mlx
 +      implementation: ollama://llama3.1:8b
-```
-```{#lst-step3-analyze .yaml lst-cap="Step 3 (excerpt): the data model and one decision as nodes. The trials dataset declares its format and binds to its CSVW schema; the Decision rules element holds every threshold once; the congruency question's decision gateway compares the test's p value with alpha, and its default flow, not shown, is the Not supported answer."}
-Dataset_Trials:
-  type: behaverse:BDMDataset
-  name: Trials
-  schema: Trial_Schema
-  dataLevel: trials
-  uri: data/trials.jsonl
-Trial_Schema:
-  type: studyflow:Schema
-  name: Trial schema
-  body:
-    "@context": http://www.w3.org/ns/csvw
-    tableSchema:
-      columns:
-        - name: context.subject
-          datatype: string
-        - name: context.state.arm
-          datatype: string
-        # five more: the trial's keys, its congruency, and whether it was correct
-Decision_Rules:
-  type: studyflow:Parameters
-  name: Decision rules
-  values:
-    alpha: 0.05
-    min_subjects: 3
-    min_per_arm: 4
-    n_permutations: 1000
-Congruency_Decision:
-  type: ExclusiveGateway
-  name: Less accurate when incongruent?
-  default: C_No
-C_Yes:
-  name: "yes"
-  conditionExpression: congruency_test.pvalue < alpha
-  sourceRef: Congruency_Decision
-  targetRef: C_Supported
 ```
 
 <!-- TODO: regenerate lst-diff from a language-model run of the Behaverse study; this excerpt is from the planted pipeline-check run of 2026-10-02 (study/pipeline-check/run-planted) -->
@@ -505,43 +320,30 @@ C_Yes:
 
 # Tables
 
-| Requirement | How Studyflow meets it | Precedent |
-|:----|:----|:----|
-| **R1** Single source of truth | One shared `.studyflow.yaml` file is at once the protocol, the runnable study, the analysis, and the figure | Config-as-code and GitOps: one versioned declaration, everything else derived from it |
-| **R2** Executable, not merely descriptive | An executing tool walks the same file a reviewer reads | Workflow engines from Make to Airflow: the description is the thing that runs |
-| **R3** Understandable to every audience without code | Multiple visual views, each a projection of one file | BPMN's original promise: one diagram read by domain experts and engineers alike [@bpmnspec] |
-| **R4** Grounded in standards | Exports losslessly to a valid BPMN 2.0 document; binds to community standards (e.g., BIDS, CSVW); degrades gracefully in generic tools | BIDS, CWL, and W3C PROV: community standards outlive any single tool [@bids; @cwl; @w3cprov] |
-| **R5** Process and data in one artifact | Typed data, bound to schemas, joined to control flow by data association edges | Typed IO in scientific workflows and asset-centric orchestration (e.g., Dagster): data as first-class nodes |
-| **R6** Extensible | New domains extend the notation without changing the core or tooling | BPMN extension mechanism and its domain profiles, from clinical to ML workflows [@tetzlaff2022bpmn4sml] |
-| **R7** Executor agnostic | One interface for any execution strategy, human or artificial; a human cohort is designed for but not demonstrated | The scheduler/builder separation in build systems: one spec, many conforming executors [@mokhov2018build] |
+| Requirement | How Studyflow meets it |
+|:----|:----|
+| **R1** Single source of truth | One shared `.studyflow.yaml` file is at once the protocol, the runnable study, the analysis, and the figure |
+| **R2** Executable, not merely descriptive | An executing tool walks the same file a reviewer reads |
+| **R3** Understandable to every audience without code | Multiple visual views, each a projection of one file |
+| **R4** Grounded in standards | Exports losslessly to a valid BPMN 2.0 document; binds to community standards (e.g., BIDS, CSVW); degrades gracefully in generic tools |
+| **R5** Process and data in one artifact | Typed data, bound to schemas, joined to control flow by data association edges |
+| **R6** Extensible | New domains extend the notation without changing the core or tooling |
+| **R7** Executor agnostic | One interface for any execution strategy, human or artificial; a human cohort is designed for but not demonstrated |
 
-: The seven requirements, how the notation meets each, and the precedent that motivates it. {#tbl-requirements}
+: The seven requirements and how the notation meets each; Appendix 2 gives the precedent that motivates each. {#tbl-requirements}
 
 | Term | Meaning in this paper |
 |:----|:----|
-| BPMN 2.0 | Business Process Model and Notation, the ISO/IEC 19510 standard for drawing processes: shapes with defined meanings and an XML file format |
-| YAML, XML | Two text formats for structured data; a Studyflow file is written in YAML and exports to BPMN's XML, both readable by machines and by people |
-| Schema | The document that fixes which elements and attributes a file may carry; the modeler's palette and inspector are generated from it |
-| Git, diff | A version-control system for text files, and the line-by-line difference it shows between two versions of one |
+| BPMN 2.0 | Business Process Model and Notation, the ISO/IEC 19510 standard for drawing processes: shapes with defined meanings and a standard file format |
+| Schema | The document that fixes which elements and attributes a file may carry |
+| Version control, diff | A system that keeps every version of a set of text files (for example, Git); a diff is the line-by-line difference between two versions of one file |
 | Projection, view | A projection is the mapping from the diagram to what one audience reads; the view is what it renders |
-| Fingerprint | A digest (hash) of the protocol's content, ignoring the drawing and the run records, that identifies a registered plan and shows any later change to it |
-| Data dictionary | The list of a dataset's columns with their types (here a CSVW schema), against which every analysis operation is checked |
-| Claim state | The end event a question reaches once decided: Supported, Not supported, or Not testable |
-| Actor | The party that takes the study, a person or a model, drawn as a pool the study exchanges messages with |
+| Fingerprint | A short code computed from the protocol's content, ignoring the drawing and the run records, that identifies a registered plan and changes with any later edit to it |
+| Data dictionary | The list of a dataset's columns with their types, against which every analysis operation is checked |
+| Claim state | The end a question reaches once decided: Supported, Not supported, or Not testable |
+| Actor | The party that takes the study, a person or a model, with which the study exchanges each trial and its response |
 
 : Terms from software engineering and from this paper, in the sense used here. {#tbl-glossary}
-
-| Element | BPMN base | What it adds |
-|:----|:----|:----|
-| Study | bpmn:Process | Root container carrying study-wide metadata (title, version, authors, runtime) |
-| CognitiveTask | bpmn:ChoreographyTask | A cognitive test an actor takes, naming the software that presents it and reading the settings wired into it |
-| Questionnaire | bpmn:Task | A questionnaire instrument administered to a participant |
-| Service task | bpmn:ServiceTask | An activity that calls a library function through `implementation` (`python://pkg.fn@version`) with `additionalArguments` |
-| Dataset | bpmn:DataStoreReference | A typed dataset bound to a schema (Psych-DS; BIDS and NWB from the eeg skill, as `eeg:BIDSDataset`; BDM from the behaverse skill, as `behaverse:BDMDataset`) |
-| RandomGateway | bpmn:ExclusiveGateway | Random assignment to one outgoing branch |
-| EligibilityGateway | bpmn:ExclusiveGateway | Inclusion and exclusion decision gateway |
-
-: Representative Studyflow elements, each subclassing a standard BPMN type. @fig-elements draws the catalog and @supptbl-catalog lists it. {#tbl-elements}
 
 | Study | What the encoding carries | Run-critical values the Methods section does not state |
 |:----|:----|:----|
@@ -623,15 +425,31 @@ Each run's accuracy by instruction (`results/group.csv`, means over the four sub
 
 The Studyflow language is defined once and compiled into the format each tool needs. Its vocabulary is the schemas the skills ship (a skill is a package that adds element types and the runner that executes them; `skills/<name>/*.moddle.yaml`, each with its own prefix and version, the core's namespace `http://behaverse.org/schemas/studyflow/v1`); a skill may ship several, as the core skill ships the notation and the run records (`prov:`), and only the core is required; the modeler's palette and inspector and the XML reader and writer are compiled from these files.
 
-@tbl-elements lists representative elements, picked by hand, and @supptbl-catalog lists the element types the schemas declare; @fig-elements is the modeler's drawing of every element type, one band per schema.
+*What Studyflow inherits.* Studyflow reuses BPMN's control-flow vocabulary and visual shapes: events, activities, gateways, data objects and stores, pools and lanes (the bands that separate the parties to a process and its phases), and the choreography task's shape for an exchange between parties. Each element keeps its standard appearance; its execution follows Studyflow's own rules, which depart from the BPMN specification of the Object Management Group (OMG) in the places @tbl-departures lists [@bpmnspec]. The exported BPMN file remains a standard BPMN file.
+
+*What Studyflow adds.* Four groups of elements extend BPMN: a root study container for study-wide metadata; domain types, such as questionnaires, instructions, and cognitive tasks, each an ordinary BPMN element under a distinctive icon; data elements bound to community schemas (e.g., BIDS [@bids], Psych-DS [@psychds], the Behaverse Data Model, BDM [@bdm], or a table description in the W3C's CSVW format [@csvw]), with operations that name the external code they call and its version; and research gateways for randomization, stratified allocation, and eligibility, with optional timing attributes from which the Gantt view derives a schedule.
+
+Studyflow is itself extensible: a lab or a field adds element types through a schema that extends the core one, and the extended diagram stays a well-formed Studyflow diagram that still exports to valid BPMN 2.0 (@fig-overview).
+
+@supptbl-catalog lists the element types the schemas declare, and @suppfig-elements is the modeler's drawing of every element type, one band per schema.
 
 The XML export (`.bpmn` or `.xml`) writes every element as a standard BPMN element with its Studyflow payload inside `extensionElements` blocks or in namespaced attributes (a choreography task in a process, which BPMN defines only in a choreography, is written as the task it is, marked `studyflow:exchange`, its bands as attributes). This separation leaves intact the structure a generic BPMN tool expects, so each tool reads only the elements it recognizes. An exported image carries the source in the `<metadata>` element of an SVG file or in an `iTXt` chunk of a PNG file.
+
+A study lives on disk as a plain-text Studyflow file (`.studyflow.yaml`) that records the BPMN diagram completely (@supplst-minimal-study). It converts losslessly to and from standard BPMN 2.0 XML, which generic BPMN tools read (Materials and methods); the YAML is the source of truth and the XML its format for exchange.
+
+Two further conventions serve the single source of truth requirement (R1 in @tbl-requirements). First, the YAML file is plain text with one attribute per line, so a version-control system such as Git shows an edit as the lines it changed (@lst-diff). Second, the source can be embedded losslessly in an exported image (SVG or PNG); the embedded source, not the image, is authoritative.
+
+A deposited Studyflow figure is therefore shareable as it is: the image *is* the Studyflow file, carrying all the information about the study (Appendix 2 gives the precedents for both conventions).
+
+A Studyflow file is read before a run (prospective provenance, the plan or recipe) and written to during one (retrospective provenance, the history of what executed) [@freire2008provenance; @lim2010prospective; @w3cprov]. A Studyflow file is prospective provenance once preregistered, and accumulates retrospective provenance as it runs: the software that ran it, the random seed, a fingerprint of the protocol each run followed (a cryptographic digest; Materials and methods), and the study state. The two forms live in the same object, so the study's deviation report (@sec-results) is the difference (a diff) between its prospective and retrospective states, rather than a comparison across unrelated documents.
 
 ### The graph and its types
 
 A Studyflow diagram represents a study as a typed directed multigraph $S = (N, E, \mathrm{src}, \mathrm{tgt}, \tau, \lambda)$ over a schema $\Sigma$ that fixes the type hierarchy of its nodes and edges. More precisely, $N$ is a finite set of nodes and $E$ a finite set of edges, with $\mathrm{src}, \mathrm{tgt}: E \to N$ mapping each edge to its source and target. The schema fixes a type hierarchy $T$, split into node types $T_N$ (events, activities, gateways, and data elements) and edge types $T_E$, so $T = T_N \cup T_E$. The typing $\tau: N \cup E \to T$ assigns each node a type in $T_N$ and each edge a type in $T_E$. The attribution $\lambda$ gives each element the attributes its type allows under $\Sigma$: the instrument name of a cognitive task, the allocation rule of a random gateway, or the onset and duration of an activity.
 
 Because data elements are themselves nodes of $S$, the data specification and the control flow live in the same object, and edge type separates them. The edges $E_{\mathrm{seq}}$ (those $e$ whose type $\tau(e)$ is a BPMN sequence flow) induce the control-flow graph $G_{\mathrm{ctrl}} = (N, E_{\mathrm{seq}})$, and the edges $E_{\mathrm{assoc}}$ (BPMN data association) induce the data-flow graph $G_{\mathrm{data}} = (N, E_{\mathrm{assoc}})$. The two graphs share the node set $N$ but no edges. Executing $S$ is then a walk over $G_{\mathrm{ctrl}}$, and a data manipulation is a path through $G_{\mathrm{data}}$.
+
+Data elements come in two kinds, a distinction Studyflow takes from BPMN [@bpmnspec]. *Datasets* appear on the diagram as data objects and stores, such as the recorded trials or a table of results. *Properties* never appear on the diagram; the study, an activity, or an event declares them, and they hold the study's *state*, the values a run accumulates and later reads, such as an allocated condition, a running count of failed trials, or a fitted model. A container element, such as the study itself or a subprocess (an activity that holds a diagram of its own), also fixes the scope of data. State declared on the study lasts as long as the study and carries from one run to the next; state declared on a subprocess, such as a cognitive battery or an analysis pipeline, lasts for one instance of it.
 
 ### Control flow
 
@@ -651,7 +469,7 @@ $$\kappa_{n+1} = \operatorname{step}(S, \kappa_n, \rho_n),$$
 
 where $\rho_n$ is the input recorded at step $n$: an actor's response, a message, or a timer's firing. When a split gives a pool several paths, which path steps first depends on when their actors answer. Every random draw is keyed by the seed, the gateway, the participant, and its visit, so the order does not change what any path draws; a value that two such paths both write is set by the step that finishes last, which the validator warns about. The record keeps the order, so a run replayed from it takes the same steps. Concretely, an executor script advances along outgoing control-flow edges: at an exclusive gateway it selects a branch by the gateway's rule, drawing any randomness from $g_n$, and at a parallel or inclusive one it takes every branch, or each whose condition holds; at an activity it sends data to the actor and consumes $\rho_n$ as external input. In a subprocess it opens a scope instance and closes it again at that subprocess's completion. Every condition a gateway or an event evaluates is written in FEEL [@dmnspec], the expression language of BPMN's sibling standard DMN, so it is human-readable and independent of the runtime that evaluates it.
 
-The runner is designed to administer every actor through one message-passing interface. Per trial it sends an observation (the stimulus, the allowed responses, the timing constraint, and where needed a rendered frame at a declared resolution) and receives a response and, where the actor produces one behaviorally, a response time. An actor is anything that implements this function from observations to responses; humans and language models are instances of one abstraction. The interface coincides with the observation-action loop AI evaluation harnesses and task standards expose [@metr2024taskstandard; @aisi2024inspect], so a bridge to those harnesses is a compilation, not a redesign (Appendix 2). The exchange itself is expressible in the notation: in the example study it is one pair of message flows between the subjects' pool and the model's pool, a `behaverse:Trial` out per trial and a `behaverse:Response` back, inherited by whichever task is playing (@fig-step2-run): a step with no message flow of its own exchanges along those of the nearest subprocess or pool drawn around it, so the exchange is drawn once, on that container, rather than once per task, and reaches no further than the container's border. A task from another toolkit is named the same way: the modeler opens a jsPsych timeline as one cognitive task per timeline node (`platform: jspsych`, the plugin as `jspsych://<plugin>@<version>`, its parameters in a wired Parameters object) [@deleeuw2015jspsych], the form of @lst-minimal-study, and the browser runtime plays such a step, its trials' data the step's result.
+The runner is designed to administer every actor through one message-passing interface. Per trial it sends an observation (the stimulus, the allowed responses, the timing constraint, and where needed a rendered frame at a declared resolution) and receives a response and, where the actor produces one behaviorally, a response time. An actor is anything that implements this function from observations to responses; humans and language models are instances of one abstraction. The interface coincides with the observation-action loop AI evaluation harnesses and task standards expose [@metr2024taskstandard; @aisi2024inspect], so a bridge to those harnesses is a compilation, not a redesign (Appendix 2). The exchange itself is expressible in the notation: in the example study it is one pair of message flows between the subjects' pool and the model's pool, a `behaverse:Trial` out per trial and a `behaverse:Response` back, inherited by whichever task is playing (@fig-step2-run): a step with no message flow of its own exchanges along those of the nearest subprocess or pool drawn around it, so the exchange is drawn once, on that container, rather than once per task, and reaches no further than the container's border. A task from another toolkit is named the same way: the modeler opens a jsPsych timeline as one cognitive task per timeline node (`platform: jspsych`, the plugin as `jspsych://<plugin>@<version>`, its parameters in a wired Parameters object) [@deleeuw2015jspsych], the form of @supplst-minimal-study, and the browser runtime plays such a step, its trials' data the step's result.
 
 The semantics are pinned in the specification because most engines that claim BPMN 2.0 compliance do not actually run the execution format [@geiger2016bpmn]. The local runtime's contract (`packages/runtime-local/CONTRACT.md`) fixes how a partial runner claims elements and exchanges state and messages. The local runtime emits a complete execution trace as it walks. Its record, `events.jsonl`, lists in order every step it ran with the step's record, every gateway decision with the conditions it weighed, every message, and every exchange with a model (the request as sent, the executor configuration, and the reply); the run is kept as a git repository with one commit per step, whose trailers name the step and the run. The record, the seed, and the trials table together reconstruct the path any subject took. `studyflow prov` writes that record as W3C PROV-O [@w3cprov]: the run and each step are activities, and the study, named by its protocol digest, is the plan they followed. Packaging that repository as a Workflow Run RO-Crate [@leo2024wfrunrocrate] is future work.
 
@@ -799,6 +617,13 @@ The reference implementation is one repository, released under the MIT license a
 
 <!-- TODO: AI-use statement (eLife policy): which AI tools were used for writing, coding or analysis, and how. -->
 
+The reference implementation also leaves parts of a study outside the file or outside what runs (@tbl-scope). What happens within a task is registered only when it is written into the settings wired to the task; in the example study, the file states how the Simon task samples each trial's congruency, but the sampling happens as the task runs, so the order of trials is recorded after the run rather than registered before it. The analysis runs only as calls to Python library functions; R and mixed-effects models are not demonstrated. The browser runtime keeps a session's record in the browser rather than sending it to the platforms laboratories use to host online studies, and it does not resume an interrupted session. A run can keep its participants' data out of its version-controlled history, but participant identifiers are not yet pseudonymised, so a study with human participants needs data protection beyond what is built in. Return visits and EEG acquisition are described by the notation but not run, and stratified allocation and minimization run only in the local runtime. Each of these is a matter of tooling rather than of the notation, and each is future work.
+
+An executable figure shifts where trust in a study rests. Running a Studyflow diagram asks the reader to trust two things: the external code it references, and the correspondence between the rendered diagram and its source file. Both yield to ordinary software engineering and security remedies: fingerprinting the source and recording the version of the external code, and restricting each external call to its declared operation, for example through containers (@tbl-claims lists which of these the reference implementation provides).
+
+A single source of truth also concentrates risk, so the design keeps the notation independent of any one tool: the schema is versioned apart from the code that reads it, and the exported BPMN 2.0 XML opens in any compliant BPMN tool, which ignores the Studyflow extensions it does not recognize [@bpmnspec; @magnani2009bpdmn]. A project that no longer uses our toolkits is left with a valid, standard file that no single tool owns and any BPMN tool can draw. Running it again, however, needs a runtime that follows the Studyflow specification, since a generic BPMN engine does not read the extensions and few engines run BPMN's own execution semantics [@geiger2016bpmn]. What has to outlive our implementation is therefore the specification, and at present one group maintains both.
+
+
 # Data availability
 
 The modeler, runner, command-line tool, and schemas are open source under the MIT license; the modeler and runner run in the browser without installation, and the command-line tool installs with Homebrew or builds from a clone with npm (Materials and methods). The modeler, runner, and documentation are hosted at <https://behaverse.org/studyflow-modeler/app>, and the source code is available at <https://github.com/behaverse/studyflow-modeler>. The Studyflow schemas are versioned in the same repository, each on its own (`skills/*/*.moddle.yaml`). Releases are tagged by version in the GitHub repository. The example study's Studyflow files accompany this paper in both states, as registered and after their runs; each executed copy carries the record of its run, so the files are at once the study's preregistration and its provenance. The Behaverse WebGL build the example study runs is distributed as a binary from the Studyflow website <!-- TODO: URL of the build -->, which anyone may run without a license; it covers the Behaverse tasks only, and the battery's source is not published.
@@ -839,6 +664,16 @@ The two reference runtimes host the same walk but keep different records: the lo
 
 ## Appendix 2. Extended related work
 
+Studyflow can be read as a workflow modeling approach. Workflow approaches separate along three axes: definition versus execution, domain-generic versus domain-specific, and control-flow versus data-flow orientation. On the third axis, control-flow systems model what happens next, while data-flow systems model what is derived from what, increasingly with the data product itself as the central object. A study needs both a procedural flow (conditions, phases, approvals) and a data flow (raw to cleaned to analyzed), which is why a Studyflow diagram carries both over one shared set of nodes; few systems offer both in one object. To our knowledge, no approach is at once a readable definition and an executable specification of a whole experimental study. Studyflow targets that gap and replaces none of the alternatives (@fig-overview). No neighboring family meets R1, R5, or R7 in full (@tbl-compare), and the paragraphs below give the extended comparison.
+
+Workflow engines and evaluation harnesses execute directed acyclic graphs of computation at scale [@nextflow; @cwl; @pydra; @zhao2008scientific_workflows; @cuevasvicenttin2013workflows]. A study, by contrast, is iterative and cyclic: piloting revises the design, sessions repeat, and a preregistered sequential design can send a researcher back to collect more data [@ghareeb2025]. Studyflow keeps the loop in the diagram, as statecharts did for state machines [@harel1987statecharts], and hands each external computation to the toolkit built for it [@ghosh2025reproducible_digital_health].
+
+Experiment builders and task scripts specify the trial, the stimuli, or the runtime platform, several of them more expressively than Studyflow does [@strittmatter2025sweetbean; @tessler2025deliberatelab; @beadl; @musslick2022sweetpea; @musslick2024autora; @harrison2026psynet; @almaatouq2021empirica]. Studyflow composes these rather than competing with them: a task authored in jsPsych [@deleeuw2015jspsych] can be followed by one authored in PsychoPy [@peirce2019psychopy] once a skill runs PsychoPy tasks, with the diagram supplying the surrounding consent, eligibility, allocation, data format, and rendering (@supplst-minimal-study).
+
+Data, provenance, and reporting standards occupy the data subspace and describe the datasets [@bids; @bdm; @psychds; @csvw]. Studyflow references them and describes the process that produced the data. Provenance tools, in turn, describe what was run after the fact [@w3cprov; @soilandreyes2022rocrate; @leo2024wfrunrocrate], whereas Studyflow specifies the study in advance and accumulates its metadata across the study lifecycle, in an interchangeable format that can be executed, diffed, and audited.
+
+None of the tool families discussed here, however, can express the study itself: a between-subjects design, assignment semantics, a consent step, or a preregistered hypothesis. Studyflow adopts the primitives they share (typed steps, named data artifacts, directed graphs, and provenance) and focuses its novelty on that missing layer.
+
 Each family is scored as a family, so a family whose members differ scores partial. R1: one artifact is the protocol, the runnable study, the analysis, and the figure (yes), two or three of them (partial), or one (no). R2: what people read is what runs (yes), in part (partial), or only describes it (no). R3: every audience reads the process without code (yes), some audiences do (partial), or none (no). R4: the artifact is, or maps losslessly to, a community standard (yes), only its data do (partial), or neither (no). R5: control flow and typed data share one artifact (yes), one of them is implicit or retrospective (partial), or absent (no). R6: new domains extend the notation without changing the core or tooling (yes), through plugin code (partial), or by forking (no). R7: one specification runs human and artificial executors (yes), one kind (partial), or none (no).
 
 | Solution family | R1 | R2 | R3 | R4 | R5 | R6 | R7 |
@@ -864,6 +699,8 @@ Each family is scored as a family, so a family whose members differ scores parti
 
 **Convergent primitives.** Seven independently evolved tool families (build systems, CI/CD, data and ML orchestrators, scientific workflow systems, provenance standards, experiment trackers, and agent frameworks) arrived at broadly the same primitives: typed steps, named data artifacts, directed graphs, and provenance. Such convergence suggests that these primitives answer a general need rather than one community's habits. The Discussion draws the consequence for Studyflow.
 
+**Precedents for the requirements.** Each requirement of @tbl-requirements has a precedent outside research. R1, a single source of truth, follows configuration-as-code and GitOps: one versioned declaration, everything else derived from it. R2 follows workflow engines from Make to Airflow, where the description is the thing that runs. R3 is BPMN's original promise: one diagram read by domain experts and engineers alike [@bpmnspec]. R4 follows BIDS, CWL, and W3C PROV, community standards that outlive any single tool [@bids; @cwl; @w3cprov]. R5 follows typed inputs and outputs in scientific workflows and asset-centric orchestration (e.g., Dagster), where data are first-class nodes. R6 follows BPMN's extension mechanism and its domain profiles, from clinical to machine-learning workflows [@tetzlaff2022bpmn4sml]. R7 follows the separation of scheduler and builder in build systems: one specification, many conforming executors [@mokhov2018build].
+
 **Configuration as code and embedded sources.** The two file conventions of the Notation section (plain text under version control, and the source embedded in its image) have precedents outside research. Configuration-as-code is standard practice in CI/CD, yet investigations of GitHub Actions report plain YAML as a usability failure, with misconfigurations that surface only at runtime [@kinsman2021; @zheng2025actionsfail]. Studyflow keeps the YAML and adds the two things those investigations report missing: 1) a validating schema, and 2) a visual view that is kept synchronized with the source. Embedding the source code in the exported artifact (e.g., ComfyUI pipelines) makes it shareable between technical and non-technical audiences: every generated image carries its full workflow, so sharing a reproducible pipeline amounts to sharing a picture [@comfyui2023].
 
 **AI evaluation harnesses.** The same gap has been named inside AI evaluation. Shared harnesses standardize how models are scored, among them HELM [@liang2023helm], the LM Evaluation Harness [@biderman2024lessons], BIG-bench [@srivastava2023bigbench], and Inspect [@aisi2024inspect], onto which new evaluation frameworks are converging from earlier task specifications [@metr2024taskstandard]. Agentic benchmarks now ship whole executable environments [@zhou2024webarena; @xie2024osworld; @mialon2024gaia]. Yet audits keep finding that what was run is unrecoverable from what was reported: none of 400 surveyed AI papers documented everything needed to reproduce them [@gundersen2018state], an independent attempt reproduced only about 64% of 255 machine learning papers [@raff2019step], results shift with undocumented details of the experiments [@biderman2024lessons; @leech2024questionable], aggregate scores hide the behavior of single instances [@burnell2023rethink], and widely used benchmarks fail basic reproducibility criteria [@reuel2024betterbench; @kapoor2025agents]. These harnesses specify something that only developers read, and for machines only; none extends to a human cohort, eligibility criteria, or publication figures.
@@ -871,6 +708,8 @@ Each family is scored as a family, so a family whose members differ scores parti
 **Agents as participants.** Machine behavior research called for studying intelligent machines with the methods of behavioral science [@rahwan2019machine]. A fast-growing literature now administers psychology experiments to language models: cognitive task batteries [@binz2023gpt3; @codaforno2024cogbench], simulated human samples [@aher2023llms; @argyle2023silicon], human versus model comparisons on the same battery of tasks [@webb2023analogical; @strachan2024tom; @mei2024turing], and foundation models of cognition trained on human performance transcribed into text [@binz2025centaur], all under the banner of machine psychology [@hagendorff2024machinepsych]. In each, the protocol is a custom prompting harness re-implemented per paper, and human and model administration are matched by hand. Methodological critiques [@ivanova2025cognitive; @dillion2023replace; @lin2025fallacies], a consensus reporting checklist for language model studies [@feuerriegel2026guidellm], and the CHART guideline for studies that evaluate chatbots [@chart2025] now demand exactly what no current artifact provides: a pinned, shareable, executable record of how the experiment was administered.
 
 **Implications for AI evaluation.** The notation also shows who decides what: a manual task is a person's step, a language model only answers the messages the study sends its pool, and a gateway's decision is a condition anyone can read. Agentic research systems draw that boundary in a separate figure [@chen2026brainresearcher]; here it is part of the diagram that runs.
+
+Agentic analysis systems have converged on the same records from the other direction. Brain Researcher seals a commitment card with a content hash before an analysis runs and writes a claim card with one of six claim states after it [@chen2026brainresearcher]. A deposited Studyflow file plays the part of the commitment card, and its executed copy the part of the claim record, with two differences: the file also runs and prints as the figure, and it spans the study from consent to report rather than the analysis of data that already exist.
 
 For AI evaluation, a benchmark and a human baseline can become one auditable artifact. Rankings built on a single task are fragile [@dehghani2021lottery], so a study of this kind would vary the diagram (the task, the prompt) across a battery of parametrically modifiable activities, the design that psychometric evaluation calls for [@wang2026psychometrics; @bean2025construct]. Related efforts cover part of this. CogBench scores language models on fixed paradigms behind a single harness [@codaforno2024cogbench], and Psych-101 transcribes 160 experiments into text [@binz2025centaur]; in neither case, however, can one registered protocol administer both a human and an artificial cohort. In the example study, the file that runs the artificial cohort is designed to run a human cohort through the same protocol, as a pool of its own, which this paper does not demonstrate, whereas current agentic benchmarks typically collect their human baselines outside the process the experimental design defines [@mialon2024gaia].
 
@@ -893,6 +732,20 @@ The fault library of @tbl-faults was seeded by the authors of the checks. As a c
 ![](figures/fig-s2-modeler.png)
 
 **The Studyflow modeler.** The reference modeler with Step 2 (@fig-step2-run) open and its 1-back task selected. (a) The palette's Behaverse flyout, the elements and templates the Behaverse schema declares. (b) The inspector, whose Execution tab shows the task's `instrument` and `timeline`, fields of `behaverse:Task`, and the prompt and Parameters wired into it. (c) The canvas. The palette's entries and the inspector's fields are compiled from the skills' schemas; the Execution tab adds the drawn inputs and outputs.
+:::
+
+::: {#suppfig-step4-report}
+
+![](figures/fig-step4-report.studyflow.png)
+
+**Step 4 (Report): the report as a part of the study that runs on its own.** In each subject's pool a debrief instruction closes the session, Record the completion appends the subject to the Completers dataset, and a completion end event ends it; for a human cohort, that end event would carry the recruitment platform's completion code. In the analysis pool one manual task, a person's step, renders the reporting artifacts from the results dataset and reads them before they go into the manuscript (its checklist lists the exports an audit ticks off). Everything else about reporting is a view of the same file.
+:::
+
+::: {#suppfig-elements}
+
+![](figures/fig-elements.studyflow.png)
+
+**The catalog of Studyflow elements, as the modeler draws it.** One band per schema; @supptbl-catalog lists the same element types with their BPMN base types and key attributes.
 :::
 
 {{< pagebreak >}}
@@ -1055,5 +908,180 @@ Identifier       ::= [A-Za-z] [A-Za-z0-9_]*
 
 The abstract syntax of a Studyflow file as an EBNF grammar (representative subset): the BPMN object tree that both the YAML and the XML spell, in the structure `studyflow convert` writes. Its productions map onto the formal object (N, E, src, tgt, tau, lambda): Element and Property are the node types, SequenceFlow and DataAssociation the edge types, an element's BPMN type with its extension entry its type under tau, and Attribute the attribution lambda; the pools and message flows of a Collaboration carry the exchanges between processes. Deriving from File supplies the syntactic part of well-formedness (Materials and methods). Inherited BPMN constructs follow the OMG grammar and are abbreviated, and the element catalog (@supptbl-catalog) lists every element type with its key attributes.
 :::
+
+## Supplementary Listings S2 to S5. Excerpts of the example study file
+
+::: {#supplst-minimal-study}
+
+```yaml
+id: minimal_study
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Minimal_Study:
+  type: studyflow:Study
+  name: Minimal study
+  flowElements:
+    Enroll:
+      type: StartEvent
+      consentFormUri: https://example.org/consent.md
+    Flanker:
+      type: UserTask
+      name: Flanker
+      extensionElements:
+        - type: cognitive:CognitiveTask
+          platform: jspsych
+      dataInputAssociations:
+        In_Flanker_Parameters:
+          sourceRef:
+            - Flanker_Parameters
+      implementation: jspsych://html-keyboard-response@8
+    Flanker_Parameters:
+      type: studyflow:Parameters
+      name: Parameters
+      values:
+        stimulus: <<<<<
+        choices:
+          - f
+          - j
+    Done:
+      type: EndEvent
+      redirectTo: https://app.prolific.com/submissions/complete?cc={COMPLETION_CODE}
+      completionCodeType: dynamic
+    F1: Enroll -> Flanker
+    F2: Flanker -> Done
+```
+
+A complete minimal study: a start event, one task and the settings wired into it, and an end event. The start event binds the consent form. The task is a jsPsych trial in the form the modeler's jsPsych import writes: a cognitive task on `platform: jspsych` that names its plugin as its implementation and reads the trial's parameters from a wired Parameters object, which the browser runtime plays with jsPsych itself. The end event issues a completion code. The steps in the Results grow this skeleton one part at a time: a design with gateways and counted exits (Step 1), a battery (Step 2), data contracts and an analysis (Step 3), and the report (Step 4).
+:::
+
+::: {#supplst-step1-design}
+
+```yaml
+Enroll:
+  type: StartEvent
+  name: Enrolled and consented
+  onset: T0
+  consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+Eligibility_Gateway:
+  type: cognitive:EligibilityGateway
+  name: Understood the instructions?
+  inclusionCriteria:
+    - Registered artificial actor family with a pinned model tag
+    - Comprehension check answered as instructed
+  exclusionCriteria:
+    - No answer, or an answer that does not follow the instruction
+  default: Flow_Excluded_Pre
+Flow_Eligible:
+  name: yes (n={reached})
+  conditionExpression: contains(upper case(Screening), "READY")
+  sourceRef: Eligibility_Gateway
+  targetRef: Randomize_Disposition
+Excluded_Pre:
+  type: EndEvent
+  name: "Excluded: did not understand the task (n={reached})"
+Randomize_Disposition:
+  type: cognitive:RandomGateway
+  name: Which instruction? (n={reached})
+  algorithm: block
+  allocationRatio: "1:1"
+  default: Flow_Allocate_Impulsive
+```
+
+Step 1: a part of the study that runs on its own, carrying CONSORT 2025 labels (an excerpt of the example study, its drawing omitted). The start event binds the consent form an ethics board approves; the eligibility gateway lists its criteria and its yes flow tests the screening answer; the randomization gateway carries its allocation rule, permuted blocks at the default size of four; and every exit cites its own count as n={reached}.
+:::
+
+::: {#supplst-step2-run}
+
+```yaml
+Task_WorkingMemory:
+  type: behaverse:Task
+  name: Working memory (1-back)
+  implementation: behaverse://assessment-unity@26.10
+  instrument: NB
+  timeline: XCIT_NB_01
+  dataInputAssociations:
+    In_Prompt_Task_WorkingMemory:
+      sourceRef:
+        - Prompt_Battery
+    In_Protocol_Task_WorkingMemory:
+      sourceRef:
+        - NBack_Protocol
+    In_Pace_Task_WorkingMemory:
+      sourceRef:
+        - Bot_Pace_NB
+Bot_Pace_NB:
+  type: studyflow:Parameters
+  name: Task settings (1-back)
+  values:
+    Bot:
+      Speed: 1
+      SkipInstructions: true
+      AutoClickInstructions: true
+      SkipFocusArea: true
+      overrideUserInputParameters: true
+      playerPaced: true
+      useNonMatchButton: true
+      maxResponseTime: 30
+      OverrideTemporalParameters: true
+      TrialForeperiod: 0.1
+      stimulusMovingAnimationDuration: 0.1
+      overrideFeedbackParameters: true
+      showAccuracyOnButtonFeedback: true
+Failed_WorkingMemory:
+  type: BoundaryEvent
+  name: "> {max_unanswered:%} unanswered"
+  eventDefinitions:
+    Cond_WorkingMemory:
+      type: ConditionalEventDefinition
+      condition: "{Task_WorkingMemory.failedTrialRate} > max_unanswered"
+  attachedToRef: Task_WorkingMemory
+```
+
+Step 2: the 1-back task node, the settings wired into it, and its exit (an excerpt of the example study, its documentation and drawing omitted). The task names its instrument and timeline as a typed element. Two Parameters elements are wired into it: the 1-back protocol (`NBack_Protocol`, not shown), which states the practice and test blocks, and the settings for an actor that is not a person, which depart from the protocol where the listing shows: the stream waits up to 30 s for each answer instead of moving on every 2.7 s. The conditional boundary event compares the task's own result with the subject process's `max_unanswered` (0.2), the one threshold both tasks' exits read, and its label shows that value rather than repeating it.
+:::
+
+::: {#supplst-step3-analyze}
+
+```yaml
+Dataset_Trials:
+  type: behaverse:BDMDataset
+  name: Trials
+  schema: Trial_Schema
+  dataLevel: trials
+  uri: data/trials.jsonl
+Trial_Schema:
+  type: studyflow:Schema
+  name: Trial schema
+  body:
+    "@context": http://www.w3.org/ns/csvw
+    tableSchema:
+      columns:
+        - name: context.subject
+          datatype: string
+        - name: context.state.arm
+          datatype: string
+        # five more: the trial's keys, its congruency, and whether it was correct
+Decision_Rules:
+  type: studyflow:Parameters
+  name: Decision rules
+  values:
+    alpha: 0.05
+    min_subjects: 3
+    min_per_arm: 4
+    n_permutations: 1000
+Congruency_Decision:
+  type: ExclusiveGateway
+  name: Less accurate when incongruent?
+  default: C_No
+C_Yes:
+  name: "yes"
+  conditionExpression: congruency_test.pvalue < alpha
+  sourceRef: Congruency_Decision
+  targetRef: C_Supported
+```
+
+Step 3 (excerpt): the data model and one decision as nodes. The trials dataset declares its format and binds to its CSVW schema; the Decision rules element holds every threshold once; the congruency question's decision gateway compares the test's p value with alpha, and its default flow, not shown, is the Not supported answer.
+:::
+
 
 # References
