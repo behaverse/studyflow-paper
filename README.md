@@ -15,7 +15,7 @@ This renders the manuscript that `elife/_quarto.yml` names, `elife/paper-v3.qmd`
 
 ## JOSS
 
-There is an earlier, shorter version of the paper that is formatted for the Journal of Open Source Software (JOSS). JOSS was dropped as a venue on 2026-09-26 (`SUBMISSION.md`), so this version is kept for reference and no longer follows the eLife manuscript.
+There is an earlier, shorter version of the paper that is formatted for the Journal of Open Source Software (JOSS). JOSS was dropped as a venue on 2026-09-26 (`archived/notes/SUBMISSION.md`), so this version is kept for reference and no longer follows the eLife manuscript.
 
 To build the JOSS version, you need to install Docker and run the following command in the root of the project:
 

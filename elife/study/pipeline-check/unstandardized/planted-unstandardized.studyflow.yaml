@@ -1,0 +1,1498 @@
+id: example_study
+definitions:
+  targetNamespace: http://bpmn.io/schema/bpmn
+Example_Study_Collaboration:
+  type: Collaboration
+  name: Example study (cognitive benchmark, artificial cohort)
+  documentation: >-
+    The paper's example study as one executable Studyflow file: the deposited plan, before any run. Three pools, one
+    level of containers each. The middle pool is one subject, and its three lanes are the CONSORT participant flow:
+    Enrolment, Allocation, Follow-up, each a band the flow crosses on its way down, with the exits at the right edge of
+    the band they leave from. Labels are the study's own words rather than BPMN's: a gateway asks a question and its
+    flows are the answers, an exit says why the subject left, and @fig-key names each symbol. The subjects' pool carries
+    a participant multiplicity of eight, so the cohort is eight instances of that pool's process, one per subject; BPMN
+    draws the parallel marker at the pool's bottom. The cohort is one actor, whoever the pool's `implementation` names:
+    `simulate://planted`, a simulated participant with a planted effect, in this file, and a language model served by a
+    local Ollama (`ollama://…`) in its sealed twins, which differ from it in that one line. The whole exchange with it
+    crosses the pool boundary as one pair of message flows at pool level: one `behaverse:Trial` out per trial and one
+    `behaverse:Response` back, inherited by whichever task is playing. @fig-step2-run draws the same exchange per task.
+    Labels cite `{reached}`, which the runner fills in as the cohort runs, so the executed copy of this file is the
+    CONSORT participant flow of the study as executed.
+  extensionElements:
+    - type: studyflow:Study
+      seed: 42
+      dependencies:
+        - pandas==2.3.3
+        - scipy==1.16.2
+        - pingouin==0.7.0
+        - scikit-learn==1.7.2
+        - matplotlib==3.10.7
+      authors:
+        - Morteza Ansarinia
+        - Hoorieh Afkari Roshan
+        - Pedro Cardoso-Leite
+      version: "1.0"
+  participants:
+    Participant_Model:
+      type: studyflow:Actor
+      name: Actor
+      implementation: simulate://planted
+    Participant_Subject:
+      name: Each subject
+      participantMultiplicity:
+        minimum: 8
+        maximum: 8
+      processRef: Example_Study
+    Participant_Analysis:
+      name: Analysis and report
+      processRef: Analysis_Report
+  messageFlows:
+    Msg_Trial:
+      name: each trial
+      sourceRef: Participant_Subject
+      targetRef: Participant_Model
+      messageRef: Trial
+    Msg_Response:
+      name: each response
+      sourceRef: Participant_Model
+      targetRef: Participant_Subject
+      messageRef: Response
+    Msg_Complete:
+      name: all subjects complete
+      sourceRef: Participant_Subject
+      targetRef: All_Complete
+      messageRef: Complete
+Trial:
+  type: Message
+  itemRef: Trial_Item
+Response:
+  type: Message
+  itemRef: Response_Item
+Complete:
+  type: Message
+Trial_Item:
+  type: ItemDefinition
+  structureRef: behaverse:Trial
+Response_Item:
+  type: ItemDefinition
+  structureRef: behaverse:Response
+Example_Study:
+  type: Process
+  name: Each subject
+  documentation: >-
+    One subject, from consent to debriefing, and the pool is the boundary of that system. The participant multiplicity
+    of eight on the pool makes eight instances of this process, one per subject in the cohort; they do not depend on one
+    another, which is why this is a multiplicity and not a loop. `arm` is a property of this process, so each instance
+    draws and carries its own instruction condition, and the runtime stamps every recorded trial with the pool's
+    instance index as `context.subject`, so nothing in the diagram has to number subjects. An exit inside an instance
+    (Excluded_Pre, Discontinued) ends that instance only. The pool is divided into the three CONSORT phases a
+    participant passes through, and into nothing else: a lane is a band of the drawing, so the flow crosses it without
+    waiting.
+  properties:
+    P_MaxUnanswered:
+      name: max_unanswered
+      value: 0.2
+    P_Arm:
+      name: arm
+      value: none
+    P_Instruction:
+      name: instruction
+      value: none
+  laneSets:
+    LaneSet_Subject:
+      lanes:
+        Lane_Enrolment:
+          name: Enrolment
+          flowNodeRef:
+            - Enroll
+            - Screening
+            - Eligibility_Gateway
+            - Excluded_Pre
+        Lane_Allocation:
+          name: Allocation
+          flowNodeRef:
+            - Randomize_Disposition
+            - Allocate_Cautious
+            - Allocate_Impulsive
+            - Merge_Allocation
+        Lane_Followup:
+          name: Follow-up
+          flowNodeRef:
+            - Task_Interference
+            - Failed_Interference
+            - Task_WorkingMemory
+            - Failed_WorkingMemory
+            - Discontinued
+            - Debrief
+            - Record_Completion
+            - Sub_End
+  flowElements:
+    Enroll:
+      type: StartEvent
+      name: Enrolled and consented
+      onset: T0
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+    Screening:
+      type: cognitive:Questionnaire
+      name: Assessed for eligibility (n={reached})
+      documentation: >-
+        The screening step asks the actor the comprehension check wired into it and takes the answer as its result; the
+        eligibility gateway tests that answer.
+      instrument: comprehension-check
+      checklist: |-
+        - [ ] Consent recorded
+        - [ ] Executor configuration pinned (model id, sampling parameters)
+        - [ ] Comprehension check passed
+      dataInputAssociations:
+        In_Check:
+          sourceRef:
+            - Prompt_Check
+      onset: T0
+      duration: 10s
+    Prompt_Check:
+      type: agentic:Prompt
+      name: Comprehension check
+      template: |
+        You are about to take part in a short cognitive study. Each trial arrives as JSON and lists the
+        answers the task accepts under ResponseOptions; you answer with exactly one of them and nothing
+        else.
+
+        To confirm you have understood, reply now with exactly the single word READY.
+    Eligibility_Gateway:
+      type: cognitive:EligibilityGateway
+      name: Understood the instructions?
+      inclusionCriteria:
+        - Registered artificial actor family with a pinned model tag
+        - Comprehension check answered as instructed
+      exclusionCriteria:
+        - No answer, or an answer that does not follow the instruction
+      default: Flow_Excluded_Pre
+    Excluded_Pre:
+      type: EndEvent
+      name: "Excluded: did not understand the task (n={reached})"
+    Randomize_Disposition:
+      type: cognitive:RandomGateway
+      name: Which instruction? (n={reached})
+      algorithm: block
+      allocationRatio: "1:1"
+      default: Flow_Allocate_Impulsive
+    Allocate_Cautious:
+      type: ServiceTask
+      name: Allocated to the cautious instruction (n={reached})
+      documentation: >-
+        The allocation writes the arm's label into the subject's `arm` property and the instruction that arm receives
+        into `instruction`, through the drawn data edges. The battery's prompt cites the instruction as `{instruction}`;
+        the label is what the recorded trials and the analysis carry. The step's implementation is `dict`, so the values
+        a reader sees in the file are the values the subject gets.
+      dataOutputAssociations:
+        Out_Arm_Cautious:
+          targetRef: P_Arm
+          transformation: result.arm
+        Out_Instruction_Cautious:
+          targetRef: P_Instruction
+          transformation: result.instruction
+      onset: T0
+      duration: 1s
+      additionalArguments:
+        arm: cautious
+        instruction: Take your time on every trial. Answer only when you are sure; accuracy matters more than speed.
+      implementation: python://builtins.dict
+    Allocate_Impulsive:
+      type: ServiceTask
+      name: Allocated to the impulsive instruction (n={reached})
+      documentation: The other arm, written into the same two properties by the same mechanism.
+      dataOutputAssociations:
+        Out_Arm_Impulsive:
+          targetRef: P_Arm
+          transformation: result.arm
+        Out_Instruction_Impulsive:
+          targetRef: P_Instruction
+          transformation: result.instruction
+      onset: T0
+      duration: 1s
+      additionalArguments:
+        arm: impulsive
+        instruction: Go with your first impression on every trial. Answer as fast as you can; speed matters more than accuracy.
+      implementation: python://builtins.dict
+    Merge_Allocation:
+      type: ExclusiveGateway
+    Prompt_Battery:
+      type: agentic:Prompt
+      name: Battery prompt
+      template: |
+        You are taking a computerised cognitive test one trial at a time. Each message is one trial, as
+        JSON, beside the instruction you were given for the whole test. Answer with one of the strings in
+        the trial's ResponseOptions, copied exactly and with nothing else; any other reply is a lost trial.
+        The trial's Rule says which option is right for what it shows.
+    Task_Interference:
+      type: SubProcess
+      name: Interference control (Simon)
+      documentation: >-
+        A Simon task drawn in the notation: its timeline (30 trials, half congruent, a coloured square on one side,
+        answered by its colour), one pass per trial asking the actor, and the record of every trial. Nothing outside the
+        diagram presents it, so any actor that answers the pool's messages can take it.
+      dataInputAssociations:
+        In_Prompt_Task_Interference:
+          sourceRef:
+            - Prompt_Battery
+      dataOutputAssociations:
+        Out_Trials_Task_Interference:
+          targetRef: Dataset_Trials
+      onset: T0+20s
+      duration: 40s
+      flowElements:
+        Simon_Start:
+          type: StartEvent
+        Simon_Timeline:
+          type: ServiceTask
+          name: Simon timeline
+          documentation: >-
+            The task's trials, one list every subject meets in the same order, and their key: each trial's right answer
+            and condition, which no subject is sent and only the record step reads.
+          dataOutputAssociations:
+            Out_Simon_Timeline:
+              targetRef: Simon_Trials
+              transformation: result.trials
+            Out_Simon_Key:
+              targetRef: Simon_Key
+              transformation: result.key
+          additionalArguments:
+            trials: 30
+          implementation: simulate://simon
+        Simon_Trials:
+          type: DataObjectReference
+          name: Simon trials
+        Simon_Key:
+          type: DataObjectReference
+          name: Simon key
+        Simon_Block:
+          type: SubProcess
+          name: Each trial
+          documentation: >-
+            One pass per trial: the trial goes to the actor along the pool's message flows, with the instruction of the
+            subject's arm and the battery's prompt, and the answer comes back as the pass's output.
+          properties:
+            Simon_Trial:
+              name: trial
+            Simon_Answer:
+              name: answer
+          loopCharacteristics:
+            type: MultiInstanceLoopCharacteristics
+            isSequential: true
+            loopDataInputRef: Simon_Trials
+            loopDataOutputRef: Simon_Answers
+            inputDataItem:
+              name: trial
+              id: Simon_Trial_Item
+            outputDataItem:
+              name: answer
+              id: Simon_Answer_Item
+          flowElements:
+            Simon_Trial_Start:
+              type: StartEvent
+            Simon_Ask:
+              type: Task
+              name: Answer the trial
+              dataInputAssociations:
+                In_Simon_Trial:
+                  sourceRef:
+                    - Simon_Trial
+                In_Simon_Instruction:
+                  sourceRef:
+                    - P_Instruction
+                In_Simon_Prompt:
+                  sourceRef:
+                    - Prompt_Battery
+              dataOutputAssociations:
+                Out_Simon_Answer:
+                  targetRef: Simon_Answer
+            Simon_Trial_End:
+              type: EndEvent
+            Simon_TF_0: Simon_Trial_Start -> Simon_Ask
+            Simon_TF_1: Simon_Ask -> Simon_Trial_End
+        Simon_Answers:
+          type: DataObjectReference
+          name: Simon answers
+        Simon_Record:
+          type: ServiceTask
+          name: Record the trials
+          documentation: >-
+            Scores each answer by the timeline's key and appends one row per trial to the trials dataset, keyed by the
+            subject and its arm; its result carries the share of trials left unanswered, which the boundary event reads.
+          dataInputAssociations:
+            In_Simon_Record_Trials:
+              sourceRef:
+                - Simon_Trials
+            In_Simon_Record_Key:
+              sourceRef:
+                - Simon_Key
+            In_Simon_Record_Answers:
+              sourceRef:
+                - Simon_Answers
+          dataOutputAssociations:
+            Out_Simon_Record:
+              targetRef: Dataset_Trials
+          additionalArguments:
+            subject: "{state._meta.instance.Participant_Subject}"
+            arm: "{arm}"
+          implementation: simulate://record
+        Simon_End:
+          type: EndEvent
+        Simon_F_0: Simon_Start -> Simon_Timeline
+        Simon_F_1: Simon_Timeline -> Simon_Block
+        Simon_F_2: Simon_Block -> Simon_Record
+        Simon_F_3: Simon_Record -> Simon_End
+    Failed_Interference:
+      type: BoundaryEvent
+      name: "> {max_unanswered:%} unanswered"
+      documentation: >-
+        The attrition rule, as the condition a BPMN conditional boundary event watches rather than an attribute of the
+        task: the task's own result carries the share of the trials it recorded no valid response for, and above one in
+        five this instance leaves at Discontinued. The threshold is the process's `max_unanswered`, written once and
+        read by the exit of both tasks.
+      eventDefinitions:
+        Cond_Interference:
+          type: ConditionalEventDefinition
+          condition: "{Simon_Record.failedTrialRate} > max_unanswered"
+      attachedToRef: Task_Interference
+    Task_WorkingMemory:
+      type: SubProcess
+      name: Working memory (1-back)
+      documentation: >-
+        A 1-back drawn in the notation: two test blocks of 28 digits, about a third repeating the digit before, one pass
+        per digit asking the actor, and the record of every trial. Each trial carries the digit before it, because the
+        pool is asked one message at a time and keeps nothing between messages.
+      dataInputAssociations:
+        In_Prompt_Task_WorkingMemory:
+          sourceRef:
+            - Prompt_Battery
+      dataOutputAssociations:
+        Out_Trials_Task_WorkingMemory:
+          targetRef: Dataset_Trials
+      onset: T0+60s
+      duration: 3min
+      flowElements:
+        NBack_Start:
+          type: StartEvent
+        NBack_Timeline:
+          type: ServiceTask
+          name: 1-back timeline
+          documentation: >-
+            The task's trials, one list every subject meets in the same order, and their key: each trial's right answer
+            and condition, which no subject is sent and only the record step reads.
+          dataOutputAssociations:
+            Out_NBack_Timeline:
+              targetRef: NBack_Trials
+              transformation: result.trials
+            Out_NBack_Key:
+              targetRef: NBack_Key
+              transformation: result.key
+          additionalArguments:
+            "n": 1
+            trials: 28
+            blocks:
+              - Test_A
+              - Test_B
+          implementation: simulate://nback
+        NBack_Trials:
+          type: DataObjectReference
+          name: 1-back trials
+        NBack_Key:
+          type: DataObjectReference
+          name: 1-back key
+        NBack_Block:
+          type: SubProcess
+          name: Each trial
+          documentation: >-
+            One pass per trial: the trial goes to the actor along the pool's message flows, with the instruction of the
+            subject's arm and the battery's prompt, and the answer comes back as the pass's output.
+          properties:
+            NBack_Trial:
+              name: trial
+            NBack_Answer:
+              name: answer
+          loopCharacteristics:
+            type: MultiInstanceLoopCharacteristics
+            isSequential: true
+            loopDataInputRef: NBack_Trials
+            loopDataOutputRef: NBack_Answers
+            inputDataItem:
+              name: trial
+              id: NBack_Trial_Item
+            outputDataItem:
+              name: answer
+              id: NBack_Answer_Item
+          flowElements:
+            NBack_Trial_Start:
+              type: StartEvent
+            NBack_Ask:
+              type: Task
+              name: Answer the trial
+              dataInputAssociations:
+                In_NBack_Trial:
+                  sourceRef:
+                    - NBack_Trial
+                In_NBack_Instruction:
+                  sourceRef:
+                    - P_Instruction
+                In_NBack_Prompt:
+                  sourceRef:
+                    - Prompt_Battery
+              dataOutputAssociations:
+                Out_NBack_Answer:
+                  targetRef: NBack_Answer
+            NBack_Trial_End:
+              type: EndEvent
+            NBack_TF_0: NBack_Trial_Start -> NBack_Ask
+            NBack_TF_1: NBack_Ask -> NBack_Trial_End
+        NBack_Answers:
+          type: DataObjectReference
+          name: 1-back answers
+        NBack_Record:
+          type: ServiceTask
+          name: Record the trials
+          documentation: >-
+            Scores each answer by the timeline's key and appends one row per trial to the trials dataset, keyed by the
+            subject and its arm; its result carries the share of trials left unanswered, which the boundary event reads.
+          dataInputAssociations:
+            In_NBack_Record_Trials:
+              sourceRef:
+                - NBack_Trials
+            In_NBack_Record_Key:
+              sourceRef:
+                - NBack_Key
+            In_NBack_Record_Answers:
+              sourceRef:
+                - NBack_Answers
+          dataOutputAssociations:
+            Out_NBack_Record:
+              targetRef: Dataset_Trials
+          additionalArguments:
+            subject: "{state._meta.instance.Participant_Subject}"
+            arm: "{arm}"
+          implementation: simulate://record
+        NBack_End:
+          type: EndEvent
+        NBack_F_0: NBack_Start -> NBack_Timeline
+        NBack_F_1: NBack_Timeline -> NBack_Block
+        NBack_F_2: NBack_Block -> NBack_Record
+        NBack_F_3: NBack_Record -> NBack_End
+    Failed_WorkingMemory:
+      type: BoundaryEvent
+      name: "> {max_unanswered:%} unanswered"
+      eventDefinitions:
+        Cond_WorkingMemory:
+          type: ConditionalEventDefinition
+          condition: "{NBack_Record.failedTrialRate} > max_unanswered"
+      attachedToRef: Task_WorkingMemory
+    Discontinued:
+      type: EndEvent
+      name: "Discontinued: more than {max_unanswered:%} of trials unanswered (n={reached})"
+    Debrief:
+      type: cognitive:Instruction
+      name: Debrief
+      content: The session is over. Thank you for taking part; nothing further is asked of you.
+      onset: T0+4min
+      duration: 1s
+    Record_Completion:
+      type: ServiceTask
+      name: Record the completion
+      documentation: >-
+        Appends the subject's line to the completers dataset: its number and its arm, named as its trials name them.
+        Only a subject who completes the protocol passes here; one who leaves at an exit never does, so the analysis
+        takes its population from the protocol rather than from which trials it finds.
+      dataOutputAssociations:
+        Out_Completion:
+          targetRef: Dataset_Completers
+      additionalArguments:
+        context:
+          subject: "{state._meta.instance.Participant_Subject}"
+          state:
+            arm: "{arm}"
+      implementation: python://builtins.dict
+    Sub_End:
+      type: EndEvent
+      name: Completed the protocol (n={reached})
+    SF_Start_Screening: Enroll -> Screening
+    SF_Screening_Eligibility: Screening -> Eligibility_Gateway
+    Flow_Eligible:
+      name: yes (n={reached})
+      conditionExpression: contains(upper case(Screening), "READY")
+      sourceRef: Eligibility_Gateway
+      targetRef: Randomize_Disposition
+    Flow_Excluded_Pre:
+      name: no (n={reached})
+      sourceRef: Eligibility_Gateway
+      targetRef: Excluded_Pre
+    Flow_Allocate_Cautious:
+      name: cautious (n={reached})
+      sourceRef: Randomize_Disposition
+      targetRef: Allocate_Cautious
+    Flow_Allocate_Impulsive:
+      name: impulsive (n={reached})
+      sourceRef: Randomize_Disposition
+      targetRef: Allocate_Impulsive
+    SF_Cautious_Merge: Allocate_Cautious -> Merge_Allocation
+    SF_Impulsive_Merge: Allocate_Impulsive -> Merge_Allocation
+    SF_Merge_Interference: Merge_Allocation -> Task_Interference
+    SF_Interference_WorkingMemory: Task_Interference -> Task_WorkingMemory
+    SF_WorkingMemory_Debrief: Task_WorkingMemory -> Debrief
+    SF_Debrief_Record: Debrief -> Record_Completion
+    SF_Record_End: Record_Completion -> Sub_End
+    SF_Failed_Interference: Failed_Interference -> Discontinued
+    SF_Failed_WorkingMemory: Failed_WorkingMemory -> Discontinued
+Analysis_Report:
+  type: Process
+  name: Analysis and report
+  documentation: >-
+    The same lab system as the pool above, in a second pool because it runs on a different beat: the protocol runs once
+    per subject, the analysis once over the whole cohort. A multi-instance pool sends its outgoing message once, after
+    its last instance ends, so the message start event here waits for all eight subjects and the analysis reads a
+    complete trials dataset. Nothing here is divided further: four steps in a row need no lanes.
+  flowElements:
+    All_Complete:
+      type: StartEvent
+      name: All subjects complete
+      eventDefinitions:
+        Def_All_Complete:
+          type: MessageEventDefinition
+    Dataset_Trials:
+      type: behaverse:BDMDataset
+      name: Trials
+      documentation: >-
+        One line per trial, appended by the record step of every task of every subject: the trial (`trialContext`), the
+        answer and whether it was correct (`result`), and the subject and its arm (`context`), in the Behaverse Data
+        Model's trial-level shape. It sits between the two lab pools because both touch it: the tasks above write it,
+        the analysis below reads it.
+      schema: Trial_Schema
+      dataLevel: trials
+      uri: data/trials.jsonl
+    Dataset_Completers:
+      type: studyflow:Dataset
+      name: Completers
+      documentation: >-
+        One line per subject who completed the protocol, appended by the step before the completion end event: the
+        subject and its arm (`context`), keyed as the trials are. A subject excluded at screening or discontinued on
+        either task has no line, so the analysis keeps exactly the subjects the participant flow counts as completed.
+      schema: Completer_Schema
+      uri: data/completers.jsonl
+    Trial_Schema:
+      type: studyflow:Schema
+      name: Trial schema
+      documentation: >-
+        The columns the analysis reads from the trials dataset, as a CSVW table schema: the trial's keys, its
+        congruency, and whether the answer was correct. `studyflow validate` checks every column an operation reading
+        the dataset names against this list, so a misspelled column fails before any data moves.
+      body:
+        "@context": http://www.w3.org/ns/csvw
+        tableSchema:
+          columns:
+            - name: context.subject
+              datatype: string
+            - name: context.state.arm
+              datatype: string
+            - name: trialContext.task.id
+              datatype: string
+            - name: trialContext.block.name
+              datatype: string
+            - name: trialContext.trial.id
+              datatype: string
+            - name: trialContext.congruency
+              datatype: string
+            - name: result.isCorrect
+              datatype: boolean
+    Completer_Schema:
+      type: studyflow:Schema
+      name: Completers schema
+      documentation: >-
+        The columns of the completers dataset, as a CSVW table schema: the subject and its arm, the keys the analysis
+        matches the trials on. `studyflow validate` checks the keys the analysis names against it, and before its first
+        line the dataset reads as a table with these columns and no row, so a cohort in which nobody completed is
+        analysed as one with no subject.
+      body:
+        "@context": http://www.w3.org/ns/csvw
+        tableSchema:
+          columns:
+            - name: context.subject
+              datatype: string
+            - name: context.state.arm
+              datatype: string
+    Decision_Rules:
+      type: studyflow:Parameters
+      name: Decision rules
+      documentation: >-
+        The thresholds every question's decision reads, fixed before the first run and kept once: the alpha of every
+        test; the fewest subjects a within-subject test needs; the fewest subjects per arm a between-arm test needs,
+        four being the smallest arms for which shuffling labels across subjects can reach p < .05; the permutations the
+        difference test draws.
+      values:
+        alpha: 0.05
+        min_subjects: 3
+        min_per_arm: 4
+        n_permutations: 1000
+    Analysis:
+      type: SubProcess
+      name: Analysis
+      documentation: >-
+        Seven preregistered operations, collapsed here and drawn in @fig-step3-analyze: read the recorded trials, keep
+        the answered trials of the test blocks, per-subject accuracy in each task, group statistics, and then the two
+        questions, each ending in a decision: the congruency effect within subjects and the difference between the two
+        instruction conditions; last, the figure, when any subject was analysed. Accuracy is the measure throughout: an
+        actor asked one message at a time has no response time the study controls, so none is recorded. Every step
+        inside is one call to a library function named in full; nothing here is code written for this study. The
+        decision rules wired in are read-only properties of this sub-process, so every question reads the same alpha and
+        the same minimum sample.
+      properties:
+        derived:
+          name: derived
+        answered:
+          name: answered
+        kept:
+          name: kept
+        test_trials:
+          name: test_trials
+        trials:
+          name: trials
+        per_subject_indexed:
+          name: per_subject_indexed
+        per_subject:
+          name: per_subject
+        analysed_trials:
+          name: analysed_trials
+        smallest_arm:
+          name: smallest_arm
+        analysed_subjects:
+          name: analysed_subjects
+      dataInputAssociations:
+        In_Trials_Analysis:
+          sourceRef:
+            - Dataset_Trials
+        In_Rules:
+          sourceRef:
+            - Decision_Rules
+        In_Completers_Analysis:
+          sourceRef:
+            - Dataset_Completers
+      dataOutputAssociations:
+        Out_Results:
+          targetRef: Dataset_Results
+      onset: T0+6min
+      duration: 30s
+      flowElements:
+        An_Start:
+          type: StartEvent
+        Read_Trials:
+          type: SubProcess
+          name: Read the recorded trials
+          documentation: >-
+            The wire is the read: the dataset's `.jsonl` codec loads the run's event lines with pandas, and the two
+            calls inside reduce them to one row per trial — the congruency the task drew and whether the answer was
+            correct — with the trial keys as columns.
+          flowElements:
+            RT_Start:
+              type: StartEvent
+            Derive:
+              type: ServiceTask
+              name: One row per trial
+              dataInputAssociations:
+                In_Trials:
+                  sourceRef:
+                    - Dataset_Trials
+                  transformation: self
+              dataOutputAssociations:
+                Out_Derived:
+                  targetRef: derived
+              additionalArguments:
+                index:
+                  - context.subject
+                  - context.state.arm
+                  - trialContext.task.id
+                  - trialContext.block.name
+                  - trialContext.trial.id
+                values:
+                  - trialContext.congruency
+                  - result.isCorrect
+                aggfunc:
+                  trialContext.congruency: first
+                  result.isCorrect: first
+              implementation: python://pandas.DataFrame.pivot_table
+            Flatten_Index:
+              type: ServiceTask
+              name: Trial keys into columns
+              dataInputAssociations:
+                In_Derived:
+                  sourceRef:
+                    - derived
+                  transformation: self
+              dataOutputAssociations:
+                Out_Answered:
+                  targetRef: answered
+              implementation: python://pandas.DataFrame.reset_index
+            RT_End:
+              type: EndEvent
+            RTF_0: RT_Start -> Derive
+            RTF_1: Derive -> Flatten_Index
+            RTF_2: Flatten_Index -> RT_End
+        Filter:
+          type: SubProcess
+          name: Keep answered test trials
+          documentation: >-
+            The trials the actor did not answer within the response window leave the table, and so do the 1-back's
+            tutorial and practice blocks, which are instruction rather than measurement; the two measures the rest of
+            the analysis works on become numbers.
+          checklist: |-
+            - [ ] Trials the actor did not answer within the response window dropped
+            - [ ] The 1-back's tutorial and practice blocks dropped
+            - [ ] Every remaining trial carries its task and block
+          flowElements:
+            F_Start:
+              type: StartEvent
+            Filter_Rows:
+              type: ServiceTask
+              name: Drop unanswered trials
+              dataInputAssociations:
+                In_Answered:
+                  sourceRef:
+                    - answered
+                  transformation: self
+              dataOutputAssociations:
+                Out_Kept:
+                  targetRef: kept
+              additionalArguments:
+                subset:
+                  - result.isCorrect
+              implementation: python://pandas.DataFrame.dropna
+            Test_Blocks:
+              type: ServiceTask
+              name: Keep the test blocks
+              documentation: >-
+                The blocks the analysis measures, named as the timelines name them: the Simon block and the 1-back's two
+                test blocks.
+              dataInputAssociations:
+                In_Kept_Blocks:
+                  sourceRef:
+                    - kept
+                  transformation: self
+              dataOutputAssociations:
+                Out_Test:
+                  targetRef: test_trials
+              additionalArguments:
+                expr: "`trialContext.block.name` in ['Simon', 'Test_A', 'Test_B']"
+              implementation: python://pandas.DataFrame.query
+            Measures:
+              type: ServiceTask
+              name: Measures as numbers
+              dataInputAssociations:
+                In_Kept:
+                  sourceRef:
+                    - test_trials
+                  transformation: self
+              dataOutputAssociations:
+                Out_Trials_Typed:
+                  targetRef: trials
+              additionalArguments:
+                dtype:
+                  result.isCorrect: float
+              implementation: python://pandas.DataFrame.astype
+            F_End:
+              type: EndEvent
+            FF_0: F_Start -> Filter_Rows
+            FF_1: Filter_Rows -> Test_Blocks
+            FF_2: Test_Blocks -> Measures
+            FF_3: Measures -> F_End
+        Per_Subject:
+          type: SubProcess
+          name: Per-subject accuracy by task
+          documentation: >-
+            The analysed population and its summary: the trials of the subjects who completed the protocol, as the
+            completers dataset lists them, which every question and the figure read; one row per subject, its mean
+            accuracy in each task, with the subject and its arm as columns, written out as the per-subject table of the
+            results dataset; then the size of the smaller arm, which the difference question checks against the decision
+            rules before it tests anything.
+          flowElements:
+            PS_Start:
+              type: StartEvent
+            Completer_Trials:
+              type: ServiceTask
+              name: Trials of the subjects who completed
+              documentation: >-
+                The analysed population: the trials of the subjects with a line in the completers dataset, matched on
+                the subject and its arm. A subject discontinued on either task, the 1-back included, has trials but no
+                line, and leaves here.
+              dataInputAssociations:
+                In_Trials_All:
+                  sourceRef:
+                    - trials
+                  transformation: self
+                In_Completers:
+                  sourceRef:
+                    - Dataset_Completers
+                  transformation: right
+              dataOutputAssociations:
+                Out_Analysed_Trials:
+                  targetRef: analysed_trials
+              additionalArguments:
+                "on":
+                  - context.subject
+                  - context.state.arm
+                how: inner
+              implementation: python://pandas.DataFrame.merge
+            Per_Subject_Table:
+              type: ServiceTask
+              name: Per-subject summary
+              dataInputAssociations:
+                In_Trials_PS:
+                  sourceRef:
+                    - analysed_trials
+                  transformation: self
+              dataOutputAssociations:
+                Out_PS:
+                  targetRef: per_subject_indexed
+              additionalArguments:
+                index:
+                  - context.subject
+                  - context.state.arm
+                columns: trialContext.task.id
+                values: result.isCorrect
+                aggfunc: mean
+              implementation: python://pandas.DataFrame.pivot_table
+            Per_Subject_Flat:
+              type: ServiceTask
+              name: Subject keys into columns
+              dataInputAssociations:
+                In_PS:
+                  sourceRef:
+                    - per_subject_indexed
+                  transformation: self
+              dataOutputAssociations:
+                Out_PS_Flat:
+                  targetRef: per_subject
+                Out_PS_File:
+                  targetRef: File_PerSubject
+              implementation: python://pandas.DataFrame.reset_index
+            Arm_Sizes:
+              type: ServiceTask
+              name: Subjects per arm
+              documentation: >-
+                How many subjects each arm holds; the smaller count is what the feasibility checks read, and an arm
+                nobody reached counts as zero. Their sum is how many subjects were analysed, which the figure checks.
+              dataInputAssociations:
+                In_PS_Arms:
+                  sourceRef:
+                    - per_subject
+                  transformation: self
+              dataOutputAssociations:
+                Out_Smallest_Arm:
+                  targetRef: smallest_arm
+                  transformation: if count(result) = 2 then min(result) else 0
+                Out_Analysed_Subjects:
+                  targetRef: analysed_subjects
+                  transformation: if count(result) = 0 then 0 else sum(result)
+              additionalArguments:
+                subset:
+                  - context.state.arm
+              implementation: python://pandas.DataFrame.value_counts
+            File_PerSubject:
+              type: DataObjectReference
+              name: Per-subject table
+              uri: results/per_subject.csv
+            PS_End:
+              type: EndEvent
+            PSF_0: PS_Start -> Completer_Trials
+            PSF_1: Completer_Trials -> Per_Subject_Table
+            PSF_2: Per_Subject_Table -> Per_Subject_Flat
+            PSF_3: Per_Subject_Flat -> Arm_Sizes
+            PSF_4: Arm_Sizes -> PS_End
+        Group:
+          type: ServiceTask
+          name: Group statistics
+          documentation: >-
+            Mean and standard deviation of each task's accuracy, by instruction condition, from the per-subject table
+            while the subject and its arm are still its index, so the arm is grouped by and every column is an accuracy.
+          dataInputAssociations:
+            In_PS_G:
+              sourceRef:
+                - per_subject_indexed
+              transformation: self
+          dataOutputAssociations:
+            Out_Group:
+              targetRef: File_Group
+          additionalArguments:
+            index: context.state.arm
+            aggfunc:
+              - mean
+              - std
+          implementation: python://pandas.DataFrame.pivot_table
+        Congruency:
+          type: SubProcess
+          name: Congruency effect
+          documentation: >-
+            Is a subject less accurate on incongruent than on congruent Simon trials? The descriptive table by
+            instruction condition and congruency is written out first, either way. Then one call does the test: per
+            subject, the mean accuracy on congruent trials and the mean on incongruent ones, compared by a one-sided
+            paired t test in the predicted direction; trials with no congruency, the 1-back's, take no part. The decision
+            was fixed before the first run: not testable with fewer analysed subjects than the decision rules' minimum,
+            supported when p is below their alpha, not supported otherwise.
+          properties:
+            congruency_test:
+              name: congruency_test
+          flowElements:
+            C_Start:
+              type: StartEvent
+            Congruency_Table:
+              type: ServiceTask
+              name: Accuracy by congruency
+              dataInputAssociations:
+                In_Trials_C:
+                  sourceRef:
+                    - analysed_trials
+                  transformation: self
+              dataOutputAssociations:
+                Out_Congruency:
+                  targetRef: File_Congruency
+              additionalArguments:
+                index:
+                  - context.state.arm
+                  - trialContext.congruency
+                values:
+                  - result.isCorrect
+                aggfunc: mean
+              implementation: python://pandas.DataFrame.pivot_table
+            File_Congruency:
+              type: DataObjectReference
+              name: Congruency table
+              uri: results/congruency.csv
+            Enough_Subjects:
+              type: ExclusiveGateway
+              name: Enough subjects?
+              default: C_Enough
+            Cost_Test:
+              type: ServiceTask
+              name: One-sided paired t test
+              documentation: >-
+                Averages each subject's trials within each congruency, then tests congruent against incongruent across
+                subjects, one-sided; the same t as the congruent-minus-incongruent cost tested against zero.
+              dataInputAssociations:
+                In_Trials_Test:
+                  sourceRef:
+                    - analysed_trials
+                  transformation: data
+              dataOutputAssociations:
+                Out_Cost_Test:
+                  targetRef: congruency_test
+                  transformation: "{statistic: result.T[1], pvalue: result.p_unc[1], subjects: result.dof[1] + 1}"
+                Out_Cost_File:
+                  targetRef: File_Congruency_Test
+                  transformation: "{statistic: result.T[1], pvalue: result.p_unc[1], subjects: result.dof[1] + 1}"
+              additionalArguments:
+                dv: result.isCorrect
+                within: trialContext.congruency
+                subject: context.subject
+                alternative: greater
+              implementation: python://pingouin.pairwise_tests
+            Congruency_Decision:
+              type: ExclusiveGateway
+              name: Less accurate when incongruent?
+              default: C_No
+            C_Supported:
+              type: EndEvent
+              name: Supported
+            C_Not_Supported:
+              type: EndEvent
+              name: Not supported
+            C_Not_Testable:
+              type: EndEvent
+              name: Not testable
+            File_Congruency_Test:
+              type: DataObjectReference
+              name: Congruency test
+              uri: results/congruency_test.json
+            CF_0: C_Start -> Congruency_Table
+            CF_1: Congruency_Table -> Enough_Subjects
+            C_Too_Few:
+              name: too few
+              conditionExpression: analysed_subjects < min_subjects
+              sourceRef: Enough_Subjects
+              targetRef: C_Not_Testable
+            C_Enough:
+              name: enough
+              sourceRef: Enough_Subjects
+              targetRef: Cost_Test
+            CF_2: Cost_Test -> Congruency_Decision
+            C_Yes:
+              name: "yes"
+              conditionExpression: congruency_test.pvalue < alpha
+              sourceRef: Congruency_Decision
+              targetRef: C_Supported
+            C_No:
+              name: "no"
+              sourceRef: Congruency_Decision
+              targetRef: C_Not_Supported
+        Divergence:
+          type: SubProcess
+          name: Difference between instructions
+          documentation: >-
+            Can a classifier tell the two instruction conditions apart better than chance? One row per subject, its
+            accuracy in each of the two tasks as unstandardized features and its arm as the label, a logistic regression
+            scored by leave-one-subject-out cross-validation; the permutation test shuffles the arm labels across
+            subjects, the unit that was randomized, so chance is what the same classifier scores when the labels carry
+            nothing. Fixed before the first run: not testable when an arm holds fewer subjects than the decision rules'
+            minimum, supported when the permutation p is below their alpha, not supported otherwise.
+          properties:
+            subject_features:
+              name: subject_features
+            subject_labels:
+              name: subject_labels
+            divergence_test:
+              name: divergence_test
+          flowElements:
+            D_Start:
+              type: StartEvent
+            Enough_Per_Arm_D:
+              type: ExclusiveGateway
+              name: Enough subjects per arm?
+              default: D_Enough
+            Features:
+              type: ServiceTask
+              name: Accuracy in each task
+              documentation: The per-subject table without its key columns, one column per task, so the features are the tasks.
+              dataInputAssociations:
+                In_PS_F:
+                  sourceRef:
+                    - per_subject
+                  transformation: self
+              dataOutputAssociations:
+                Out_Features:
+                  targetRef: subject_features
+              additionalArguments:
+                columns:
+                  - context.subject
+                  - context.state.arm
+              implementation: python://pandas.DataFrame.drop
+            Labels:
+              type: ServiceTask
+              name: Subject-level labels
+              dataInputAssociations:
+                In_PS_L:
+                  sourceRef:
+                    - per_subject
+                  transformation: self
+              dataOutputAssociations:
+                Out_Labels:
+                  targetRef: subject_labels
+              additionalArguments:
+                key: context.state.arm
+              implementation: python://pandas.DataFrame.get
+            Permutation_Test:
+              type: ServiceTask
+              name: Classifier against shuffled labels
+              dataInputAssociations:
+                In_Features:
+                  sourceRef:
+                    - subject_features
+                  transformation: X
+                In_Labels:
+                  sourceRef:
+                    - subject_labels
+                  transformation: "y"
+              dataOutputAssociations:
+                Out_Divergence_Test:
+                  targetRef: divergence_test
+                  transformation: "{accuracy: result[1], pvalue: result[3]}"
+                Out_Divergence:
+                  targetRef: File_Divergence
+                  transformation: "{accuracy: result[1], pvalue: result[3]}"
+              additionalArguments:
+                estimator:
+                  implementation: python://sklearn.pipeline.make_pipeline
+                  arguments:
+                    args:
+                      - implementation: python://sklearn.linear_model.LogisticRegression
+                        arguments:
+                          max_iter: 1000
+                cv:
+                  implementation: python://sklearn.model_selection.LeaveOneOut
+                n_permutations: "{n_permutations}"
+                scoring: accuracy
+              implementation: python://sklearn.model_selection.permutation_test_score
+            Divergence_Decision:
+              type: ExclusiveGateway
+              name: Told apart above chance?
+              default: D_No
+            D_Supported:
+              type: EndEvent
+              name: Supported
+            D_Not_Supported:
+              type: EndEvent
+              name: Not supported
+            D_Not_Testable:
+              type: EndEvent
+              name: Not testable
+            File_Divergence:
+              type: DataObjectReference
+              name: Difference test
+              uri: results/divergence.json
+            DF_0: D_Start -> Enough_Per_Arm_D
+            D_Too_Few:
+              name: too few
+              conditionExpression: smallest_arm < min_per_arm
+              sourceRef: Enough_Per_Arm_D
+              targetRef: D_Not_Testable
+            D_Enough:
+              name: enough
+              sourceRef: Enough_Per_Arm_D
+              targetRef: Features
+            DF_1: Features -> Labels
+            DF_2: Labels -> Permutation_Test
+            DF_3: Permutation_Test -> Divergence_Decision
+            D_Yes:
+              name: "yes"
+              conditionExpression: divergence_test.pvalue < alpha
+              sourceRef: Divergence_Decision
+              targetRef: D_Supported
+            D_No:
+              name: "no"
+              sourceRef: Divergence_Decision
+              targetRef: D_Not_Supported
+        Anyone_Analysed:
+          type: ExclusiveGateway
+          name: Anyone analysed?
+          default: AF_No_Figure
+        Plot:
+          type: ServiceTask
+          name: Figure
+          documentation: Accuracy by instruction condition and congruency, as a box plot.
+          dataInputAssociations:
+            In_Trials_P:
+              sourceRef:
+                - analysed_trials
+              transformation: self
+          dataOutputAssociations:
+            Out_Plot:
+              targetRef: File_Accuracy
+              transformation: result.figure
+          additionalArguments:
+            column:
+              - result.isCorrect
+            by:
+              - context.state.arm
+              - trialContext.congruency
+            grid: false
+            rot: 30
+          implementation: python://pandas.DataFrame.boxplot
+        An_End:
+          type: EndEvent
+          name: Analyzed
+        File_Group:
+          type: DataObjectReference
+          name: Group table
+          uri: results/group.csv
+        File_Accuracy:
+          type: DataObjectReference
+          name: Accuracy figure
+          uri: results/accuracy.png
+        AF_0: An_Start -> Read_Trials
+        AF_1: Read_Trials -> Filter
+        AF_2: Filter -> Per_Subject
+        AF_3: Per_Subject -> Group
+        AF_4: Group -> Congruency
+        AF_5: Congruency -> Divergence
+        AF_7: Divergence -> Anyone_Analysed
+        AF_Figure:
+          name: "yes"
+          conditionExpression: analysed_subjects > 0
+          sourceRef: Anyone_Analysed
+          targetRef: Plot
+        AF_No_Figure:
+          name: "no"
+          sourceRef: Anyone_Analysed
+          targetRef: An_End
+        AF_8: Plot -> An_End
+    Dataset_Results:
+      type: studyflow:Dataset
+      name: Results
+      documentation: The run's results, laid out as a Psych-DS dataset.
+      format: psych-ds
+      uri: results/
+    Render:
+      type: ManualTask
+      name: Render the report
+      documentation: >-
+        Not automated on purpose: `figures/src/render.sh` in the paper repository draws these from the executed copy of
+        this file, and a person reads them before they go into the manuscript.
+      checklist: |-
+        - [ ] CONSORT participant flow exported from the Figure view
+        - [ ] SPIRIT schedule exported from the Gantt view
+        - [ ] Model, prompts and sampling settings recorded with each exchange
+      onset: T0+7min
+      duration: 2min
+    Completed:
+      type: EndEvent
+      name: Study complete
+    Flow_Start_Analysis: All_Complete -> Analysis
+    Flow_Analysis_Render: Analysis -> Render
+    Flow_Render_Completed: Render -> Completed
+layout:
+  Participant_Model:
+    bounds: 8 0 932 168
+    isHorizontal: true
+    fill: "#f5f5f4"
+  Participant_Subject:
+    bounds: 8 216 932 694
+    isHorizontal: true
+  Participant_Analysis:
+    bounds: 8 994 932 148
+    isHorizontal: true
+  Msg_Trial:
+    waypoint: 380,216 380,168
+    label: 288 178 88 14
+    stroke: "#5c8a55"
+  Msg_Response:
+    waypoint: 460,168 460,216
+    label: 468 178 96 14
+    stroke: "#5c8a55"
+  Msg_Complete:
+    waypoint: 108,910 108,1019
+    label: 116 940 130 14
+    stroke: "#7a67a6"
+  Lane_Enrolment:
+    bounds: 38 216 902 160
+    font: "#5c8a55"
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Lane_Allocation:
+    bounds: 38 376 902 212
+    font: "#5c8a55"
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Lane_Followup:
+    bounds: 38 588 902 322
+    font: "#5c8a55"
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Enroll:
+    bounds: 100 260 36 36
+    label: 70 300 96 28
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Screening:
+    bounds: 190 245 130 66
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  In_Check:
+    waypoint: 208,318 208,311
+    stroke: "#4e6f95"
+  Prompt_Check:
+    bounds: 190 318 36 50
+    label: 232 330 96 27
+    fill: "#eef3f8"
+    stroke: "#4e6f95"
+  Eligibility_Gateway:
+    bounds: 360 253 50 50
+    isMarkerVisible: true
+    label: 315 222 140 24
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Excluded_Pre:
+    bounds: 840 260 36 36
+    label: 763 300 154 30
+    fill: "#f1d0cd"
+    stroke: "#ac5a54"
+  Randomize_Disposition:
+    bounds: 360 388 50 50
+    isMarkerVisible: true
+    label: 130 394 130 40
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Allocate_Cautious:
+    bounds: 190 452 190 62
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Allocate_Impulsive:
+    bounds: 470 452 190 62
+    font: "#4e6f95"
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Merge_Allocation:
+    bounds: 360 526 50 50
+    fill: "#dbe6f2"
+    stroke: "#4e6f95"
+  Prompt_Battery:
+    bounds: 500 602 36 50
+    label: 542 608 96 27
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Task_Interference:
+    bounds: 310 678 150 92
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  In_Prompt_Task_Interference:
+    waypoint: 500,627 440,627 440,678
+    stroke: "#5c8a55"
+  Out_Trials_Task_Interference:
+    waypoint: 385,770 385,920
+    stroke: "#5c8a55"
+  Failed_Interference:
+    bounds: 424 752 36 36
+    label: 268 789 104 22
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Task_WorkingMemory:
+    bounds: 490 678 150 92
+    font: "#5c8a55"
+    fill: "#dcebd6"
+    stroke: "#5c8a55"
+  In_Prompt_Task_WorkingMemory:
+    waypoint: 518,652 518,664 560,664 560,678
+    stroke: "#5c8a55"
+  Out_Trials_Task_WorkingMemory:
+    waypoint: 565,770 565,945 410,945
+    stroke: "#5c8a55"
+  Failed_WorkingMemory:
+    bounds: 604 752 36 36
+    label: 646 789 104 22
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
+  Discontinued:
+    bounds: 830 800 36 36
+    label: 700 842 184 28
+    fill: "#f1d0cd"
+    stroke: "#ac5a54"
+  Debrief:
+    bounds: 656 678 96 92
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Record_Completion:
+    bounds: 770 678 104 92
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Out_Completion:
+    waypoint: 860,770 860,790 908,790 908,920
+    stroke: "#a2803c"
+  Sub_End:
+    bounds: 890 706 36 36
+    label: 850 648 90 28
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  SF_Start_Screening:
+    waypoint: 136,278 190,278
+    stroke: "#4e6f95"
+  SF_Screening_Eligibility:
+    waypoint: 320,278 360,278
+    stroke: "#4e6f95"
+  Flow_Eligible:
+    waypoint: 385,303 385,388
+    label: 392 316 68 14
+    stroke: "#4e6f95"
+  Flow_Excluded_Pre:
+    waypoint: 410,278 840,278
+    label: 420 256 62 14
+    stroke: "#ac5a54"
+  Flow_Allocate_Cautious:
+    waypoint: 360,413 285,413 285,452
+    label: 258 390 100 14
+    stroke: "#4e6f95"
+  Flow_Allocate_Impulsive:
+    waypoint: 410,413 565,413 565,452
+    label: 474 390 106 14
+    stroke: "#4e6f95"
+  SF_Cautious_Merge:
+    waypoint: 285,514 285,551 360,551
+    stroke: "#4e6f95"
+  SF_Impulsive_Merge:
+    waypoint: 565,514 565,551 410,551
+    stroke: "#4e6f95"
+  SF_Merge_Interference:
+    waypoint: 385,576 385,678
+    stroke: "#5c8a55"
+  SF_Interference_WorkingMemory:
+    waypoint: 460,724 490,724
+    stroke: "#5c8a55"
+  SF_WorkingMemory_Debrief:
+    waypoint: 640,724 656,724
+    stroke: "#a2803c"
+  SF_Debrief_Record:
+    waypoint: 752,724 770,724
+    stroke: "#a2803c"
+  SF_Record_End:
+    waypoint: 874,724 890,724
+    stroke: "#a2803c"
+  SF_Failed_Interference:
+    waypoint: 442,788 442,818 830,818
+    stroke: "#ac5a54"
+  SF_Failed_WorkingMemory:
+    waypoint: 622,788 622,818 830,818
+    stroke: "#ac5a54"
+  All_Complete:
+    bounds: 90 1019 36 36
+    label: 48 1059 120 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Dataset_Trials:
+    bounds: 360 920 50 50
+    label: 294 938 60 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Dataset_Completers:
+    bounds: 883 920 50 50
+    label: 812 938 66 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Trial_Schema:
+    bounds: 620 920 36 50
+    label: 662 938 80 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Completer_Schema:
+    bounds: 880 1084 36 50
+    label: 770 1102 104 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Decision_Rules:
+    bounds: 230 1084 36 50
+    label: 150 1096 76 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Analysis:
+    bounds: 295 1002 180 70
+    font: "#7a67a6"
+    isExpanded: false
+    fill: "#e6dff1"
+    stroke: "#7a67a6"
+  In_Trials_Analysis:
+    waypoint: 385,970 385,1002
+  In_Rules:
+    waypoint: 248,1084 248,1060 295,1060
+  In_Completers_Analysis:
+    waypoint: 908,970 908,984 460,984 460,1002
+  Out_Results:
+    waypoint: 385,1072 385,1084
+  Dataset_Results:
+    bounds: 360 1084 50 50
+    label: 416 1100 62 14
+    fill: "#f4f1f8"
+    stroke: "#7a67a6"
+  Render:
+    bounds: 545 1002 160 70
+    font: "#a2803c"
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Completed:
+    bounds: 760 1019 36 36
+    label: 802 1026 102 14
+    fill: "#f6e8c9"
+    stroke: "#a2803c"
+  Flow_Start_Analysis:
+    waypoint: 126,1037 295,1037
+    stroke: "#7a67a6"
+  Flow_Analysis_Render:
+    waypoint: 475,1037 545,1037
+    stroke: "#a2803c"
+  Flow_Render_Completed:
+    waypoint: 705,1037 760,1037
+    stroke: "#a2803c"

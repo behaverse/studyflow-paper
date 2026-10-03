@@ -140,7 +140,7 @@ Example_Study:
       instrument: comprehension-check
       checklist: |-
         - [ ] Consent recorded
-        - [ ] Executor configuration pinned (model id, sampling parameters)
+        - [ ] Executor configuration recorded with every exchange (model id and digest, sampling parameters)
         - [ ] Comprehension check passed
       dataInputAssociations:
         In_Check:
@@ -161,7 +161,7 @@ Example_Study:
       type: cognitive:EligibilityGateway
       name: Understood the instructions?
       inclusionCriteria:
-        - Registered artificial actor family with a pinned model tag
+        - Registered model, at a version recorded with every exchange
         - Comprehension check answered as instructed
       exclusionCriteria:
         - No answer, or an answer that does not follow the instruction

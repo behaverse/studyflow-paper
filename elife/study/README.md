@@ -32,9 +32,18 @@ The three files differ in one line, the Actor's `implementation`:
 | `example_study-gemma4-12b.studyflow.yaml` | `ollama://gemma4:12b-it-qat` | `sha256:3213e7b5705c3d90922368201eb23f835cd841076dbeed53694c73dd841edda5` |
 | `example_study-llama3.1-8b.studyflow.yaml` | `ollama://llama3.1:8b` | `sha256:20912640ecd1b2459198e26d152d0f434b65b12e01aefd76b517108b55352ebf` |
 
-Digests computed on 2026-10-03 with a build of the modeler's `feat/wave2` at `8541b1c8`, in main since `543cfaa1` (`studyflow info`), after three changes (`../adoption-objections-plan.md`, wave 2): the exits' labels read `{max_unanswered:%}` instead of repeating 20%; the congruency question tests in one call (`pingouin.pairwise_tests`, paired, one-sided) instead of five; and, in the three example-study files, the tasks' run-critical values are written out and the actor is given 30 s per trial at the build's own clock. Before that, on 2026-10-02 at the modeler's main `c7e40477`, the labels and documentation of all seven files took the paper's wording (the two arms are instruction conditions, the second question is the difference between them, its test writes the data object named `Difference test`, and the report's checklist asks that the model, prompts and sampling settings be recorded with each exchange). Before that, two changes to all five files: the discontinuation threshold became one property of the subject's process (`max_unanswered`) that both tasks' exits read, and a step on the completion path (`Record_Completion`, before the completion end event) appends each completer's subject and arm to a Completers dataset (`data/completers.jsonl`), whose trials are the only ones the analysis reads, so a subject discontinued on either task, or excluded, is never analysed and leaves the classifier no missing value. The Completers dataset is bound to a schema of its two columns, so a cohort in which nobody completes reads it as an empty table, and the analysis then ends both questions at *Not testable* (the figure is drawn only when someone was analysed). Appending one record per subject to a `.jsonl` dataset, and reading a not-yet-written one as empty, need the python runner of the modeler's branch `feat/subject-exits` (commits `57ef0393` and `a6f09259`), merged into the modeler's main on 2026-10-02 (as `7f835c09` and `1002fa26` after main was rebased); with an earlier runtime these files fail at `Record_Completion`. Any edit to the protocol changes
+Digests computed on 2026-10-03 with a build of the modeler's `feat/wave2` at `8541b1c8`, in main since `543cfaa1` (`studyflow info`), after three changes (`../../archived/notes/adoption-objections-plan.md`, wave 2): the exits' labels read `{max_unanswered:%}` instead of repeating 20%; the congruency question tests in one call (`pingouin.pairwise_tests`, paired, one-sided) instead of five; and, in the three example-study files, the tasks' run-critical values are written out and the actor is given 30 s per trial at the build's own clock. Before that, on 2026-10-02 at the modeler's main `c7e40477`, the labels and documentation of all seven files took the paper's wording (the two arms are instruction conditions, the second question is the difference between them, its test writes the data object named `Difference test`, and the report's checklist asks that the model, prompts and sampling settings be recorded with each exchange). Before that, two changes to all five files: the discontinuation threshold became one property of the subject's process (`max_unanswered`) that both tasks' exits read, and a step on the completion path (`Record_Completion`, before the completion end event) appends each completer's subject and arm to a Completers dataset (`data/completers.jsonl`), whose trials are the only ones the analysis reads, so a subject discontinued on either task, or excluded, is never analysed and leaves the classifier no missing value. The Completers dataset is bound to a schema of its two columns, so a cohort in which nobody completes reads it as an empty table, and the analysis then ends both questions at *Not testable* (the figure is drawn only when someone was analysed). Appending one record per subject to a `.jsonl` dataset, and reading a not-yet-written one as empty, need the python runner of the modeler's branch `feat/subject-exits` (commits `57ef0393` and `a6f09259`), merged into the modeler's main on 2026-10-02 (as `7f835c09` and `1002fa26` after main was rebased); with an earlier runtime these files fail at `Record_Completion`. Any edit to the protocol changes
 them, the cohort size included; the drawing, the Gantt progress and checklist ticks do not. The language-model runs are
-pending: the author runs them, with more subjects; at the build's own clock a subject takes about 7 to 15 minutes, depending on how fast the model answers.
+pending: the author runs them, with hundreds of subjects per model (a multiple of four, so that the permuted blocks
+split the arms evenly); at the build's own clock a subject takes about 7 to 15 minutes, depending on how fast the
+model answers. The local runtime runs the instances of a pool one after another (the paper's `tbl-departures`), so a
+cohort of 300 takes about 35 to 75 hours per model unless the runtime runs them at once.
+
+On 2026-10-03 two notes of the three files were reworded to what the runner does, with no change to the protocol's
+behaviour: the screening checklist's executor item ("recorded with every exchange", not "pinned") and the first
+inclusion criterion ("Registered model, at a version recorded with every exchange", not "a pinned model tag"). Notes
+enter the digest, so the three digests above predate that edit; they change again when `participantMultiplicity` is
+raised for the reported runs. Recompute them with `studyflow info` before the runs.
 
 ## The pipeline check
 
@@ -64,12 +73,19 @@ allocation for all eight).
 
 `pipeline-check/forced-discontinuation/` and `pipeline-check/nobody-completes/` hold two further copies of `planted.studyflow.yaml` that differ from it only in `max_unanswered` (0.05 and 0.0; protocol digests `sha256:f3f3710a…` and `sha256:f7f8b069…`), each with its run of 2026-10-02 (`run-005/`, `run-0/`, re-run at `feat/wave2` `cf548588` after the wave-2 changes, with the same subjects, results and claim states; until then their labels said 20%, the drift the new label check exists to prevent): the first discontinues four of the eight subjects and the analysis of the four who completed reaches *Supported* on the congruency question and *Not testable* on the instruction-condition question, and the second discontinues all eight and ends both questions at *Not testable* with no figure (the paper's Methods, the pipeline-check paragraph). Like the other run folders, these two runs are git repositories of their own and stay out of any commit of this folder.
 
+`pipeline-check/unstandardized/planted-unstandardized.studyflow.yaml` is a third copy of `planted.studyflow.yaml`
+(2026-10-03) without the `StandardScaler` before the classifier (and its documentation says so). It keeps the fault the
+paper reports in the pipeline-check paragraph of Methods: fitted to unstandardized accuracies, the classifier scored 0%
+under leave-one-out. It has not been run or validated yet; run it as below into `run-unstandardized/` and check that
+result before submission.
+
 ## Running it
 
 ```sh
 studyflow run --runtime local pipeline-check/planted.studyflow.yaml --repo pipeline-check/run-planted
 studyflow run --runtime local pipeline-check/null.studyflow.yaml --repo pipeline-check/run-null
 studyflow validate pipeline-check/run-planted/planted.studyflow.yaml
+studyflow run --runtime local pipeline-check/unstandardized/planted-unstandardized.studyflow.yaml --repo pipeline-check/unstandardized/run-unstandardized
 studyflow run --runtime local example_study.studyflow.yaml --repo run
 ```
 
