@@ -20,6 +20,7 @@ Consort_Collaboration:
       dependencies:
         - pandas==2.3.3
         - scipy==1.16.2
+        - pingouin==0.7.0
         - scikit-learn==1.7.2
         - matplotlib==3.10.7
       authors:
@@ -151,7 +152,7 @@ Example_Study:
       duration: 40s
     Failed_Interference:
       type: BoundaryEvent
-      name: "> 20% unanswered"
+      name: "> {max_unanswered:%} unanswered"
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
@@ -166,7 +167,7 @@ Example_Study:
       duration: 3min
     Failed_WorkingMemory:
       type: BoundaryEvent
-      name: "> 20% unanswered"
+      name: "> {max_unanswered:%} unanswered"
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
@@ -174,7 +175,7 @@ Example_Study:
       attachedToRef: Task_WorkingMemory
     Discontinued:
       type: EndEvent
-      name: "Discontinued: more than 20% of trials unanswered (n={reached})"
+      name: "Discontinued: more than {max_unanswered:%} of trials unanswered (n={reached})"
     Debrief:
       type: cognitive:Instruction
       name: Debrief
@@ -310,7 +311,7 @@ layout:
     stroke: "#5c8a55"
   Failed_WorkingMemory:
     bounds: 540 568 36 36
-    label: 452 620 120 14
+    label: 428 620 120 14
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   Discontinued:
@@ -386,12 +387,11 @@ state:
   _meta:
     prov:
       - action: executed
-        when: "2026-10-02T19:29:26.728+02:00"
-        who: morteza
+        when: "2026-10-02T22:30:53.718+02:00"
         with: studyflow-cli/26.9.29
         run: run-planted
         seed: 42
-        plan: sha256:6c2c0ee7f0a24c450565fda7734d81f1ef5b98a1c52d79e3e7983309c10cbe8f
+        plan: sha256:8268b53e2a332deb9c9de443785933041a804c7fb77345069ebcaa82c01c39d8
     instance:
       Participant_Subject: 8
       Simon_Block: 30
@@ -492,20 +492,7 @@ state:
       Congruency: 1
       C_Start: 1
       CF_0: 1
-      Cost_Per_Subject: 1
-      CP_Start: 1
-      CPF_0: 1
       Congruency_Table: 1
-      CPF_1: 1
-      By_Congruency: 1
-      CPF_2: 1
-      Accuracy_Congruent: 1
-      CPF_3: 1
-      Accuracy_Incongruent: 1
-      CPF_4: 1
-      Cost: 1
-      CPF_5: 1
-      CP_End: 1
       CF_1: 1
       Enough_Subjects: 1
       C_Enough: 1
@@ -575,10 +562,10 @@ state:
     smallest_arm: 4
     analysed_subjects: 8
   Congruency:
-    congruency_n: 8
     congruency_test:
       statistic: 4.079853428221753
       pvalue: 0.0023452759794757665
+      subjects: 8
   Divergence:
     divergence_test:
       accuracy: 1

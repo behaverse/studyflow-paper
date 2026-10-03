@@ -6,16 +6,18 @@ NBack:
   name: The n-back, drawn out and collapsed
   documentation: >-
     The example study's second task at two grains. Above, one trial as an explicit sub-process repeated fifty-six times:
-    a stimulus activity reading its timings from a Parameters element, a boundary timer that closes the response window,
-    labelled match and non-match branches, and a timer for the inter-stimulus interval. Below, the same two test blocks
-    collapsed into the single Behaverse task the study actually wires (`NB` / `XCIT_NB_01`, two test blocks of
-    twenty-eight digits, after three tutorial blocks and a practice block the drawing omits), configured by the same
-    Parameters element — the `Bot:` block, which is how the build plays for an actor that is not a person and where
-    every timing above comes from. The runner expands the collapsed task into the trials drawn above. The durations in
-    that block are engine-scaled seconds: the bot runs the engine clock twenty times faster, so the twenty-second
-    response window is one real second, which is what a local model needs to answer. The trial sub-process carries a
-    standard loop marker, not the parallel multi-instance marker the study's `Subject` carries: an n-back trial is
-    answered against the digit before it, so the trials depend on one another and the subjects do not.
+    a stimulus activity reading its timings from the 1-back protocol, a boundary timer that closes the response window,
+    labelled match and non-match branches, and a timer for the inter-stimulus interval. The timings are the protocol's,
+    for a person, as the study file states them (`NBack_Protocol`): each digit shows for 0.5 s and the next follows 2.2
+    s later, so the window to answer is 2.7 s from the digit's onset; the test blocks are not paced by the player, so
+    the next digit ends the window whether or not an answer came. Below, the same two test blocks collapsed into the
+    single Behaverse task the study actually wires (`NB` / `XCIT_NB_01`, two test blocks of twenty-eight digits, after
+    three tutorial blocks and a practice block the drawing omits), configured by the same protocol and by the task
+    settings, the `Bot:` block, which is how the build plays for an actor that is not a person and where it departs from
+    the protocol: the stream waits up to 30 s for each answer instead of moving on every 2.7 s. The runner expands the
+    collapsed task into the trials drawn above. The trial sub-process carries a standard loop marker, not the parallel
+    multi-instance marker the study's subjects' pool carries: an n-back trial is answered against the digit before it,
+    so the trials depend on one another and the subjects do not.
   seed: 42
   flowElements:
     A_Start:
@@ -33,18 +35,21 @@ NBack:
           type: StartEvent
         Present:
           type: Task
-          name: Present digit (0.3 s)
+          name: Present digit (0.5 s)
           dataInputAssociations:
             In_Params:
               sourceRef:
                 - Params_NBack
         Response_Window:
           type: BoundaryEvent
-          name: Response window (20 s scaled, 1 s real)
+          name: Response window (2.7 s from the digit's onset)
+          documentation: >-
+            The protocol's 0.5 s of the digit and 2.2 s of the interval after it: the test blocks are not paced by the
+            player, so the next digit closes the window whether or not an answer came.
           eventDefinitions:
             Timer_RW:
               type: TimerEventDefinition
-              timeDuration: PT20S
+              timeDuration: PT2.7S
           attachedToRef: Present
         Match:
           type: ExclusiveGateway
@@ -62,11 +67,14 @@ NBack:
           type: ExclusiveGateway
         ISI:
           type: IntermediateCatchEvent
-          name: Inter-stimulus interval (0.3 s)
+          name: Inter-stimulus interval (2.2 s)
+          documentation: >-
+            The protocol's 2.2 s between the digit's offset and the next digit's onset, which runs whether or not an
+            answer came; drawn after the answer for reading order.
           eventDefinitions:
             Timer_ISI:
               type: TimerEventDefinition
-              timeDuration: PT0.3S
+              timeDuration: PT2.2S
         T_End:
           type: EndEvent
         TF_1: T_Start -> Present
@@ -90,21 +98,139 @@ NBack:
       name: Block complete
     Params_NBack:
       type: studyflow:Parameters
-      name: Task settings (1-back)
+      name: 1-back protocol
+      documentation: >-
+        The 1-back protocol of the study (`NBack_Protocol`), its values unchanged: the trial above reads the test
+        blocks' timings from it.
       values:
-        Bot:
-          Speed: 20
-          SkipInstructions: true
-          AutoClickInstructions: true
-          SkipFocusArea: true
-          overrideUserInputParameters: true
-          playerPaced: true
-          useNonMatchButton: true
-          maxResponseTime: 20
-          OverrideTemporalParameters: true
-          StimulusDisplayDuration: 0.3
-          InterStimulusInterval: 0.3
-          TrialForeperiod: 0.1
+        Blocks:
+          XCIT_NB_01_Practice:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 14
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: NBack
+                      NValue:
+                        Reference: NValue
+                      StreamSize:
+                        Reference: StreamSize
+                      FeatureValuesCount:
+                        Reference: FeatureValuesCount
+                      MatchCount: 6
+                      PostLureCount: 5
+                      PreLureCount: 5
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: true
+              ShowCorrectTrialResponseFeedback: OnTimeout
+          XCIT_NB_01_Test_A:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 28
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: Ordered
+                      Values:
+                        - 5
+                        - 5
+                        - 2
+                        - 5
+                        - 5
+                        - 9
+                        - 7
+                        - 7
+                        - 7
+                        - 8
+                        - 3
+                        - 8
+                        - 4
+                        - 4
+                        - 3
+                        - 4
+                        - 3
+                        - 2
+                        - 2
+                        - 6
+                        - 6
+                        - 9
+                        - 9
+                        - 8
+                        - 1
+                        - 6
+                        - 1
+                        - 1
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: false
+              ShowCorrectTrialResponseFeedback: Never
+          XCIT_NB_01_Test_B:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 28
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: Ordered
+                      Values:
+                        - 4
+                        - 5
+                        - 4
+                        - 4
+                        - 9
+                        - 3
+                        - 3
+                        - 3
+                        - 1
+                        - 1
+                        - 4
+                        - 1
+                        - 2
+                        - 9
+                        - 9
+                        - 5
+                        - 6
+                        - 5
+                        - 6
+                        - 6
+                        - 7
+                        - 7
+                        - 8
+                        - 8
+                        - 8
+                        - 2
+                        - 7
+                        - 2
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: false
+              ShowCorrectTrialResponseFeedback: Never
     AF_1: A_Start -> Trial
     AF_2: Trial -> A_End
     B_Start:
@@ -116,34 +242,182 @@ NBack:
       instrument: NB
       timeline: XCIT_NB_01
       dataInputAssociations:
+        In_Protocol_WorkingMemory:
+          sourceRef:
+            - NBack_Protocol
         In_Pace_WorkingMemory:
           sourceRef:
             - Bot_Pace_NB
       dataOutputAssociations:
         Out_Trials_WorkingMemory:
           targetRef: Dataset_Trials
+    NBack_Protocol:
+      type: studyflow:Parameters
+      name: 1-back protocol
+      documentation: >-
+        The protocol of the 1-back's practice and test blocks on the build's `XCIT_NB_01` timeline, written out at the
+        values the build ships, so that the file rather than the build states them; the three tutorial blocks before
+        them run as the build ships them. Digits 1 to 9, one at a time; the first digit of a block has none before it
+        and takes no answer. The practice block's 14 digits are drawn by the build's 1-back generator with the numbers
+        of matches and lures stated here; the test blocks' 28 digits come in the fixed orders below, 9 matches in each.
+        A digit shows for 0.5 s and the next follows 2.2 s later, whether or not an answer came, so the window to answer
+        is 2.7 s. The practice block marks every answer and shows the right one after a miss; the test blocks show
+        nothing. The build merges these Parameters over its own definitions of the blocks.
+      values:
+        Blocks:
+          XCIT_NB_01_Practice:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 14
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: NBack
+                      NValue:
+                        Reference: NValue
+                      StreamSize:
+                        Reference: StreamSize
+                      FeatureValuesCount:
+                        Reference: FeatureValuesCount
+                      MatchCount: 6
+                      PostLureCount: 5
+                      PreLureCount: 5
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: true
+              ShowCorrectTrialResponseFeedback: OnTimeout
+          XCIT_NB_01_Test_A:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 28
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: Ordered
+                      Values:
+                        - 5
+                        - 5
+                        - 2
+                        - 5
+                        - 5
+                        - 9
+                        - 7
+                        - 7
+                        - 7
+                        - 8
+                        - 3
+                        - 8
+                        - 4
+                        - 4
+                        - 3
+                        - 4
+                        - 3
+                        - 2
+                        - 2
+                        - 6
+                        - 6
+                        - 9
+                        - 9
+                        - 8
+                        - 1
+                        - 6
+                        - 1
+                        - 1
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: false
+              ShowCorrectTrialResponseFeedback: Never
+          XCIT_NB_01_Test_B:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 28
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: Ordered
+                      Values:
+                        - 4
+                        - 5
+                        - 4
+                        - 4
+                        - 9
+                        - 3
+                        - 3
+                        - 3
+                        - 1
+                        - 1
+                        - 4
+                        - 1
+                        - 2
+                        - 9
+                        - 9
+                        - 5
+                        - 6
+                        - 5
+                        - 6
+                        - 6
+                        - 7
+                        - 7
+                        - 8
+                        - 8
+                        - 8
+                        - 2
+                        - 7
+                        - 2
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: false
+              ShowCorrectTrialResponseFeedback: Never
     Bot_Pace_NB:
       type: studyflow:Parameters
       name: Task settings (1-back)
       documentation: >-
-        The whole block the study wires into the task: the stream waits for the actor instead of running on a fixed
-        clock, which is what lets a model take it at all, and its stimulus, interval and foreperiod are compressed. It
-        defines no block and no timeline; the protocol is the instrument and the timeline alone, and the trials are the
-        timeline's own, in order.
+        Not the protocol: how the build plays the 1-back for an actor that is not a person, and where it departs from
+        the protocol. It skips the screens nobody is there to click and keeps the engine clock at the protocol's own
+        pace (`Speed: 1`). The stream waits for each answer, up to 30 s, instead of moving on every 2.7 s, which is what
+        lets a model take it at all; the window reaches the actor with each trial, and the runner waits for the answer
+        as long. The foreperiod and the digit's move take 0.1 s. The build marks a 1-back answer right or wrong only in
+        a block that shows accuracy feedback, which the test blocks do not, so the bot shows it in every block; an actor
+        that reads the trial as text sees none of it.
       values:
         Bot:
-          Speed: 20
+          Speed: 1
           SkipInstructions: true
           AutoClickInstructions: true
           SkipFocusArea: true
           overrideUserInputParameters: true
           playerPaced: true
           useNonMatchButton: true
-          maxResponseTime: 20
+          maxResponseTime: 30
           OverrideTemporalParameters: true
-          StimulusDisplayDuration: 0.3
-          InterStimulusInterval: 0.3
           TrialForeperiod: 0.1
+          stimulusMovingAnimationDuration: 0.1
+          overrideFeedbackParameters: true
+          showAccuracyOnButtonFeedback: true
     Dataset_Trials:
       type: behaverse:BDMDataset
       name: Trials
@@ -196,7 +470,7 @@ layout:
     stroke: "#5c8a55"
   Response_Window:
     bounds: 422 227 36 36
-    label: 300 254 116 27
+    label: 262 256 172 27
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   Match:
@@ -265,7 +539,7 @@ layout:
     stroke: "#5c8a55"
   Params_NBack:
     bounds: 372 95 36 50
-    label: 414 108 110 27
+    label: 414 114 90 14
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   AF_1:
@@ -277,27 +551,36 @@ layout:
     fill: "#dcebd6"
     stroke: "#5c8a55"
   Task_WorkingMemory:
-    bounds: 240 410 150 80
+    bounds: 240 410 190 80
     font: "#5c8a55"
     fill: "#dcebd6"
     stroke: "#5c8a55"
+  In_Protocol_WorkingMemory:
+    waypoint: 274,515 274,490
+    stroke: "#5c8a55"
   In_Pace_WorkingMemory:
-    waypoint: 276,515 276,490
+    waypoint: 334,515 334,490
     stroke: "#5c8a55"
   Out_Trials_WorkingMemory:
-    waypoint: 355,490 355,515
+    waypoint: 405,490 405,515
+    stroke: "#5c8a55"
+  NBack_Protocol:
+    bounds: 256 515 36 50
+    label: 170 527 80 27
+    fill: "#f0f6ee"
     stroke: "#5c8a55"
   Bot_Pace_NB:
-    bounds: 258 515 36 50
-    label: 165 527 88 27
+    bounds: 316 515 36 50
+    label: 284 571 100 27
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   Dataset_Trials:
-    bounds: 330 515 50 50
+    bounds: 380 515 50 50
+    label: 436 533 56 14
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   B_End:
-    bounds: 440 432 36 36
+    bounds: 480 432 36 36
     fill: "#dcebd6"
     stroke: "#5c8a55"
   BF_1:
@@ -307,4 +590,4 @@ layout:
   Group_A:
     bounds: 160 40 890 310
   Group_B:
-    bounds: 160 370 890 220
+    bounds: 160 370 890 240

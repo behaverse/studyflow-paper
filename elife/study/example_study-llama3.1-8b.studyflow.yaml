@@ -24,6 +24,7 @@ Example_Study_Collaboration:
       dependencies:
         - pandas==2.3.3
         - scipy==1.16.2
+        - pingouin==0.7.0
         - scikit-learn==1.7.2
         - matplotlib==3.10.7
       authors:
@@ -236,10 +237,10 @@ Example_Study:
       documentation: >-
         The Simon task the Behaverse build ships as WhichOne (`WO`), on its `SimonTask` timeline: one block, a coloured
         disk on the left or the right, answered by its colour, its congruency (congruent, incongruent, neutral) drawn
-        per trial, so the congruency contrast is inside the block. How many trials the block runs is the Simon timeline
-        wired in beside the task's settings. The task carries no message flow of its own: the trial and response
-        exchange is the pool's, which every task inside inherits, and its result carries the share of the trials the
-        build showed that it recorded no valid response for.
+        per trial, so the congruency contrast is inside the block. The Simon protocol wired into it states every value
+        of the block, and the task settings beside it how the build plays for the actor. The task carries no message
+        flow of its own: the trial and response exchange is the pool's, which every task inside inherits, and its result
+        carries the share of the trials the build showed that it recorded no valid response for.
       implementation: behaverse://assessment-unity@26.10
       instrument: WO
       timeline: SimonTask
@@ -260,11 +261,15 @@ Example_Study:
           targetRef: Dataset_Trials
     Simon_Timeline:
       type: studyflow:Parameters
-      name: Simon timeline
+      name: Simon protocol
       documentation: >-
-        The protocol of the Simon task: its timeline as the build ships it, one block (`Simon`) that its exit rule ends
-        after a number of trials. The build merges these Parameters over its own definition of the timeline, so this
-        number is the one place the study sets how many trials every subject meets.
+        The protocol of the Simon task, written out at the values the build ships, so that the file rather than the
+        build states them. One block of 30 trials and no practice. A trial: 1 s from its start to the disk, which shows
+        for 1 s or until the answer; 5 s to answer; a tick or a cross after every answer; 0.5 s before the next trial.
+        The disk has the colour of the correct button; its congruency (congruent, over the correct button; incongruent,
+        over the other; neutral, centred) and the correct button are each drawn per trial, uniformly and with
+        replacement, by the build's generator, whose seed is drawn when the task starts and recorded with every trial.
+        The build merges these Parameters over its own definition of the timeline.
       values:
         Timelines:
           SimonTask:
@@ -272,22 +277,60 @@ Example_Study:
               - Name: Simon
                 ExitRules:
                   - Trials: 30
+                Parameters:
+                  PrimaryFeature: Color
+                  SecondaryFeature: Position
+                  ButtonCount: 2
+                  ButtonSymbols: Disk
+                  ButtonColors:
+                    - "#FFC826"
+                    - "#2D50C8"
+                  NeutralSymbol: Disk
+                  NeutralColor: "#FFFFFF"
+                  ShowButtonContent: true
+                  InputDevice: MouseOrTouch
+                  ResponseButtonKeys:
+                    - LeftArrow
+                    - RightArrow
+                  Congruency:
+                    Distribution:
+                      Type: Uniform
+                  CorrectButton:
+                    Distribution:
+                      Type: Uniform
+                  TaskPace: PlayerDriven
+                  FixationPointDisplayDuration: 0
+                  StimulusOnset: 1
+                  StimulusDisplayDuration: 1
+                  MaxResponseTime: 5
+                  ShowAccuracyCheckFeedback: Always
+                  ShowCorrectTrialResponseFeedback: Never
+                  InterTrialInterval: 0.5
     Bot_Pace_Simon:
       type: studyflow:Parameters
       name: Task settings (Simon)
       documentation: >-
-        Not the protocol: how the build plays for an actor that is not a person. It skips the instruction screens nobody
-        is there to click and runs the engine clock faster; WhichOne's response window is not scaled by it. A Parameters
-        object only reaches a step it is wired into, so each task carries its own.
+        Not the protocol: how the build plays the Simon task for an actor that is not a person, and where it departs
+        from the protocol. It skips the screens nobody is there to click and keeps the engine clock at the protocol's
+        own pace (`Speed: 1`). Every trial gives the actor 30 s to answer instead of the protocol's 5 s, so that a model
+        slower than a person still answers in time: the block repeats one trial that carries this window, and the
+        protocol's exit rule still ends it after 30. The window reaches the actor with each trial, and the runner waits
+        for the answer as long. A Parameters object only reaches a step it is wired into, so each task carries its own.
       values:
         Bot:
-          Speed: 5
+          Speed: 1
           SkipInstructions: true
           AutoClickInstructions: true
           SkipFocusArea: true
+        Blocks:
+          Simon:
+            RepeatTrials: true
+            Trials:
+              - Parameters:
+                  MaxResponseTime: 30
     Failed_Interference:
       type: BoundaryEvent
-      name: "> 20% unanswered"
+      name: "> {max_unanswered:%} unanswered"
       documentation: >-
         The attrition rule, as the condition a BPMN conditional boundary event watches rather than an attribute of the
         task: the task's own result carries the share of the trials it recorded no valid response for, and above one in
@@ -304,7 +347,8 @@ Example_Study:
       documentation: >-
         The 1-back the build ships as `NB`, on `XCIT_NB_01`, the timeline the battery's human studies run: three
         tutorial blocks and a practice block, then two test blocks of 28 digits, of which the analysis keeps the test
-        blocks. The build sends each trial's digit alone, so the actor answers from what it remembers of the trial
+        blocks. The 1-back protocol wired into it states the practice and test blocks; the tutorials run as the build
+        ships them. The build sends each trial's digit alone, so the actor answers from what it remembers of the trial
         before: the Actor pool keeps one conversation per subject.
       implementation: behaverse://assessment-unity@26.10
       instrument: NB
@@ -315,41 +359,185 @@ Example_Study:
         In_Prompt_Task_WorkingMemory:
           sourceRef:
             - Prompt_Battery
+        In_Protocol_Task_WorkingMemory:
+          sourceRef:
+            - NBack_Protocol
         In_Pace_Task_WorkingMemory:
           sourceRef:
             - Bot_Pace_NB
       dataOutputAssociations:
         Out_Trials_Task_WorkingMemory:
           targetRef: Dataset_Trials
+    NBack_Protocol:
+      type: studyflow:Parameters
+      name: 1-back protocol
+      documentation: >-
+        The protocol of the 1-back's practice and test blocks on the build's `XCIT_NB_01` timeline, written out at the
+        values the build ships, so that the file rather than the build states them; the three tutorial blocks before
+        them run as the build ships them. Digits 1 to 9, one at a time; the first digit of a block has none before it
+        and takes no answer. The practice block's 14 digits are drawn by the build's 1-back generator with the numbers
+        of matches and lures stated here; the test blocks' 28 digits come in the fixed orders below, 9 matches in each.
+        A digit shows for 0.5 s and the next follows 2.2 s later, whether or not an answer came, so the window to answer
+        is 2.7 s. The practice block marks every answer and shows the right one after a miss; the test blocks show
+        nothing. The build merges these Parameters over its own definitions of the blocks.
+      values:
+        Blocks:
+          XCIT_NB_01_Practice:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 14
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: NBack
+                      NValue:
+                        Reference: NValue
+                      StreamSize:
+                        Reference: StreamSize
+                      FeatureValuesCount:
+                        Reference: FeatureValuesCount
+                      MatchCount: 6
+                      PostLureCount: 5
+                      PreLureCount: 5
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: true
+              ShowCorrectTrialResponseFeedback: OnTimeout
+          XCIT_NB_01_Test_A:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 28
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: Ordered
+                      Values:
+                        - 5
+                        - 5
+                        - 2
+                        - 5
+                        - 5
+                        - 9
+                        - 7
+                        - 7
+                        - 7
+                        - 8
+                        - 3
+                        - 8
+                        - 4
+                        - 4
+                        - 3
+                        - 4
+                        - 3
+                        - 2
+                        - 2
+                        - 6
+                        - 6
+                        - 9
+                        - 9
+                        - 8
+                        - 1
+                        - 6
+                        - 1
+                        - 1
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: false
+              ShowCorrectTrialResponseFeedback: Never
+          XCIT_NB_01_Test_B:
+            Parameters:
+              NValue: 1
+              Feature: Digits
+              FeatureValuesCount: 9
+              StreamSize: 28
+              Streams:
+                - Feature:
+                    Reference: Feature
+                  StimulusValue:
+                    Generate: OncePerBlock
+                    Sequence:
+                      Type: Ordered
+                      Values:
+                        - 4
+                        - 5
+                        - 4
+                        - 4
+                        - 9
+                        - 3
+                        - 3
+                        - 3
+                        - 1
+                        - 1
+                        - 4
+                        - 1
+                        - 2
+                        - 9
+                        - 9
+                        - 5
+                        - 6
+                        - 5
+                        - 6
+                        - 6
+                        - 7
+                        - 7
+                        - 8
+                        - 8
+                        - 8
+                        - 2
+                        - 7
+                        - 2
+              UseNonMatchButton: true
+              PlayerPaced: false
+              StimulusDisplayDuration: 0.5
+              InterStimulusInterval: 2.2
+              TrialForeperiod: 0
+              ShowAccuracyFeedback: false
+              ShowCorrectTrialResponseFeedback: Never
     Bot_Pace_NB:
       type: studyflow:Parameters
       name: Task settings (1-back)
       documentation: >-
-        Not the protocol: how the build plays for an actor that is not a person. The same pacing, plus the fields the
-        1-back's own bot declares: the stream waits for the actor instead of running on a fixed clock, which is what
-        lets a model take it at all, with a response window of `maxResponseTime` engine seconds, which `Speed` divides;
-        its stimulus, interval and foreperiod are compressed. The build marks a 1-back answer correct or not only in a
-        block that shows accuracy feedback, which the test blocks do not, so the bot shows it in every block; an actor
+        Not the protocol: how the build plays the 1-back for an actor that is not a person, and where it departs from
+        the protocol. It skips the screens nobody is there to click and keeps the engine clock at the protocol's own
+        pace (`Speed: 1`). The stream waits for each answer, up to 30 s, instead of moving on every 2.7 s, which is what
+        lets a model take it at all; the window reaches the actor with each trial, and the runner waits for the answer
+        as long. The foreperiod and the digit's move take 0.1 s. The build marks a 1-back answer right or wrong only in
+        a block that shows accuracy feedback, which the test blocks do not, so the bot shows it in every block; an actor
         that reads the trial as text sees none of it.
       values:
         Bot:
-          Speed: 20
+          Speed: 1
           SkipInstructions: true
           AutoClickInstructions: true
           SkipFocusArea: true
           overrideUserInputParameters: true
           playerPaced: true
           useNonMatchButton: true
-          maxResponseTime: 20
+          maxResponseTime: 30
           OverrideTemporalParameters: true
-          StimulusDisplayDuration: 0.3
-          InterStimulusInterval: 0.3
           TrialForeperiod: 0.1
+          stimulusMovingAnimationDuration: 0.1
           overrideFeedbackParameters: true
           showAccuracyOnButtonFeedback: true
     Failed_WorkingMemory:
       type: BoundaryEvent
-      name: "> 20% unanswered"
+      name: "> {max_unanswered:%} unanswered"
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
@@ -357,7 +545,7 @@ Example_Study:
       attachedToRef: Task_WorkingMemory
     Discontinued:
       type: EndEvent
-      name: "Discontinued: more than 20% of trials unanswered (n={reached})"
+      name: "Discontinued: more than {max_unanswered:%} of trials unanswered (n={reached})"
     Debrief:
       type: cognitive:Instruction
       name: Debrief
@@ -797,166 +985,70 @@ Analysis_Report:
           type: SubProcess
           name: Congruency effect
           documentation: >-
-            Is a subject less accurate on incongruent than on congruent Simon trials? Per subject, the mean accuracy on
-            congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
-            one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects
-            than the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The
-            descriptive table by instruction condition and congruency is written out either way.
+            Is a subject less accurate on incongruent than on congruent Simon trials? The descriptive table by
+            instruction condition and congruency is written out first, either way. Then one call does the test: per
+            subject, the mean accuracy on congruent trials and the mean on incongruent ones, compared by a one-sided
+            paired t test in the predicted direction; trials with no congruency, the 1-back's, take no part. The decision
+            was fixed before the first run: not testable with fewer analysed subjects than the decision rules' minimum,
+            supported when p is below their alpha, not supported otherwise.
           properties:
-            by_congruency:
-              name: by_congruency
-            accuracy_congruent:
-              name: accuracy_congruent
-            accuracy_incongruent:
-              name: accuracy_incongruent
-            congruency_costs:
-              name: congruency_costs
-            congruency_n:
-              name: congruency_n
             congruency_test:
               name: congruency_test
           flowElements:
             C_Start:
               type: StartEvent
-            Cost_Per_Subject:
-              type: SubProcess
-              name: Accuracy cost per subject
-              documentation: >-
-                The descriptive table by instruction condition and congruency, written out as it stands; then, per
-                subject, the mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects
-                have both.
-              flowElements:
-                CP_Start:
-                  type: StartEvent
-                Congruency_Table:
-                  type: ServiceTask
-                  name: Accuracy by congruency
-                  dataInputAssociations:
-                    In_Trials_C:
-                      sourceRef:
-                        - analysed_trials
-                      transformation: self
-                  dataOutputAssociations:
-                    Out_Congruency:
-                      targetRef: File_Congruency
-                  additionalArguments:
-                    index:
-                      - context.state.arm
-                      - trialContext.congruency
-                    values:
-                      - result.isCorrect
-                    aggfunc: mean
-                  implementation: python://pandas.DataFrame.pivot_table
-                By_Congruency:
-                  type: ServiceTask
-                  name: Accuracy, one column per congruency
-                  dataInputAssociations:
-                    In_Trials_BC:
-                      sourceRef:
-                        - analysed_trials
-                      transformation: self
-                  dataOutputAssociations:
-                    Out_BC:
-                      targetRef: by_congruency
-                  additionalArguments:
-                    index: context.subject
-                    columns: trialContext.congruency
-                    values: result.isCorrect
-                    aggfunc: mean
-                  implementation: python://pandas.DataFrame.pivot_table
-                Accuracy_Incongruent:
-                  type: ServiceTask
-                  name: Incongruent accuracies
-                  documentation: The incongruent column, one accuracy per subject; empty when no subject was analysed.
-                  dataInputAssociations:
-                    In_BC_I:
-                      sourceRef:
-                        - by_congruency
-                      transformation: self
-                  dataOutputAssociations:
-                    Out_Incongruent:
-                      targetRef: accuracy_incongruent
-                  additionalArguments:
-                    key: Incongruent
-                    default:
-                      implementation: python://pandas.Series
-                      arguments:
-                        dtype: float
-                  implementation: python://pandas.DataFrame.get
-                Accuracy_Congruent:
-                  type: ServiceTask
-                  name: Congruent accuracies
-                  documentation: The congruent column, one accuracy per subject; empty when no subject was analysed.
-                  dataInputAssociations:
-                    In_BC_C:
-                      sourceRef:
-                        - by_congruency
-                      transformation: self
-                  dataOutputAssociations:
-                    Out_Congruent:
-                      targetRef: accuracy_congruent
-                  additionalArguments:
-                    key: Congruent
-                    default:
-                      implementation: python://pandas.Series
-                      arguments:
-                        dtype: float
-                  implementation: python://pandas.DataFrame.get
-                Cost:
-                  type: ServiceTask
-                  name: Congruency cost per subject
-                  dataInputAssociations:
-                    In_Cost_C:
-                      sourceRef:
-                        - accuracy_congruent
-                      transformation: self
-                    In_Cost_I:
-                      sourceRef:
-                        - accuracy_incongruent
-                      transformation: other
-                  dataOutputAssociations:
-                    Out_Costs:
-                      targetRef: congruency_costs
-                    Out_Cost_N:
-                      targetRef: congruency_n
-                      transformation: count(result)
-                  implementation: python://pandas.Series.sub
-                File_Congruency:
-                  type: DataObjectReference
-                  name: Congruency table
-                  uri: results/congruency.csv
-                CP_End:
-                  type: EndEvent
-                CPF_0: CP_Start -> Congruency_Table
-                CPF_1: Congruency_Table -> By_Congruency
-                CPF_2: By_Congruency -> Accuracy_Congruent
-                CPF_3: Accuracy_Congruent -> Accuracy_Incongruent
-                CPF_4: Accuracy_Incongruent -> Cost
-                CPF_5: Cost -> CP_End
+            Congruency_Table:
+              type: ServiceTask
+              name: Accuracy by congruency
+              dataInputAssociations:
+                In_Trials_C:
+                  sourceRef:
+                    - analysed_trials
+                  transformation: self
+              dataOutputAssociations:
+                Out_Congruency:
+                  targetRef: File_Congruency
+              additionalArguments:
+                index:
+                  - context.state.arm
+                  - trialContext.congruency
+                values:
+                  - result.isCorrect
+                aggfunc: mean
+              implementation: python://pandas.DataFrame.pivot_table
+            File_Congruency:
+              type: DataObjectReference
+              name: Congruency table
+              uri: results/congruency.csv
             Enough_Subjects:
               type: ExclusiveGateway
               name: Enough subjects?
               default: C_Enough
             Cost_Test:
               type: ServiceTask
-              name: One-sided t test
+              name: One-sided paired t test
+              documentation: >-
+                Averages each subject's trials within each congruency, then tests congruent against incongruent across
+                subjects, one-sided; the same t as the congruent-minus-incongruent cost tested against zero. The Simon task
+                also has neutral trials, a third level; the decision reads the first row only, Congruent against Incongruent.
               dataInputAssociations:
-                In_Costs:
+                In_Trials_Test:
                   sourceRef:
-                    - congruency_costs
-                  transformation: a
+                    - analysed_trials
+                  transformation: data
               dataOutputAssociations:
                 Out_Cost_Test:
                   targetRef: congruency_test
-                  transformation: "{statistic: result.statistic, pvalue: result.pvalue}"
+                  transformation: "{statistic: result.T[1], pvalue: result.p_unc[1], subjects: result.dof[1] + 1}"
                 Out_Cost_File:
                   targetRef: File_Congruency_Test
-                  transformation: "{statistic: result.statistic, pvalue: result.pvalue, subjects: congruency_n}"
+                  transformation: "{statistic: result.T[1], pvalue: result.p_unc[1], subjects: result.dof[1] + 1}"
               additionalArguments:
-                popmean: 0
+                dv: result.isCorrect
+                within: trialContext.congruency
+                subject: context.subject
                 alternative: greater
-                nan_policy: omit
-              implementation: python://scipy.stats.ttest_1samp
+              implementation: python://pingouin.pairwise_tests
             Congruency_Decision:
               type: ExclusiveGateway
               name: Less accurate when incongruent?
@@ -974,11 +1066,11 @@ Analysis_Report:
               type: DataObjectReference
               name: Congruency test
               uri: results/congruency_test.json
-            CF_0: C_Start -> Cost_Per_Subject
-            CF_1: Cost_Per_Subject -> Enough_Subjects
+            CF_0: C_Start -> Congruency_Table
+            CF_1: Congruency_Table -> Enough_Subjects
             C_Too_Few:
               name: too few
-              conditionExpression: congruency_n < min_subjects
+              conditionExpression: analysed_subjects < min_subjects
               sourceRef: Enough_Subjects
               targetRef: C_Not_Testable
             C_Enough:
@@ -1304,7 +1396,7 @@ layout:
     waypoint: 178,652 178,740 310,740
     stroke: "#5c8a55"
   In_Pace_Task_Interference:
-    waypoint: 328,652 328,678
+    waypoint: 425,110 425,678
     stroke: "#5c8a55"
   Out_Trials_Task_Interference:
     waypoint: 385,770 385,920
@@ -1315,8 +1407,8 @@ layout:
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   Bot_Pace_Simon:
-    bounds: 310 602 36 50
-    label: 200 612 104 28
+    bounds: 407 60 36 50
+    label: 297 70 104 28
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   Failed_Interference:
@@ -1332,15 +1424,23 @@ layout:
   In_Prompt_Task_WorkingMemory:
     waypoint: 518,652 518,664 560,664 560,678
     stroke: "#5c8a55"
+  In_Protocol_Task_WorkingMemory:
+    waypoint: 600,652 600,678
+    stroke: "#5c8a55"
   In_Pace_Task_WorkingMemory:
-    waypoint: 708,652 708,664 618,664 618,678
+    waypoint: 680,110 680,664 618,664 618,678
     stroke: "#5c8a55"
   Out_Trials_Task_WorkingMemory:
     waypoint: 565,770 565,945 410,945
     stroke: "#5c8a55"
+  NBack_Protocol:
+    bounds: 582 602 36 50
+    label: 622 606 56 28
+    fill: "#f0f6ee"
+    stroke: "#5c8a55"
   Bot_Pace_NB:
-    bounds: 690 602 36 50
-    label: 732 608 96 28
+    bounds: 662 60 36 50
+    label: 704 70 96 28
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   Failed_WorkingMemory:

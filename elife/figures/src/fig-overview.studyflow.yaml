@@ -18,6 +18,7 @@ Example_Study:
   dependencies:
     - pandas==2.3.3
     - scipy==1.16.2
+    - pingouin==0.7.0
     - scikit-learn==1.7.2
     - matplotlib==3.10.7
   authors:
@@ -42,9 +43,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:52.518+02:00"
+          when: "2026-10-02T22:31:17.264+02:00"
           run: run-planted
-          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
+          commit: 04736de574a29ef222d58db95575721336c39a6a
       onset: T0
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
     Screening:
@@ -54,9 +55,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:52.519+02:00"
+          when: "2026-10-02T22:31:17.264+02:00"
           run: run-planted
-          commit: 8458fc986f31bc4b896c474890a4e1ae82278ece
+          commit: 5004516b611a0b41d8d1e0dbab502963e302b83f
       checklist: |-
         - [x] Consent recorded
         - [x] Executor configuration pinned (model id, sampling parameters)
@@ -74,10 +75,10 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:52.538+02:00"
+          when: "2026-10-02T22:31:17.284+02:00"
           what: Flow_Eligible
           run: run-planted
-          commit: 68027048aa09556256c57d15933e3895f16fb2b9
+          commit: 87adeb78b10a9a69151090d7c899b11e34163ef2
       default: Flow_Excluded_Pre
     Excluded_Pre:
       type: EndEvent
@@ -90,10 +91,10 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:52.558+02:00"
+          when: "2026-10-02T22:31:17.302+02:00"
           what: Flow_Allocate_Cautious
           run: run-planted
-          commit: c15a30a312b6f5e6642275ef6baa244d6305306e
+          commit: 1974937fabcff2a6884e5d949ad5c568ea3e2344
       default: Flow_Allocate_Impulsive
     Allocate_Cautious:
       type: ServiceTask
@@ -101,9 +102,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:52.578+02:00"
+          when: "2026-10-02T22:31:17.321+02:00"
           run: run-planted
-          commit: cf871ca7b526aadfae2d36b4111b66d92f4b5f0c
+          commit: df98987b7456aba25cf37ef519f926827bfe4f36
       onset: T0
       duration: 1s
       additionalArguments:
@@ -116,9 +117,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:49.020+02:00"
+          when: "2026-10-02T22:31:14.042+02:00"
           run: run-planted
-          commit: ce83c73b1c8c93f2038e13e34bef3139b8052779
+          commit: 431e2ef90fdf69e4157df45e6cc34ca3985dfc89
       onset: T0
       duration: 1s
       additionalArguments:
@@ -142,9 +143,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:53.753+02:00"
+          when: "2026-10-02T22:31:18.486+02:00"
           run: run-planted
-          commit: 4cc128f6352cd0b72f965370392462e6c9a5bc23
+          commit: 2320d3fb5725344af2f587182b3ac6c0436d9120
       onset: T0+20s
       duration: 40s
       dataInputAssociations:
@@ -153,7 +154,7 @@ Example_Study:
             - Prompt_Battery
     Failed_Interference:
       type: BoundaryEvent
-      name: "> 20% unanswered"
+      name: "> {max_unanswered:%} unanswered"
       eventDefinitions:
         Cond_Interference:
           type: ConditionalEventDefinition
@@ -167,9 +168,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:55.721+02:00"
+          when: "2026-10-02T22:31:20.503+02:00"
           run: run-planted
-          commit: 46af6df211e078dbce98f31197fa182ca79307a9
+          commit: b77f6114e7846a11f0de378dac297507915402fc
       onset: T0+60s
       duration: 3min
       dataOutputAssociations:
@@ -177,7 +178,7 @@ Example_Study:
           targetRef: Dataset_Trials
     Failed_WorkingMemory:
       type: BoundaryEvent
-      name: "> 20% unanswered"
+      name: "> {max_unanswered:%} unanswered"
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
@@ -190,30 +191,30 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: created
-          when: "2026-10-02T19:29:55.721+02:00"
+          when: "2026-10-02T22:31:20.503+02:00"
           run: run-planted
       uri: data/trials.jsonl
     Discontinued:
       type: EndEvent
-      name: "Discontinued: more than 20% of trials unanswered (n={reached})"
+      name: "Discontinued: more than {max_unanswered:%} of trials unanswered (n={reached})"
     Sub_End:
       type: EndEvent
       name: Completed the protocol (n={reached})
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:55.780+02:00"
+          when: "2026-10-02T22:31:20.560+02:00"
           run: run-planted
-          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
+          commit: 04736de574a29ef222d58db95575721336c39a6a
     All_Complete:
       type: StartEvent
       name: All subjects complete
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:29:55.781+02:00"
+          when: "2026-10-02T22:31:20.561+02:00"
           run: run-planted
-          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
+          commit: 04736de574a29ef222d58db95575721336c39a6a
       eventDefinitions:
         Def_All_Complete:
           type: MessageEventDefinition
@@ -224,9 +225,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:30:08.043+02:00"
+          when: "2026-10-02T22:31:34.251+02:00"
           run: run-planted
-          commit: 4ece089d28dd1eef810706d940f4e52b34e98c0e
+          commit: a9e76179bb892c8a6a0dbb616d0682b58f9791db
       checklist: |-
         - [x] Trials the actor did not answer within the response window dropped
         - [x] The 1-back's tutorial and practice blocks dropped
@@ -239,9 +240,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:30:08.061+02:00"
+          when: "2026-10-02T22:31:34.355+02:00"
           run: run-planted
-          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
+          commit: 04736de574a29ef222d58db95575721336c39a6a
       checklist: |-
         - [x] CONSORT participant flow exported from the Figure view
         - [x] SPIRIT schedule exported from the Gantt view
@@ -254,9 +255,9 @@ Example_Study:
       extensionElements:
         - type: prov:Activity
           action: executed
-          when: "2026-10-02T19:30:08.079+02:00"
+          when: "2026-10-02T22:31:34.461+02:00"
           run: run-planted
-          commit: 9e69a576b5cfee81e096b7ab70ad1042fa0781f4
+          commit: 04736de574a29ef222d58db95575721336c39a6a
     Flow_Enroll_Screening: Enroll -> Screening
     Flow_Screening_Eligibility: Screening -> Eligibility_Gateway
     Flow_Eligible: Eligibility_Gateway -> Randomize_Disposition
@@ -306,7 +307,7 @@ layout:
   Randomize_Disposition:
     bounds: 250 80 40 40
     isMarkerVisible: true
-    label: 190 120 96 40
+    label: 210 120 86 42
     fill: "#dbe6f2"
     stroke: "#4e6f95"
   Allocate_Cautious:
@@ -334,6 +335,7 @@ layout:
     stroke: "#5c8a55"
   Failed_Interference:
     bounds: 572 122 28 28
+    label: 409 146 210 15
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   Task_WorkingMemory:
@@ -346,6 +348,7 @@ layout:
     stroke: "#5c8a55"
   Failed_WorkingMemory:
     bounds: 716 122 28 28
+    label: 555 146 210 15
     fill: "#f0f6ee"
     stroke: "#5c8a55"
   Dataset_Trials:
@@ -434,12 +437,11 @@ state:
   _meta:
     prov:
       - action: executed
-        when: "2026-10-02T19:29:26.728+02:00"
-        who: morteza
+        when: "2026-10-02T22:30:53.718+02:00"
         with: studyflow-cli/26.9.29
         run: run-planted
         seed: 42
-        plan: sha256:6c2c0ee7f0a24c450565fda7734d81f1ef5b98a1c52d79e3e7983309c10cbe8f
+        plan: sha256:8268b53e2a332deb9c9de443785933041a804c7fb77345069ebcaa82c01c39d8
     instance:
       Participant_Subject: 8
       Simon_Block: 30
@@ -540,20 +542,7 @@ state:
       Congruency: 1
       C_Start: 1
       CF_0: 1
-      Cost_Per_Subject: 1
-      CP_Start: 1
-      CPF_0: 1
       Congruency_Table: 1
-      CPF_1: 1
-      By_Congruency: 1
-      CPF_2: 1
-      Accuracy_Congruent: 1
-      CPF_3: 1
-      Accuracy_Incongruent: 1
-      CPF_4: 1
-      Cost: 1
-      CPF_5: 1
-      CP_End: 1
       CF_1: 1
       Enough_Subjects: 1
       C_Enough: 1
@@ -629,10 +618,10 @@ state:
     smallest_arm: 4
     analysed_subjects: 8
   Congruency:
-    congruency_n: 8
     congruency_test:
       statistic: 4.079853428221753
       pvalue: 0.0023452759794757665
+      subjects: 8
   Divergence:
     divergence_test:
       accuracy: 1

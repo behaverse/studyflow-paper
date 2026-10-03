@@ -24,6 +24,7 @@ Example_Study_Collaboration:
       dependencies:
         - pandas==2.3.3
         - scipy==1.16.2
+        - pingouin==0.7.0
         - scikit-learn==1.7.2
         - matplotlib==3.10.7
       authors:
@@ -343,7 +344,7 @@ Example_Study:
         Simon_F_3: Simon_Record -> Simon_End
     Failed_Interference:
       type: BoundaryEvent
-      name: "> 20% unanswered"
+      name: "> {max_unanswered:%} unanswered"
       documentation: >-
         The attrition rule, as the condition a BPMN conditional boundary event watches rather than an attribute of the
         task: the task's own result carries the share of the trials it recorded no valid response for, and above one in
@@ -478,7 +479,7 @@ Example_Study:
         NBack_F_3: NBack_Record -> NBack_End
     Failed_WorkingMemory:
       type: BoundaryEvent
-      name: "> 20% unanswered"
+      name: "> {max_unanswered:%} unanswered"
       eventDefinitions:
         Cond_WorkingMemory:
           type: ConditionalEventDefinition
@@ -486,7 +487,7 @@ Example_Study:
       attachedToRef: Task_WorkingMemory
     Discontinued:
       type: EndEvent
-      name: "Discontinued: more than 20% of trials unanswered (n={reached})"
+      name: "Discontinued: more than {max_unanswered:%} of trials unanswered (n={reached})"
     Debrief:
       type: cognitive:Instruction
       name: Debrief
@@ -926,166 +927,69 @@ Analysis_Report:
           type: SubProcess
           name: Congruency effect
           documentation: >-
-            Is a subject less accurate on incongruent than on congruent Simon trials? Per subject, the mean accuracy on
-            congruent trials minus the mean on incongruent ones, tested against zero in the predicted direction with a
-            one-sided one-sample t test. The decision was fixed before the first run: not testable with fewer subjects
-            than the decision rules' minimum, supported when p is below their alpha, not supported otherwise. The
-            descriptive table by instruction condition and congruency is written out either way.
+            Is a subject less accurate on incongruent than on congruent Simon trials? The descriptive table by
+            instruction condition and congruency is written out first, either way. Then one call does the test: per
+            subject, the mean accuracy on congruent trials and the mean on incongruent ones, compared by a one-sided
+            paired t test in the predicted direction; trials with no congruency, the 1-back's, take no part. The decision
+            was fixed before the first run: not testable with fewer analysed subjects than the decision rules' minimum,
+            supported when p is below their alpha, not supported otherwise.
           properties:
-            by_congruency:
-              name: by_congruency
-            accuracy_congruent:
-              name: accuracy_congruent
-            accuracy_incongruent:
-              name: accuracy_incongruent
-            congruency_costs:
-              name: congruency_costs
-            congruency_n:
-              name: congruency_n
             congruency_test:
               name: congruency_test
           flowElements:
             C_Start:
               type: StartEvent
-            Cost_Per_Subject:
-              type: SubProcess
-              name: Accuracy cost per subject
-              documentation: >-
-                The descriptive table by instruction condition and congruency, written out as it stands; then, per
-                subject, the mean accuracy on congruent trials minus the mean on incongruent ones, and how many subjects
-                have both.
-              flowElements:
-                CP_Start:
-                  type: StartEvent
-                Congruency_Table:
-                  type: ServiceTask
-                  name: Accuracy by congruency
-                  dataInputAssociations:
-                    In_Trials_C:
-                      sourceRef:
-                        - analysed_trials
-                      transformation: self
-                  dataOutputAssociations:
-                    Out_Congruency:
-                      targetRef: File_Congruency
-                  additionalArguments:
-                    index:
-                      - context.state.arm
-                      - trialContext.congruency
-                    values:
-                      - result.isCorrect
-                    aggfunc: mean
-                  implementation: python://pandas.DataFrame.pivot_table
-                By_Congruency:
-                  type: ServiceTask
-                  name: Accuracy, one column per congruency
-                  dataInputAssociations:
-                    In_Trials_BC:
-                      sourceRef:
-                        - analysed_trials
-                      transformation: self
-                  dataOutputAssociations:
-                    Out_BC:
-                      targetRef: by_congruency
-                  additionalArguments:
-                    index: context.subject
-                    columns: trialContext.congruency
-                    values: result.isCorrect
-                    aggfunc: mean
-                  implementation: python://pandas.DataFrame.pivot_table
-                Accuracy_Incongruent:
-                  type: ServiceTask
-                  name: Incongruent accuracies
-                  documentation: The incongruent column, one accuracy per subject; empty when no subject was analysed.
-                  dataInputAssociations:
-                    In_BC_I:
-                      sourceRef:
-                        - by_congruency
-                      transformation: self
-                  dataOutputAssociations:
-                    Out_Incongruent:
-                      targetRef: accuracy_incongruent
-                  additionalArguments:
-                    key: Incongruent
-                    default:
-                      implementation: python://pandas.Series
-                      arguments:
-                        dtype: float
-                  implementation: python://pandas.DataFrame.get
-                Accuracy_Congruent:
-                  type: ServiceTask
-                  name: Congruent accuracies
-                  documentation: The congruent column, one accuracy per subject; empty when no subject was analysed.
-                  dataInputAssociations:
-                    In_BC_C:
-                      sourceRef:
-                        - by_congruency
-                      transformation: self
-                  dataOutputAssociations:
-                    Out_Congruent:
-                      targetRef: accuracy_congruent
-                  additionalArguments:
-                    key: Congruent
-                    default:
-                      implementation: python://pandas.Series
-                      arguments:
-                        dtype: float
-                  implementation: python://pandas.DataFrame.get
-                Cost:
-                  type: ServiceTask
-                  name: Congruency cost per subject
-                  dataInputAssociations:
-                    In_Cost_C:
-                      sourceRef:
-                        - accuracy_congruent
-                      transformation: self
-                    In_Cost_I:
-                      sourceRef:
-                        - accuracy_incongruent
-                      transformation: other
-                  dataOutputAssociations:
-                    Out_Costs:
-                      targetRef: congruency_costs
-                    Out_Cost_N:
-                      targetRef: congruency_n
-                      transformation: count(result)
-                  implementation: python://pandas.Series.sub
-                File_Congruency:
-                  type: DataObjectReference
-                  name: Congruency table
-                  uri: results/congruency.csv
-                CP_End:
-                  type: EndEvent
-                CPF_0: CP_Start -> Congruency_Table
-                CPF_1: Congruency_Table -> By_Congruency
-                CPF_2: By_Congruency -> Accuracy_Congruent
-                CPF_3: Accuracy_Congruent -> Accuracy_Incongruent
-                CPF_4: Accuracy_Incongruent -> Cost
-                CPF_5: Cost -> CP_End
+            Congruency_Table:
+              type: ServiceTask
+              name: Accuracy by congruency
+              dataInputAssociations:
+                In_Trials_C:
+                  sourceRef:
+                    - analysed_trials
+                  transformation: self
+              dataOutputAssociations:
+                Out_Congruency:
+                  targetRef: File_Congruency
+              additionalArguments:
+                index:
+                  - context.state.arm
+                  - trialContext.congruency
+                values:
+                  - result.isCorrect
+                aggfunc: mean
+              implementation: python://pandas.DataFrame.pivot_table
+            File_Congruency:
+              type: DataObjectReference
+              name: Congruency table
+              uri: results/congruency.csv
             Enough_Subjects:
               type: ExclusiveGateway
               name: Enough subjects?
               default: C_Enough
             Cost_Test:
               type: ServiceTask
-              name: One-sided t test
+              name: One-sided paired t test
+              documentation: >-
+                Averages each subject's trials within each congruency, then tests congruent against incongruent across
+                subjects, one-sided; the same t as the congruent-minus-incongruent cost tested against zero.
               dataInputAssociations:
-                In_Costs:
+                In_Trials_Test:
                   sourceRef:
-                    - congruency_costs
-                  transformation: a
+                    - analysed_trials
+                  transformation: data
               dataOutputAssociations:
                 Out_Cost_Test:
                   targetRef: congruency_test
-                  transformation: "{statistic: result.statistic, pvalue: result.pvalue}"
+                  transformation: "{statistic: result.T[1], pvalue: result.p_unc[1], subjects: result.dof[1] + 1}"
                 Out_Cost_File:
                   targetRef: File_Congruency_Test
-                  transformation: "{statistic: result.statistic, pvalue: result.pvalue, subjects: congruency_n}"
+                  transformation: "{statistic: result.T[1], pvalue: result.p_unc[1], subjects: result.dof[1] + 1}"
               additionalArguments:
-                popmean: 0
+                dv: result.isCorrect
+                within: trialContext.congruency
+                subject: context.subject
                 alternative: greater
-                nan_policy: omit
-              implementation: python://scipy.stats.ttest_1samp
+              implementation: python://pingouin.pairwise_tests
             Congruency_Decision:
               type: ExclusiveGateway
               name: Less accurate when incongruent?
@@ -1103,11 +1007,11 @@ Analysis_Report:
               type: DataObjectReference
               name: Congruency test
               uri: results/congruency_test.json
-            CF_0: C_Start -> Cost_Per_Subject
-            CF_1: Cost_Per_Subject -> Enough_Subjects
+            CF_0: C_Start -> Congruency_Table
+            CF_1: Congruency_Table -> Enough_Subjects
             C_Too_Few:
               name: too few
-              conditionExpression: congruency_n < min_subjects
+              conditionExpression: analysed_subjects < min_subjects
               sourceRef: Enough_Subjects
               targetRef: C_Not_Testable
             C_Enough:
