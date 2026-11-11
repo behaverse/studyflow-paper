@@ -1,0 +1,1527 @@
+id: example_study
+schemas:
+  agentic: https://w3id.org/studyflow/agentic
+  behaverse: http://behaverse.org/schemas/studyflow/behaverse
+  cognitive: http://behaverse.org/schemas/studyflow/cognitive
+  studyflow: http://behaverse.org/schemas/studyflow/v1
+
+Example_Study_Collaboration:
+  type: Collaboration
+  name: Example study (a strategy instruction against the standard one, flanker and Simon tasks in two sessions)
+  extensions:
+    studyflow:Study:
+      seed: 42
+      dependencies:
+        - pandas==2.3.3
+        - scipy==1.16.2
+      authors:
+        - Morteza Ansarinia
+        - Hoorieh Afkari
+        - Pedro Cardoso-Leite
+      version: "3.0"
+  documentation: >-
+    The example study as one executable Studyflow file, before any run. It shows Studyflow's elements once each; it is
+    not a study of models or of cognition. Agents (each one instance of the Study run pool) are screened and allocated
+    at random (1:1, permuted blocks of four) to the control group, which gets the standard instructions, or to the
+    treatment group, whose flanker task adds a strategy instruction. Both do a flanker task (jsPsych) and then a Simon
+    task (the Behaverse build), and do both again after a short rest with the standard instructions. An agent who leaves
+    more than the threshold of a task's test trials unanswered, or who does not come back within the return window, does
+    not complete. One question is tested, on those who completed both sessions: is the flanker effect in session 1
+    smaller with the strategy instruction? Every exchange with the agent is a choreography task: the software that
+    presents it on its upper band, the agent on its lower band.
+  participants:
+    Pool_Agent:
+      name: "Agent: simulated"
+      extensions:
+        behaverse:SimulatedActor:
+          accuracy:
+            default: 0.9
+            FL:
+              Congruent: 0.95
+              Incongruent: 0.75
+            WO:
+              Congruent: 0.95
+              Incongruent: 0.85
+          prompted:
+            "Strategy:":
+              default: 0.9
+              FL:
+                Congruent: 0.95
+                Incongruent: 0.9
+              WO:
+                Congruent: 0.95
+                Incongruent: 0.85
+          missRate: 0.02
+          absent:
+            Return: 0.25
+      documentation: >-
+        The planted agent, except that a quarter of the subjects never come back for session 2: for them it never
+        answers the return step, so its one-week window runs out.
+
+    Pool_Run:
+      name: Study run
+      multiplicity:
+        maximum: 48
+      process: $Study_Run
+      documentation: The protocol one agent walks, from enrollment to the end of session 2; one instance per agent.
+
+    Pool_Analysis:
+      name: Analysis and report
+      process: $Analysis_Report
+  messageFlows:
+    Msg_Complete:
+      name: all agents complete
+      source: $Pool_Run
+      target: $All_Complete
+      message: $Complete
+
+Complete:
+  type: Message
+
+Study_Run:
+  type: Process
+  name: Study run
+  executable: true
+  documentation: >-
+    One agent, from enrollment to the end of session 2. The lanes are the CONSORT phases: Enrollment, Allocation,
+    Follow-up. Each group's session 1 is a path of its own; the two join at the wait, and session 2 is the same for
+    both. The protocols, prompts and task settings sit here, so every session reads the same ones.
+  properties:
+    P_CheckOptions:
+      name: ResponseOptions
+      value:
+        - READY
+        - NOT READY
+      documentation: The answers the screening and the return step allow, sent with them.
+
+    P_MaxUnanswered:
+      name: max_unanswered
+      value: 0.2
+
+    P_ScoredBlocks:
+      name: scored_blocks
+      value:
+        - Flanker_Test
+        - Simon_Test
+      documentation: >-
+        The test blocks of the two tasks, read by the exit rules and the analysis; practice blocks are not among them.
+  laneSets:
+    LaneSet_CONSORT:
+      lanes:
+        Lane_Enrollment:
+          name: Enrollment
+          nodes:
+            - $Enroll
+            - $Screening
+            - $Eligibility_Gateway
+            - $Excluded
+
+        Lane_Allocation:
+          name: Allocation
+          nodes: $Randomize
+
+        Lane_FollowUp:
+          name: Follow-up
+          nodes:
+            - $S1_Standard
+            - $Exit_S1_Standard
+            - $S1_Strategy
+            - $Exit_S1_Strategy
+            - $Wait
+            - $Return
+            - $Late
+            - $S2
+            - $Exit_S2
+            - $Record_Completion
+            - $Completed
+            - $Exit_FollowUp
+  elements:
+    Enroll:
+      type: StartEvent
+      name: Enrolled and consented
+      onset: T0
+      consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+
+    Screening:
+      type: ChoreographyTask
+      name: Assessed for eligibility (n={reached})
+      checklist: |-
+        - [ ] Consent recorded
+        - [ ] Executor configuration recorded with every exchange (model id and digest, sampling parameters)
+        - [ ] Comprehension check passed
+      participant: $Pool_Agent
+      onset: T0
+      duration: 5min
+      extensions:
+        cognitive:Questionnaire:
+          instrument: comprehension-check
+      inputs:
+        In_Check:
+          source:
+            - $Prompt_Check
+            - $P_CheckOptions
+
+    Prompt_Check:
+      type: DataObjectReference
+      name: Comprehension check
+      extensions:
+        agentic:Prompt:
+          template: |
+            You are about to take part in a short study of two computerised tasks, in two sessions with a short rest
+            between them.
+            Each trial arrives as one message and lists the answers the task accepts under ResponseOptions; you answer
+            with exactly one of them and nothing else.
+
+            To confirm you have understood, reply now with exactly the single word READY.
+
+    Eligibility_Gateway:
+      type: ExclusiveGateway
+      name: Understood the instructions?
+      default: $Flow_Excluded
+      extensions:
+        cognitive:EligibilityGateway:
+          inclusionCriteria:
+            - Comprehension check answered as instructed
+
+    Excluded:
+      type: EndEvent
+      name: Excluded (n={reached})
+
+    Randomize:
+      type: ExclusiveGateway
+      name: Which group? (n={reached})
+      default: $Flow_Arm_Standard
+      extensions:
+        cognitive:RandomGateway:
+          algorithm: block
+          allocationRatio: "1:1"
+      documentation: >-
+        Permuted blocks of four, so every complete block holds two agents of each group, dealt in the order agents reach
+        this gateway.
+
+    Prompt_Flanker:
+      type: DataObjectReference
+      name: Flanker prompt
+      extensions:
+        agentic:Prompt:
+          template: |
+            You are taking a computerised test one trial at a time. Each message is one trial and lists the answers it
+            accepts under ResponseOptions; answer with one of them, copied exactly and with nothing else. Any other reply
+            is a lost trial.
+
+            In this task a row of five arrows appears. Answer with the direction the middle arrow points, Left or Right,
+            whatever the direction of the arrows around it.
+          delivery: once
+
+    Prompt_Flanker_Strategy:
+      type: DataObjectReference
+      name: Flanker prompt, strategy
+      extensions:
+        agentic:Prompt:
+          template: |
+            You are taking a computerised test one trial at a time. Each message is one trial and lists the answers it
+            accepts under ResponseOptions; answer with one of them, copied exactly and with nothing else. Any other reply
+            is a lost trial.
+
+            In this task a row of five arrows appears. Answer with the direction the middle arrow points, Left or Right,
+            whatever the direction of the arrows around it.
+
+            Strategy: look only at the middle arrow. The arrows around it never tell you the answer, so do not let them
+            pull you to their side.
+          delivery: once
+
+    Prompt_Simon:
+      type: DataObjectReference
+      name: Simon prompt
+      extensions:
+        agentic:Prompt:
+          template: |
+            You are taking a computerised test one trial at a time. Each message is one trial and lists the answers it
+            accepts under ResponseOptions; answer with one of them, copied exactly and with nothing else. Any other reply
+            is a lost trial.
+
+            In this task a coloured disk appears on the left or the right of the screen, above two buttons of different
+            colours. Answer with the position of the button whose colour is the disk's colour, wherever the disk appears.
+          delivery: once
+
+    Prompt_Return:
+      type: DataObjectReference
+      name: Return for session 2
+      extensions:
+        agentic:Prompt:
+          template: |
+            The rest is over. To start the second session, reply now with exactly the single word READY.
+
+    Task_Settings:
+      type: DataObjectReference
+      name: Task settings (artificial agent)
+      extensions:
+        studyflow:Parameters:
+          values:
+            Bot:
+              Speed: 10
+              SkipInstructions: true
+              AutoClickInstructions: true
+              SkipFocusArea: true
+              MaxExternalResponseTime: 30
+      documentation: >-
+        Not the protocol: how the task software plays the tasks for an agent that is not a person. The Behaverse build
+        skips the screens nobody is there to click and runs its clock ten times faster (`Speed: 10`), while the window
+        to answer stays in real seconds. Every trial gives the agent up to 30 s to answer, instead of the protocol's
+        window, so that a model slower than a person still answers in time.
+
+    Protocol_Flanker:
+      type: DataObjectReference
+      name: Flanker protocol
+      extensions:
+        studyflow:Parameters:
+          values:
+            ResponseOptions:
+              Left: f
+              Right: j
+            choices:
+              - f
+              - j
+            response_ends_trial: true
+            timeline:
+              - randomize_order: true
+                timeline:
+                  - stimulus:
+                      timelineVariable: arrows
+                    trial_duration: 2000
+                    post_trial_gap: 500
+                    data:
+                      task: FL
+                      block:
+                        timelineVariable: block
+                      condition:
+                        timelineVariable: condition
+                      correct_response:
+                        timelineVariable: correct
+                timeline_variables:
+                  - block: Flanker_Practice
+                    arrows: <p>&larr;&larr;&larr;&larr;&larr;</p>
+                    condition: Congruent
+                    correct: f
+                  - block: Flanker_Practice
+                    arrows: <p>&rarr;&rarr;&rarr;&rarr;&rarr;</p>
+                    condition: Congruent
+                    correct: j
+                  - block: Flanker_Practice
+                    arrows: <p>&rarr;&rarr;&larr;&rarr;&rarr;</p>
+                    condition: Incongruent
+                    correct: f
+                  - block: Flanker_Practice
+                    arrows: <p>&larr;&larr;&rarr;&larr;&larr;</p>
+                    condition: Incongruent
+                    correct: j
+              - randomize_order: true
+                timeline:
+                  - stimulus:
+                      timelineVariable: arrows
+                    trial_duration: 2000
+                    post_trial_gap: 500
+                    data:
+                      task: FL
+                      block:
+                        timelineVariable: block
+                      condition:
+                        timelineVariable: condition
+                      correct_response:
+                        timelineVariable: correct
+                timeline_variables:
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&larr;&larr;&larr;</p>
+                    condition: Congruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&rarr;&rarr;&rarr;</p>
+                    condition: Congruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&larr;&rarr;&rarr;</p>
+                    condition: Incongruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&rarr;&larr;&larr;</p>
+                    condition: Incongruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&larr;&larr;&larr;</p>
+                    condition: Congruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&rarr;&rarr;&rarr;</p>
+                    condition: Congruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&larr;&rarr;&rarr;</p>
+                    condition: Incongruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&rarr;&larr;&larr;</p>
+                    condition: Incongruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&larr;&larr;&larr;</p>
+                    condition: Congruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&rarr;&rarr;&rarr;</p>
+                    condition: Congruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&larr;&rarr;&rarr;</p>
+                    condition: Incongruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&rarr;&larr;&larr;</p>
+                    condition: Incongruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&larr;&larr;&larr;</p>
+                    condition: Congruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&rarr;&rarr;&rarr;</p>
+                    condition: Congruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&larr;&rarr;&rarr;</p>
+                    condition: Incongruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&rarr;&larr;&larr;</p>
+                    condition: Incongruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&larr;&larr;&larr;</p>
+                    condition: Congruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&rarr;&rarr;&rarr;</p>
+                    condition: Congruent
+                    correct: j
+                  - block: Flanker_Test
+                    arrows: <p>&rarr;&rarr;&larr;&rarr;&rarr;</p>
+                    condition: Incongruent
+                    correct: f
+                  - block: Flanker_Test
+                    arrows: <p>&larr;&larr;&rarr;&larr;&larr;</p>
+                    condition: Incongruent
+                    correct: j
+      documentation: >-
+        The flanker task as a jsPsych timeline, the html-keyboard-response plugin of jsPsych 8 showing a row of five
+        arrows per trial until the answer or 2 s. A practice block of 4 trials and a test block of 20 (10 congruent, 10
+        incongruent; the middle arrow points left in half of each), each in an order jsPsych draws for every agent from
+        the run's seed. No feedback. ResponseOptions maps each answer to the key it presses. The records carry the task
+        id FL.
+
+    Protocol_Simon:
+      type: DataObjectReference
+      name: Simon protocol
+      extensions:
+        studyflow:Parameters:
+          values:
+            Timelines:
+              Simon_Practice_Test:
+                Blocks:
+                  - Name: Simon_Practice
+                    ExitRules:
+                      - Trials: 4
+                  - Name: Simon_Test
+                    ExitRules:
+                      - Trials: 20
+            Blocks:
+              Simon_Practice:
+                Trials:
+                  - Parameters:
+                      Congruency: Congruent
+                      CorrectButton: Left
+                  - Parameters:
+                      Congruency: Congruent
+                      CorrectButton: Right
+                  - Parameters:
+                      Congruency: Incongruent
+                      CorrectButton: Left
+                  - Parameters:
+                      Congruency: Incongruent
+                      CorrectButton: Right
+                TrialOrder:
+                  Replacement: WithoutInBlock
+                  ItemOccurrences: 1
+                  Distribution:
+                    Type: Uniform
+                Adapt: []
+                Parameters:
+                  PrimaryFeature: Color
+                  SecondaryFeature: Position
+                  ButtonCount: 2
+                  ButtonSymbols: Disk
+                  NeutralSymbol: Disk
+                  NeutralColor: "#FFFFFF"
+                  ButtonColors:
+                    - "#FFC826"
+                    - "#2D50C8"
+                  ShowButtonContent: true
+                  InputDevice: MouseOrTouch
+                  ResponseButtonKeys:
+                    - LeftArrow
+                    - RightArrow
+                  TaskPace: PlayerDriven
+                  FixationPointDisplayDuration: 0
+                  StimulusOnset: 1
+                  StimulusDisplayDuration: 1
+                  MaxResponseTime: 5
+                  InterTrialInterval: 0.5
+                  ShowAccuracyCheckFeedback: Always
+                  ShowCorrectTrialResponseFeedback: Never
+              Simon_Test:
+                Trials:
+                  - Parameters:
+                      Congruency: Congruent
+                      CorrectButton: Left
+                  - Parameters:
+                      Congruency: Congruent
+                      CorrectButton: Right
+                  - Parameters:
+                      Congruency: Incongruent
+                      CorrectButton: Left
+                  - Parameters:
+                      Congruency: Incongruent
+                      CorrectButton: Right
+                TrialOrder:
+                  Replacement: WithoutInBlock
+                  ItemOccurrences: 5
+                  Distribution:
+                    Type: Uniform
+                Adapt: []
+                Parameters:
+                  PrimaryFeature: Color
+                  SecondaryFeature: Position
+                  ButtonCount: 2
+                  ButtonSymbols: Disk
+                  NeutralSymbol: Disk
+                  NeutralColor: "#FFFFFF"
+                  ButtonColors:
+                    - "#FFC826"
+                    - "#2D50C8"
+                  ShowButtonContent: true
+                  InputDevice: MouseOrTouch
+                  ResponseButtonKeys:
+                    - LeftArrow
+                    - RightArrow
+                  TaskPace: PlayerDriven
+                  FixationPointDisplayDuration: 0
+                  StimulusOnset: 1
+                  StimulusDisplayDuration: 1
+                  MaxResponseTime: 5
+                  InterTrialInterval: 0.5
+                  ShowAccuracyCheckFeedback: Never
+                  ShowCorrectTrialResponseFeedback: Never
+      documentation: >-
+        The Simon task of the Behaverse build's `WhichOne` (`WO`): a disk in the colour of the correct button, over that
+        button (congruent) or the other one (incongruent). 1 s from the trial's start to the disk, which shows for 1 s
+        or until the answer; 5 s to answer; 0.5 s before the next trial. Each block deals the four combinations of
+        congruency and correct button equally often: once each in practice (4 trials, with feedback) and five times each
+        in the test block (20 trials, 10 congruent and 10 incongruent, no feedback).
+
+    Flow_Arm_Standard:
+      name: "Control: standard instructions (n={reached})"
+      source: $Randomize
+      target: $S1_Standard
+
+    S1_Standard:
+      type: SubProcess
+      name: "Session 1: standard instructions (n={reached})"
+      onset: T0+5min
+      duration: 10min
+      documentation: >-
+        Session 1: the flanker task, then the Simon task, with the standard instructions. Its duration is the window of
+        the visit, which its two tasks of four minutes each fill. Each task's data edge writes into `unanswered` the
+        larger of what it holds and the share of the task's test trials left unanswered, so at the end of the session it
+        holds the worst task's share, and the exit rule on the border reads it when the session ends.
+      properties:
+        P_Unanswered_S1_Standard:
+          name: unanswered
+          value: 0
+
+        P_Session_S1_Standard:
+          name: session
+          value: 1
+
+        P_Arm_S1_Standard:
+          name: arm
+          value: standard
+          documentation: The group, recorded with every trial of the session.
+      elements:
+        S1_Standard_Start:
+          type: StartEvent
+
+        S1_Standard_Flanker:
+          type: ChoreographyTask
+          name: Flanker task
+          participant: $Pool_Agent
+          onset: T0+5min
+          duration: 4min
+          extensions:
+            cognitive:CognitiveTask:
+              platform: jspsych
+              implementation: jspsych://html-keyboard-response@8
+          inputs:
+            In_S1_Standard_Flanker_0:
+              source: $Prompt_Flanker
+
+            In_S1_Standard_Flanker_1:
+              source: $Protocol_Flanker
+
+            In_S1_Standard_Flanker_2:
+              source: $Task_Settings
+          outputs:
+            Out_S1_Standard_Flanker_Trials:
+              target: $Dataset_Trials
+
+            Out_S1_Standard_Flanker_Unanswered:
+              target: $P_Unanswered_S1_Standard
+              transformation: >-
+                max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
+                scored_blocks].trials)])
+
+        S1_Standard_Simon:
+          type: ChoreographyTask
+          name: Simon task
+          participant: $Pool_Agent
+          onset: T0+5min+4min
+          duration: 4min
+          extensions:
+            behaverse:Task:
+              implementation: behaverse://assessment-unity@26.11
+              instrument: WO
+              timeline: Simon_Practice_Test
+          inputs:
+            In_S1_Standard_Simon_0:
+              source: $Prompt_Simon
+
+            In_S1_Standard_Simon_1:
+              source: $Protocol_Simon
+
+            In_S1_Standard_Simon_2:
+              source: $Task_Settings
+          outputs:
+            Out_S1_Standard_Simon_Trials:
+              target: $Dataset_Trials
+
+            Out_S1_Standard_Simon_Unanswered:
+              target: $P_Unanswered_S1_Standard
+              transformation: >-
+                max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
+                scored_blocks].trials)])
+
+        S1_Standard_End:
+          type: EndEvent
+
+        S1_Standard_F0:
+          source: $S1_Standard_Start
+          target: $S1_Standard_Flanker
+
+        S1_Standard_F1:
+          source: $S1_Standard_Flanker
+          target: $S1_Standard_Simon
+
+        S1_Standard_F2:
+          source: $S1_Standard_Simon
+          target: $S1_Standard_End
+
+    Exit_S1_Standard:
+      type: BoundaryEvent
+      condition: unanswered > max_unanswered
+      attachedTo: $S1_Standard
+
+    SF_S1_Standard_Wait:
+      source: $S1_Standard
+      target: $Wait
+
+    SF_Exit_S1_Standard:
+      name: "> {max_unanswered:%} unanswered, session 1 (n={reached})"
+      source: $Exit_S1_Standard
+      target: $Exit_FollowUp
+
+    Flow_Arm_Strategy:
+      name: "Treatment: strategy instruction (n={reached})"
+      source: $Randomize
+      target: $S1_Strategy
+
+    S1_Strategy:
+      type: SubProcess
+      name: "Session 1: strategy instruction (n={reached})"
+      onset: T0+5min
+      duration: 10min
+      documentation: >-
+        Session 1: the flanker task, then the Simon task, with the strategy instruction with the flanker task. Its
+        duration is the window of the visit, which its two tasks of four minutes each fill. Each task's data edge writes
+        into `unanswered` the larger of what it holds and the share of the task's test trials left unanswered, so at the
+        end of the session it holds the worst task's share, and the exit rule on the border reads it when the session
+        ends.
+      properties:
+        P_Unanswered_S1_Strategy:
+          name: unanswered
+          value: 0
+
+        P_Session_S1_Strategy:
+          name: session
+          value: 1
+
+        P_Arm_S1_Strategy:
+          name: arm
+          value: strategy
+          documentation: The group, recorded with every trial of the session.
+      elements:
+        S1_Strategy_Start:
+          type: StartEvent
+
+        S1_Strategy_Flanker:
+          type: ChoreographyTask
+          name: Flanker task
+          participant: $Pool_Agent
+          onset: T0+5min
+          duration: 4min
+          extensions:
+            cognitive:CognitiveTask:
+              platform: jspsych
+              implementation: jspsych://html-keyboard-response@8
+          inputs:
+            In_S1_Strategy_Flanker_0:
+              source: $Prompt_Flanker_Strategy
+
+            In_S1_Strategy_Flanker_1:
+              source: $Protocol_Flanker
+
+            In_S1_Strategy_Flanker_2:
+              source: $Task_Settings
+          outputs:
+            Out_S1_Strategy_Flanker_Trials:
+              target: $Dataset_Trials
+
+            Out_S1_Strategy_Flanker_Unanswered:
+              target: $P_Unanswered_S1_Strategy
+              transformation: >-
+                max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
+                scored_blocks].trials)])
+
+        S1_Strategy_Simon:
+          type: ChoreographyTask
+          name: Simon task
+          participant: $Pool_Agent
+          onset: T0+5min+4min
+          duration: 4min
+          extensions:
+            behaverse:Task:
+              implementation: behaverse://assessment-unity@26.11
+              instrument: WO
+              timeline: Simon_Practice_Test
+          inputs:
+            In_S1_Strategy_Simon_0:
+              source: $Prompt_Simon
+
+            In_S1_Strategy_Simon_1:
+              source: $Protocol_Simon
+
+            In_S1_Strategy_Simon_2:
+              source: $Task_Settings
+          outputs:
+            Out_S1_Strategy_Simon_Trials:
+              target: $Dataset_Trials
+
+            Out_S1_Strategy_Simon_Unanswered:
+              target: $P_Unanswered_S1_Strategy
+              transformation: >-
+                max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
+                scored_blocks].trials)])
+
+        S1_Strategy_End:
+          type: EndEvent
+
+        S1_Strategy_F0:
+          source: $S1_Strategy_Start
+          target: $S1_Strategy_Flanker
+
+        S1_Strategy_F1:
+          source: $S1_Strategy_Flanker
+          target: $S1_Strategy_Simon
+
+        S1_Strategy_F2:
+          source: $S1_Strategy_Simon
+          target: $S1_Strategy_End
+
+    Exit_S1_Strategy:
+      type: BoundaryEvent
+      condition: unanswered > max_unanswered
+      attachedTo: $S1_Strategy
+
+    SF_S1_Strategy_Wait:
+      source: $S1_Strategy
+      target: $Wait
+
+    SF_Exit_S1_Strategy:
+      name: "> {max_unanswered:%} unanswered, session 1 (n={reached})"
+      source: $Exit_S1_Strategy
+      target: $Exit_FollowUp
+
+    Wait:
+      type: IntermediateCatchEvent
+      name: Rest
+      timer: PT5M
+      extensions:
+        cognitive:Rest: {}
+
+    Return:
+      type: ChoreographyTask
+      name: Returns for session 2 (n={reached})
+      participant: $Pool_Agent
+      onset: T0+20min
+      duration: 10min
+      extensions:
+        cognitive:Questionnaire:
+          instrument: comprehension-check
+      inputs:
+        In_Return:
+          source:
+            - $Prompt_Return
+            - $P_CheckOptions
+
+    Late:
+      type: BoundaryEvent
+      name: Return window
+      onset: T0+20min
+      timer: PT10M
+      attachedTo: $Return
+      documentation: The minutes an agent has to come back, from when session 2 is due.
+
+    S2:
+      type: SubProcess
+      name: Session 2 (n={reached})
+      onset: T0+20min
+      duration: 10min
+      documentation: >-
+        Session 2: the flanker task, then the Simon task, with the standard instructions, whichever group. Its duration
+        is the window of the visit, which its two tasks of four minutes each fill. Each task's data edge writes into
+        `unanswered` the larger of what it holds and the share of the task's test trials left unanswered, so at the end
+        of the session it holds the worst task's share, and the exit rule on the border reads it when the session ends.
+      properties:
+        P_Unanswered_S2:
+          name: unanswered
+          value: 0
+
+        P_Session_S2:
+          name: session
+          value: 2
+      elements:
+        S2_Start:
+          type: StartEvent
+
+        S2_Flanker:
+          type: ChoreographyTask
+          name: Flanker task
+          participant: $Pool_Agent
+          onset: T0+20min
+          duration: 4min
+          extensions:
+            cognitive:CognitiveTask:
+              platform: jspsych
+              implementation: jspsych://html-keyboard-response@8
+          inputs:
+            In_S2_Flanker_0:
+              source: $Prompt_Flanker
+
+            In_S2_Flanker_1:
+              source: $Protocol_Flanker
+
+            In_S2_Flanker_2:
+              source: $Task_Settings
+          outputs:
+            Out_S2_Flanker_Trials:
+              target: $Dataset_Trials
+
+            Out_S2_Flanker_Unanswered:
+              target: $P_Unanswered_S2
+              transformation: >-
+                max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
+                scored_blocks].trials)])
+
+        S2_Simon:
+          type: ChoreographyTask
+          name: Simon task
+          participant: $Pool_Agent
+          onset: T0+20min+4min
+          duration: 4min
+          extensions:
+            behaverse:Task:
+              implementation: behaverse://assessment-unity@26.11
+              instrument: WO
+              timeline: Simon_Practice_Test
+          inputs:
+            In_S2_Simon_0:
+              source: $Prompt_Simon
+
+            In_S2_Simon_1:
+              source: $Protocol_Simon
+
+            In_S2_Simon_2:
+              source: $Task_Settings
+          outputs:
+            Out_S2_Simon_Trials:
+              target: $Dataset_Trials
+
+            Out_S2_Simon_Unanswered:
+              target: $P_Unanswered_S2
+              transformation: >-
+                max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
+                scored_blocks].trials)])
+
+        S2_End:
+          type: EndEvent
+
+        S2_F0:
+          source: $S2_Start
+          target: $S2_Flanker
+
+        S2_F1:
+          source: $S2_Flanker
+          target: $S2_Simon
+
+        S2_F2:
+          source: $S2_Simon
+          target: $S2_End
+
+    Exit_S2:
+      type: BoundaryEvent
+      condition: unanswered > max_unanswered
+      attachedTo: $S2
+
+    SF_Wait_Return:
+      source: $Wait
+      target: $Return
+
+    SF_Return_S2:
+      source: $Return
+      target: $S2
+
+    SF_S2_Done:
+      source: $S2
+      target: $Record_Completion
+
+    SF_Late:
+      name: late return (n={reached})
+      source: $Late
+      target: $Exit_FollowUp
+
+    SF_Exit_S2:
+      name: "> {max_unanswered:%} unanswered, session 2 (n={reached})"
+      source: $Exit_S2
+      target: $Exit_FollowUp
+
+    Record_Completion:
+      type: ServiceTask
+      name: Record the completion
+      additionalArguments:
+        object:
+          name: Completed
+        context:
+          subject: "{state._meta.instance.Pool_Run}"
+      implementation: python://builtins.dict
+      documentation: >-
+        Appends the agent's completion line to the trials dataset (`object.name` `Completed`). Only an agent who
+        completes both sessions passes here, so the analysis takes its population from the protocol.
+      outputs:
+        Out_Completion:
+          target: $Dataset_Trials
+
+    Completed:
+      type: EndEvent
+      name: Completed both sessions (n={reached})
+
+    Exit_FollowUp:
+      type: EndEvent
+      name: Did not complete (n={reached})
+
+    SF_Record_Completed:
+      source: $Record_Completion
+      target: $Completed
+
+    SF_Start:
+      source: $Enroll
+      target: $Screening
+
+    SF_Screen:
+      source: $Screening
+      target: $Eligibility_Gateway
+
+    Flow_Eligible:
+      name: yes (n={reached})
+      condition: contains(upper case(Screening), "READY") and not(contains(upper case(Screening), "NOT"))
+      source: $Eligibility_Gateway
+      target: $Randomize
+
+    Flow_Excluded:
+      name: no (n={reached})
+      source: $Eligibility_Gateway
+      target: $Excluded
+
+Analysis_Report:
+  type: Process
+  name: Analysis and report
+  documentation: >-
+    Runs once, after the last agent: the message start event waits for the Study run pool's last instance, so the
+    analysis reads a complete trials dataset.
+  elements:
+    All_Complete:
+      type: StartEvent
+      name: All agents complete
+      message: true
+
+    Dataset_Trials:
+      type: DataStoreReference
+      name: Trials
+      uri: data/trials.jsonl
+      extensions:
+        behaverse:BDMDataset:
+          schema: $Trial_Schema
+          dataLevel: trials
+      documentation: >-
+        One line per event the task software records, appended by every task of every agent, in the Behaverse Data
+        Model; the analysis reads the one record each task writes per trial (`FL.TrialEnd`, `WO.TrialEnd`) and the
+        completion lines.
+
+    Trial_Schema:
+      type: DataObjectReference
+      name: Trial schema
+      extensions:
+        studyflow:Schema:
+          body:
+            "@context": http://www.w3.org/ns/csvw
+            tableSchema:
+              columns:
+                - name: context.subject
+                  datatype: string
+                - name: context.state.session
+                  datatype: integer
+                - name: context.state.arm
+                  datatype: string
+                - name: object.name
+                  datatype: string
+                - name: trialContext.task.id
+                  datatype: string
+                - name: trialContext.block.name
+                  datatype: string
+                - name: trialContext.condition
+                  datatype: string
+                - name: result.isAnswered
+                  datatype: boolean
+                - name: result.isCorrect
+                  datatype: boolean
+      documentation: >-
+        The columns the analysis reads, as a CSVW table schema; the validator checks every column an operation names
+        against it.
+
+    Decision_Rules:
+      type: DataObjectReference
+      name: Decision rules
+      extensions:
+        studyflow:Parameters:
+          values:
+            alpha: 0.05
+            min_completed: 20
+      documentation: >-
+        Fixed before the first run: the alpha of the one test, and the fewest agents who completed both sessions the
+        test needs (a feasibility rule, not a claim of power).
+
+    Analysis:
+      type: SubProcess
+      name: "Analysis: the strategy and the flanker effect"
+      checklist: |-
+        - [ ] Practice blocks dropped
+        - [ ] Only the agents who completed both sessions analysed
+        - [ ] Unanswered test trials kept, as errors
+      documentation: >-
+        Library calls only (pandas, SciPy). The session-1 flanker test trials of the agents who completed both sessions,
+        then one question. Each agent's flanker effect is its error rate on incongruent trials minus that on congruent
+        ones (its accuracy on congruent minus that on incongruent), an unanswered trial counting as an error. Not
+        testable with fewer agents who completed than the minimum, or an undefined test (no variance); otherwise a
+        one-sided Welch t test of the control group's effects against the treatment group's, supported only for a larger
+        effect in the control group with p below alpha. The two group means are written out with the two-sided 95%
+        confidence interval of their difference whatever the decision.
+      properties:
+        completed:
+          name: completed
+
+        n_completed:
+          name: n_completed
+
+        flanker:
+          name: flanker
+
+        effects:
+          name: effects
+
+        standard:
+          name: standard
+
+        strategy:
+          name: strategy
+
+        flanker_test:
+          name: flanker_test
+
+        flanker_ci:
+          name: flanker_ci
+
+        mean_standard:
+          name: mean_standard
+
+        mean_strategy:
+          name: mean_strategy
+      inputs:
+        In_Trials_Analysis:
+          source: $Dataset_Trials
+
+        In_Rules:
+          source: $Decision_Rules
+      outputs:
+        Out_Results:
+          target: $Dataset_Results
+      elements:
+        An_Start:
+          type: StartEvent
+
+        Flanker_Rows:
+          type: ServiceTask
+          name: Session 1 flanker trials
+          additionalArguments:
+            expr: >-
+              `object.name` == 'FL.TrialEnd' and `trialContext.block.name` == 'Flanker_Test' and `context.state.session`
+              == 1
+          implementation: python://pandas.DataFrame.query
+          inputs:
+            In_Trials:
+              source: $Dataset_Trials
+              parameter: self
+          outputs:
+            Out_Flanker_Rows:
+              target: $flanker
+
+        Completed_Rows:
+          type: ServiceTask
+          name: Agents who completed
+          additionalArguments:
+            expr: "`object.name` == 'Completed'"
+          implementation: python://pandas.DataFrame.query
+          documentation: The completion lines, one per agent who completed both sessions.
+          inputs:
+            In_Completed:
+              source: $Dataset_Trials
+              parameter: self
+          outputs:
+            Out_Completed:
+              target: $completed
+
+        Keep_Completed:
+          type: ServiceTask
+          name: Of those who completed
+          additionalArguments:
+            "on":
+              - context.subject
+            how: inner
+            suffixes:
+              - ""
+              - .completion
+          implementation: python://pandas.DataFrame.merge
+          inputs:
+            In_Flanker_All:
+              source: $flanker
+              parameter: self
+
+            In_Completed_Subjects:
+              source: $completed
+              parameter: right
+          outputs:
+            Out_Flanker_Completed:
+              target: $flanker
+
+        Count_Completed:
+          type: ServiceTask
+          name: How many
+          additionalArguments:
+            args:
+              - "{completed}"
+          implementation: python://builtins.len
+          outputs:
+            Out_N_Completed:
+              target: $n_completed
+
+        Feasible:
+          type: ExclusiveGateway
+          name: Enough completed?
+          default: $Flow_TooFew
+
+        Measures:
+          type: ServiceTask
+          name: Correctness as a number
+          additionalArguments:
+            dtype:
+              result.isCorrect: float
+          implementation: python://pandas.DataFrame.astype
+          inputs:
+            In_Flanker_Typed:
+              source: $flanker
+              parameter: self
+          outputs:
+            Out_Flanker_Typed:
+              target: $flanker
+
+        Per_Subject:
+          type: ServiceTask
+          name: Accuracy per agent and condition
+          additionalArguments:
+            index:
+              - context.subject
+              - context.state.arm
+            columns: trialContext.condition
+            values: result.isCorrect
+            aggfunc: mean
+          implementation: python://pandas.DataFrame.pivot_table
+          inputs:
+            In_Flanker:
+              source: $flanker
+              parameter: self
+          outputs:
+            Out_Per_Subject:
+              target: $effects
+
+        Effect:
+          type: ServiceTask
+          name: Flanker effect per agent
+          additionalArguments:
+            expr: effect = Congruent - Incongruent
+          implementation: python://pandas.DataFrame.eval
+          documentation: >-
+            Error rate on incongruent minus that on congruent trials, which is accuracy on congruent minus that on
+            incongruent.
+          inputs:
+            In_Effects:
+              source: $effects
+              parameter: self
+          outputs:
+            Out_Effects:
+              target: $effects
+
+            Out_Effects_File:
+              target: $File_PerSubject
+
+        Standard_Effects:
+          type: ServiceTask
+          name: Control group
+          additionalArguments:
+            expr: "`context.state.arm` == 'standard'"
+          implementation: python://pandas.DataFrame.query
+          inputs:
+            In_Effects_Standard:
+              source: $effects
+              parameter: self
+          outputs:
+            Out_Standard:
+              target: $standard
+
+        Strategy_Effects:
+          type: ServiceTask
+          name: Treatment group
+          additionalArguments:
+            expr: "`context.state.arm` == 'strategy'"
+          implementation: python://pandas.DataFrame.query
+          inputs:
+            In_Effects_Strategy:
+              source: $effects
+              parameter: self
+          outputs:
+            Out_Strategy:
+              target: $strategy
+
+        Effect_Test:
+          type: ServiceTask
+          name: One-sided Welch t test
+          additionalArguments:
+            a: "{standard.effect}"
+            b: "{strategy.effect}"
+            equal_var: false
+            alternative: greater
+            nan_policy: omit
+          implementation: python://scipy.stats.ttest_ind
+          outputs:
+            Out_Effect_Test:
+              target: $flanker_test
+              transformation: "{statistic: result.statistic, pvalue: result.pvalue, df: result.df}"
+
+        Effect_CI:
+          type: ServiceTask
+          name: 95% confidence interval
+          additionalArguments:
+            args:
+              - implementation: python://scipy.stats.ttest_ind
+                arguments:
+                  a: "{standard.effect}"
+                  b: "{strategy.effect}"
+                  equal_var: false
+                  nan_policy: omit
+            confidence_level: 0.95
+          implementation: python://scipy.stats._result_classes.TtestResult.confidence_interval
+          documentation: >-
+            The two-sided interval of the difference, control minus treatment, from the test result's own method.
+          outputs:
+            Out_Effect_CI:
+              target: $flanker_ci
+              transformation: "{low: result.low, high: result.high}"
+
+        Mean_Standard:
+          type: ServiceTask
+          name: Mean effect, control
+          additionalArguments:
+            args:
+              - "{standard.effect}"
+          implementation: python://pandas.Series.mean
+          outputs:
+            Out_Mean_Standard:
+              target: $mean_standard
+
+        Mean_Strategy:
+          type: ServiceTask
+          name: Mean effect, treatment
+          additionalArguments:
+            args:
+              - "{strategy.effect}"
+          implementation: python://pandas.Series.mean
+          outputs:
+            Out_Mean_Strategy:
+              target: $mean_strategy
+
+        Write_Estimate:
+          type: ServiceTask
+          name: Write the estimate
+          additionalArguments:
+            completed: "{n_completed}"
+            mean_standard: "{mean_standard}"
+            mean_strategy: "{mean_strategy}"
+            ci95: "{flanker_ci}"
+            test: "{flanker_test}"
+          implementation: python://builtins.dict
+          outputs:
+            Out_Estimate_File:
+              target: $File_Flanker
+
+        Decision:
+          type: ExclusiveGateway
+          name: Smaller flanker effect with the strategy?
+          default: $Flow_No
+
+        Supported:
+          type: EndEvent
+          name: Supported
+
+        Not_Supported:
+          type: EndEvent
+          name: Not supported
+
+        Not_Testable:
+          type: EndEvent
+          name: Not testable
+
+        File_PerSubject:
+          type: DataObjectReference
+          name: Per-agent effects
+          uri: results/flanker_per_subject.csv
+
+        File_Flanker:
+          type: DataObjectReference
+          name: Flanker estimate
+          uri: results/flanker.json
+
+        AF_0:
+          source: $An_Start
+          target: $Flanker_Rows
+
+        AF_1:
+          source: $Flanker_Rows
+          target: $Completed_Rows
+
+        AF_2:
+          source: $Completed_Rows
+          target: $Keep_Completed
+
+        AF_3:
+          source: $Keep_Completed
+          target: $Count_Completed
+
+        AF_4:
+          source: $Count_Completed
+          target: $Feasible
+
+        Flow_Enough:
+          name: enough
+          condition: n_completed >= min_completed
+          source: $Feasible
+          target: $Measures
+
+        Flow_TooFew:
+          name: too few
+          source: $Feasible
+          target: $Not_Testable
+
+        AF_5:
+          source: $Measures
+          target: $Per_Subject
+
+        AF_6:
+          source: $Per_Subject
+          target: $Effect
+
+        AF_7:
+          source: $Effect
+          target: $Standard_Effects
+
+        AF_8:
+          source: $Standard_Effects
+          target: $Strategy_Effects
+
+        AF_9:
+          source: $Strategy_Effects
+          target: $Effect_Test
+
+        AF_10:
+          source: $Effect_Test
+          target: $Effect_CI
+
+        AF_11:
+          source: $Effect_CI
+          target: $Mean_Standard
+
+        AF_12:
+          source: $Mean_Standard
+          target: $Mean_Strategy
+
+        AF_13:
+          source: $Mean_Strategy
+          target: $Write_Estimate
+
+        AF_14:
+          source: $Write_Estimate
+          target: $Decision
+
+        Flow_Yes:
+          name: "yes"
+          condition: flanker_test.statistic > 0 and flanker_test.pvalue < alpha
+          source: $Decision
+          target: $Supported
+
+        Flow_Undefined:
+          name: undefined
+          condition: flanker_test.pvalue = null
+          source: $Decision
+          target: $Not_Testable
+
+        Flow_No:
+          name: "no"
+          source: $Decision
+          target: $Not_Supported
+
+    Dataset_Results:
+      type: DataStoreReference
+      name: Results
+      uri: results/
+      extensions:
+        studyflow:Dataset:
+          format: psych-ds
+      documentation: The run's results, laid out as a Psych-DS dataset.
+
+    Render:
+      type: ManualTask
+      name: Render the report
+      checklist: |-
+        - [ ] CONSORT participant flow exported from the Reporting Diagram view
+        - [ ] Visit schedule exported from the Schedule view
+        - [ ] Model and settings recorded with each exchange
+
+    Study_Complete:
+      type: EndEvent
+      name: Study complete
+
+    Flow_Start_Analysis:
+      source: $All_Complete
+      target: $Analysis
+
+    Flow_Analysis_Render:
+      source: $Analysis
+      target: $Render
+
+    Flow_Render_Complete:
+      source: $Render
+      target: $Study_Complete
+
+layout:
+  Pool_Agent: {bounds: 0 -150 1300 130, horizontal: true, fill: "#f5f5f4", stroke: "#6b6b6b"}
+  Pool_Run: {bounds: 0 0 1300 580, horizontal: true}
+  Pool_Analysis: {bounds: 0 620 1300 180, horizontal: true}
+  Msg_Complete: {waypoint: "136,580 136,694", label: 146 615 140 14, stroke: "#7a67a6"}
+  Lane_Enrollment: {bounds: 30 0 1270 150, horizontal: true, fill: "#f3f6fa"}
+  Lane_Allocation: {bounds: 30 150 1270 90, horizontal: true, fill: "#f3f6fa"}
+  Lane_FollowUp: {bounds: 30 240 1270 340, horizontal: true, fill: "#f4f8f2"}
+  Enroll: {bounds: 70 59 32 32, label: 50 95 72 30, fill: "#dbe6f2", stroke: "#4e6f95"}
+  Screening: {bounds: 140 25 130 100, font: "#4e6f95", fill: "#dbe6f2", stroke: "#4e6f95"}
+  In_Check: {waypoint: "518,90 518,138 240,138 240,125", stroke: "#4e6f95"}
+  Prompt_Check: {bounds: 500 40 36 50, label: 480 94 76 28, fill: "#dbe6f2", stroke: "#4e6f95"}
+  Eligibility_Gateway: {bounds: 310 55 40 40, markerVisible: true, label: 270 12 120 30, fill: "#dbe6f2", stroke: "#4e6f95"}
+  Excluded: {bounds: 420 61 28 28, label: 456 65 90 20, fill: "#f1d0cd", stroke: "#ac5a54"}
+  Randomize: {bounds: 310 175 40 40, markerVisible: true, label: 360 185 120 20, fill: "#dbe6f2", stroke: "#4e6f95"}
+  Prompt_Flanker: {bounds: 600 40 36 50, label: 580 94 76 28, fill: "#dcebd6", stroke: "#5c8a55"}
+  Prompt_Flanker_Strategy: {bounds: 690 40 36 50, label: 670 94 76 28, fill: "#dcebd6", stroke: "#5c8a55"}
+  Prompt_Simon: {bounds: 780 40 36 50, label: 760 94 76 28, fill: "#dcebd6", stroke: "#5c8a55"}
+  Prompt_Return: {bounds: 870 40 36 50, label: 850 94 76 28, fill: "#dcebd6", stroke: "#5c8a55"}
+  Task_Settings: {bounds: 1140 40 36 50, label: 1120 94 76 28, fill: "#dcebd6", stroke: "#5c8a55"}
+  Protocol_Flanker: {bounds: 960 40 36 50, label: 940 94 76 28, fill: "#dcebd6", stroke: "#5c8a55"}
+  Protocol_Simon: {bounds: 1050 40 36 50, label: 1030 94 76 28, fill: "#dcebd6", stroke: "#5c8a55"}
+  Flow_Arm_Standard: {waypoint: "330,215 330,300 420,300", label: 338 250 80 42, stroke: "#4e6f95"}
+  S1_Standard: {bounds: 420 265 170 70, font: "#5c8a55", expanded: false, fill: "#dcebd6", stroke: "#5c8a55"}
+  Exit_S1_Standard: {bounds: 550 321 28 28, fill: "#f0f6ee", stroke: "#5c8a55"}
+  SF_S1_Standard_Wait: {waypoint: "590,300 640,300 640,349", stroke: "#5c8a55"}
+  SF_Exit_S1_Standard: {waypoint: "564,349 564,380 604,380 604,510 704,510 704,520", label: 470 352 90 28, stroke: "#ac5a54"}
+  Flow_Arm_Strategy: {waypoint: "310,195 290,195 290,430 420,430", label: 186 380 100 42, stroke: "#4e6f95"}
+  S1_Strategy: {bounds: 420 395 170 70, font: "#5c8a55", expanded: false, fill: "#dcebd6", stroke: "#5c8a55"}
+  Exit_S1_Strategy: {bounds: 550 451 28 28, fill: "#f0f6ee", stroke: "#5c8a55"}
+  SF_S1_Strategy_Wait: {waypoint: "590,430 640,430 640,381", stroke: "#5c8a55"}
+  SF_Exit_S1_Strategy: {waypoint: "564,479 564,510 704,510 704,520", label: 470 482 90 28, stroke: "#ac5a54"}
+  Wait: {bounds: 624 349 32 32, label: 650 325 60 20, fill: "#f0f6ee", stroke: "#5c8a55"}
+  Return: {bounds: 690 320 130 90, font: "#4e6f95", fill: "#dbe6f2", stroke: "#4e6f95"}
+  Late: {bounds: 760 396 28 28, fill: "#f0f6ee", stroke: "#5c8a55"}
+  S2: {bounds: 890 330 170 70, font: "#5c8a55", expanded: false, fill: "#dcebd6", stroke: "#5c8a55"}
+  Exit_S2: {bounds: 1020 386 28 28, fill: "#f0f6ee", stroke: "#5c8a55"}
+  SF_Wait_Return: {waypoint: "656,365 690,365", stroke: "#5c8a55"}
+  SF_Return_S2: {waypoint: "820,365 890,365", stroke: "#5c8a55"}
+  SF_S2_Done: {waypoint: "1060,365 1100,365", stroke: "#a2803c"}
+  SF_Late: {waypoint: "774,424 774,510 704,510 704,520", label: 780 427 120 28, stroke: "#ac5a54"}
+  SF_Exit_S2: {waypoint: "1034,414 1034,510 704,510 704,520", label: 1040 417 120 28, stroke: "#ac5a54"}
+  Record_Completion: {bounds: 1100 330 100 70, font: "#a2803c", fill: "#f6e8c9", stroke: "#a2803c"}
+  Completed: {bounds: 1240 349 32 32, label: 1222 385 70 42, fill: "#f6e8c9", stroke: "#a2803c"}
+  Exit_FollowUp: {bounds: 690 520 28 28, label: 580 526 104 20, fill: "#f1d0cd", stroke: "#ac5a54"}
+  SF_Record_Completed: {waypoint: "1200,365 1240,365", stroke: "#a2803c"}
+  SF_Start: {waypoint: "102,75 140,75", stroke: "#4e6f95"}
+  SF_Screen: {waypoint: "270,75 310,75", stroke: "#4e6f95"}
+  Flow_Eligible: {waypoint: "330,95 330,175", label: 338 125 60 14, stroke: "#4e6f95"}
+  Flow_Excluded: {waypoint: "350,75 420,75", label: 360 57 54 14, stroke: "#ac5a54"}
+  All_Complete: {bounds: 120 694 32 32, label: 96 730 80 30, fill: "#e6dff1", stroke: "#7a67a6"}
+  Dataset_Trials: {bounds: 760 660 36 50, label: 740 714 76 28, fill: "#e6dff1", stroke: "#7a67a6"}
+  Trial_Schema: {bounds: 870 660 36 50, label: 850 714 76 28, fill: "#e6dff1", stroke: "#7a67a6"}
+  Decision_Rules: {bounds: 980 660 36 50, label: 960 714 76 28, fill: "#e6dff1", stroke: "#7a67a6"}
+  Analysis: {bounds: 200 672 190 76, font: "#7a67a6", expanded: false, fill: "#e6dff1", stroke: "#7a67a6"}
+  Dataset_Results: {bounds: 1090 660 36 50, label: 1070 714 76 28, fill: "#e6dff1", stroke: "#7a67a6"}
+  Render: {bounds: 440 672 120 76, font: "#a2803c", fill: "#f6e8c9", stroke: "#a2803c"}
+  Study_Complete: {bounds: 610 694 32 32, label: 590 730 72 20, fill: "#f6e8c9", stroke: "#a2803c"}
+  Flow_Start_Analysis: {waypoint: "152,710 200,710", stroke: "#7a67a6"}
+  Flow_Analysis_Render: {waypoint: "390,710 440,710", stroke: "#a2803c"}
+  Flow_Render_Complete: {waypoint: "560,710 610,710", stroke: "#a2803c"}

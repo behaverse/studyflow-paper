@@ -1,0 +1,154 @@
+id: fault_library
+schemas:
+  cognitive: http://behaverse.org/schemas/studyflow/cognitive
+  studyflow: http://behaverse.org/schemas/studyflow/v1
+
+Study:
+  type: Process
+  name: Fault library
+  extensions:
+    studyflow:Study:
+      seed: 42
+  elements:
+    Start:
+      type: StartEvent
+      name: Enrolled
+
+    Eligible:
+      type: ExclusiveGateway
+      name: Eligible?
+      default: $F_No
+      extensions:
+        cognitive:EligibilityGateway: {}
+
+    Excluded:
+      type: EndEvent
+      name: Excluded (n={reached})
+
+    Settings:
+      type: DataObjectReference
+      name: Task settings
+      extensions:
+        studyflow:Parameters:
+          values:
+            trials: 30
+
+    Play:
+      type: Task
+      name: Play the task
+      inputs:
+        In_Settings:
+          source: $Settings
+      outputs:
+        Out_Trials:
+          target: $Trials
+
+    Failed:
+      type: BoundaryEvent
+      name: Task failed
+      error:
+        id: Error
+      attachedTo: $Play
+
+    Discontinued:
+      type: EndEvent
+      name: Discontinued (n={reached})
+
+    Trials:
+      type: DataStoreReference
+      name: Trials
+      extensions:
+        studyflow:Dataset:
+          schema: $Trial_Schema
+
+    Trial_Schema:
+      type: DataObjectReference
+      name: Trial schema
+      extensions:
+        studyflow:Schema:
+          body:
+            tableSchema:
+              columns:
+                - name: subject
+                  datatype: string
+                - name: response_time
+                  datatype: number
+                - name: correct
+                  datatype: boolean
+
+    Summarize:
+      type: ServiceTask
+      name: Accuracy per subject
+      additionalArguments:
+        index: subject
+        values:
+          - correct
+          - response_time
+      implementation: python://pandas.DataFrame.pivot_table
+      inputs:
+        In_Trials:
+          source: $Trials
+          parameter: self
+
+    Accurate:
+      type: ExclusiveGateway
+      name: Accurate enough?
+
+    Below:
+      type: EndEvent
+      name: Below criterion (n={reached})
+
+    Compare:
+      type: ServiceTask
+      name: Equivalent across arms?
+      additionalArguments:
+        low: -0.1
+        upp: 0.1
+      implementation: python://statsmodels.stats.weightstats.ttost_ind
+
+    Done:
+      type: EndEvent
+      name: Completed (n={reached})
+
+    F_Start:
+      source: $Start
+      target: $Eligible
+
+    F_Yes:
+      name: "yes"
+      condition: consented
+      source: $Eligible
+      target: $Play
+
+    F_No:
+      name: "no"
+      source: $Eligible
+      target: $Excluded
+
+    F_Played:
+      source: $Play
+      target: $Summarize
+
+    F_Failed:
+      source: $Failed
+      target: $Discontinued
+
+    F_Summarized:
+      source: $Summarize
+      target: $Accurate
+
+    F_Pass:
+      name: "yes"
+      condition: accuracy >= 0.8
+      source: $Accurate
+      target: $Compare
+
+    F_Below:
+      name: "no"
+      condition: accuracy < 0.8
+      source: $Accurate
+      target: $Below
+
+    F_Compared:
+      source: $Compare
+      target: $Done

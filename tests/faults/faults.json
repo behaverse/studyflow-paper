@@ -1,0 +1,62 @@
+[
+ {
+  "file": "fault-01.studyflow.yaml",
+  "category": "Undisclosed change of random seed",
+  "fault": "The random seed was changed from 7 to 42 without being reported."
+ },
+ {
+  "file": "fault-02.studyflow.yaml",
+  "category": "Changed design parameter",
+  "fault": "The task was run with 20 trials per participant instead of the preregistered 30."
+ },
+ {
+  "file": "fault-03.studyflow.yaml",
+  "category": "Changed exclusion/performance criterion",
+  "fault": "The accuracy criterion for continuing to the equivalence test was relaxed from 0.8 to 0.7 in both branches."
+ },
+ {
+  "file": "fault-04.studyflow.yaml",
+  "category": "Inconsistent criterion (logic error)",
+  "fault": "The pass threshold was lowered to 0.7 but the 'below criterion' branch still uses 0.8, so accuracies between 0.7 and 0.8 go both ways."
+ },
+ {
+  "file": "fault-05.studyflow.yaml",
+  "category": "Changed equivalence bounds",
+  "fault": "The equivalence margin was widened from +/-0.1 to +/-0.3, making equivalence easier to claim."
+ },
+ {
+  "file": "fault-06.studyflow.yaml",
+  "category": "Changed analysis/test",
+  "fault": "The equivalence test (TOST) was replaced by an ordinary independent-samples t-test while the step is still described as testing equivalence."
+ },
+ {
+  "file": "fault-07.studyflow.yaml",
+  "category": "Changed primary outcome",
+  "fault": "Accuracy was dropped from the summarised measures so only response time is analysed, although the accuracy criterion still gates the analysis."
+ },
+ {
+  "file": "fault-08.studyflow.yaml",
+  "category": "Dropped step",
+  "fault": "The per-subject summary step was skipped, so the accuracy check and the test run directly on raw trial data."
+ },
+ {
+  "file": "fault-09.studyflow.yaml",
+  "category": "Added exclusion criterion",
+  "fault": "An undisclosed age limit was added to the eligibility condition on top of consent."
+ },
+ {
+  "file": "fault-10.studyflow.yaml",
+  "category": "Data processing error",
+  "fault": "Per-subject accuracy was aggregated with a sum instead of a mean, so it reports correct counts rather than proportions."
+ },
+ {
+  "file": "fault-11.studyflow.yaml",
+  "category": "Data schema/type error",
+  "fault": "Correctness was recorded as a string instead of a boolean, so accuracy cannot be computed as a proportion."
+ },
+ {
+  "file": "fault-12.studyflow.yaml",
+  "category": "Misreported counts",
+  "fault": "Participants whose task failed are routed to the 'Completed' end, so dropouts are counted as completers and the discontinued count is lost."
+ }
+]
