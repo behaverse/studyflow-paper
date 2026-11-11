@@ -1,0 +1,61 @@
+---
+title: "Studyflow: an executable visual notation for designing, running, and reporting experimental studies"
+author:
+  - name: Morteza Ansarinia
+    orcid: 0000-0001-8335-6704
+    corresponding: true
+    email: morteza.ansarinia@uni.lu
+    affiliations:
+      - ref: unilu
+  - name: Hoorieh Afkari
+    orcid: 0000-0003-4787-8331
+    affiliations:
+      - ref: unilu
+  - name: Pedro Cardoso-Leite
+    orcid: 0000-0002-2848-5527
+    affiliations:
+      - ref: unilu
+affiliations:
+  - id: unilu
+    name: University of Luxembourg
+    country: Luxembourg
+abstract: |
+  Experimental studies in cognitive sciences are hard to replicate, verify, and understand. One cause of these difficulties is that a study's processes are scattered across protocols, code, data, and figures that are neither machine-readable nor mutually consistent. To bring these processes together, we present *Studyflow*. It is a visual notation that describes an entire study, in the vocabulary of experimental design, as one diagram humans can understand and computers can execute. Built on BPMN, an established process-modeling standard, the diagram is at once the study's protocol, runnable implementation, data model, analysis plan, provenance record, and publication figure. The documents a study requires, such as the participant flow and checklists, are generated from the Studyflow diagram, ensuring consistency across documents by design. Studyflow tracks every change to a study and records what happened and when. A study can be validated and simulated before data collection, rerun from the same file, and compared with its registered version to expose any deviation. We demonstrate Studyflow on a complete study with artificial agents and release open source tools to create, validate, and run diagrams. Studyflow thus lays the foundation for a new generation of research tools that make studies transparent, verifiable, and replicable for human and AI stakeholders alike.
+impact-statement: |
+  A single human-understandable, machine-readable diagram serves as a study's protocol, experiment orchestration script, data model, analysis plan, data provenance, and publication figure.
+keywords:
+  - scientific workflows
+  - process modeling
+  - BPMN
+  - reproducibility
+bibliography: references.bib
+---
+
+<!-- PENDING[ID] tags mark open items. -->
+
+{{< include sections/01-introduction.qmd >}}
+
+{{< include sections/02-notation.qmd >}}
+
+{{< include sections/03-results.qmd >}}
+
+{{< include sections/04-discussion.qmd >}}
+
+{{< include sections/05-methods.qmd >}}
+
+{{< include sections/back-matter.qmd >}}
+
+# Appendices
+
+{{< include sections/appendix-1-literature-review.qmd >}}
+
+```{=latex}
+% start a new page before Appendix 2 when fewer than 15 lines remain, so that its heading stays with its table
+\needspace{15\baselineskip}
+```
+
+{{< include sections/appendix-2-glossary.qmd >}}
+
+{{< include sections/appendix-3-code.qmd >}}
+
+# References

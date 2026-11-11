@@ -1,0 +1,222 @@
+# Results: one study, from design to report {#sec-results}
+
+To demonstrate the capabilities of Studyflow, we follow one fictitious study from design to report. Importantly, this study is not intended to answer a scientific question about cognition, and its results say nothing about the models or about human cognition [@lin2025fallacies; @bean2025construct]. Its only purpose is to show how Studyflow works and how a study runs. Consequently, we chose a design that uses most kinds of elements in @tbl-elements and combines two task platforms, two sessions, and a registered analysis, which current tools usually handle separately.
+
+## Study description
+
+In this fictitious study, we used artificial agents as participants. Each agent completed the study once and responded to each trial through the same interface that human participants would use. Over two sessions, the agents completed two classic cognitive tasks twice, the Flanker task [@eriksen1974flanker] in jsPsych and the Simon task [@simon1969reactions] in the Behaverse assessment battery [@behaverse], each on its own platform. Artificial agents were randomly assigned to either a control or a treatment group. In the first session, all agents completed the Flanker task followed by the Simon task. In the Flanker task, both groups were told to respond with the direction of the middle arrow, whatever the direction of the arrows around it. The treatment group also received a strategy instruction that repeated this rule, asking the agents to look only at the middle arrow and not let the arrows around it change their answer. After a short rest, the second session started and all agents completed both tasks again, this time with the standard instructions only. Agents had to start the second session within a fixed time window. Agents who missed this window, or who left more than 20% of a task's test trials unanswered, did not complete the study.
+
+We ran three cohorts of 48 independent agents each, one cohort per model. The agents were driven by the language models Gemma 4 E2B and E4B [@google2026gemma4] and by the decision model d1 3B [@liquid2026d1], all served locally by Ollama (<https://ollama.com/>). The same design could compare other models, or simulate different types of populations (e.g., clinical vs. healthy, young vs. old, typical vs. atypical).
+
+Before running the study with these cohorts, we tested the Studyflow diagram with a simple simulated agent whose response probabilities were set in advance. These tests verified that each outcome of the analysis can be reached, that agents who do not complete the study are counted on the path they took, and that the analysis of the generated data recovers the effects built into the simulated responses (@tbl-planted). They check the study from start to finish, including that the data are collected accurately, before it is run with real participants.
+
+The Studyflow diagram of the study is shown in @fig-combined. For convenience, we report the study in the four stages of its lifecycle shown in @fig-overview (Design, Run, Analyze, Report). These four stages are served by the same Studyflow diagram, which ensures consistency and continuity across them. The following sections describe how Studyflow supports researchers at each stage, using the example study as a concrete use case.
+
+![**The example study after it was run, shown as a Studyflow diagram.** The counts (n) are those of the run with Gemma 4 E2B. The upper pool ("Study run") is executed once per agent, and its lanes follow the CONSORT phases. At the allocation gateway, each agent is assigned to one of the two groups; the paths of the two groups merge again at the rest that precedes session 2. In each choreography task (a box with one band at the top and one at the bottom, e.g., the assessment for eligibility), the lower band represents the agent. An agent can fail to complete the study, and each of these failure paths is labeled with its reason. The lower pool contains the analysis, which starts on a message (dashed arrow) that the upper pool sends once all agents have finished. Data flow is omitted here for simplicity but shown in @fig-step2-run and @fig-step3-analyze. The box at the bottom is a key to the symbols.](figures/png/fig-combined.studyflow.png){#fig-combined}
+
+## Stage 1 (Design): the protocol is the diagram
+
+The first part of the diagram (the Enrollment and Allocation lanes of @fig-combined) describes consent, enrollment, and random allocation. It specifies the screening and eligibility criteria, the reasons for exclusion, and how the agents of a cohort are allocated to groups. The study has the structure of a randomized trial and follows the CONSORT phases [@hopewell2025consort]. Its CONSORT participant flow, including the agents lost to follow-up, is a view of the diagram (@fig-views, panel B) and does not need to be drawn separately for publication. @lst-design shows these elements in text form (Appendix 3).
+
+Domain-specific elements state each design decision visually in the diagram. The start event references the consent document, so an ethics review panel approves the same document that human participants would see when they enroll. The screening task presents the comprehension check to the agent and holds a checklist that is later used to audit the study. The eligibility gateway lists the inclusion criterion, and its "yes" path tests the screening result with executable code rather than with a written label. The allocation gateway states the allocation rule and its parameters, and each group then follows its own path. The two groups are therefore visible in the control flow rather than hidden in code or in prose. Each element holds the values that the study uses when it runs. Because every such value has a place in the diagram, writing a study as a diagram also shows the decisions that its authors have not made, as values left empty or paths never taken, whereas prose simply leaves them out.
+
+The example study uses only some of the design options that the notation provides. Its allocation gateway, for example, could also allocate by simple randomization, within strata, or by minimization, and conceal the allocation sequence until data collection finishes, as the CONSORT and SPIRIT guidelines recommend [@hopewell2025consort; @chan2025spirit]. When a complex procedure, such as an adaptive staircase, is delegated to the external software that an element names, the run records what software was used and what that software decided.
+
+The way these elements are *connected* is as much a part of the experimental design as the elements themselves. For example, attrition is drawn as paths in the control flow rather than annotated by hand. The "no" path of the eligibility gateway ends at the "Excluded" end event. Each session has an exit rule, drawn as a small double circle on its border. The rule is a boundary event, the standard BPMN mechanism for interrupting an activity [@bpmnspec; @dijkman2008semantics]. If more than 20% of a task's test trials are left unanswered, the rule interrupts the session and the agent leaves the study. Similarly, a timer boundary event on the step at which an agent returns for session 2 closes the ten-minute return window. An agent who has not returned when the window closes leaves the study and is counted as lost to follow-up. The paths from the exit rules and from the return window all lead to a single end event, "Did not complete", and each path is labeled with its reason and with a placeholder for the number of agents who took it. Because each path carries its own count, the CONSORT participant flow reports attrition by path, and by group up to the end of session 1, where the paths of the two groups merge.
+
+As the study runs, the Studyflow runner counts how many times each element and path is reached, and the labels in the diagram can dynamically show these counts. The labels contain placeholders that are filled in from the study's state variables. Each variable is a standard BPMN element, a property (i.e., a named value stored in the diagram) or, for a value kept for all agents, a data store (Materials and methods). The run writes to these variables as it proceeds, and afterwards a placeholder such as `{X}` is replaced by the value of the variable `X`. The registered plan and the final report are therefore the same diagram, before and after the run, the first with placeholders and the second with the values that the variables held at the end of the run.
+
+## Stage 2 (Run): one interface for any agent
+
+In the second stage, the study is executed to collect data from the agents. On each trial, the task presents stimuli and the agent responds. The diagram draws this exchange as a choreography task, whose two bands name the parties (the cognitive assessment software on top and the agent below; @fig-step2-run). The interface between the study and the agent is therefore part of the protocol rather than hidden in custom code. Because the agent is a party of its own, the diagram also states who does what. Different roles (e.g., presentation software, agent, researcher) therefore cannot be confused.
+
+![**One interface for any agent (Stage 2, Run).** Session 1 of the treatment group in @fig-combined, shown expanded. The Flanker task (jsPsych) and the Simon task (Behaverse assessment battery) are choreography tasks. In each, the top band names the assessment software and the bottom band represents the agent that responds to each trial. Above each task are the prompt it sends to the agent and its protocol (the task's settings). The prompt of the Flanker task for the treatment group contains the strategy instruction, which is the only difference between treatment and control groups in session 1 (session 2 is the same for both groups). If more than 20% of a task's test trials are unanswered, the session's exit rule (double circle) ends the session. Both tasks write their trials to the same dataset ("Trials data"), which is linked to its schema [@bdm] and read by the analysis (@fig-step3-analyze). @lst-tasks shows this part of the diagram as text (Appendix 3).](figures/png/fig-step2-run.studyflow.png){#fig-step2-run}
+
+The top band names the external assessment software, but its detailed implementation (i.e., the code that shows the stimuli, records the responses, and scores them) is not part of the diagram. Instead, the diagram references this code with a Uniform Resource Identifier (URI) in the activity's implementation attribute. The same mechanism applies to any other external software the study calls. In the example study, the Flanker task is a jsPsych timeline [@deleeuw2015jspsych], that is, the ordered list of trials that jsPsych presents, and it references the html-keyboard-response plugin of jsPsych 8. The Simon task comes from the Behaverse assessment battery [@behaverse] and references version 26.11 of the battery. Each reference names the code and its version, and the settings passed to the activity are the arguments that the program receives. The diagram does not need to describe how these programs work. It only states where to find them and what to ask of them.
+
+Combining two such external programs usually requires substantial custom work. At the level of the process, the experimenter has to hand each agent over from one program to the other, pass on the agent's identifier and assigned group, and keep the order of the tasks and their exit rules consistent between the two platforms. At the level of the data, jsPsych writes one row per trial, with its own column names and conventions, while the Behaverse task writes tables in the Behaverse Data Model [@bdm]. The two outputs then have to be aligned by agent, session, and timing before an analysis can read them. In the example study, the diagram does this work. It specifies the order of the tasks and the group of each agent, and both programs present their trials to the same agent and write their records to the same dataset, in which each record carries the agent, the session, and the group. From the connections between activities and datasets, the runner derives how to align the outputs of the two programs. Two task programs can therefore run in one study without extra custom code (@fig-step2-run).
+
+To show what one of these tasks contains, @fig-step2-simon compares a slide-style figure of the Simon task, drawn as such figures usually appear in publications, with its Studyflow diagram. The slide is intuitive but underspecified. Its timings are listed next to the screens without stating when each one starts (e.g., the 5s response window could start at the beginning of the trial or at the onset of the disk), the boundary between trials and blocks is left implicit, and the definition of a correct response is hidden in the analysis code. In contrast, the Studyflow diagram draws the trial itself, with its scoring rule and the dataset it writes, in a form that a machine can read and execute.
+
+![**A Simon trial as a slide and as a Studyflow diagram.** (A) A slide-style figure of a congruent and an incongruent trial. (B) One trial drawn as a subprocess, which repeats for each trial (circular arrow). The display reads the trial's settings (the disk's color and side), which make the trial congruent or incongruent. Timers set the stimulus onset (1s) and the inter-trial interval (0.5s). The display step shows the disk for 1s at most and waits for the answer, and a boundary timer on this element closes the 5s response window. A gateway scores the response, which is correct when the pressed button has the color of the disk, and a trial without an answer is scored as missed. One record step then writes the scored trial to the Trials dataset. These timings are for human participants, and agents had up to 30s per trial (Materials and methods).](figures/png/fig-step2-simon.studyflow.png){#fig-step2-simon width=100%}
+
+The same study can be taken by human participants in a web browser, by a language model that receives each trial as text, by a vision model that reads the rendered screen, by a decision model, or by simulated agents whose response probabilities are set in advance, without any change to the protocol (@lst-swap). Other kinds of recorded data are specified in the same way as the trials. For example, a study that records EEG during a task states the recording device, the electrode montage, and the event markers as elements of the diagram, together with the BIDS dataset they are written to. The task programs compute, and the diagram coordinates them. Who takes the study, and which data each step reads and writes, are stated in the diagram rather than buried in the code that connects the programs. Because the diagram also records each step of the run, a run that is interrupted, for example when a participant closes the browser or a model server returns an error, can resume from where it left off rather than restart from scratch.
+
+We ran the example study with four such variants of the diagram, one for the simulated agent and one for each model, and the models received each trial on its own (i.e., without memory of earlier trials). All 48 agents of Gemma 4 E2B and of Gemma 4 E4B, and 47 of the 48 agents of d1 3B, returned in time and completed both sessions, and no allocated agent failed to complete the study (@tbl-agents). The remaining d1 3B agent replied "NOT READY" to the comprehension check and was excluded before allocation. The runs took 17, 19, and 28 minutes, respectively.
+
+| Model | Group | Allocated | Completed | Flanker accuracy, session 1 | Flanker accuracy, session 2 | Simon accuracy, session 1 | Simon accuracy, session 2 |
+|:-----------|:---------|--------:|--------:|---------:|---------:|---------:|---------:|
+| Gemma 4 E2B | Control | 24 | 24 | 0.76 (0.05) | 0.78 (0.05) | 1.00 (0.00) | 1.00 (0.00) |
+| | Treatment | 24 | 24 | 0.62 (0.08) | 0.80 (0.05) | 1.00 (0.00) | 1.00 (0.00) |
+| Gemma 4 E4B | Control | 24 | 24 | 0.54 (0.05) | 0.54 (0.04) | 1.00 (0.00) | 1.00 (0.00) |
+| | Treatment | 24 | 24 | 0.56 (0.08) | 0.52 (0.03) | 1.00 (0.00) | 1.00 (0.00) |
+| d1 3B | Control | 24 | 24 | 0.61 (0.08) | 0.62 (0.09) | 0.73 (0.06) | 0.74 (0.07) |
+| | Treatment | 23 | 23 | 0.61 (0.09) | 0.63 (0.12) | 0.74 (0.07) | 0.73 (0.08) |
+
+: Agents and test accuracy in the runs with the three models. Accuracy is the share of an agent's test trials answered correctly, with unanswered trials counted as errors, shown as mean (SD) over the agents of each group. No allocated agent left the study at any of its three exits (session 1, late return, session 2). Invalid answers and missed trials are counted in the run records. {#tbl-agents}
+
+## Stage 3 (Analyze): the analysis is part of the diagram
+
+In the third stage, the collected data are analyzed to answer the registered research question. The analysis is drawn in the same notation as the rest of the study, rather than kept in a separate script (@fig-step3-analyze). The example study asks one question, whether the strategy instruction reduces the Flanker effect. The Flanker effect is an agent's error rate on incongruent trials, on which the arrows around the middle arrow point the other way, minus its error rate on congruent trials, on which they point the same way. The question is therefore whether this effect is smaller in the treatment group than in the control group. A preregistration typically states such a research question in a single sentence and leaves the test, the threshold, and the exclusions open. In contrast, the diagram fixes each of them before any data are collected (@tbl-rule).
+
+![**The analysis as data operations (Stage 3, Analyze).** The analysis of @fig-combined, shown expanded. Each box is an automated step that calls a function of an external library (e.g., pandas). The steps select the session 1 Flanker trials of the agents who completed both sessions and count those agents, compute one Flanker effect per agent, compare the two groups with a one-sided Welch t-test, and write each group's mean effect together with the estimate. Dotted arrows show the data that the analysis reads and writes. The "Trials" dataset is linked to its schema [@bdm], and "Decision rules" holds the two thresholds of the analysis (the alpha level and the minimum number of agents who completed both sessions). A first gateway sends the analysis to "Not testable" when too few agents completed both sessions, and a second gateway leads to "Supported", "Not supported", or "Not testable". @lst-analysis shows part of the analysis as text (Appendix 3).](figures/png/fig-step3-analyze.studyflow.png){#fig-step3-analyze}
+
+Each operation names the external function that performs it, together with its arguments, using the same implementation attribute as in Stage 2. For example, the t-test names the SciPy function that computes it, and the diagram pins the version of SciPy (1.16.2). Because the diagram records which software was used, and in which version, the analysis is reproducible [@peikert2021reproducible]. Each external call could also run in a container, which fixes the rest of its environment. The diagram also defines the format of the data. The validator therefore rejects an operation that expects a data column the study will never record, even before any data are collected [@hoytO3GuidelinesOpen2024].
+
+Each research question then ends in a decision, drawn as BPMN gateways that select a path in the diagram. A first gateway sends a cohort that is too small for the t-test to the "Not testable" end event; otherwise, the t-test runs. A second gateway then leads to "Supported" or "Not supported", or to "Not testable" when the t-test is undefined (e.g., when all Flanker effects are zero). Each possible conclusion (i.e., a claim statement) is therefore an end event of its own, drawn as a circle with a thick border at the end of its path. The executed diagram records which end event was reached, so each question ends in a claim statement selected by its registered decision rule, rather than in an estimate alone. Because these elements are fixed before any data are collected, the analysis is executed exactly as it was preregistered. Its exclusions are the same paths that the CONSORT flow reports (Stage 1), and because they are fixed in advance, they remove choices that an analyst could otherwise make after seeing the data [@simmons2011falsepositive].
+
+This particular example asks only a single research question (group differences in the Flanker effect in session 1). More questions and different types of questions can be specified in Studyflow. One can compute summary statistics for the different tasks and sessions (@tbl-agents), test whether a smaller Flanker effect persists in session 2, or use a Bayes factor or an equivalence test instead of a *p* value.
+
+What Studyflow further adds to current practices is that the whole study, from data collection to the claim statement, can be simulated before any data are collected. Because the outcome of a real run is not known in advance, we first ran the study with simulated agents, for which the correct outcome of the analysis was known, much as a model is checked by recovering parameters built into simulated data [@wilson2019tensimple]. When a smaller Flanker effect was built into the treatment group, the question reached "Supported". When both groups had the same effect, it reached "Not supported". When a quarter of the simulated agents never returned for session 2, these agents were counted as lost to follow-up, and the decision was based on the agents who completed the study. Two further runs reached "Not testable", one because too few agents completed both sessions and one because the t-test was undefined (@tbl-planted). Each of these runs used the registered diagram with a few lines changed, namely the response probabilities of the simulated agent or one threshold. No test changed the analysis code or needed data from human participants.
+
+Once the simulated runs had reached the outcomes built into them, we ran the same registered diagram with the three computational models, and the question reached "Not supported" with Gemma 4 E2B, "Supported" with Gemma 4 E4B, and "Not supported" with d1 3B (@tbl-test). With Gemma 4 E4B, the Flanker effect was smaller in the treatment group than in the control group (0.78 against 0.93), and the difference passed the registered test. With Gemma 4 E2B, the effect was larger in the treatment group (0.65 against 0.46), and with d1 3B the two groups did not differ reliably (0.64 against 0.67). Each of these claim statements was selected by the decision rule registered before any data were collected, and the executed diagram of each cohort records the path that led to it. As noted earlier, our goal with this example study is simply to demonstrate the capabilities of Studyflow; these results are not meant to support any scientific claim about the computational models or about human cognition.
+
+| Model | Flanker effect, control | Flanker effect, treatment | Difference (95% CI) | Welch *t* (df) | *p*, one-sided | Claim reached |
+|:-------------|----------:|----------:|:------------------|:-------------|---------:|:--------------|
+| Gemma 4 E2B | 0.46 | 0.65 | −0.19 [−0.27, −0.11] | −4.98 (36.3) | > .99 | Not supported |
+| Gemma 4 E4B | 0.93 | 0.78 | 0.15 [0.08, 0.22] | 4.24 (39.5) | < .001 | Supported |
+| d1 3B | 0.67 | 0.64 | 0.02 [−0.07, 0.11] | 0.51 (40.7) | .31 | Not supported |
+
+: The registered test in the runs with the three models. The Flanker effect is an agent's error rate on incongruent minus congruent test trials in session 1, averaged over the agents of each group. The difference (control minus treatment) was computed before rounding. It is shown with its two-sided 95% confidence interval (CI) and was tested with a one-sided Welch t-test. The registered decision rule then selected the claim statement ("Supported", "Not supported", or "Not testable"). {#tbl-test}
+
+## Stage 4 (Report): views are generated, and deviations are found by comparison
+
+Finally, the results are reported. This last stage closes the study lifecycle (@fig-combined; @fig-views) and shows where the figures and values in the report come from and what changed since the preregistration.
+
+A report presents two kinds of content, the results of the study and a description of how the study was done. The results, such as figures, tables, and fitted or trained models, are outputs of steps in the diagram. Each output is drawn as a data object that a step writes (e.g., the "Flanker estimate" of the analysis, @fig-step3-analyze), so the diagram states which step produced it and from which data. When the Studyflow runner executes the analysis, it stores these outputs in the run repository, a Git repository that holds the executed diagram together with everything the run produced. A step that researchers carry out by hand, such as polishing a figure for the manuscript, is drawn as a manual task (e.g., "Render the report" in @fig-combined), and its outputs are declared in the same way as automated ones. The same files can then be used outside the diagram, for example as a figure in the manuscript or as a model checkpoint shared online, and each of them can be traced back to the steps and data that produced it.
+
+The description of the study is generated as views, which turn the executed diagram into the documents needed to report the study. Each view presents the same diagram to one audience, in a form that the audience already knows. Because the views are generated from the diagram rather than drawn by hand, they remain consistent by construction (@fig-views). The *BPMN* view shows all the information available about the study as a standard BPMN 2.0 diagram (@fig-combined shows it without the data flow). The *Schedule* view (@fig-views, panel A) places each activity on a time axis, as a Gantt chart or as a schedule of visits in the SPIRIT 2025 format [@chan2025spirit]. The *Reporting Diagram* view draws the diagram in the form that a reporting guideline expects, with its placeholders filled in from the study's state (see Stage 1). It draws the CONSORT participant flow (@fig-views, panel B), and the diagrams of other guidelines can be added in the same way. The *Checklist* view lists the checklist of each element as items that an audit ticks off (@fig-views, panel C). The *Provenance* view shows the history of every change to the diagram since it was created, including each run (@fig-views, panel D). An exported image of the diagram (a PNG, TIFF, or SVG file) carries the whole diagram as embedded metadata and can be reopened for editing. A figure deposited with a paper is therefore the runnable study and its provenance, rather than a simple picture of it.
+
+![**Four views of the executed diagram (Stage 4, Report).** Each panel is generated from the executed diagram of the run with Gemma 4 E2B. (A) The Schedule view, as a Gantt chart (top) of the activities from enrollment to the end of the return window and as a SPIRIT-style table (bottom). (B) The Reporting Diagram view, as a CONSORT 2025 participant flow diagram [@hopewell2025consort] with the count at each exit. (C) The Checklist view, with the screening checklist, the analysis exclusions, and the reporting exports. (D) An excerpt of the Provenance view. It shows the run (its software, name, and seed) and the records of two tasks, of the agent count and the gateway that tests it, of the decision and the path it took, and of the claim statement reached.](figures/png/fig-views.studyflow.png){#fig-views}
+
+The same diagram can produce further documents and records. Because the items of a reporting guideline, such as CONSORT or SPIRIT, are attributes of the elements they cover, a study's adherence to the guideline can be checked from the diagram rather than from the manuscript. The provenance record can also be exported in the W3C PROV standard [@w3cprov], packaged with the data as a Workflow Run RO-Crate for deposit in an archive [@leo2024wfrunrocrate], or exported as an event log that can be compared with the registered protocol [@berti2024ocel].
+
+Deviations from the preregistration are found in the Studyflow file itself. The file is plain YAML text that holds the diagram and its provenance together, so it works with version control systems. The registered diagram and the executed diagram are the same file at two points in time, and comparing them line by line shows everything that changed (@lst-diff, Appendix 3). A run adds only its record, a few lines of provenance such as the computed values and a note on each element the run reached, and these lines are marked as the run's record. In contrast, a change to the protocol itself, such as a new value for a property, appears as a changed line inside the element it belongs to, rather than as edits scattered through the nested XML in which BPMN diagrams are usually saved. Any such change is a deviation, and it cannot hide among the lines the run added. Each run also records a fingerprint of the protocol, a short code that changes with any edit to the protocol but not with the lines that a run adds. The validator recomputes this fingerprint to confirm that the protocol is still the one that ran. Comparing a registry entry with a published paper, both written in prose, offers no such check [@claesen2021adherence; @cummins2026regcheck], and current recommendations ask authors to record their deviations by hand [@willroth2024deviations].
+
+::: {#tbl-blind .list-table header-rows=1 widths="101,77,22" aligns="l,l,l"}
+
+* - Deviation
+  - Where the comparison showed it
+  - Validator
+
+* - Random seed changed, not reported
+  - Seed of the study
+  - 
+
+* - Fewer trials per participant than registered
+  - Settings of the task
+  - 
+
+* - Accuracy criterion relaxed
+  - Conditions of both paths of the accuracy decision
+  - 
+
+* - Criterion relaxed on one path only, so the two conditions overlap
+  - Condition of that path
+  - Warning
+
+* - Equivalence margin widened
+  - Arguments of the test
+  - 
+
+* - Equivalence test replaced by a difference test
+  - Implementation of the test
+  - 
+
+* - Primary outcome replaced (response time instead of accuracy)
+  - Measures of the summary step
+  - 
+
+* - Per-participant summary step dropped
+  - The removed step and its flow
+  - 
+
+* - Exclusion criterion added (age)
+  - Condition of the eligibility gateway
+  - 
+
+* - Aggregation changed (sum instead of mean)
+  - Arguments of the summary step
+  - 
+
+* - Column type changed in the data schema
+  - Type of the column in the schema
+  - 
+
+* - Dropouts rerouted to the completion exit
+  - Target of the dropout path
+  - Error
+
+Twelve deviations of the kinds that audits of preregistered studies report [@claesen2021adherence], each introduced on its own into a small study. Any edit to the protocol changes the file, so comparing the modified and the original diagram flags all twelve and shows where each change was made. The validator checks only whether a study is well formed, so it flags just two. It warned that both conditions of the decision hold for accuracy in [0.7, 0.8), and it reported as an error that the exit for dropouts lies on no path.
+:::
+
+**What the comparison and the validator catch.** Deviations and design faults are different kinds of changes. A deviation is a change after which the study still runs but no longer matches the registered study, so only a comparison with the registered diagram reveals it. A design fault is an error that makes the study unable to run as intended, and the validator should catch it before any data are collected. To test the comparison and the validator, we introduced changes of both kinds, one at a time, into a small study in which the participants who meet an accuracy criterion are compared between two groups with an equivalence test. The twelve deviations were of the kinds that audits of preregistrations commonly report [@claesen2021adherence], such as fewer trials, a relaxed criterion, or a replaced outcome measure. The comparison flagged all twelve and showed where each change was made, whereas the validator flagged only two (@tbl-blind). The comparison cannot, however, detect changes made outside the diagram, for example in the external software the diagram calls. Such changes can still be traced if the external code is kept in a public repository and the diagram pins its exact version, as it does for SciPy in Stage 3.
+
+Of the fifteen design faults, thirteen were introduced into the diagram and two into an external Python script that it calls (@tbl-faults). They included an analysis that reads a data column the study never records. The validator caught twelve, and the Studyflow runner caught two more when it executed the faulty analysis in a test run with simulated agents, that is, before any data are collected from participants. The one fault that went undetected, a difference test where the research question asks for equivalence, is a choice of statistical test, which no check of the diagram's structure can judge.
+
+::: {#tbl-faults .list-table header-rows=1 widths="5,3" aligns="l,l"}
+
+* - Fault
+  - Check that reported it (severity)
+
+* - **Caught by the validator, before the run**
+  - 
+
+* - An analysis step reads a column that the schema of its dataset does not define
+  - Data schemas (error)
+
+* - A step on no path from the start to an end
+  - Connectedness (error)
+
+* - Two steps joined by data flow instead of control flow
+  - Edge endpoints (error)
+
+* - A decision drawn as parallel paths, so that every path runs
+  - Decisions (error)
+
+* - A decision rule whose inequality is flipped
+  - Decisions (warning and error)
+
+* - A threshold changed on one path of a decision only, so the conditions overlap
+  - Decisions (warning)
+
+* - A decision that may take several paths at once (an\ inclusive\ gateway)
+  - Decisions (warning)
+
+* - A decision with a custom rule that names no software to apply it (a complex gateway)
+  - Runner paths (error)
+
+* - Two elements share an id
+  - Reader (error)
+
+* - A misspelled attribute
+  - Reader (warning) and BPMN 2.0 schema (error)
+
+* - **Caught by the validator, after the run**
+  - 
+
+* - An attrition count manually edited after the run
+  - Flow consistency (error)
+
+* - A parameter changed after the run
+  - Protocol fingerprint (warning)
+
+* - **Caught by the runner, in a simulated run**
+  - 
+
+* - A step pins a package version that the environment does not provide
+  - Version pin (the step fails)
+
+* - An analysis step reads a column that a derived table does not have
+  - Column check (the step fails and names the closest column)
+
+* - **Missed**
+  - 
+
+* - A difference test where the question asks for equivalence
+  - None
+
+Design faults introduced one at a time, thirteen into a small study and two into an external Python script that a study calls (the two that the runner caught). The rows are grouped by the program that caught the fault and when. The runner reports a fault when the step runs, which a simulated run does before any data are collected.
+:::
+
+**What the example study shows.** The registered diagram fixed in advance how the research question would be decided. The simulated runs showed that the analysis recovers an effect built into the simulated data as well as its absence, that each claim statement is reached when the data call for it, and that agents who leave the study are counted on the path they took (@tbl-planted). The runs with the three models then ended in the claim statements that the registered decision rule selected (@tbl-test). The example thus covers the whole study lifecycle in one diagram, which is at once the protocol as registered, the study as executed, and the record of what was done. It also replaces four documents that current practices produce by hand, namely the CONSORT flow, the schedule of visits, the checklist, and the deviation report. The abilities that each stage mentioned beyond the example, such as concealed allocation or a decision by a Bayes factor, are stated in a diagram in the same way.

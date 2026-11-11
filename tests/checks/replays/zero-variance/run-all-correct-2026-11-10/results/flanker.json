@@ -1,0 +1,14 @@
+{
+  "completed": 48,
+  "mean_standard": 0,
+  "mean_strategy": 0,
+  "ci95": {
+    "low": 0,
+    "high": 0
+  },
+  "test": {
+    "statistic": null,
+    "pvalue": null,
+    "df": 1
+  }
+}

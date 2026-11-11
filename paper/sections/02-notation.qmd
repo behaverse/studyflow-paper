@@ -1,0 +1,70 @@
+# The Studyflow notation
+
+This section introduces the Studyflow notation. It first presents the graphical elements a diagram is drawn with and how they relate to the BPMN standard. It then describes what a diagram states about a study, how views present that information to different audiences, and how a diagram is executed. @fig-combined shows these elements in the example study, which the Results section follows stage by stage, and Materials and methods gives the full specification.
+
+Studyflow is a domain-specific profile of BPMN 2.0, the standard of the Object Management Group (OMG) for drawing processes [@bpmnspec]. It keeps BPMN's graphical elements and their meaning, and it adds element types for experimental research through the extension mechanisms that the standard provides, without changing the standard [@stroppi2011]. @tbl-elements shows a selection of these elements, grouped by kind. A Studyflow type keeps the shape of the BPMN element it extends and adds an icon (e.g., a random allocation is a BPMN gateway marked with a die). The description in each row of @tbl-elements says which elements are Studyflow types. Some of these types belong to the Studyflow core. Others come from extensions, each of which adds the element types and the code that executes them for one kind of data or equipment, such as EEG recordings or a social robot. A lab can add its own element types in the same way, through a schema that extends the core schema, and the extended diagram still exports to valid BPMN. The documentation of each release lists every declared element type [@studyflowdocs], and Materials and methods (Execution) states where running a diagram departs from the BPMN specification.
+
+::: {#tbl-elements .list-table header-rows=1 widths="6,4,11" aligns="l,l,l"}
+
+* - Graphical element
+  - Name
+  - Description
+
+* - ![](figures/box1/events.png){width=30.0mm}
+  - **Events**
+  - A start event is where a process begins (e.g., recruitment of participants), and an end event marks where it exits. A timer event holds the process for a set time, such as the delay between two sessions. A rest, a Studyflow type, is a timed break or resting-state period.
+
+* - ![](figures/box1/tasks.png){width=39.0mm}
+  - **Tasks and subprocess**
+  - An activity that a person, a software tool, or a computational agent performs. The plain task is the BPMN task, and the icons mark three Studyflow types (a cognitive task, a questionnaire, and an instruction). A subprocess embeds a flow of its own, such as a complex analysis, and its + marker shows it is drawn collapsed.
+
+* - ![](figures/box1/choreography.png){width=13.2mm}
+  - **Choreography task**
+  - An exchange between two parties, such as task software sending a trial and an agent responding to it. Its bands name the parties, and the shaded band is the party that responds.
+
+* - ![](figures/box1/boundary.png){width=12.6mm}
+  - **Boundary event**
+  - A rule or a timer on a task's border (black) that can take a process off the main path, such as an exit rule, a deadline, or the handling of a software error.
+
+* - ![](figures/box1/gateways.png){width=24.0mm}
+  - **Gateways**
+  - A decision on which path to take. The first is the BPMN gateway, and the other two are Studyflow gateways (a random allocation and an eligibility screen).
+
+* - ![](figures/box1/flows.png){width=25.2mm}
+  - **Control flow and data flow**
+  - Control flow (solid edges) says what happens next after a task completes. Data flow (dotted edges) says which data an activity reads or writes. Both kinds of flow are drawn in the same diagram.
+
+* - ![](figures/box1/pool-lane.png){width=31.2mm}
+  - **Pool and lane**
+  - A pool visually separates the various parties involved in a study (e.g., participants, experimenter, external systems). Its lanes (black) separate the phases or subsystems of its process (e.g., the CONSORT phases of a trial, such as enrollment and allocation).
+
+* - ![](figures/box1/actors.png){width=31.2mm}
+  - **Actor pools**
+  - An actor pool, a Studyflow type, is a party that takes part in the study, such as a person, a software tool, a language model, or a robot.
+
+* - ![](figures/box1/messages.png){width=31.2mm}
+  - **Message flow**
+  - Message flow (dashed edges) is the information that passes between pools, such as a trial sent to an agent and the response that comes back.
+
+* - ![](figures/box1/data.png){width=35.4mm}
+  - **Data objects**
+  - Data the study reads or records while it runs. Studyflow extends the basic BPMN data object with several specific data types and corresponding schemas (e.g., a prompt for a language model, an EEG recording with its event markers).
+
+* - ![](figures/box1/stores.png){width=31.5mm}
+  - **Datasets**
+  - Data persisted and kept after the study completes. Studyflow extends the basic BPMN data store with several types for a dataset in a community format (e.g., a BIDS dataset for brain imaging data, a Psych-DS dataset for psychological data, a Behaverse Data Model dataset for behavioral data).
+
+Reading a Studyflow diagram. The table shows a selection of graphical elements, grouped by kind. The documentation of each release lists every element type [@studyflowdocs].
+:::
+
+## What a Studyflow diagram describes
+
+**Diagram.** In the context of experimental research, the *nodes* of a diagram are a study's events, tasks, gateways, and data. The *edges* record both what happens next after a task completes (control flow, i.e., the process dependencies) and which data each node reads and writes (data flow, i.e., the data dependencies). Unlike a classical BPMN process model, a Studyflow diagram also holds the study's data model. It states the schema of each dataset (e.g., the names of the columns in a table) and the community format each dataset follows (e.g., BIDS format). Each element in a Studyflow diagram also has attributes for the values that running an experiment needs, such as the allocation ratio of a randomization gateway that distributes participants across experimental groups, or the settings of a task (e.g., the number of trials to be completed). Because each of these values has a place in the diagram, translating a textual description of a study into a Studyflow diagram reveals the values that the prose left unreported, which audits of published studies find to be common (see Appendix 1 for a review). The same elements describe the designs that experimental science commonly uses (@tbl-scope). For example, a randomization gateway can allocate participants by simple randomization, in permuted blocks, within strata, or by minimization. Counterbalanced task orders are paths of a randomization gateway, and a delay between sessions is a timer event. Designs beyond these elements are handled in two ways. First, complex procedures, such as adaptive staircases, can be delegated to the external software that a task names. Second, extensions of the notation add elements for further kinds of data and equipment.
+
+**Views.** Different audiences need different information about a study. For example, an ethics review panel wants a plan, while an analyst may want to understand where data came from and how. Studyflow meets these needs from one source by projecting the same diagram into several special-purpose views. A view selects the subset of information available in the Studyflow diagram that is relevant for one audience's specific needs and displays that information in a familiar form, such as a schedule, a checklist, or a reporting diagram such as the CONSORT participant flow (@fig-overview, panel C; @fig-views, panel B). The documents a study requires, such as the participant flow that a journal asks for, the schedule of visits that an ethics review panel reads, and the checklists of reporting guidelines, can therefore all be generated from the diagram.
+
+A view is read-only. It shows only information that the diagram holds, and it never adds to or changes the diagram. In current practice, these documents are drawn by hand and can drift apart over the course of a study. In contrast, Studyflow views generated from the same diagram are consistent with it, and with each other, by construction.
+
+**Execution.** A Studyflow diagram is not just an image; it contains structured information that can be consumed by different software programs. The validator, for example, can check whether the content of the diagram is complete and consistent. Most importantly, the runner program can orchestrate and execute the processes described in the Studyflow diagram. The runner presents each trial to an agent through one interface, so the same study can be taken by human participants in a web browser, by a language model, a vision model, or a decision model, by a robot, or by simulated agents, simply by swapping the actor pool (@lst-swap). When a study is registered, the Studyflow diagram is a plan (prospective provenance). As the study runs, the Studyflow diagram accumulates a run record (retrospective provenance) of the environment in which it ran, the random seed, the state of every element, and what each activity read and wrote [@w3cprov]. Any change outside the provenance history is a change to the plan itself (i.e., a deviation). The deviation report is thus the difference between the diagram's two states, before and after execution, apart from the provenance history. It is computed automatically and can be inspected directly, whereas current practices require comparing and searching documents by hand. A run that is interrupted, for example when a participant closes the browser, can resume from its record, and the record can be exported in the W3C PROV standard and deposited with the data.
+
+In summary, a Studyflow diagram is one object. People read it, machines validate and run it, each stakeholder gets the information they need about the study through specific views, and every run is recorded for traceability and completeness.

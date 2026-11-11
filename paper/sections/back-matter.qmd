@@ -1,0 +1,29 @@
+# Data availability
+
+All data and scripts of this study are archived at <https://github.com/behaverse/studyflow-paper/releases/tag/v26.11>, including:
+
+- The variants of the example study (one for each of the three language models and one for the simulated agent), the outputs of each model, the generated data, and the analysis scripts.
+- The simulated runs and the test scripts.
+- The Studyflow diagram for the small study and its planted deviations.
+
+The Studyflow notation and tools (RRID:SCR_029273) are open source under the MIT license. The modeler is available at <https://behaverse.org/studyflow>, and the source code at <https://github.com/behaverse/studyflow-modeler>, whose tests include the design faults. The figures in this paper were exported from version 26.11 of the modeler software.
+
+# Author contributions
+
+MA, Conceptualization, Data curation, Formal analysis, Methodology, Project administration, Software, Validation, Visualization, Writing -- original draft, Writing -- review and editing
+
+HA, Conceptualization, Data curation, Validation, Writing -- original draft, Writing -- review and editing
+
+PCL, Conceptualization, Funding acquisition, Investigation, Methodology, Project administration, Resources, Supervision, Validation, Visualization, Writing -- original draft, Writing -- review and editing
+
+# Competing interests
+
+The authors declare no competing interests.
+
+# Ethics
+
+No human participants took part in this work. The example study's participants are artificial (small language and decision models, and simulated agents that tested the analysis), and the human-facing elements of its protocol (e.g., consent) were not used by any person. No ethics approval was required.
+
+# Funding
+
+This work was supported by the Luxembourg National Research Fund (FNR), grant ATTRACT/2016/ID/`\allowbreak`{=latex}11242114/DIGILEARN to Pedro Cardoso-Leite. The funder had no role in study design, data collection and interpretation, or the decision to submit the work for publication.

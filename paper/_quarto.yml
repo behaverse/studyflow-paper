@@ -1,0 +1,51 @@
+project:
+  type: manuscript
+  render:
+    - paper.qmd
+
+manuscript:
+  article: paper.qmd
+
+format:
+  html:
+    filters:
+      - filters/strip-comments.lua
+  elife-pdf:
+    filters:
+      - filters/box-glyphs.lua
+      - path: filters/wide-tables.lua
+        at: post-render
+    # appendix tables and code listings are set in place, not as floats, so a long one can break across pages;
+    # long code lines wrap, a long word moves to the next line, and URLs and line numbers use vector Latin Modern Sans
+    include-in-header:
+      text: |
+        \usepackage{adjustbox}
+        \usepackage{needspace}
+        \usepackage{fvextra}
+        \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,breakindentnchars=6,commandchars=\\\{\}}
+        \setlength{\emergencystretch}{6em}
+        % a little space between table rows, so that wrapped rows stay apart
+        \renewcommand{\arraystretch}{1.2}
+        % a minus sign typed as − (U+2212) prints as the font's minus, not as a hyphen
+        \DeclareUnicodeCharacter{2212}{\textminus}
+        \hyphenation{ATTRACT}
+        \renewcommand{\sfdefault}{lmss}
+        \AtBeginDocument{%
+          \renewenvironment{relatedworktable}{\par\addvspace{\medskipamount}\needspace{38\baselineskip}\captionsetup{type=relatedworktable}}{\par\addvspace{\medskipamount}}%
+          \renewenvironment{glossarytable}{\par\addvspace{\medskipamount}\captionsetup{type=glossarytable}}{\par\addvspace{\medskipamount}}%
+          \renewenvironment{codelisting}{\par\addvspace{\medskipamount}\captionsetup{type=codelisting}}{\par\addvspace{\medskipamount}}%
+        }
+
+# tables inside an appendix are numbered per appendix (Appendix 1---table 1)
+crossref:
+  custom:
+    - kind: float
+      key: reltbl
+      reference-prefix: "Appendix 1---table"
+      latex-env: relatedworktable
+      caption-location: top
+    - kind: float
+      key: glosstbl
+      reference-prefix: "Appendix 2---table"
+      latex-env: glossarytable
+      caption-location: top

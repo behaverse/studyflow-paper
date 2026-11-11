@@ -1,0 +1,153 @@
+# Materials and methods
+
+## Example study
+
+### Design
+
+The example is a randomized study with two groups and two sessions separated by a rest period. Agents first answered a comprehension check, and those who replied as instructed were eligible. Eligible agents were allocated to a control group or a treatment group in permuted blocks of four (two to each group), in order of arrival at the allocation gateway. The control group received the standard instructions, and the treatment group's Flanker prompt added a strategy instruction. Instructions are among the oldest manipulations in human experiments [@heitz2014sat], and a prompt that gives an artificial agent a disposition, or that reminds it of the task rule, carries the same manipulation over to language models.
+
+In session 1, each agent did the Flanker task and then the Simon task. After a five-minute rest, the agent was expected to return for session 2 within a ten-minute return window. In session 2, both groups did the two tasks again with only the standard instructions. Apart from the strategy instruction, both groups received the same instructions, response options, and stimuli, and no correctness feedback was given on test trials. The contrast therefore estimates the effect of the added strategy instruction on the Flanker effect in session 1.
+
+The agents were not told which group they were in. The investigators were not blinded to group allocation, and the software allocated the agents, scored trials, and ran the analysis without human intervention.
+
+### Artificial agents
+
+The participants were artificial agents. We ran three cohorts of 48 agents with Studyflow 26.11, one for each of three models served locally by Ollama. Two were small variants of the language model Gemma 4 [@google2026gemma4], E2B and E4B, and the third was the decision model d1 3B [@liquid2026d1]. Each agent completed the tasks in an independent session and kept no memory between messages, so the model received each trial on its own, with only the task's instructions. Gemma 4 answered under its default sampling settings (temperature 1, top-p 0.95, top-k 64), with a new random seed drawn for every request. The answers of d1 were drawn from its output probabilities.
+
+Every exchange recorded the model's name, version, and settings and, for d1, the probability of each response option and the sampled response. The run record kept the full text of every request to a model and of its reply. A fourth variant of the diagram replaced the model with a simulated agent, which answered each trial correctly with a probability that the diagram defined for each task and condition. The four variants differ only in the agent's pool (@lst-swap, Appendix 3).
+
+### Tasks
+
+Each trial was an exchange between the task software and the agent, drawn as a choreography task (@fig-step2-run). The trial was sent individually, with the task instruction, the stimulus as text, and the allowed response options (@tbl-example-protocol). Flanker trials stated the row of five arrows as arrow characters, and Simon trials stated the disk's color and side as text. For human participants, a Flanker stimulus stays on the screen until the response or for 2s, with 0.5s before the next trial. A Simon disk appears 1s after trial onset, with 5s to respond and 0.5s before the next trial starts. Artificial agents were given up to 30s per trial to respond, and their response times were recorded.
+
+| | Flanker [@eriksen1974flanker] | Simon [@simon1969reactions] |
+|:-----------|:---------------------|:---------------------|
+| Software | jsPsych 8 [@deleeuw2015jspsych], html-keyboard-response plugin | Behaverse assessment battery [@behaverse], WhichOne instrument |
+| Practice trials | 4 | 4, with feedback |
+| Test trials | 20 (10 congruent, 10 incongruent) | 20 (10 congruent, 10 incongruent) |
+| Balanced over | Direction of the middle arrow | Correct button |
+| Stimulus, as text | A row of five arrows | The disk's color and side |
+| Response | Left or Right, the direction of the middle arrow, whatever the direction of the arrows around it | The button whose color is the disk's color, wherever the disk appears |
+| Effect | Incongruent minus congruent error\ rate | Incongruent minus congruent error\ rate |
+
+: Task specification of the example study, as the diagram describes it. Each session presents both tasks, and the trial counts are per session. Practice trials are not analyzed. {#tbl-example-protocol}
+
+### Scoring and exclusion
+
+The data of each trial include the agent, session, group, task, response, whether the trial was answered, and correctness. Invalid and missing responses were both scored as unanswered and counted as errors. Practice trials were not scored. After each task, the share of unanswered test trials (out of 20) was recorded for the session. A conditional boundary event, the session's exit rule, ended a session when the share of unanswered trials exceeded 20%, and the agent left the study at "Did not complete". A timer boundary event did the same for an agent who had not returned before the return window of session 2 closed. An agent whose answer to the comprehension check did not contain READY, or also contained NOT (as in NOT READY), was excluded before allocation. Low accuracy was not an exclusion criterion.
+
+### Sample size
+
+We chose 48 agents per cohort to demonstrate the tools, not from a power analysis. The analysis of each cohort required at least 20 agents who completed both sessions. Excluded agents and agents who did not complete the study were not replaced.
+
+### Statistical analysis
+
+We analyzed each cohort on its own and did not compare the cohorts with one another. The question asked whether the Flanker effect was smaller in the treatment group than in the control group. The analysis used the session 1 Flanker test trials of the agents who completed both sessions. Each agent's Flanker effect was $F_i = e_{i,\mathrm{incongruent}} - e_{i,\mathrm{congruent}}$, its error rate on incongruent trials minus that on congruent trials. The difference in mean Flanker effect, $\Delta = \overline{F}_{\mathrm{control}} - \overline{F}_{\mathrm{treatment}}$, was tested with a one-sided Welch t-test at $\alpha = .05$ and is reported with its two-sided 95% confidence interval. Note that the Welch test does not assume equal variances in the two groups. The analysis ran in Python 3.14, with pandas 2.3.3 for the data operations and SciPy 1.16.2 for the test. The question was "Supported" if $\Delta$ was positive and its *p* value was below $\alpha$, "Not supported" otherwise, and "Not testable" if fewer than 20 agents completed both sessions or if the test was undefined (e.g., when every effect was zero). Accuracy in session 2 and on the Simon task is illustrative and not part of the analysis. @tbl-rule sets these rules beside the wording that a preregistration might use.
+
+| Decision | Typical preregistration (illustrative) | Studyflow diagram |
+|:------|:----------|:-----------------|
+| Primary contrast | "The strategy instruction will reduce the Flanker effect." | Per agent, the session 1 error rate on incongruent minus congruent test trials, unanswered trials counted as errors. Control minus treatment, one-sided Welch test |
+| Unit of analysis | Often implicit | One score per agent, the unit randomized to a group |
+| Threshold | "$\alpha$ = .05." | $\alpha$ = .05 for the single planned test, set once in "Decision rules" |
+| Minimum sample size | Often stated for the whole study, with a claim of power | 20 agents who completed both sessions, a feasibility rule, not a claim of power |
+| Exclusions | "Participants with poor performance will be excluded." | More than 20% of a task's test trials unanswered, or a late return, leads to "Did not complete" |
+| Outcome | Left to interpretation after the test | The end event reached, "Supported", "Not supported", or "Not testable" (too few agents, or an undefined test) |
+
+: The registered decisions of the example study's question, whether the strategy instruction reduces the Flanker effect, as a typical preregistration might word them and as the Studyflow diagram fixes them (@fig-step3-analyze). The middle column is illustrative, not quoted from a particular preregistration. {#tbl-rule}
+
+## Validation
+
+### Simulated runs
+
+We first tested the analysis on simulated agents whose correct outcomes were known in advance (@tbl-planted). Agents with a planted effect answered congruent Flanker trials correctly with probability .95, and incongruent ones with .75 in the control group and .90 in the treatment group, so the planted Flanker effect was .20 in the control group and .05 in the treatment group. Agents with no effect answered incongruent Flanker trials with .80 in both groups, so the strategy instruction changed nothing. Both kinds answered congruent and incongruent Simon trials correctly with probability .95 and .85, respectively, in both groups and left one trial in fifty unanswered, so that the runs also tested how unanswered trials are scored and when the exit rules end a session. Two further runs used the agents with a planted effect. In the first, a quarter of them never returned for session 2, and in the second, the threshold of the exit rules was lowered to 0, so that any unanswered trial ended the session. In a fifth run, the agents answered every trial correctly, so every Flanker effect was zero and the test was undefined. In these runs, the Simon task ran in the Behaverse assessment battery, and the Flanker task ran in jsPsych. All five runs used seed 42. These simulated runs test only that the analysis and its failure paths work as registered, not statistical power [@morris2019simulation; @wilson2019tensimple].
+
+| Simulated agents | Exit threshold | Completed, control / treatment | Did not complete | Difference (95%\ CI) | Welch *t* (df) | Expected claim | Claim reached |
+|:----------------------------------------------------|----------------------------:|---------------------------------:|:--------------------------------------------|:-------------------------------------------------|:--------------------------------|:------------------------------------------|:------------------------------------------|
+| Planted effect | 20% | 24 / 24 | 0 | 0.20 [0.11, 0.28] | 4.80 (32.7) | Supported | Supported |
+| No effect | 20% | 24 / 24 | 0 | 0.07 [−0.02, 0.16] | 1.57 (38.0) | Not supported | Not supported |
+| Planted effect, a quarter never return | 20% | 19 / 17 | 12 late return | 0.16 [0.07, 0.26] | 3.57 (26.8) | Supported | Supported |
+| Planted effect, any unanswered trial ends the session | 0% | 8 / 7 | 24 in session 1, 9 in session 2 | not computed | not computed | Not testable | Not testable |
+| Every trial answered correctly | 20% | 24 / 24 | 0 | 0.00 [0.00, 0.00] | undefined | Not testable | Not testable |
+
+: Runs of the example study with 48 simulated agents whose correct outcomes are known in advance. The exit threshold is the share of a task's test trials that may go unanswered before the session ends. The difference is the Flanker effect of the control group minus that of the treatment group, with its two-sided 95% confidence interval (CI). "Not testable" was expected in the fourth run because too few agents completed both sessions, and in the fifth because the test is undefined. {#tbl-planted}
+
+### Deviations and design faults
+
+The twelve deviations (@tbl-blind) were each introduced on their own into a copy of a small study, in which the participants who meet an accuracy criterion are compared between two groups with an equivalence test. The fifteen design faults (@tbl-faults) were likewise introduced one at a time, thirteen into a small study and two into an external Python script that a study calls. A change counted as found by the validator when the validator reported it as an error or a warning, and as found by the comparison when the line-by-line comparison of the changed and the original diagram showed it.
+
+## Reproducibility
+
+Every random draw that the diagram makes is keyed by the study's seed (Execution), so a rerun with the same seed makes the same draws, such as the allocation of each agent. Randomness inside an external task must be recorded by the task software. jsPsych drew each agent's Flanker order from the seed defined in the study, so it repeated on a rerun, whereas the Behaverse task drew the Simon order from its own internal seed, so that order differed between runs.
+
+Gemma 4 samples its responses with a new seed for every request. Replaying the identical requests repeated 87.9% of the answers of Gemma 4 E2B and 92.6% of those of E4B. The responses of d1 are drawn by the runner from the probabilities that the model returns and repeat exactly whenever the model returns the same probabilities. Reproducing the analysis requires the registered and executed diagrams, the trial data, and the pinned external packages installed. Re-administering the protocol also requires the external task materials and the same versions of the Behaverse task and jsPsych.
+
+## Language specification
+
+This section gives the formal specification of the notation. How the reference tools implement it is documented with each release [@studyflowdocs].
+
+### Study model
+
+We treat a study as a graph whose nodes are the diagram's events, activities, gateways, and data elements and whose edges are its control, data, and message flows. Formally, a study is a typed directed multigraph (i.e., two nodes may be joined by more than one edge) $S = (N, E, \mathrm{src}, \mathrm{tgt}, \tau, \lambda)$ over a schema $\Sigma$. $N$ and $E$ are finite sets of nodes and edges, and $\mathrm{src}, \mathrm{tgt}: E \to N$ give each edge its source and target. The schema fixes the node types $T_N$ and the edge types $T_E$, the typing $\tau$ gives each node and edge its type, and the attribution $\lambda$ gives each element the attributes its type allows, such as the allocation rule of a randomization gateway or the onset and duration of an activity.
+
+BPMN sequence flows $E_{\mathrm{seq}}$ describe the control-flow graph $G_{\mathrm{ctrl}} = (N, E_{\mathrm{seq}})$, and BPMN data associations $E_{\mathrm{assoc}}$ describe the data-flow graph $G_{\mathrm{data}} = (N, E_{\mathrm{assoc}})$. The two graphs share nodes, $N$, but no edges. The control flow connects activities and says what is executed next, and the data flow connects data elements to activities and says which activity reads or writes which data. Message flows connect pools and carry the messages between them (Execution). Executing $S$ is a walk over $G_{\mathrm{ctrl}}$, that is, the run follows the arrows from the start event, and a data manipulation is a path through $G_{\mathrm{data}}$.
+
+Data elements are of two kinds. *Datasets*, such as the recorded trials, are drawn as data objects and data stores. *Variables* hold the values that the study reads and writes while it runs, such as an allocated condition or a count of failed trials, and where a variable is declared decides how long it lives, as in BPMN. A property of a participant's process lasts for one participant, and a property of a subprocess for one pass through it. A variable that the study keeps for all its participants, such as how many it excluded, is a data store, which every pool shares and which persists across runs. An activity writes a variable through a data-flow edge, and other elements read it by its name (e.g., the placeholder `{X}` in a label).
+
+Unlike the directed acyclic graphs of most workflow engines, $G_{\mathrm{ctrl}}$ may contain cycles, because experimental procedures repeat steps. They also contain interrupts and exchanges between parties, which BPMN expresses as boundary events, message flows, and choreography tasks.
+
+### File formats
+
+A diagram is communicated between people and tools in three forms, each of which holds the whole study. The text form is a plain-text YAML file, which converts without loss to and from standard BPMN 2.0 XML, the form that generic BPMN tools read. An exported image (PNG, TIFF, or SVG) embeds the diagram as metadata, so a published figure can be opened, checked, and run.
+
+### Well-formedness
+
+Only well-formed diagrams are considered executable. A study is well-formed when (1) its types validate against the Studyflow schemas, (2) control flow joins events, activities, and gateways, data flow joins a data element to another data element or to one of those elements, and every property is accessed only where an enclosing scope declares it, (3) every event, activity, and gateway lies on a path from a start event to an end event, and (4) its BPMN 2.0 export is valid XML. A well-formed study can still have a run that stops with an activity left waiting. Ruling this out is the stronger property of soundness [@vanderaalst2011soundness].
+
+Before a run, the validator checks well-formedness, reports as errors the BPMN constructs that a run does not read, warns where two steps on concurrent paths write the same value, checks every data column that an operation names against the schema of the dataset it reads, and explores the ways the study can unfold. This exploration is a simulation that walks the study without running it, with one instance of each pool, and treats each decision as a random choice. It warns about a parallel join that waits for a token that can never arrive, a pool that waits for a message no pool can still send, and a message that nothing receives, each with the exact choices that lead to it. The exploration is bounded in the number of walks and in the passes it takes through a loop. A study that passes is therefore sound only over the simulated walks. For the example study, the validator walked all 36 ways a run can unfold within its bounds.
+
+### Views and provenance
+
+Each audience reads the study through a view. A view first selects elements with a predicate $p$, the mapping $\pi_p(S) = \{x \in N \cup E : p(x)\}$, which keeps their attributes, and then renders them, possibly with the recorded state and provenance (e.g., a variable updated when the diagram was modified or executed). Neither step changes $S$, so every view agrees with the diagram by construction.
+
+Before a run, a diagram is the plan, its prospective provenance, and during the run it receives the record of what happened, its retrospective provenance [@freire2008provenance; @lim2010prospective; @w3cprov]. The run writes the software versions, the random seed, decisions, and the study state into the diagram, and keeps the detailed record of every step, data item, and event beside it in a Git repository. Each provenance record is stored as a Git commit. Records export to PROV-O [@w3cprov], and an interrupted run resumes from its records, as durable workflow engines are expected to do [@burckhardt2021durable].
+
+After a run, the validator checks the state of every element and whether the protocol is still the one the run walked. For this second check, each run records a fingerprint of its protocol. The fingerprint is a cryptographic digest (i.e., a short code computed from the content) of the file, leaving out the run state and provenance records, the graphical drawing (lanes included), progress, and checklist completion. Any other edit changes the fingerprint, and the validator recomputes it to compare it with the recorded one. Whoever edits the file can also recompute the fingerprint, so only a comparison with a registered copy kept elsewhere shows that the protocol did not change. As for any preregistration, what was registered and when is shown by where the file was deposited before the run.
+
+### Execution
+
+Executing a well-formed diagram is a walk over its control-flow graph $G_{\mathrm{ctrl}}$. The walk is deterministic given its initial state, which includes the start event and the random seed, and the inputs it receives from external systems, in the order they arrive. A run is a sequence of configurations $\kappa_n = (m_n, q_n, s_n, v_n, g_n)$. Here $m_n$ is where the tokens stand (i.e., the elements currently running); $q_n$ holds the messages sent along each message flow and not yet taken; $s_n$ is the study state (global variables); $v_n$ is the node state (local variables); and $g_n$ is the state of the pseudo-random generator. Each step moves one token from $m_n$ and is a transition
+
+$$\kappa_{n+1} = \operatorname{step}(S, \kappa_n, \rho_n),$$
+
+where $\rho_n$ is the input recorded at step $n$, such as an agent's response, a message, or a timeout.
+
+Tokens, splits, and joins behave as in BPMN [@bpmnspec]. Each pool starts with one token, and pools exchange messages only along message flows, each a queue that the walk holds. A randomization gateway draws from $g_n$, an activity consumes the agent's input $\rho_n$, and a subprocess opens a scope instance that closes when the subprocess completes. Every condition that a gateway or an event evaluates is written in FEEL [@dmnspec], the expression language of DMN, BPMN's sibling standard, so conditions are readable and independent of the program that evaluates them.
+
+When a split gives a pool several paths, which path steps first depends on when the agents on those paths answer. Every random draw is keyed by the study's seed, the gateway, the participant, and the visit (how many times that participant has reached the gateway), so this order does not change what any path draws. A value that two such paths both write is set by the step that finishes last, and the validator warns about it. The record keeps the order of the steps, so a run replayed from the record takes the same steps.
+
+The walk follows the execution semantics of BPMN 2.0 but reads a few constructs differently. A conditional boundary event is read when its activity's step finishes, and signal, escalation, compensation, link, and cancel events are not read, because each acts on steps away from where it is drawn. Other departures address one limit of BPMN, which treats each process instance as a separate case, whereas a study relates many participants to one allocation sequence, one cohort, and one analysis [@vanderaalst2019objectcentric]. In BPMN, data that outlive a process instance are kept in data stores [@bpmnspec]. The study's state, such as its counts, is kept in the same way and shared by all instances of a pool of several participants, and every pool also shares the data objects. A message out of such a pool is sent once, after the last instance, so that a step for the whole cohort, such as the analysis, starts once. The validator warns about or refuses each departure that could surprise an author.
+
+### Common designs
+
+@tbl-scope lists designs that experimental research commonly uses and how a diagram states each. A step handed to external software, such as an adaptive staircase, is recorded in full but cannot be checked by the validator before the run.
+
+| Design pattern | How a Studyflow diagram states it |
+|:----|:----|
+| Random allocation, simple or in permuted blocks, at a ratio | A randomization gateway and its rule |
+| Stratified allocation, minimization, alternation | Attributes of the randomization gateway |
+| Concealed allocation | The gateway holds only a digest of its random seed, and the executed diagram reveals the seed |
+| Counterbalanced task orders | One path of a randomization gateway per order, with earlier orders kept in the study state |
+| Conditions, order, and timing of trials within a task | Task parameters, a data object linked to the task; the rest stays in the task software |
+| Consent | The start event |
+| Questionnaires | Questionnaire tasks |
+| Completion codes | Attributes of the end event |
+| A delay between sessions | A timer event, or a rest event with more settings |
+| Adaptive procedures (staircases, sequential designs) | An external script that the element references |
+| Recorded data | Datasets with their schema, linked to the elements that write them |
+| Analysis | Activities that call external library functions |
+
+: Common design patterns in experimental research and how a Studyflow diagram states each. {#tbl-scope}
+
+## Use of generative AI
+
+The authors used Anthropic's Claude models to edit and review the text of this manuscript and the code of the software tools. The authors reviewed and revised all text and code and take full responsibility for the content. Language and decision models are also part of the study. Gemma 4 and d1 were used as the artificial cohorts of the example study. No AI tool is an author.

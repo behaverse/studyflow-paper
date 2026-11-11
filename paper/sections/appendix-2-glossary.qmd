@@ -1,0 +1,25 @@
+## Appendix 2. Glossary
+
+::: {#glosstbl-glossary}
+
+| Term | Description |
+|:------|:--------------------|
+| BPMN 2.0 | Business Process Model and Notation, the ISO/IEC 19510 standard for drawing processes with graphical elements of defined meaning and a standard file format; @tbl-elements explains the elements |
+| Studyflow diagram | The authoritative record of one study, drawn with BPMN graphical elements. It holds the study as planned and, after a run, what happened. Its files (YAML, BPMN XML, an exported image) only carry it between tools |
+| Registered and executed diagram | The same file before and after a run. The executed diagram adds the run's record, so any other difference between the two is a deviation |
+| View | What the tools render from the diagram for one audience, such as a schedule, a checklist, a provenance record, or a reporting diagram. A view only leaves information out |
+| Property (a variable) | A named value that a process, an activity, or an event declares and that a run writes and reads while one instance of it lasts; it is not drawn, and a label cites it by name as a placeholder such as `{X}` |
+| Data store | The BPMN element for data that outlive a process instance. It holds a dataset that the study keeps, or a variable that it keeps for all its participants and across runs |
+| Implementation | The standard BPMN attribute by which an activity names the external software that carries it out, written as a URI that names the program and, optionally, its version |
+| Data schema | A dataset's column names and declared types, used to check what an analysis reads |
+| Runner | The program that runs a study by following its diagram step by step |
+| Validator | The program that checks a diagram before and after a run |
+| Modeler | The application in which a study is drawn, edited, and exported |
+| Agent | Whoever takes the study and answers its trials, such as a person, a language model, a decision model, or a simulated agent; the diagram draws it as an actor pool |
+| Version control, diff | A system that keeps every version of a set of text files, such as Git; a diff is the line-by-line difference between two versions of one file |
+| Fingerprint | A short code computed from the content of the protocol (a cryptographic digest), which changes whenever the protocol changes. The layout and the records a run adds are left out, so comparing fingerprints shows whether the protocol itself was edited |
+| Simulated run | A run of the registered study with simulated agents whose correct outcome is fixed in advance, so that the analysis and its failure paths can be tested against the truth |
+| Claim statement | The conclusion that a research question reaches, drawn as an end event of its own (e.g., "Supported", "Not supported", or "Not testable") and selected by the registered decision rule |
+
+Technical terms used in this paper.
+:::

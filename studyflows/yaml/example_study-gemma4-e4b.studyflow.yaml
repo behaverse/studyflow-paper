@@ -19,6 +19,8 @@ Example_Study_Collaboration:
         - Hoorieh Afkari
         - Pedro Cardoso-Leite
       version: "3.0"
+    prov:Activity:
+      - {action: executed, when: "2026-11-10T20:20:36.644+01:00", with: studyflow-cli/26.11.5, run: run-gemma4-e4b-2026-11-10, seed: 42, plan: sha256:745307aa38a2c901d6f2e16dd04aea9871edc9af66456ba87191391fb06b09f0, clock: virtual}
   documentation: >-
     The example study as one executable Studyflow file, before any run. It shows Studyflow's elements once each; it is
     not a study of models or of cognition. Agents (each one instance of the Study run pool) are screened and allocated
@@ -123,6 +125,9 @@ Study_Run:
       name: Enrolled and consented
       onset: T0
       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:33:45.839+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
     Screening:
       type: ChoreographyTask
@@ -137,11 +142,16 @@ Study_Run:
       extensions:
         cognitive:Questionnaire:
           instrument: comprehension-check
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:33:45.903+01:00", run: run-gemma4-e4b-2026-11-10, commit: f0ca980e5e832dd462d7ca6d1b4fed651d3aad2f}
       inputs:
         In_Check:
           source:
             - $Prompt_Check
             - $P_CheckOptions
+          extensions:
+            prov:Activity:
+              - {action: read, when: "2026-11-11T00:33:45.903+01:00", what: f0ca980e5e832dd462d7ca6d1b4fed651d3aad2f, run: run-gemma4-e4b-2026-11-10}
 
     Prompt_Check:
       type: DataObjectReference
@@ -164,6 +174,8 @@ Study_Run:
         cognitive:EligibilityGateway:
           inclusionCriteria:
             - Comprehension check answered as instructed
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:33:45.971+01:00", what: Flow_Eligible, run: run-gemma4-e4b-2026-11-10, commit: 01f8e2e88d81bbbff28a433da0ef1fbef5bc0733}
 
     Excluded:
       type: EndEvent
@@ -177,6 +189,8 @@ Study_Run:
         cognitive:RandomGateway:
           algorithm: block
           allocationRatio: "1:1"
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:33:46.008+01:00", what: Flow_Arm_Strategy, run: run-gemma4-e4b-2026-11-10, commit: e11d346c4d5a7a74754b4d9030ff61550f1aa931}
       documentation: >-
         Permuted blocks of four, so every complete block holds two agents of each group, dealt in the order agents reach
         this gateway.
@@ -518,6 +532,9 @@ Study_Run:
       name: "Session 1: standard instructions (n={reached})"
       onset: T0+5min
       duration: 10min
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:23:11.631+01:00", run: run-gemma4-e4b-2026-11-10, commit: 4dbbe44b47d188dd8963f5cd1b75756a77b6ca70}
       documentation: >-
         Session 1: the flanker task, then the Simon task, with the standard instructions. Its duration is the window of
         the visit, which its two tasks of four minutes each fill. Each task's data edge writes into `unanswered` the
@@ -539,6 +556,9 @@ Study_Run:
       elements:
         S1_Standard_Start:
           type: StartEvent
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:23:00.421+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
         S1_Standard_Flanker:
           type: ChoreographyTask
@@ -550,24 +570,41 @@ Study_Run:
             cognitive:CognitiveTask:
               platform: jspsych
               implementation: jspsych://html-keyboard-response@8
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:23:02.622+01:00", run: run-gemma4-e4b-2026-11-10, commit: 33bfa1450caadaea48ad601379b42e1233d835b2}
           inputs:
             In_S1_Standard_Flanker_0:
               source: $Prompt_Flanker
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:23:02.622+01:00", what: 33bfa1450caadaea48ad601379b42e1233d835b2, run: run-gemma4-e4b-2026-11-10}
 
             In_S1_Standard_Flanker_1:
               source: $Protocol_Flanker
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:23:02.622+01:00", what: 33bfa1450caadaea48ad601379b42e1233d835b2, run: run-gemma4-e4b-2026-11-10}
 
             In_S1_Standard_Flanker_2:
               source: $Task_Settings
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:23:02.622+01:00", what: 33bfa1450caadaea48ad601379b42e1233d835b2, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_S1_Standard_Flanker_Trials:
               target: $Dataset_Trials
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:23:02.622+01:00", what: 33bfa1450caadaea48ad601379b42e1233d835b2, run: run-gemma4-e4b-2026-11-10}
 
             Out_S1_Standard_Flanker_Unanswered:
               target: $P_Unanswered_S1_Standard
               transformation: >-
                 max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
                 scored_blocks].trials)])
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:23:02.622+01:00", what: 33bfa1450caadaea48ad601379b42e1233d835b2, run: run-gemma4-e4b-2026-11-10}
 
         S1_Standard_Simon:
           type: ChoreographyTask
@@ -580,27 +617,47 @@ Study_Run:
               implementation: behaverse://assessment-unity@26.11
               instrument: WO
               timeline: Simon_Practice_Test
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:23:11.546+01:00", run: run-gemma4-e4b-2026-11-10, commit: a307568c370346140be542ad30a15a6e12eded11}
           inputs:
             In_S1_Standard_Simon_0:
               source: $Prompt_Simon
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:23:11.546+01:00", what: a307568c370346140be542ad30a15a6e12eded11, run: run-gemma4-e4b-2026-11-10}
 
             In_S1_Standard_Simon_1:
               source: $Protocol_Simon
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:23:11.546+01:00", what: a307568c370346140be542ad30a15a6e12eded11, run: run-gemma4-e4b-2026-11-10}
 
             In_S1_Standard_Simon_2:
               source: $Task_Settings
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:23:11.546+01:00", what: a307568c370346140be542ad30a15a6e12eded11, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_S1_Standard_Simon_Trials:
               target: $Dataset_Trials
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:23:11.546+01:00", what: a307568c370346140be542ad30a15a6e12eded11, run: run-gemma4-e4b-2026-11-10}
 
             Out_S1_Standard_Simon_Unanswered:
               target: $P_Unanswered_S1_Standard
               transformation: >-
                 max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
                 scored_blocks].trials)])
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:23:11.546+01:00", what: a307568c370346140be542ad30a15a6e12eded11, run: run-gemma4-e4b-2026-11-10}
 
         S1_Standard_End:
           type: EndEvent
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:23:11.631+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
         S1_Standard_F0:
           source: $S1_Standard_Start
@@ -638,6 +695,9 @@ Study_Run:
       name: "Session 1: strategy instruction (n={reached})"
       onset: T0+5min
       duration: 10min
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:33:57.302+01:00", run: run-gemma4-e4b-2026-11-10, commit: 4453eb55b087cc677cadd3fa362fe6c633c40f80}
       documentation: >-
         Session 1: the flanker task, then the Simon task, with the strategy instruction with the flanker task. Its
         duration is the window of the visit, which its two tasks of four minutes each fill. Each task's data edge writes
@@ -660,6 +720,9 @@ Study_Run:
       elements:
         S1_Strategy_Start:
           type: StartEvent
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:33:46.023+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
         S1_Strategy_Flanker:
           type: ChoreographyTask
@@ -671,24 +734,41 @@ Study_Run:
             cognitive:CognitiveTask:
               platform: jspsych
               implementation: jspsych://html-keyboard-response@8
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:33:48.251+01:00", run: run-gemma4-e4b-2026-11-10, commit: 9090f612cac558e0f70853da5348884904b485ec}
           inputs:
             In_S1_Strategy_Flanker_0:
               source: $Prompt_Flanker_Strategy
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:33:48.251+01:00", what: 9090f612cac558e0f70853da5348884904b485ec, run: run-gemma4-e4b-2026-11-10}
 
             In_S1_Strategy_Flanker_1:
               source: $Protocol_Flanker
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:33:48.251+01:00", what: 9090f612cac558e0f70853da5348884904b485ec, run: run-gemma4-e4b-2026-11-10}
 
             In_S1_Strategy_Flanker_2:
               source: $Task_Settings
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:33:48.251+01:00", what: 9090f612cac558e0f70853da5348884904b485ec, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_S1_Strategy_Flanker_Trials:
               target: $Dataset_Trials
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:33:48.251+01:00", what: 9090f612cac558e0f70853da5348884904b485ec, run: run-gemma4-e4b-2026-11-10}
 
             Out_S1_Strategy_Flanker_Unanswered:
               target: $P_Unanswered_S1_Strategy
               transformation: >-
                 max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
                 scored_blocks].trials)])
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:33:48.251+01:00", what: 9090f612cac558e0f70853da5348884904b485ec, run: run-gemma4-e4b-2026-11-10}
 
         S1_Strategy_Simon:
           type: ChoreographyTask
@@ -701,27 +781,47 @@ Study_Run:
               implementation: behaverse://assessment-unity@26.11
               instrument: WO
               timeline: Simon_Practice_Test
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:33:57.213+01:00", run: run-gemma4-e4b-2026-11-10, commit: ff4c5ee1a96786f57ba27571da49ed2619611db4}
           inputs:
             In_S1_Strategy_Simon_0:
               source: $Prompt_Simon
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:33:57.213+01:00", what: ff4c5ee1a96786f57ba27571da49ed2619611db4, run: run-gemma4-e4b-2026-11-10}
 
             In_S1_Strategy_Simon_1:
               source: $Protocol_Simon
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:33:57.213+01:00", what: ff4c5ee1a96786f57ba27571da49ed2619611db4, run: run-gemma4-e4b-2026-11-10}
 
             In_S1_Strategy_Simon_2:
               source: $Task_Settings
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:33:57.213+01:00", what: ff4c5ee1a96786f57ba27571da49ed2619611db4, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_S1_Strategy_Simon_Trials:
               target: $Dataset_Trials
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:33:57.213+01:00", what: ff4c5ee1a96786f57ba27571da49ed2619611db4, run: run-gemma4-e4b-2026-11-10}
 
             Out_S1_Strategy_Simon_Unanswered:
               target: $P_Unanswered_S1_Strategy
               transformation: >-
                 max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
                 scored_blocks].trials)])
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:33:57.213+01:00", what: ff4c5ee1a96786f57ba27571da49ed2619611db4, run: run-gemma4-e4b-2026-11-10}
 
         S1_Strategy_End:
           type: EndEvent
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:33:57.302+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
         S1_Strategy_F0:
           source: $S1_Strategy_Start
@@ -755,6 +855,8 @@ Study_Run:
       timer: PT5M
       extensions:
         cognitive:Rest: {}
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:38:57.317+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
     Return:
       type: ChoreographyTask
@@ -765,11 +867,16 @@ Study_Run:
       extensions:
         cognitive:Questionnaire:
           instrument: comprehension-check
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:38:57.385+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5a31be749adb888a66a7d483e40f0468e3cc8821}
       inputs:
         In_Return:
           source:
             - $Prompt_Return
             - $P_CheckOptions
+          extensions:
+            prov:Activity:
+              - {action: read, when: "2026-11-11T00:38:57.385+01:00", what: 5a31be749adb888a66a7d483e40f0468e3cc8821, run: run-gemma4-e4b-2026-11-10}
 
     Late:
       type: BoundaryEvent
@@ -784,6 +891,9 @@ Study_Run:
       name: Session 2 (n={reached})
       onset: T0+20min
       duration: 10min
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:39:08.610+01:00", run: run-gemma4-e4b-2026-11-10, commit: 3e227e0e7c455083e4221203c314ca4f486e11de}
       documentation: >-
         Session 2: the flanker task, then the Simon task, with the standard instructions, whichever group. Its duration
         is the window of the visit, which its two tasks of four minutes each fill. Each task's data edge writes into
@@ -800,6 +910,9 @@ Study_Run:
       elements:
         S2_Start:
           type: StartEvent
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:38:57.406+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
         S2_Flanker:
           type: ChoreographyTask
@@ -811,24 +924,41 @@ Study_Run:
             cognitive:CognitiveTask:
               platform: jspsych
               implementation: jspsych://html-keyboard-response@8
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:38:59.633+01:00", run: run-gemma4-e4b-2026-11-10, commit: a44f2a03b53d30bafcde5732beba8f8ab6d1de4c}
           inputs:
             In_S2_Flanker_0:
               source: $Prompt_Flanker
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:38:59.633+01:00", what: a44f2a03b53d30bafcde5732beba8f8ab6d1de4c, run: run-gemma4-e4b-2026-11-10}
 
             In_S2_Flanker_1:
               source: $Protocol_Flanker
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:38:59.633+01:00", what: a44f2a03b53d30bafcde5732beba8f8ab6d1de4c, run: run-gemma4-e4b-2026-11-10}
 
             In_S2_Flanker_2:
               source: $Task_Settings
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:38:59.633+01:00", what: a44f2a03b53d30bafcde5732beba8f8ab6d1de4c, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_S2_Flanker_Trials:
               target: $Dataset_Trials
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:38:59.633+01:00", what: a44f2a03b53d30bafcde5732beba8f8ab6d1de4c, run: run-gemma4-e4b-2026-11-10}
 
             Out_S2_Flanker_Unanswered:
               target: $P_Unanswered_S2
               transformation: >-
                 max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
                 scored_blocks].trials)])
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:38:59.633+01:00", what: a44f2a03b53d30bafcde5732beba8f8ab6d1de4c, run: run-gemma4-e4b-2026-11-10}
 
         S2_Simon:
           type: ChoreographyTask
@@ -841,27 +971,47 @@ Study_Run:
               implementation: behaverse://assessment-unity@26.11
               instrument: WO
               timeline: Simon_Practice_Test
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:08.521+01:00", run: run-gemma4-e4b-2026-11-10, commit: f596f4a8d09267665e3771a8eab0aaa2ceff48bb}
           inputs:
             In_S2_Simon_0:
               source: $Prompt_Simon
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:08.521+01:00", what: f596f4a8d09267665e3771a8eab0aaa2ceff48bb, run: run-gemma4-e4b-2026-11-10}
 
             In_S2_Simon_1:
               source: $Protocol_Simon
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:08.521+01:00", what: f596f4a8d09267665e3771a8eab0aaa2ceff48bb, run: run-gemma4-e4b-2026-11-10}
 
             In_S2_Simon_2:
               source: $Task_Settings
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:08.521+01:00", what: f596f4a8d09267665e3771a8eab0aaa2ceff48bb, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_S2_Simon_Trials:
               target: $Dataset_Trials
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:08.521+01:00", what: f596f4a8d09267665e3771a8eab0aaa2ceff48bb, run: run-gemma4-e4b-2026-11-10}
 
             Out_S2_Simon_Unanswered:
               target: $P_Unanswered_S2
               transformation: >-
                 max([unanswered, sum(result.blocks[block in scored_blocks].unanswered) / sum(result.blocks[block in
                 scored_blocks].trials)])
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:08.521+01:00", what: f596f4a8d09267665e3771a8eab0aaa2ceff48bb, run: run-gemma4-e4b-2026-11-10}
 
         S2_End:
           type: EndEvent
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:08.610+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
         S2_F0:
           source: $S2_Start
@@ -911,16 +1061,25 @@ Study_Run:
         context:
           subject: "{state._meta.instance.Pool_Run}"
       implementation: python://builtins.dict
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:39:08.625+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5a09f8b879a6cead28da386742046cc96f9f2b3b}
       documentation: >-
         Appends the agent's completion line to the trials dataset (`object.name` `Completed`). Only an agent who
         completes both sessions passes here, so the analysis takes its population from the protocol.
       outputs:
         Out_Completion:
           target: $Dataset_Trials
+          extensions:
+            prov:Activity:
+              - {action: wrote, when: "2026-11-11T00:39:08.625+01:00", what: 5a09f8b879a6cead28da386742046cc96f9f2b3b, run: run-gemma4-e4b-2026-11-10}
 
     Completed:
       type: EndEvent
       name: Completed both sessions (n={reached})
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:39:08.733+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
     Exit_FollowUp:
       type: EndEvent
@@ -960,6 +1119,9 @@ Analysis_Report:
       type: StartEvent
       name: All agents complete
       message: true
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:39:08.733+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
     Dataset_Trials:
       type: DataStoreReference
@@ -969,6 +1131,8 @@ Analysis_Report:
         behaverse:BDMDataset:
           schema: $Trial_Schema
           dataLevel: trials
+        prov:Activity:
+          - {action: created, when: "2026-11-11T00:39:08.625+01:00", run: run-gemma4-e4b-2026-11-10}
       documentation: >-
         One line per event the task software records, appended by every task of every agent, in the Behaverse Data
         Model; the analysis reads the one record each task writes per trial (`FL.TrialEnd`, `WO.TrialEnd`) and the
@@ -1024,6 +1188,9 @@ Analysis_Report:
         - [ ] Practice blocks dropped
         - [ ] Only the agents who completed both sessions analysed
         - [ ] Unanswered test trials kept, as errors
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:39:11.289+01:00", run: run-gemma4-e4b-2026-11-10, commit: 8a263d98ec4c65057f7b0b69b40c1803fce95e1f}
       documentation: >-
         Library calls only (pandas, SciPy). The session-1 flanker test trials of the agents who completed both sessions,
         then one question. Each agent's flanker effect is its error rate on incongruent trials minus that on congruent
@@ -1065,15 +1232,27 @@ Analysis_Report:
       inputs:
         In_Trials_Analysis:
           source: $Dataset_Trials
+          extensions:
+            prov:Activity:
+              - {action: read, when: "2026-11-11T00:39:11.289+01:00", what: 8a263d98ec4c65057f7b0b69b40c1803fce95e1f, run: run-gemma4-e4b-2026-11-10}
 
         In_Rules:
           source: $Decision_Rules
+          extensions:
+            prov:Activity:
+              - {action: read, when: "2026-11-11T00:39:11.289+01:00", what: 8a263d98ec4c65057f7b0b69b40c1803fce95e1f, run: run-gemma4-e4b-2026-11-10}
       outputs:
         Out_Results:
           target: $Dataset_Results
+          extensions:
+            prov:Activity:
+              - {action: wrote, when: "2026-11-11T00:39:11.289+01:00", what: 8a263d98ec4c65057f7b0b69b40c1803fce95e1f, run: run-gemma4-e4b-2026-11-10}
       elements:
         An_Start:
           type: StartEvent
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:08.733+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
         Flanker_Rows:
           type: ServiceTask
@@ -1083,13 +1262,22 @@ Analysis_Report:
               `object.name` == 'FL.TrialEnd' and `trialContext.block.name` == 'Flanker_Test' and `context.state.session`
               == 1
           implementation: python://pandas.DataFrame.query
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:09.757+01:00", run: run-gemma4-e4b-2026-11-10, commit: 56217617bd755bc42087f48e8864a2508f3dcd6a}
           inputs:
             In_Trials:
               source: $Dataset_Trials
               parameter: self
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:09.757+01:00", what: 56217617bd755bc42087f48e8864a2508f3dcd6a, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_Flanker_Rows:
               target: $flanker
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:09.757+01:00", what: 56217617bd755bc42087f48e8864a2508f3dcd6a, run: run-gemma4-e4b-2026-11-10}
 
         Completed_Rows:
           type: ServiceTask
@@ -1097,14 +1285,23 @@ Analysis_Report:
           additionalArguments:
             expr: "`object.name` == 'Completed'"
           implementation: python://pandas.DataFrame.query
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.100+01:00", run: run-gemma4-e4b-2026-11-10, commit: d182aa559f6d3eaacc3de67e3d6500e1d953c3f4}
           documentation: The completion lines, one per agent who completed both sessions.
           inputs:
             In_Completed:
               source: $Dataset_Trials
               parameter: self
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:10.100+01:00", what: d182aa559f6d3eaacc3de67e3d6500e1d953c3f4, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_Completed:
               target: $completed
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.100+01:00", what: d182aa559f6d3eaacc3de67e3d6500e1d953c3f4, run: run-gemma4-e4b-2026-11-10}
 
         Keep_Completed:
           type: ServiceTask
@@ -1117,17 +1314,29 @@ Analysis_Report:
               - ""
               - .completion
           implementation: python://pandas.DataFrame.merge
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.140+01:00", run: run-gemma4-e4b-2026-11-10, commit: d7e1cf7385317866e480ea652d42f72bd1ed2c6c}
           inputs:
             In_Flanker_All:
               source: $flanker
               parameter: self
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:10.140+01:00", what: d7e1cf7385317866e480ea652d42f72bd1ed2c6c, run: run-gemma4-e4b-2026-11-10}
 
             In_Completed_Subjects:
               source: $completed
               parameter: right
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:10.140+01:00", what: d7e1cf7385317866e480ea652d42f72bd1ed2c6c, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_Flanker_Completed:
               target: $flanker
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.140+01:00", what: d7e1cf7385317866e480ea652d42f72bd1ed2c6c, run: run-gemma4-e4b-2026-11-10}
 
         Count_Completed:
           type: ServiceTask
@@ -1136,14 +1345,23 @@ Analysis_Report:
             args:
               - "{completed}"
           implementation: python://builtins.len
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.158+01:00", run: run-gemma4-e4b-2026-11-10, commit: 9c3257a6c0c2751e30c638ef7776e9741b809125}
           outputs:
             Out_N_Completed:
               target: $n_completed
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.158+01:00", what: 9c3257a6c0c2751e30c638ef7776e9741b809125, run: run-gemma4-e4b-2026-11-10}
 
         Feasible:
           type: ExclusiveGateway
           name: Enough completed?
           default: $Flow_TooFew
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.173+01:00", what: Flow_Enough, run: run-gemma4-e4b-2026-11-10, commit: e6e22c605d036c10c31c42176b6dde17a51bd0a2}
 
         Measures:
           type: ServiceTask
@@ -1152,13 +1370,22 @@ Analysis_Report:
             dtype:
               result.isCorrect: float
           implementation: python://pandas.DataFrame.astype
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.226+01:00", run: run-gemma4-e4b-2026-11-10, commit: dca70d2fcec0fca01622dd66973aca24ff499718}
           inputs:
             In_Flanker_Typed:
               source: $flanker
               parameter: self
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:10.226+01:00", what: dca70d2fcec0fca01622dd66973aca24ff499718, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_Flanker_Typed:
               target: $flanker
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.226+01:00", what: dca70d2fcec0fca01622dd66973aca24ff499718, run: run-gemma4-e4b-2026-11-10}
 
         Per_Subject:
           type: ServiceTask
@@ -1171,13 +1398,22 @@ Analysis_Report:
             values: result.isCorrect
             aggfunc: mean
           implementation: python://pandas.DataFrame.pivot_table
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.281+01:00", run: run-gemma4-e4b-2026-11-10, commit: d9380880a0f4f8c1b2e3b24c1fb67e94a5f9d9f2}
           inputs:
             In_Flanker:
               source: $flanker
               parameter: self
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:10.281+01:00", what: d9380880a0f4f8c1b2e3b24c1fb67e94a5f9d9f2, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_Per_Subject:
               target: $effects
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.281+01:00", what: d9380880a0f4f8c1b2e3b24c1fb67e94a5f9d9f2, run: run-gemma4-e4b-2026-11-10}
 
         Effect:
           type: ServiceTask
@@ -1185,6 +1421,9 @@ Analysis_Report:
           additionalArguments:
             expr: effect = Congruent - Incongruent
           implementation: python://pandas.DataFrame.eval
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.300+01:00", run: run-gemma4-e4b-2026-11-10, commit: da7aa09f7b384bf2f930e6faa4c8382321fbd1a5}
           documentation: >-
             Error rate on incongruent minus that on congruent trials, which is accuracy on congruent minus that on
             incongruent.
@@ -1192,12 +1431,21 @@ Analysis_Report:
             In_Effects:
               source: $effects
               parameter: self
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:10.300+01:00", what: da7aa09f7b384bf2f930e6faa4c8382321fbd1a5, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_Effects:
               target: $effects
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.300+01:00", what: da7aa09f7b384bf2f930e6faa4c8382321fbd1a5, run: run-gemma4-e4b-2026-11-10}
 
             Out_Effects_File:
               target: $File_PerSubject
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.300+01:00", what: da7aa09f7b384bf2f930e6faa4c8382321fbd1a5, run: run-gemma4-e4b-2026-11-10}
 
         Standard_Effects:
           type: ServiceTask
@@ -1205,13 +1453,22 @@ Analysis_Report:
           additionalArguments:
             expr: "`context.state.arm` == 'standard'"
           implementation: python://pandas.DataFrame.query
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.317+01:00", run: run-gemma4-e4b-2026-11-10, commit: 0406d48d1711e45f1ccda1d936bccedaa7c88873}
           inputs:
             In_Effects_Standard:
               source: $effects
               parameter: self
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:10.317+01:00", what: 0406d48d1711e45f1ccda1d936bccedaa7c88873, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_Standard:
               target: $standard
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.317+01:00", what: 0406d48d1711e45f1ccda1d936bccedaa7c88873, run: run-gemma4-e4b-2026-11-10}
 
         Strategy_Effects:
           type: ServiceTask
@@ -1219,13 +1476,22 @@ Analysis_Report:
           additionalArguments:
             expr: "`context.state.arm` == 'strategy'"
           implementation: python://pandas.DataFrame.query
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:10.334+01:00", run: run-gemma4-e4b-2026-11-10, commit: a699c627c1bf2035585de924f62f6f6673add25d}
           inputs:
             In_Effects_Strategy:
               source: $effects
               parameter: self
+              extensions:
+                prov:Activity:
+                  - {action: read, when: "2026-11-11T00:39:10.334+01:00", what: a699c627c1bf2035585de924f62f6f6673add25d, run: run-gemma4-e4b-2026-11-10}
           outputs:
             Out_Strategy:
               target: $strategy
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:10.334+01:00", what: a699c627c1bf2035585de924f62f6f6673add25d, run: run-gemma4-e4b-2026-11-10}
 
         Effect_Test:
           type: ServiceTask
@@ -1237,10 +1503,16 @@ Analysis_Report:
             alternative: greater
             nan_policy: omit
           implementation: python://scipy.stats.ttest_ind
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:11.192+01:00", run: run-gemma4-e4b-2026-11-10, commit: 4a594accad46f0333883de3cda86f79da538a3a5}
           outputs:
             Out_Effect_Test:
               target: $flanker_test
               transformation: "{statistic: result.statistic, pvalue: result.pvalue, df: result.df}"
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:11.192+01:00", what: 4a594accad46f0333883de3cda86f79da538a3a5, run: run-gemma4-e4b-2026-11-10}
 
         Effect_CI:
           type: ServiceTask
@@ -1255,12 +1527,18 @@ Analysis_Report:
                   nan_policy: omit
             confidence_level: 0.95
           implementation: python://scipy.stats._result_classes.TtestResult.confidence_interval
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:11.211+01:00", run: run-gemma4-e4b-2026-11-10, commit: d2c221864fbc6ab4936db67082e016eb3310a5a7}
           documentation: >-
             The two-sided interval of the difference, control minus treatment, from the test result's own method.
           outputs:
             Out_Effect_CI:
               target: $flanker_ci
               transformation: "{low: result.low, high: result.high}"
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:11.211+01:00", what: d2c221864fbc6ab4936db67082e016eb3310a5a7, run: run-gemma4-e4b-2026-11-10}
 
         Mean_Standard:
           type: ServiceTask
@@ -1269,9 +1547,15 @@ Analysis_Report:
             args:
               - "{standard.effect}"
           implementation: python://pandas.Series.mean
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:11.227+01:00", run: run-gemma4-e4b-2026-11-10, commit: 14f95cfd7f007d0baf16e1351c5a64734498d51a}
           outputs:
             Out_Mean_Standard:
               target: $mean_standard
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:11.227+01:00", what: 14f95cfd7f007d0baf16e1351c5a64734498d51a, run: run-gemma4-e4b-2026-11-10}
 
         Mean_Strategy:
           type: ServiceTask
@@ -1280,9 +1564,15 @@ Analysis_Report:
             args:
               - "{strategy.effect}"
           implementation: python://pandas.Series.mean
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:11.243+01:00", run: run-gemma4-e4b-2026-11-10, commit: 164d6ad9b689d4be9e3f16e82a779c197757b014}
           outputs:
             Out_Mean_Strategy:
               target: $mean_strategy
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:11.243+01:00", what: 164d6ad9b689d4be9e3f16e82a779c197757b014, run: run-gemma4-e4b-2026-11-10}
 
         Write_Estimate:
           type: ServiceTask
@@ -1294,18 +1584,30 @@ Analysis_Report:
             ci95: "{flanker_ci}"
             test: "{flanker_test}"
           implementation: python://builtins.dict
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:11.258+01:00", run: run-gemma4-e4b-2026-11-10, commit: 181fda98c94fd560ea1d680aa5673d85d9b49001}
           outputs:
             Out_Estimate_File:
               target: $File_Flanker
+              extensions:
+                prov:Activity:
+                  - {action: wrote, when: "2026-11-11T00:39:11.258+01:00", what: 181fda98c94fd560ea1d680aa5673d85d9b49001, run: run-gemma4-e4b-2026-11-10}
 
         Decision:
           type: ExclusiveGateway
           name: Smaller flanker effect with the strategy?
           default: $Flow_No
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:11.274+01:00", what: Flow_Yes, run: run-gemma4-e4b-2026-11-10, commit: ede104901cb9086dd91df14e3da074f983ffd41d}
 
         Supported:
           type: EndEvent
           name: Supported
+          extensions:
+            prov:Activity:
+              - {action: executed, when: "2026-11-11T00:39:11.288+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
         Not_Supported:
           type: EndEvent
@@ -1319,11 +1621,17 @@ Analysis_Report:
           type: DataObjectReference
           name: Per-agent effects
           uri: results/flanker_per_subject.csv
+          extensions:
+            prov:Activity:
+              - {action: created, when: "2026-11-11T00:39:10.300+01:00", run: run-gemma4-e4b-2026-11-10}
 
         File_Flanker:
           type: DataObjectReference
           name: Flanker estimate
           uri: results/flanker.json
+          extensions:
+            prov:Activity:
+              - {action: created, when: "2026-11-11T00:39:11.258+01:00", run: run-gemma4-e4b-2026-11-10}
 
         AF_0:
           source: $An_Start
@@ -1420,6 +1728,8 @@ Analysis_Report:
       extensions:
         studyflow:Dataset:
           format: psych-ds
+        prov:Activity:
+          - {action: created, when: "2026-11-11T00:39:11.288+01:00", run: run-gemma4-e4b-2026-11-10}
       documentation: The run's results, laid out as a Psych-DS dataset.
 
     Render:
@@ -1429,10 +1739,16 @@ Analysis_Report:
         - [ ] CONSORT participant flow exported from the Reporting Diagram view
         - [ ] Visit schedule exported from the Schedule view
         - [ ] Model and settings recorded with each exchange
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:39:11.303+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
     Study_Complete:
       type: EndEvent
       name: Study complete
+      extensions:
+        prov:Activity:
+          - {action: executed, when: "2026-11-11T00:39:11.317+01:00", run: run-gemma4-e4b-2026-11-10, commit: 5d3acd5293543ca2101d342fe3fa90f79a3bd532}
 
     Flow_Start_Analysis:
       source: $All_Complete
@@ -1507,3 +1823,126 @@ layout:
   Flow_Start_Analysis: {waypoint: "152,710 200,710", stroke: "#7a67a6"}
   Flow_Analysis_Render: {waypoint: "390,710 440,710", stroke: "#a2803c"}
   Flow_Render_Complete: {waypoint: "560,710 610,710", stroke: "#a2803c"}
+
+state:
+  Study_Run:
+    ResponseOptions:
+      - READY
+      - NOT READY
+    max_unanswered: 0.2
+    scored_blocks:
+      - Flanker_Test
+      - Simon_Test
+  _meta:
+    instance:
+      Pool_Run: 48
+    reached:
+      Enroll: 48
+      All_Complete: 1
+      SF_Start: 48
+      Screening: 48
+      SF_Screen: 48
+      Eligibility_Gateway: 48
+      Flow_Eligible: 48
+      Randomize: 48
+      Flow_Arm_Standard: 24
+      S1_Standard: 24
+      S1_Standard_Start: 24
+      S1_Standard_F0: 24
+      S1_Standard_Flanker: 24
+      S1_Standard_F1: 24
+      S1_Standard_Simon: 24
+      S1_Standard_F2: 24
+      S1_Standard_End: 24
+      SF_S1_Standard_Wait: 24
+      Wait: 48
+      SF_Wait_Return: 48
+      Return: 48
+      SF_Return_S2: 48
+      S2: 48
+      S2_Start: 48
+      S2_F0: 48
+      S2_Flanker: 48
+      S2_F1: 48
+      S2_Simon: 48
+      S2_F2: 48
+      S2_End: 48
+      SF_S2_Done: 48
+      Record_Completion: 48
+      SF_Record_Completed: 48
+      Completed: 48
+      Flow_Arm_Strategy: 24
+      S1_Strategy: 24
+      S1_Strategy_Start: 24
+      S1_Strategy_F0: 24
+      S1_Strategy_Flanker: 24
+      S1_Strategy_F1: 24
+      S1_Strategy_Simon: 24
+      S1_Strategy_F2: 24
+      S1_Strategy_End: 24
+      SF_S1_Strategy_Wait: 24
+      Flow_Start_Analysis: 1
+      Analysis: 1
+      An_Start: 1
+      AF_0: 1
+      Flanker_Rows: 1
+      AF_1: 1
+      Completed_Rows: 1
+      AF_2: 1
+      Keep_Completed: 1
+      AF_3: 1
+      Count_Completed: 1
+      AF_4: 1
+      Feasible: 1
+      Flow_Enough: 1
+      Measures: 1
+      AF_5: 1
+      Per_Subject: 1
+      AF_6: 1
+      Effect: 1
+      AF_7: 1
+      Standard_Effects: 1
+      AF_8: 1
+      Strategy_Effects: 1
+      AF_9: 1
+      Effect_Test: 1
+      AF_10: 1
+      Effect_CI: 1
+      AF_11: 1
+      Mean_Standard: 1
+      AF_12: 1
+      Mean_Strategy: 1
+      AF_13: 1
+      Write_Estimate: 1
+      AF_14: 1
+      Decision: 1
+      Flow_Yes: 1
+      Supported: 1
+      Flow_Analysis_Render: 1
+      Render: 1
+      Flow_Render_Complete: 1
+      Study_Complete: 1
+  S1_Standard:
+    unanswered: 0
+    session: 1
+    arm: standard
+  S2:
+    unanswered: 0
+    session: 2
+  S1_Strategy:
+    unanswered: 0
+    session: 1
+    arm: strategy
+  Analysis:
+    alpha: 0.05
+    min_completed: 20
+    n_completed: 48
+    flanker_test:
+      statistic: 4.242640687119289
+      pvalue: 0.0000646934232468984
+      df: 39.49612263300271
+    flanker_ci:
+      low: 0.07851578654104895
+      high: 0.2214842134589513
+    mean_standard: 0.9250000000000002
+    mean_strategy: 0.775

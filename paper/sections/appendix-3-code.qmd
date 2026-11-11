@@ -1,0 +1,176 @@
+## Appendix 3. Code excerpts of the example study
+
+The excerpts below show, one stage at a time, how the elements that the Results describe are written in the Studyflow file. The complete diagrams and run records are in the supplementary repository (see Data availability).
+
+### Design: enrollment and allocation
+
+```{#lst-design .yaml lst-cap="The Stage 1 excerpt of the diagram as text, abridged. It includes the start event with its reference to the consent document, the eligibility gateway with its inclusion criterion and the executable condition of its 'yes' path, and the allocation gateway with its allocation algorithm and ratio. The other path of each gateway (to 'Excluded' and to the control group) is its default path, which the diagram draws with a short slash across its start; it is not shown."}
+Enroll:
+  type: StartEvent
+  name: Enrolled and consented
+  consentFormUri: https://behaverse.org/protocols/example-study/consent.md
+
+Eligibility_Gateway:
+  type: ExclusiveGateway
+  name: Understood the instructions?
+  default: $Flow_Excluded
+  extensions:
+    cognitive:EligibilityGateway:
+      inclusionCriteria:
+        - Comprehension check answered as instructed
+
+Flow_Eligible:
+  name: yes (n={reached})
+  condition: contains(upper case(Screening), "READY") and not(contains(upper case(Screening), "NOT"))
+  source: $Eligibility_Gateway
+  target: $Randomize
+
+Randomize:
+  type: ExclusiveGateway
+  name: Which group? (n={reached})
+  default: $Flow_Arm_Standard
+  extensions:
+    cognitive:RandomGateway:
+      algorithm: block
+      allocationRatio: "1:1"
+```
+
+```{=latex}
+% Listing 2 is long: it starts on a new page, so that it runs over two pages instead of three
+\newpage
+```
+
+### Run: tasks and trial exchanges
+
+```{#lst-tasks .yaml lst-cap="The Stage 2 excerpt of the diagram as text, abridged. It includes the prompt with the strategy instruction and the two tasks of session 1 of the treatment group, each with the software and the agent that it names and the dataset that it writes its trials to. It ends with the session's exit rule."}
+Prompt_Flanker_Strategy:
+  type: DataObjectReference
+  name: Flanker prompt, strategy
+  extensions:
+    agentic:Prompt:
+      template: |
+        You are taking a computerised test one trial at a time. Each message is one trial and lists the answers it
+        accepts under ResponseOptions; answer with one of them, copied exactly and with nothing else. Any other reply
+        is a lost trial.
+
+        In this task a row of five arrows appears. Answer with the direction the middle arrow points, Left or Right,
+        whatever the direction of the arrows around it.
+
+        Strategy: look only at the middle arrow. The arrows around it never tell you the answer, so do not let them
+        pull you to their side.
+      delivery: once
+
+S1_Strategy_Flanker:
+  type: ChoreographyTask
+  name: Flanker task
+  participant: $Pool_Agent
+  extensions:
+    cognitive:CognitiveTask:
+      platform: jspsych
+      implementation: jspsych://html-keyboard-response@8
+  inputs:
+    In_S1_Strategy_Flanker_0:
+      source: $Prompt_Flanker_Strategy
+
+    In_S1_Strategy_Flanker_1:
+      source: $Protocol_Flanker
+
+    In_S1_Strategy_Flanker_2:
+      source: $Task_Settings
+  outputs:
+    Out_S1_Strategy_Flanker_Trials:
+      target: $Dataset_Trials
+
+S1_Strategy_Simon:
+  type: ChoreographyTask
+  name: Simon task
+  participant: $Pool_Agent
+  extensions:
+    behaverse:Task:
+      implementation: behaverse://assessment-unity@26.11
+      instrument: WO
+      timeline: Simon_Practice_Test
+  outputs:
+    Out_S1_Strategy_Simon_Trials:
+      target: $Dataset_Trials
+
+Exit_S1_Strategy:
+  type: BoundaryEvent
+  condition: unanswered > max_unanswered
+  attachedTo: $S1_Strategy
+```
+
+### Run: changing the agent
+
+```{#lst-swap .diff lst-cap="Who takes the study is stated in one place, the agent's pool. The variant for Gemma 4 E4B differs from the example study (Gemma 4 E2B) only in the two lines shown, the pool's name and the model it names. In this diff, lines that start with a minus sign appear only in the example study, and lines that start with a plus sign only in the variant. The variant for d1 3B changes the same two lines, and the simulated variant replaces the model with the response probabilities of the simulated agent (not shown)."}
+--- example_study.studyflow.yaml
++++ example_study-gemma4-e4b.studyflow.yaml
+@@ -33,6 +33,6 @@
+     Pool_Agent:
+-      name: "Agent: Gemma 4 E2B"
++      name: "Agent: Gemma 4 E4B"
+       extensions:
+         studyflow:Actor:
+           actorType: llm
+-          implementation: ollama://gemma4:e2b-mlx
++          implementation: ollama://gemma4:e4b
+```
+
+### Analyze: the registered rule
+
+```{#lst-analysis .yaml lst-cap="The Stage 3 excerpt of the diagram as text, abridged. It includes the decision rules, the t-test, which calls one library function with its arguments, and the 'yes' path of the decision gateway, whose condition reads the result of the t-test and the alpha of the decision rules."}
+Decision_Rules:
+  type: DataObjectReference
+  name: Decision rules
+  extensions:
+    studyflow:Parameters:
+      values:
+        alpha: 0.05
+        min_completed: 20
+
+Effect_Test:
+  type: ServiceTask
+  name: One-sided Welch t test
+  additionalArguments:
+    a: "{standard.effect}"
+    b: "{strategy.effect}"
+    equal_var: false
+    alternative: greater
+    nan_policy: omit
+  implementation: python://scipy.stats.ttest_ind
+  outputs:
+    Out_Effect_Test:
+      target: $flanker_test
+
+Flow_Yes:
+  name: "yes"
+  condition: flanker_test.statistic > 0 and flanker_test.pvalue < alpha
+  source: $Decision
+  target: $Supported
+```
+
+### Report: comparing the plan and the run
+
+```{#lst-diff .diff lst-cap="The registered and the executed diagram compared line by line (excerpt, with the run's records abridged and the fingerprint, the commit, and the numbers shortened). The file is that of the simulated run with an effect built into the treatment group (@tbl-planted). Every changed line, marked with a plus sign, was added by the run. These lines hold the run's record with the protocol's fingerprint, a note on each element the run reached, the counts, including the claim statement reached, and the computed values. No line of the protocol changed, so there is no deviation, and the validator confirms this by recomputing the fingerprint."}
+--- planted.studyflow.yaml (registered)
++++ planted.studyflow.yaml (after execution)
+@@ ... @@
+       version: "3.0"
++    prov:Activity:
++      - {action: executed, run: run-planted, seed: 42, plan: sha256:50de832084c3...}
+@@ ... @@
+       consentFormUri: https://behaverse.org/protocols/example-study/consent.md
++      extensions:
++        prov:Activity:
++          - {action: executed, run: run-planted, commit: 1f9ac63}
+@@ ... @@
++state:
++  _meta:
++    reached:
++      Enroll: 48
++      Completed: 48
++      Supported: 1
++  Analysis:
++    n_completed: 48
++    flanker_test: {statistic: 4.80, pvalue: 0.00002, df: 32.7}
+```
